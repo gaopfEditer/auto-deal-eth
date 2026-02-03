@@ -1,13 +1,21 @@
 """
 Gemini分析模块 - 第1部分：导入和初始化
 """
-import google.generativeai as genai
+try:
+    import google.generativeai as genai
+except ImportError:
+    print("警告：google.generativeai 未安装，请运行: pip install google-generativeai")
+    raise
+
 import base64
 from PIL import Image
 from config import GEMINI_API_KEY, GEMINI_MODEL
 
 def init_gemini():
     """初始化Gemini客户端"""
+    if not GEMINI_API_KEY:
+        raise ValueError("❌ 错误：GEMINI_API_KEY 未配置！请在 .env 文件中设置 GEMINI_API_KEY")
+    
     genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel(GEMINI_MODEL)
     return model

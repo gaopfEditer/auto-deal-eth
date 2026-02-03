@@ -15,7 +15,11 @@ def run_analysis():
     
     # 步骤1: 截图所有周期
     print("\n[步骤1] 开始截图...")
-    screenshot_paths = capture_all_timeframes()
+    try:
+        screenshot_paths = capture_all_timeframes()
+    except Exception as e:
+        print(f"❌ 截图失败: {e}")
+        return
     
     if not screenshot_paths:
         print("❌ 截图失败，终止流程")

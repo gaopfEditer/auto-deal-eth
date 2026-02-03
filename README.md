@@ -25,13 +25,22 @@ auto-deal-eth/
 
 ## 安装步骤
 
-### 1. 安装Python依赖
+### 1. 创建虚拟环境（推荐）
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # macOS/Linux
+# 或
+venv\Scripts\activate  # Windows
+```
+
+### 2. 安装Python依赖
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. 安装Playwright浏览器
+### 3. 安装Playwright浏览器
 
 ```bash
 playwright install chromium

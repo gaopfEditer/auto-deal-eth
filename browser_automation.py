@@ -14,13 +14,33 @@ from config import (
 
 def init_browser():
     """初始化浏览器"""
-    playwright = sync_playwright().start()
-    browser = playwright.chromium.launch(headless=True)
-    context = browser.new_context(
-        viewport={'width': SCREENSHOT_WIDTH, 'height': SCREENSHOT_HEIGHT}
-    )
-    page = context.new_page()
-    return playwright, browser, page
+    try:
+        playwright = sync_playwright().start()
+        browser = playwright.chromium.launch(headless=True)
+        context = browser.new_context(
+            viewport={'width': SCREENSHOT_WIDTH, 'height': SCREENSHOT_HEIGHT}
+        )
+        page = context.new_page()
+        return playwright, browser, page
+    except Exception as e:
+        error_msg = str(e)
+        if "Executable doesn't exist" in error_msg or "BrowserType.launch" in error_msg:
+            print("\n" + "="*60)
+            print("❌ 错误：Playwright浏览器未安装！")
+            print("="*60)
+            print("\n【自动安装】运行以下命令：")
+            print("  cd /Users/mac/frontend/code/1.operations/auto-deal-eth")
+            print("  source venv/bin/activate")
+            print("  playwright install chromium")
+            print("\n【手动下载】如果网络问题，可以手动下载：")
+            print("  下载地址: https://cdn.playwright.dev/chrome-for-testing-public/145.0.7632.6/mac-x64/chrome-headless-shell-mac-x64.zip")
+            print("  解压到: ~/Library/Caches/ms-playwright/chromium_headless_shell-1208/")
+            print("\n【使用代理】如果使用代理：")
+            print("  export HTTP_PROXY=http://your-proxy:port")
+            print("  export HTTPS_PROXY=http://your-proxy:port")
+            print("  playwright install chromium")
+            print("\n" + "="*60 + "\n")
+        raise
 
 # 第2部分：切换周期和截图功能
 def switch_timeframe(page: Page, timeframe: str):
@@ -28,7 +48,7 @@ def switch_timeframe(page: Page, timeframe: str):
     try:
         # 方法1: 通过URL参数切换
         url_with_timeframe = f"{TRADINGVIEW_URL}&interval={timeframe}"
-        page.goto(url_with_timeframe, wait_until='networkidle')
+        page.goto(url_with_timeframe, wait_until='domcontentloaded', timeout=30000)
         time.sleep(3)  # 等待图表加载
         
         # 方法2: 如果URL参数不行，尝试点击周期按钮
@@ -68,9 +88,20 @@ def capture_all_timeframes():
     screenshot_paths = {}
     
     try:
-        # 先打开TradingView
-        page.goto(TRADINGVIEW_URL, wait_until='networkidle')
-        time.sleep(5)  # 等待页面完全加载
+        # 先打开TradingView（增加重试机制）
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                print(f"正在访问TradingView... (尝试 {attempt + 1}/{max_retries})")
+                page.goto(TRADINGVIEW_URL, wait_until='domcontentloaded', timeout=30000)
+                time.sleep(5)  # 等待页面完全加载
+                break
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    print(f"❌ 访问TradingView失败: {e}")
+                    raise
+                print(f"⚠️ 访问失败，3秒后重试... ({e})")
+                time.sleep(3)
         
         # 遍历所有周期进行截图
         for timeframe in TIME_PERIODS:
