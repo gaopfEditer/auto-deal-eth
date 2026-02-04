@@ -46,15 +46,15 @@ def send_telegram_message(content: str):
 
 # 第3部分：格式化消息和统一发送接口
 def format_analysis_message(analysis_results: dict):
-    """格式化分析结果为消息"""
-    message = "📊 ETH交易策略分析报告\n\n"
+    """格式化分析结果为消息（支持多币种）"""
+    message = "[REPORT] 加密货币交易策略分析报告\n\n"
     
-    for timeframe, result in analysis_results.items():
-        message += f"【{timeframe}周期】\n"
-        if result['status'] == 'success':
-            message += f"{result['analysis']}\n\n"
+    for symbol, result in analysis_results.items():
+        message += f"【{symbol}】\n"
+        if result.get('status') == 'success':
+            message += f"{result.get('analysis', '')}\n\n"
         else:
-            message += f"❌ 分析失败: {result.get('error', '未知错误')}\n\n"
+            message += f"[ERROR] 分析失败: {result.get('error', '未知错误')}\n\n"
     
     return message
 
@@ -64,13 +64,13 @@ def send_notification(content: str):
     
     if send_dingtalk_message(content):
         success_count += 1
-        print("✓ 钉钉消息发送成功")
+        print("[OK] 钉钉消息发送成功")
     
     if send_telegram_message(content):
         success_count += 1
-        print("✓ Telegram消息发送成功")
+        print("[OK] Telegram消息发送成功")
     
     if success_count == 0:
-        print("⚠️ 所有通知渠道都未配置或发送失败")
+        print("[WARNING] 所有通知渠道都未配置或发送失败")
     
     return success_count > 0
