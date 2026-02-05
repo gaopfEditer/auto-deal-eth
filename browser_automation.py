@@ -13,8 +13,8 @@ import os
 import time
 import platform
 from config import (
-    TRADINGVIEW_BASE_URL, 
-    TIME_PERIODS, 
+    TARGET_URL,
+    TARGET_PAGE_SELECTOR,
     SCREENSHOT_DIR,
     SCREENSHOT_WIDTH,
     SCREENSHOT_HEIGHT,
@@ -23,6 +23,23 @@ from config import (
     CHROME_HEADLESS
 )
 from PIL import Image
+
+def check_chrome_running():
+    """检查Chrome是否正在运行"""
+    try:
+        if platform.system() == "Windows":
+            import subprocess
+            result = subprocess.run(['tasklist', '/FI', 'IMAGENAME eq chrome.exe'], 
+                                  capture_output=True, text=True, shell=True)
+            return 'chrome.exe' in result.stdout
+        elif platform.system() == "Darwin":  # Mac
+            import subprocess
+            result = subprocess.run(['pgrep', '-f', 'Google Chrome'], 
+                                  capture_output=True, text=True)
+            return result.returncode == 0
+        return False
+    except Exception:
+        return False
 
 def init_browser():
     """初始化浏览器"""
@@ -46,13 +63,10 @@ def init_browser():
             print("[OK] 成功连接到已运行的Chrome浏览器")
             return driver
         
-        # 否则，直接打开默认浏览器（完全使用系统默认配置，不读取任何用户配置文件）
+        # 否则，直接打开默认浏览器（不使用任何用户配置文件，避免修改Chrome配置）
         else:
-            print("[INFO] 直接打开默认浏览器（使用系统默认配置）")
+            print("[INFO] 直接打开默认浏览器（使用系统默认配置，不会修改Chrome配置）")
             chrome_options = Options()
-            
-            # 重要：不添加任何 --user-data-dir 参数，让 Chrome 使用系统默认配置
-            # 这样会自动使用默认账号和设置，不会触发安全检测
             
             # 无头模式配置
             if CHROME_HEADLESS:
@@ -66,9 +80,6 @@ def init_browser():
             chrome_options.add_argument('--disable-dev-shm-usage')
             chrome_options.add_argument(f'--window-size={SCREENSHOT_WIDTH},{SCREENSHOT_HEIGHT}')
             chrome_options.add_argument('--disable-gpu')
-            # 禁用一些可能导致读取用户配置的选项
-            chrome_options.add_argument('--disable-extensions')
-            chrome_options.add_argument('--disable-plugins-discovery')
             
             # 使用 webdriver-manager 自动管理 ChromeDriver
             try:
@@ -79,7 +90,7 @@ def init_browser():
                 driver = webdriver.Chrome(options=chrome_options)
             
             driver.set_window_size(SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT)
-            print("[OK] 浏览器已启动，使用系统默认配置")
+            print("[OK] 浏览器已启动（使用系统默认配置）")
             return driver
     except Exception as e:
         error_msg = str(e)
@@ -111,7 +122,7 @@ def init_browser():
                 print("1. Chrome可能未正确安装")
                 print("2. 检查ChromeDriver是否正确安装")
             print("\n" + "="*60 + "\n")
-        elif "crashed" in error_msg.lower() or "not reachable" in error_msg.lower():
+        elif "crashed" in error_msg.lower() or "not reachable" in error_msg.lower() or "devtoolsactiveport" in error_msg.lower():
             print("\n" + "="*60)
             print("[ERROR] Chrome启动失败！")
             print("="*60)
@@ -121,8 +132,19 @@ def init_browser():
             print("3. 系统资源不足")
             print("\n【解决方法】")
             if not USE_REMOTE_DEBUGGING:
-                print("1. 尝试关闭所有Chrome窗口后重新运行")
-                print("2. 或者设置 USE_REMOTE_DEBUGGING=True 使用远程调试模式")
+                print("1. 推荐：使用远程调试模式（不会修改Chrome配置）")
+                print("   - 设置 USE_REMOTE_DEBUGGING=True")
+                print("   - 以远程调试模式启动Chrome:")
+                if platform.system() == "Windows":
+                    print(f'     "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port={CHROME_DEBUG_PORT}')
+                elif platform.system() == "Darwin":  # Mac
+                    print(f'     /Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome --remote-debugging-port={CHROME_DEBUG_PORT}')
+                print("   - 在Chrome中登录需要的账号")
+                print("   - 然后运行程序")
+                print("2. 或者：关闭所有Chrome窗口后重新运行")
+            else:
+                print("1. 确保Chrome已以远程调试模式启动")
+                print("2. 检查远程调试端口是否正确")
             print("\n" + "="*60 + "\n")
         raise
 
@@ -248,6 +270,49 @@ def capture_all_timeframes_for_symbol(symbol: str):
             combined_path = combine_images(screenshot_paths, symbol)
         
         return screenshot_paths, combined_path
+    finally:
+        driver.quit()
+
+def capture_target_page():
+    """截图目标页面（tophub.today）"""
+    driver = init_browser()
+    screenshot_path = None
+    
+    try:
+        print(f"正在访问目标页面: {TARGET_URL}")
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                driver.get(TARGET_URL)
+                time.sleep(5)  # 等待页面完全加载
+                break
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    print(f"[ERROR] 访问目标页面失败: {e}")
+                    raise
+                print(f"[WARNING] 访问失败，3秒后重试... ({e})")
+                time.sleep(3)
+        
+        # 等待页面元素加载
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, TARGET_PAGE_SELECTOR))
+            )
+        except TimeoutException:
+            print(f"[WARNING] 未找到选择器 {TARGET_PAGE_SELECTOR}，继续截图")
+        
+        time.sleep(3)  # 额外等待确保页面渲染完成
+        
+        # 截图
+        os.makedirs(SCREENSHOT_DIR, exist_ok=True)
+        screenshot_path = os.path.join(SCREENSHOT_DIR, 'tophub_page.png')
+        driver.save_screenshot(screenshot_path)
+        print(f"[OK] 截图已保存: {screenshot_path}")
+        
+        return screenshot_path
+    except Exception as e:
+        print(f"[ERROR] 截图失败: {e}")
+        return None
     finally:
         driver.quit()
 

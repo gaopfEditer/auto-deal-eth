@@ -8,12 +8,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Gemini API配置
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyCp812BsFgInOxKsHBzlD01gt4lKgQxe88')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'sk-lrAkmUypOl8Vras0tNAEjzP0wQNI2cEeii97VcszS4UFCdY6')
 GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash')
 
-# TradingView配置
-TRADINGVIEW_BASE_URL = os.getenv('TRADINGVIEW_BASE_URL', 'https://www.tradingview.com/chart/?symbol=BINANCE:')
-TRADINGVIEW_CHART_SELECTOR = os.getenv('TRADINGVIEW_SELECTOR', '#chart-container')
+# TradingView配置（已注释，暂时不使用）
+# TRADINGVIEW_BASE_URL = os.getenv('TRADINGVIEW_BASE_URL', 'https://www.tradingview.com/chart/?symbol=BINANCE:')
+# TRADINGVIEW_CHART_SELECTOR = os.getenv('TRADINGVIEW_SELECTOR', '#chart-container')
+
+# 目标页面配置
+TARGET_URL = os.getenv('TARGET_URL', 'https://tophub.today/c/developer')
+TARGET_PAGE_SELECTOR = os.getenv('TARGET_PAGE_SELECTOR', 'body')  # 默认截图整个页面
 
 # 币种配置
 # 支持的币种列表，格式: ["ETH", "BTC", "SOL"] 等
@@ -38,10 +42,10 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '')
 
 # Chrome浏览器配置
-# 使用远程调试模式连接到已运行的Chrome（推荐）
+# 使用远程调试模式连接到已运行的Chrome（推荐，不会修改Chrome配置）
 # 设置为 True 时，会连接到已经打开的Chrome浏览器（需要先手动启动Chrome并启用远程调试）
-# 设置为 False 时，会直接打开默认浏览器
-USE_REMOTE_DEBUGGING = os.getenv('USE_REMOTE_DEBUGGING', 'False').lower() == 'true'
+# 设置为 False 时，会直接打开默认浏览器（使用系统默认配置，未登录状态）
+USE_REMOTE_DEBUGGING = os.getenv('USE_REMOTE_DEBUGGING', 'True').lower() == 'true'
 # 远程调试端口（默认9222）
 CHROME_DEBUG_PORT = int(os.getenv('CHROME_DEBUG_PORT', '9222'))
 # 是否使用无头模式（headless），使用远程调试时此选项无效

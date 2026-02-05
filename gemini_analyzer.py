@@ -113,16 +113,49 @@ def analyze_charts(model, image_paths: dict):
     return results
 
 def analyze_chart(combined_image_path: str, symbol: str):
-    """分析单个组合图片（包含4个周期）"""
+    """分析图片（支持K线图和普通页面）"""
     try:
         model = init_gemini()
-        print(f"  正在分析 {symbol} 组合图表...")
         
-        # 加载组合图片
+        # 加载图片
         image = Image.open(combined_image_path)
         
-        # 修改提示词，说明这是包含4个周期的组合图
-        prompt = f"""
+        # 根据symbol判断分析类型
+        if symbol == "tophub" or "tophub" in symbol.lower():
+            # 普通页面分析
+            print(f"  正在分析页面内容...")
+            prompt = f"""
+请分析这个网页截图的内容，并严格按照 JSON 格式输出分析结果。
+
+这是一个技术开发者热门内容聚合页面（tophub.today/c/developer）。
+
+分析要求：
+1. 识别页面上的主要内容类型和主题
+2. 提取热门文章/项目的标题和关键信息
+3. 分析当前技术趋势和热点话题
+4. 总结页面上的重要信息
+5. 提供有价值的洞察
+
+输出格式必须符合以下 JSON 结构：
+{{
+    "page_type": "string",
+    "main_topics": ["string"],
+    "hot_items": [
+        {{
+            "title": "string",
+            "description": "string",
+            "category": "string"
+        }}
+    ],
+    "trends": "string",
+    "insights": "string",
+    "summary": "string"
+}}
+"""
+        else:
+            # K线图分析
+            print(f"  正在分析 {symbol} 组合图表...")
+            prompt = f"""
 你是一个资深的加密货币技术分析师。请分析提供的 K 线图表组合图，并严格按照 JSON 格式输出建议。
 
 图表说明：

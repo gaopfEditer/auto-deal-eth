@@ -4,67 +4,107 @@
 import schedule
 import time
 from datetime import datetime, time as dt_time
-from browser_automation import capture_all_timeframes_for_symbol
+# TradingView相关功能（已注释，暂时不使用）
+# from browser_automation import capture_all_timeframes_for_symbol
+# from gemini_analyzer import analyze_chart
+# from config import SYMBOLS
+
+from browser_automation import capture_target_page
 from gemini_analyzer import analyze_chart
 from notifier import format_analysis_message, send_notification
-from config import SYMBOLS
+from config import TARGET_URL
 
 def run_analysis():
-    """执行完整的分析流程（支持多币种）"""
+    """执行完整的分析流程（目标页面）"""
     print("=" * 50)
-    print("开始执行交易策略分析...")
+    print("开始执行页面分析...")
     print("=" * 50)
     
-    all_results = {}
+    # 步骤1: 截图目标页面
+    print(f"\n[步骤1] 开始截图目标页面: {TARGET_URL}")
+    try:
+        screenshot_path = capture_target_page()
+    except Exception as e:
+        print(f"[ERROR] 截图失败: {e}")
+        return
     
-    # 遍历所有币种
-    for symbol in SYMBOLS:
-        print(f"\n{'='*50}")
-        print(f"处理币种: {symbol}")
-        print(f"{'='*50}")
-        
-        # 步骤1: 截图所有周期并组合
-        print(f"\n[步骤1] 开始截图 {symbol}...")
-        try:
-            screenshot_paths, combined_path = capture_all_timeframes_for_symbol(symbol)
-        except Exception as e:
-            print(f"[ERROR] {symbol} 截图失败: {e}")
-            continue
-        
-        if not screenshot_paths or len(screenshot_paths) < 4:
-            print(f"[ERROR] {symbol} 截图不完整，跳过")
-            continue
-        
-        print(f"[OK] {symbol} 成功截图 {len(screenshot_paths)} 个周期")
-        
-        if not combined_path:
-            print(f"[ERROR] {symbol} 图片组合失败，跳过")
-            continue
-        
-        # 步骤2: Gemini分析（使用组合图片）
-        print(f"\n[步骤2] 开始Gemini分析 {symbol}...")
-        try:
-            analysis_result = analyze_chart(combined_path, symbol)
-            if analysis_result:
-                all_results[symbol] = analysis_result
-                print(f"[OK] {symbol} 分析完成")
-            else:
-                print(f"[ERROR] {symbol} 分析失败")
-        except Exception as e:
-            print(f"[ERROR] {symbol} 分析异常: {e}")
+    if not screenshot_path:
+        print("[ERROR] 截图失败，终止流程")
+        return
     
-    if not all_results:
-        print("\n[ERROR] 所有币种分析失败")
+    # 步骤2: Gemini分析
+    print(f"\n[步骤2] 开始Gemini分析...")
+    try:
+        analysis_result = analyze_chart(screenshot_path, "tophub")
+        if not analysis_result:
+            print("[ERROR] 分析失败，终止流程")
+            return
+        
+        print(f"[OK] 分析完成")
+    except Exception as e:
+        print(f"[ERROR] 分析异常: {e}")
         return
     
     # 步骤3: 发送通知
     print(f"\n[步骤3] 发送通知...")
-    message = format_analysis_message(all_results)
+    message = format_analysis_message({"tophub": analysis_result})
     send_notification(message)
     
     print("\n" + "=" * 50)
-    print(f"分析流程完成！共处理 {len(all_results)} 个币种")
+    print("分析流程完成！")
     print("=" * 50 + "\n")
+    
+    # TradingView相关功能（已注释，暂时不使用）
+    # all_results = {}
+    # 
+    # # 遍历所有币种
+    # for symbol in SYMBOLS:
+    #     print(f"\n{'='*50}")
+    #     print(f"处理币种: {symbol}")
+    #     print(f"{'='*50}")
+    #     
+    #     # 步骤1: 截图所有周期并组合
+    #     print(f"\n[步骤1] 开始截图 {symbol}...")
+    #     try:
+    #         screenshot_paths, combined_path = capture_all_timeframes_for_symbol(symbol)
+    #     except Exception as e:
+    #         print(f"[ERROR] {symbol} 截图失败: {e}")
+    #         continue
+    #     
+    #     if not screenshot_paths or len(screenshot_paths) < 4:
+    #         print(f"[ERROR] {symbol} 截图不完整，跳过")
+    #         continue
+    #     
+    #     print(f"[OK] {symbol} 成功截图 {len(screenshot_paths)} 个周期")
+    #     
+    #     if not combined_path:
+    #         print(f"[ERROR] {symbol} 图片组合失败，跳过")
+    #         continue
+    #     
+    #     # 步骤2: Gemini分析（使用组合图片）
+    #     print(f"\n[步骤2] 开始Gemini分析 {symbol}...")
+    #     try:
+    #         analysis_result = analyze_chart(combined_path, symbol)
+    #         if analysis_result:
+    #             all_results[symbol] = analysis_result
+    #             print(f"[OK] {symbol} 分析完成")
+    #         else:
+    #             print(f"[ERROR] {symbol} 分析失败")
+    #     except Exception as e:
+    #         print(f"[ERROR] {symbol} 分析异常: {e}")
+    # 
+    # if not all_results:
+    #     print("\n[ERROR] 所有币种分析失败")
+    #     return
+    # 
+    # # 步骤3: 发送通知
+    # print(f"\n[步骤3] 发送通知...")
+    # message = format_analysis_message(all_results)
+    # send_notification(message)
+    # 
+    # print("\n" + "=" * 50)
+    # print(f"分析流程完成！共处理 {len(all_results)} 个币种")
+    # print("=" * 50 + "\n")
 
 # 第3部分：定时任务和主入口
 def parse_time_range(time_range_str):
