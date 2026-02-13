@@ -14,7 +14,10 @@ from gemini_analyzer import analyze_chart
 from notifier import format_analysis_message, send_notification
 from config import TARGET_URL
 
-def run_analysis():
+# 全局变量：是否使用 API 模式
+USE_API_MODE = False
+
+def run_analysis(use_api: bool = False):
     """执行完整的分析流程（目标页面）"""
     print("=" * 50)
     print("开始执行页面分析...")
@@ -34,21 +37,32 @@ def run_analysis():
     
     # 步骤2: Gemini分析
     print(f"\n[步骤2] 开始Gemini分析...")
-    try:
-        analysis_result = analyze_chart(screenshot_path, "tophub")
-        if not analysis_result:
-            print("[ERROR] 分析失败，终止流程")
-            return
-        
-        print(f"[OK] 分析完成")
-    except Exception as e:
-        print(f"[ERROR] 分析异常: {e}")
-        return
+    if use_api:
+        print(f"  [模式] 使用 API 模式进行分析")
+    else:
+        print(f"  [模式] 使用浏览器网页版模式进行分析（默认）")
     
-    # 步骤3: 发送通知
+    analysis_result = None
+    try:
+        analysis_result = analyze_chart(screenshot_path, "tophub", use_api=use_api)
+        if analysis_result and analysis_result.get('status') == 'skipped':
+            print("[INFO] AI 分析已跳过（未配置 API key）")
+        elif analysis_result and analysis_result.get('status') == 'success':
+        print(f"[OK] 分析完成")
+            if analysis_result.get('method') == 'web':
+                print(f"  [提示] 分析结果已在浏览器中显示，请查看 Gemini 网页版")
+        else:
+            print("[WARNING] 分析失败，但继续执行")
+    except Exception as e:
+        print(f"[WARNING] 分析异常: {e}，但继续执行")
+    
+    # 步骤3: 发送通知（如果有分析结果）
+    if analysis_result and analysis_result.get('status') not in ['skipped', 'error']:
     print(f"\n[步骤3] 发送通知...")
     message = format_analysis_message({"tophub": analysis_result})
     send_notification(message)
+    else:
+        print(f"\n[步骤3] 跳过通知（无分析结果）")
     
     print("\n" + "=" * 50)
     print("分析流程完成！")
@@ -147,8 +161,9 @@ def is_in_time_ranges():
 
 def run_analysis_with_time_check():
     """带时间检查的分析函数"""
+    global USE_API_MODE
     if is_in_time_ranges():
-        run_analysis()
+        run_analysis(use_api=USE_API_MODE)
     else:
         current_time = datetime.now().strftime('%H:%M:%S')
         print(f"[INFO] 当前时间 {current_time} 不在执行时间区间内，跳过本次执行")
@@ -170,13 +185,45 @@ def setup_scheduler():
 def main():
     """主入口"""
     import sys
+    global USE_API_MODE
     
-    if len(sys.argv) > 1 and sys.argv[1] == '--once':
+    # 解析命令行参数
+    use_api = False
+    run_once = False
+    
+    for arg in sys.argv[1:]:
+        if arg == '--once':
+            run_once = True
+        elif arg == '--api':
+            use_api = True
+            USE_API_MODE = True
+        elif arg == '--help' or arg == '-h':
+            print("使用方法:")
+            print("  python main.py [选项]")
+            print("")
+            print("选项:")
+            print("  --once     立即执行一次（测试模式）")
+            print("  --api      使用 API 模式进行分析（需要配置 GEMINI_API_KEY）")
+            print("             默认使用浏览器网页版模式进行分析")
+            print("  --help     显示此帮助信息")
+            print("")
+            print("示例:")
+            print("  python main.py --once              # 使用浏览器模式立即执行一次")
+            print("  python main.py --once --api        # 使用 API 模式立即执行一次")
+            print("  python main.py                      # 定时任务模式（浏览器模式）")
+            print("  python main.py --api               # 定时任务模式（API 模式）")
+            return
+    
+    if run_once:
         # 立即执行一次
-        run_analysis()
+        run_analysis(use_api=use_api)
     else:
         # 设置定时任务
         setup_scheduler()
+        if use_api:
+            print("[INFO] 定时任务模式：使用 API 模式进行分析")
+        else:
+            print("[INFO] 定时任务模式：使用浏览器网页版模式进行分析（默认）")
         print("程序运行中，按 Ctrl+C 退出...")
         try:
             while True:

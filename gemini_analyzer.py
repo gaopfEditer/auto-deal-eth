@@ -13,8 +13,9 @@ from config import GEMINI_API_KEY, GEMINI_MODEL
 
 def init_gemini():
     """初始化Gemini客户端"""
-    if not GEMINI_API_KEY:
-        raise ValueError("[ERROR] 错误：GEMINI_API_KEY 未配置！")
+    if not GEMINI_API_KEY or GEMINI_API_KEY.strip() == '':
+        print("[INFO] GEMINI_API_KEY 未配置，跳过 AI 分析步骤")
+        return None
     
     genai.configure(api_key=GEMINI_API_KEY)
     
@@ -112,10 +113,39 @@ def analyze_charts(model, image_paths: dict):
     
     return results
 
-def analyze_chart(combined_image_path: str, symbol: str):
-    """分析图片（支持K线图和普通页面）"""
+def analyze_chart(combined_image_path: str, symbol: str, use_api: bool = False):
+    """分析图片（支持K线图和普通页面）
+    
+    Args:
+        combined_image_path: 图片路径
+        symbol: 符号名称
+        use_api: 是否使用 API 模式，False 则使用浏览器网页版模式
+    """
+    # 如果指定使用 API 模式
+    if use_api:
     try:
         model = init_gemini()
+            
+            # 如果没有 API key，跳过分析
+            if model is None:
+                print("[INFO] API 模式需要配置 GEMINI_API_KEY，切换到浏览器模式")
+                use_api = False
+            else:
+                # 使用 API 模式进行分析
+                return _analyze_with_api(model, combined_image_path, symbol)
+        except Exception as e:
+            print(f"[WARNING] API 模式失败: {e}，切换到浏览器模式")
+            use_api = False
+    
+    # 使用浏览器网页版模式（默认）
+    if not use_api:
+        print("[INFO] 使用 Gemini 网页版进行分析（浏览器模式）")
+        from browser_automation import analyze_with_gemini_web
+        return analyze_with_gemini_web(combined_image_path, symbol)
+
+def _analyze_with_api(model, combined_image_path: str, symbol: str):
+    """使用 API 模式进行分析（内部函数）"""
+    try:
         
         # 加载图片
         image = Image.open(combined_image_path)
@@ -209,4 +239,7 @@ def analyze_chart(combined_image_path: str, symbol: str):
 def analyze_all_timeframes(image_paths: dict):
     """主入口（兼容旧接口）"""
     model = init_gemini()
+    if model is None:
+        print("[INFO] 跳过 AI 分析（未配置 API key）")
+        return {}
     return analyze_charts(model, image_paths)
