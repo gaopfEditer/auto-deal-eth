@@ -1,15 +1,21 @@
 """
 Gemini分析模块 - 优化版
 """
-try:
-    import google.generativeai as genai
-except ImportError:
-    print("警告：google.generativeai 未安装，请运行: pip install google-generativeai")
-    raise
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=FutureWarning)
+    try:
+        import google.generativeai as genai
+    except ImportError:
+        print("警告：google.generativeai 未安装，请运行: pip install google-generativeai")
+        raise
 
 import base64
+import os
+import sys
+from multiprocessing import Process, Queue
 from PIL import Image
-from config import GEMINI_API_KEY, GEMINI_MODEL
+from config import GEMINI_API_KEY, GEMINI_MODEL, GEMINI_REQUEST_TIMEOUT
 
 def init_gemini():
     """初始化Gemini客户端"""
@@ -17,7 +23,11 @@ def init_gemini():
         print("[INFO] GEMINI_API_KEY 未配置，跳过 AI 分析步骤")
         return None
     
-    genai.configure(api_key=GEMINI_API_KEY)
+    # 使用 REST 传输才能走 HTTP 代理；默认 gRPC 不认 HTTP_PROXY，会报 proxy handshake failed
+    try:
+        genai.configure(api_key=GEMINI_API_KEY, transport="rest")
+    except TypeError:
+        genai.configure(api_key=GEMINI_API_KEY)
     
     # 1. 确保模型名称包含 'models/' 前缀 (解决 404 的关键)
     full_model_name = GEMINI_MODEL if GEMINI_MODEL.startswith("models/") else f"models/{GEMINI_MODEL}"
@@ -93,7 +103,7 @@ def analyze_charts(model, image_paths: dict):
             image = Image.open(image_path)
             prompt = get_analysis_prompt()
             
-            # 核心调用
+            # 直接调用（多周期分析在子进程外，不加重超时）
             response = model.generate_content([prompt, image])
             
             # 直接存储 JSON 结果
@@ -113,6 +123,24 @@ def analyze_charts(model, image_paths: dict):
     
     return results
 
+def _api_worker(q: Queue, image_path: str, symbol: str):
+    """子进程里跑 API 调用，超时可由主进程 kill。必须在模块顶层以便 pickle。"""
+    # 子进程不打印，避免和主进程重复刷屏
+    try:
+        sys.stdout = open(os.devnull, "w")
+        sys.stderr = open(os.devnull, "w")
+    except Exception:
+        pass
+    try:
+        model = init_gemini()
+        if model is None:
+            q.put({"status": "error", "symbol": symbol, "error": "No API key"})
+            return
+        q.put(_analyze_with_api(model, image_path, symbol))
+    except Exception as e:
+        q.put({"status": "error", "symbol": symbol, "error": str(e)})
+
+
 def analyze_chart(combined_image_path: str, symbol: str, use_api: bool = False):
     """分析图片（支持K线图和普通页面）
     
@@ -123,18 +151,38 @@ def analyze_chart(combined_image_path: str, symbol: str, use_api: bool = False):
     """
     # 如果指定使用 API 模式
     if use_api:
-    try:
-        model = init_gemini()
-            
+        try:
+            model = init_gemini()
             # 如果没有 API key，跳过分析
             if model is None:
                 print("[INFO] API 模式需要配置 GEMINI_API_KEY，切换到浏览器模式")
                 use_api = False
             else:
-                # 使用 API 模式进行分析
-                return _analyze_with_api(model, combined_image_path, symbol)
+                # 用多进程 + 超时，超时直接杀进程，避免卡死
+                print(f"  请求 Gemini API（{GEMINI_REQUEST_TIMEOUT} 秒超时）...")
+                q = Queue()
+                p = Process(target=_api_worker, args=(q, combined_image_path, symbol))
+                p.start()
+                p.join(timeout=GEMINI_REQUEST_TIMEOUT)
+                if p.is_alive():
+                    p.terminate()
+                    p.join(timeout=3)
+                    if p.is_alive():
+                        p.kill()
+                    err_msg = (
+                        f"Gemini API 在 {GEMINI_REQUEST_TIMEOUT} 秒内无响应，已终止。\n"
+                        "  可能原因：网络无法访问 Google、需代理/VPN、或 API 限流。\n"
+                        "  建议：检查网络/代理，或使用 --web 走浏览器模式。"
+                    )
+                    raise TimeoutError(err_msg)
+                if q.empty():
+                    raise RuntimeError("子进程未返回结果")
+                return q.get_nowait()
+        except TimeoutError as e:
+            print(f"[WARNING] API 模式失败（超时）:\n  {e}\n  切换到浏览器模式")
+            use_api = False
         except Exception as e:
-            print(f"[WARNING] API 模式失败: {e}，切换到浏览器模式")
+            print(f"[WARNING] API 模式失败: {e}\n  切换到浏览器模式")
             use_api = False
     
     # 使用浏览器网页版模式（默认）
@@ -220,14 +268,23 @@ def _analyze_with_api(model, combined_image_path: str, symbol: str):
 }}
 """
         
-        # 调用Gemini API
-        response = model.generate_content([prompt, image])
-        
-        return {
-            'symbol': symbol,
-            'analysis': response.text,
-            'status': 'success'
-        }
+        # 直接调用，连接类错误最多重试 3 次
+        last_err = None
+        for attempt in range(3):
+            try:
+                response = model.generate_content([prompt, image])
+                return {
+                    'symbol': symbol,
+                    'analysis': response.text,
+                    'status': 'success'
+                }
+            except Exception as e:
+                last_err = e
+                err_str = str(e).lower()
+                is_conn_err = "remote end closed" in err_str or "connection aborted" in err_str or "connection reset" in err_str
+                if attempt < 2 and is_conn_err:
+                    continue
+                raise
     except Exception as e:
         print(f"[ERROR] {symbol} 分析失败: {str(e)}")
         return {

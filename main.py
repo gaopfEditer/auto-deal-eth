@@ -48,7 +48,7 @@ def run_analysis(use_api: bool = False):
         if analysis_result and analysis_result.get('status') == 'skipped':
             print("[INFO] AI 分析已跳过（未配置 API key）")
         elif analysis_result and analysis_result.get('status') == 'success':
-        print(f"[OK] 分析完成")
+            print(f"[OK] 分析完成")
             if analysis_result.get('method') == 'web':
                 print(f"  [提示] 分析结果已在浏览器中显示，请查看 Gemini 网页版")
         else:
@@ -58,9 +58,9 @@ def run_analysis(use_api: bool = False):
     
     # 步骤3: 发送通知（如果有分析结果）
     if analysis_result and analysis_result.get('status') not in ['skipped', 'error']:
-    print(f"\n[步骤3] 发送通知...")
-    message = format_analysis_message({"tophub": analysis_result})
-    send_notification(message)
+        print(f"\n[步骤3] 发送通知...")
+        message = format_analysis_message({"tophub": analysis_result})
+        send_notification(message)
     else:
         print(f"\n[步骤3] 跳过通知（无分析结果）")
     
