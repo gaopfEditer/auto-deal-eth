@@ -46,9 +46,9 @@ def init_gemini():
         
         # 备用模型列表，全部带上 models/ 前缀
         fallback_models = [
-            'models/gemini-2.0-flash', 
-            'models/gemini-1.5-flash', 
-            'models/gemini-1.5-pro'
+            'models/gemini-2.5-flash',
+            'models/gemini-2.0-flash-lite',
+            'models/gemini-1.5-flash'
         ]
         
         for fallback in fallback_models:

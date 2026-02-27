@@ -10,21 +10,11 @@ load_dotenv()
 # Gemini API配置
 # 如果不需要 AI 分析，可以不配置 GEMINI_API_KEY，程序会自动跳过分析步骤
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
-GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash')
+GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
 # API 请求超时（秒），超时后强制结束请求
 GEMINI_REQUEST_TIMEOUT = int(os.getenv('GEMINI_REQUEST_TIMEOUT', '45'))
 
-# 代理（可选）。仅填端口时使用 http://localhost:端口，避免 127.0.0.1 导致部分库解析失败
-# NO_PROXY 确保本机（Chrome 调试 9222、127.0.0.1）不走代理
-_proxy_port = os.getenv('PROXY_PORT', '').strip()
-_proxy_url = os.getenv('PROXY_URL', '').strip()
-if _proxy_url or (_proxy_port and _proxy_port.isdigit()):
-    _url = _proxy_url if _proxy_url else f"http://localhost:{_proxy_port}"
-    os.environ['HTTP_PROXY'] = os.environ['HTTPS_PROXY'] = _url
-    os.environ['http_proxy'] = os.environ['https_proxy'] = _url
-    _no = (os.getenv('NO_PROXY') or os.getenv('no_proxy') or '').strip()
-    _no = ','.join(filter(None, [_no, 'localhost', '127.0.0.1']))
-    os.environ['NO_PROXY'] = os.environ['no_proxy'] = _no
+# 代理：不自动设置，避免 Gemini 被不稳定代理影响。需要时手动: source set_proxy_7890.sh
 
 # TradingView配置（已注释，暂时不使用）
 # TRADINGVIEW_BASE_URL = os.getenv('TRADINGVIEW_BASE_URL', 'https://www.tradingview.com/chart/?symbol=BINANCE:')
