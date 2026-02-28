@@ -9,7 +9,7 @@ load_dotenv()
 
 # Gemini API配置
 # 如果不需要 AI 分析，可以不配置 GEMINI_API_KEY，程序会自动跳过分析步骤
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyCp812BsFgInOxKsHBzlD01gt4lKgQxe88')
 GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
 # API 请求超时（秒），超时后强制结束请求
 GEMINI_REQUEST_TIMEOUT = int(os.getenv('GEMINI_REQUEST_TIMEOUT', '45'))

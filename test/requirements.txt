@@ -1,0 +1,5 @@
+# 测试依赖
+playwright>=1.40.0
+# USE_CHROME_CDP=1 时用 Selenium 直连 Chrome（不依赖 /json/version）
+selenium>=4.15.0
+webdriver-manager>=4.0.0

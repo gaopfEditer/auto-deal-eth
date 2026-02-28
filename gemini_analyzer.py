@@ -1,69 +1,75 @@
 """
-Gemini分析模块 - 优化版
+Gemini分析模块 - 使用 REST API，无需 google-generativeai
 """
-import warnings
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", category=FutureWarning)
-    try:
-        import google.generativeai as genai
-    except ImportError:
-        print("警告：google.generativeai 未安装，请运行: pip install google-generativeai")
-        raise
-
 import base64
 import os
 import sys
 from multiprocessing import Process, Queue
-from PIL import Image
-from config import GEMINI_API_KEY, GEMINI_MODEL, GEMINI_REQUEST_TIMEOUT
+
+from config import GEMINI_API_KEY, GEMINI_REQUEST_TIMEOUT
+
 
 def init_gemini():
-    """初始化Gemini客户端"""
-    if not GEMINI_API_KEY or GEMINI_API_KEY.strip() == '':
+    """校验 API Key，返回 key 或 None"""
+    key = (GEMINI_API_KEY or "").strip()
+    if not key:
         print("[INFO] GEMINI_API_KEY 未配置，跳过 AI 分析步骤")
         return None
-    
-    # 使用 REST 传输才能走 HTTP 代理；默认 gRPC 不认 HTTP_PROXY，会报 proxy handshake failed
+    print(f"[OK] 使用 Gemini REST API")
+    return key
+
+
+def _get_available_models(key):
+    """从 ListModels 获取支持 generateContent 的模型，优先 flash"""
     try:
-        genai.configure(api_key=GEMINI_API_KEY, transport="rest")
-    except TypeError:
-        genai.configure(api_key=GEMINI_API_KEY)
-    
-    # 1. 确保模型名称包含 'models/' 前缀 (解决 404 的关键)
-    full_model_name = GEMINI_MODEL if GEMINI_MODEL.startswith("models/") else f"models/{GEMINI_MODEL}"
-    
-    try:
-        # 2. 初始化模型时，针对 JSON 任务可以开启 schema 约束
-        # 这里先使用通用初始化
-        model = genai.GenerativeModel(
-            model_name=full_model_name,
-            generation_config={"response_mime_type": "application/json"}
+        import requests
+        r = requests.get(
+            f"https://generativelanguage.googleapis.com/v1beta/models?key={key}",
+            timeout=10
         )
-        print(f"[OK] 成功初始化模型: {full_model_name}")
-        return model
-    except Exception as e:
-        print(f"[ERROR] 模型 {full_model_name} 初始化失败: {e}")
-        
-        # 备用模型列表，全部带上 models/ 前缀
-        fallback_models = [
-            'models/gemini-2.5-flash',
-            'models/gemini-2.0-flash-lite',
-            'models/gemini-1.5-flash'
+        if r.status_code != 200:
+            return ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"]
+        names = [
+            m["name"].replace("models/", "")
+            for m in r.json().get("models", [])
+            if "generateContent" in m.get("supportedGenerationMethods", [])
         ]
-        
-        for fallback in fallback_models:
-            if fallback != full_model_name:
-                try:
-                    print(f"[INFO] 尝试使用备用模型: {fallback}")
-                    model = genai.GenerativeModel(
-                        model_name=fallback,
-                        generation_config={"response_mime_type": "application/json"}
-                    )
-                    print(f"[OK] 成功使用备用模型: {fallback}")
-                    return model
-                except Exception:
-                    continue
-        raise ValueError(f"[ERROR] 无法初始化任何模型。")
+        flash = [n for n in names if "flash" in n.lower()]
+        other = [n for n in names if n not in flash]
+        return (flash + other) or ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"]
+    except Exception:
+        return ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"]
+
+
+def _generate_via_rest(key, prompt, image_path, timeout=60):
+    """通过 REST API 调用 generateContent，自动尝试可用模型"""
+    import requests
+    with open(image_path, "rb") as f:
+        img_b64 = base64.standard_b64encode(f.read()).decode()
+    payload = {
+        "contents": [{
+            "parts": [
+                {"text": prompt},
+                {"inline_data": {"mime_type": "image/png", "data": img_b64}}
+            ]
+        }],
+        "generationConfig": {"response_mime_type": "application/json"}
+    }
+    for model in _get_available_models(key)[:6]:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
+        r = requests.post(url, json=payload, timeout=timeout)
+        if r.status_code == 200:
+            return r.json()["candidates"][0]["content"]["parts"][0]["text"]
+        if r.status_code in (403, 404):
+            try:
+                err = r.json().get("error", {}).get("message", "")[:100]
+            except Exception:
+                err = ""
+            if err and "leaked" not in err.lower():
+                print(f"[WARN] {model} {r.status_code}: {err}")
+        else:
+            r.raise_for_status()
+    raise RuntimeError("所有模型均失败，请检查 API Key 或到 https://aistudio.google.com/apikey 新建")
 
 def get_analysis_prompt():
     """获取分析提示词 (优化了 prompt 以适配 JSON 模式)"""
@@ -92,51 +98,33 @@ def get_analysis_prompt():
 }
 """
 
-def analyze_charts(model, image_paths: dict):
+def analyze_charts(key, image_paths: dict):
     """分析多个周期的K线图"""
     results = {}
-    
+    prompt = get_analysis_prompt()
     for timeframe, image_path in image_paths.items():
         try:
             print(f"正在分析 {timeframe} 周期...")
-            # 使用 PIL 加载图片
-            image = Image.open(image_path)
-            prompt = get_analysis_prompt()
-            
-            # 直接调用（多周期分析在子进程外，不加重超时）
-            response = model.generate_content([prompt, image])
-            
-            # 直接存储 JSON 结果
-            results[timeframe] = {
-                'timeframe': timeframe,
-                'analysis': response.text,
-                'status': 'success'
-            }
+            text = _generate_via_rest(key, prompt, image_path, timeout=GEMINI_REQUEST_TIMEOUT or 60)
+            results[timeframe] = {'timeframe': timeframe, 'analysis': text, 'status': 'success'}
         except Exception as e:
-            # 如果报错，这里会打印具体的 API 错误信息
             print(f"[ERROR] 分析失败 {timeframe}: {str(e)}")
-            results[timeframe] = {
-                'timeframe': timeframe,
-                'status': 'error',
-                'error': str(e)
-            }
-    
+            results[timeframe] = {'timeframe': timeframe, 'status': 'error', 'error': str(e)}
     return results
 
 def _api_worker(q: Queue, image_path: str, symbol: str):
     """子进程里跑 API 调用，超时可由主进程 kill。必须在模块顶层以便 pickle。"""
-    # 子进程不打印，避免和主进程重复刷屏
     try:
         sys.stdout = open(os.devnull, "w")
         sys.stderr = open(os.devnull, "w")
     except Exception:
         pass
     try:
-        model = init_gemini()
-        if model is None:
+        key = init_gemini()
+        if key is None:
             q.put({"status": "error", "symbol": symbol, "error": "No API key"})
             return
-        q.put(_analyze_with_api(model, image_path, symbol))
+        q.put(_analyze_with_api(key, image_path, symbol))
     except Exception as e:
         q.put({"status": "error", "symbol": symbol, "error": str(e)})
 
@@ -152,9 +140,8 @@ def analyze_chart(combined_image_path: str, symbol: str, use_api: bool = False):
     # 如果指定使用 API 模式
     if use_api:
         try:
-            model = init_gemini()
-            # 如果没有 API key，跳过分析
-            if model is None:
+            key = init_gemini()
+            if key is None:
                 print("[INFO] API 模式需要配置 GEMINI_API_KEY，切换到浏览器模式")
                 use_api = False
             else:
@@ -191,13 +178,9 @@ def analyze_chart(combined_image_path: str, symbol: str, use_api: bool = False):
         from browser_automation import analyze_with_gemini_web
         return analyze_with_gemini_web(combined_image_path, symbol)
 
-def _analyze_with_api(model, combined_image_path: str, symbol: str):
-    """使用 API 模式进行分析（内部函数）"""
+def _analyze_with_api(key, combined_image_path: str, symbol: str):
+    """使用 REST API 进行分析（内部函数）"""
     try:
-        
-        # 加载图片
-        image = Image.open(combined_image_path)
-        
         # 根据symbol判断分析类型
         if symbol == "tophub" or "tophub" in symbol.lower():
             # 普通页面分析
@@ -268,23 +251,9 @@ def _analyze_with_api(model, combined_image_path: str, symbol: str):
 }}
 """
         
-        # 直接调用，连接类错误最多重试 3 次
-        last_err = None
-        for attempt in range(3):
-            try:
-                response = model.generate_content([prompt, image])
-                return {
-                    'symbol': symbol,
-                    'analysis': response.text,
-                    'status': 'success'
-                }
-            except Exception as e:
-                last_err = e
-                err_str = str(e).lower()
-                is_conn_err = "remote end closed" in err_str or "connection aborted" in err_str or "connection reset" in err_str
-                if attempt < 2 and is_conn_err:
-                    continue
-                raise
+        # 通过 REST API 调用
+        text = _generate_via_rest(key, prompt, combined_image_path, timeout=GEMINI_REQUEST_TIMEOUT or 60)
+        return {'symbol': symbol, 'analysis': text, 'status': 'success'}
     except Exception as e:
         print(f"[ERROR] {symbol} 分析失败: {str(e)}")
         return {
@@ -295,8 +264,8 @@ def _analyze_with_api(model, combined_image_path: str, symbol: str):
 
 def analyze_all_timeframes(image_paths: dict):
     """主入口（兼容旧接口）"""
-    model = init_gemini()
-    if model is None:
+    key = init_gemini()
+    if key is None:
         print("[INFO] 跳过 AI 分析（未配置 API key）")
         return {}
-    return analyze_charts(model, image_paths)
+    return analyze_charts(key, image_paths)
