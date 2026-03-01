@@ -1,0 +1,48 @@
+// OpenClaw 2026 agents 配置
+// 使用方式: 在 openclaw.json 中 $include: "./agents.json5"
+// 或在 openclaw 安装目录中: openclaw config set agents $include ./path/to/openclaw-project/agents.json5
+
+{
+  agents: {
+    defaults: {
+      model: {
+        primary: "anthropic/claude-sonnet-4-5",
+        fallbacks: ["openai/gpt-4o"],
+      },
+      sandbox: {
+        mode: "non-main",
+        scope: "agent",
+      },
+      heartbeat: {
+        every: "30m",
+        target: "last",
+      },
+    },
+    list: [
+      {
+        id: "trader",
+        default: true,
+        workspace: "./agents/trader",
+        groupChat: {
+          mentionPatterns: ["@Ares", "Ares", "分析", "策略"],
+        },
+        tools: {
+          allow: ["exec", "read", "write", "edit", "web"],
+          deny: ["browser", "web.search"],
+        },
+      },
+      {
+        id: "operator",
+        workspace: "./agents/operator",
+      },
+      {
+        id: "auditor",
+        workspace: "./agents/auditor",
+      },
+    ],
+  },
+  bindings: [
+    // 示例: 将 trader 绑定到指定 Telegram 群
+    // { agentId: "trader", match: { channel: "telegram", peer: { kind: "group", id: "YOUR_GROUP_ID" } } },
+  ],
+}

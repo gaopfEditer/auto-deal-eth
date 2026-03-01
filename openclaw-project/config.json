@@ -1,0 +1,16 @@
+{
+  "webhook": {
+    "url": "https://bz.a.gaopf.top/api/tradingview/receive",
+    "token": null,
+    "fallback_url": "http://127.0.0.1:3123/api/tradingview/receive"
+  },
+  "trader": {
+    "schedule": "0 8 * * *",
+    "symbols": ["ETH", "BTC"],
+    "analysis_output_dir": "output"
+  },
+  "openclaw": {
+    "workspace_root": "./agents",
+    "node_version": "22"
+  }
+}
