@@ -1,0 +1,11 @@
+{
+  "api": {
+    "gemini": {
+      "timeout_sec": 60,
+      "retry": 3
+    }
+  },
+  "rate_limit": {
+    "max_calls_per_minute": 15
+  }
+}

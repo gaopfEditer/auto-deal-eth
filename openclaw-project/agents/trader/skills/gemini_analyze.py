@@ -9,8 +9,14 @@
   python3 gemini_analyze.py ./chart.png
   python3 gemini_analyze.py --role trader
 """
-
 import base64
+
+# 将 openclaw-project 根目录加入 path，以便 import shared
+def _ensure_shared_path():
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[3]  # skills/trader/agents -> openclaw-project
+    if str(root) not in __import__("sys").path:
+        __import__("sys").path.insert(0, str(root))
 import io
 import json
 import os
@@ -41,6 +47,7 @@ def _load_dotenv():
         pass
 
 _load_dotenv()
+_ensure_shared_path()
 
 # 代理保留：访问 Gemini 需走代理（.env / shell 的 HTTP_PROXY、HTTPS_PROXY）
 _PROXY_SNAPSHOT = {k: os.environ.get(k) for k in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy")}
@@ -130,10 +137,20 @@ def _get_news_prompt(role: str) -> str:
 def fetch_news(role: str = "trader") -> dict:
     if not GEMINI_API_KEY or not GEMINI_API_KEY.strip():
         raise ValueError("未配置 GEMINI_API_KEY")
+    try:
+        from shared.logger import AgentLogger
+        log = AgentLogger("trader")
+        log.info("fetch_news 开始", audit=True, notify=True, stage="news")
+    except ImportError:
+        log = None
     prompt = _get_news_prompt(role)
     raw = _call_gemini_rest([{"text": prompt}], role)
+    if log:
+        log.api_response("fetch_news", raw)
     if raw.startswith("```"):
         raw = raw.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+    if log:
+        log.info("fetch_news 完成", audit=True, notify=True, stage="news")
     data = json.loads(raw)
     data["timestamp"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     return data
@@ -144,6 +161,13 @@ def analyze(image_path: str, role: str = "trader") -> dict:
 
     if not GEMINI_API_KEY or not GEMINI_API_KEY.strip():
         raise ValueError("未配置 GEMINI_API_KEY")
+    try:
+        from shared.logger import AgentLogger
+        log = AgentLogger("trader")
+        log.info(f"analyze 开始: {image_path}", audit=True, notify=True, stage="gemini")
+        log.report_progress("gemini", {"status": "uploading", "image": os.path.basename(image_path)})
+    except ImportError:
+        log = None
 
     img = Image.open(image_path)
     if img.mode in ("RGBA", "P"):
@@ -157,9 +181,16 @@ def analyze(image_path: str, role: str = "trader") -> dict:
         {"text": prompt},
     ]
 
+    if log:
+        log.report_progress("gemini", {"status": "analyzing"})
     raw = _call_gemini_rest(contents, role)
+    if log:
+        log.api_response("analyze", raw)
     if raw.startswith("```"):
         raw = raw.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+    if log:
+        log.info("analyze 完成", audit=True, notify=True, stage="gemini")
+        log.report_progress("gemini", {"status": "done"})
     data = json.loads(raw)
     data["timestamp"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     return data
@@ -192,13 +223,21 @@ def main():
         try:
             result = fetch_news(role=args.role)
         except Exception as e:
-            print(f"[ERROR] {e}", file=sys.stderr)
+            try:
+                from shared.logger import AgentLogger
+                AgentLogger("trader").error(str(e), stage="fetch_news")
+            except Exception:
+                print(f"[ERROR] {e}", file=sys.stderr)
             sys.exit(1)
     else:
         try:
             result = analyze(args.image, role=args.role)
         except Exception as e:
-            print(f"[ERROR] {e}", file=sys.stderr)
+            try:
+                from shared.logger import AgentLogger
+                AgentLogger("trader").error(str(e), stage="analyze")
+            except Exception:
+                print(f"[ERROR] {e}", file=sys.stderr)
             sys.exit(1)
 
     out = json.dumps(result, ensure_ascii=False, indent=2)

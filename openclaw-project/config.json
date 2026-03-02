@@ -1,4 +1,8 @@
 {
+  "logging": {
+    "LOG_PATH": "logs",
+    "backup_count": 7
+  },
   "webhook": {
     "url": "https://bz.a.gaopf.top/api/tradingview/receive",
     "token": null,
