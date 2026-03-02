@@ -19,9 +19,7 @@ import os
 import sys
 import json
 
-# 立即清除代理，否则 Gemini 请求会因失效代理报错
-for _k in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"):
-    os.environ.pop(_k, None)
+# 保留代理：访问 Gemini API 需走代理（.env/shell 的 HTTP_PROXY、HTTPS_PROXY）
 
 # 确保项目根目录在 path 中
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

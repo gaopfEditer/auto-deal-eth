@@ -42,17 +42,14 @@ def _load_dotenv():
 
 _load_dotenv()
 
-# 清除代理，直连 Gemini（与 run_gemini_analyzer 一致）
-for _k in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"):
-    os.environ.pop(_k, None)
+# 代理保留：访问 Gemini 需走代理（.env / shell 的 HTTP_PROXY、HTTPS_PROXY）
+_PROXY_SNAPSHOT = {k: os.environ.get(k) for k in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy")}
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 GEMINI_TIMEOUT = int(os.environ.get("GEMINI_REQUEST_TIMEOUT", "60"))
 
 
-def _get_proxies():
-    return None
 
 
 def _call_gemini_rest(contents: list, role: str = "trader") -> str:
@@ -65,9 +62,10 @@ def _call_gemini_rest(contents: list, role: str = "trader") -> str:
         "contents": [{"parts": contents}],
         "generationConfig": {"responseMimeType": "application/json"},
     }
-    proxies = _get_proxies()
 
-    r = requests.post(url, params=params, json=body, timeout=GEMINI_TIMEOUT, proxies=proxies)
+    s = requests.Session()
+    # trust_env=True（默认）：使用 .env/shell 的 HTTP_PROXY、HTTPS_PROXY 访问 Google API
+    r = s.post(url, params=params, json=body, timeout=GEMINI_TIMEOUT)
     r.raise_for_status()
     data = r.json()
     parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
@@ -174,7 +172,21 @@ def main():
     ap.add_argument("image", nargs="?", help="K 线图路径（不传则走资讯模式）")
     ap.add_argument("--role", "-r", default="trader", help="角色，默认 trader")
     ap.add_argument("--output", "-o", help="写入文件而非 stdout")
+    ap.add_argument("--check-proxy", action="store_true", help="验证代理来源后退出")
     args = ap.parse_args()
+
+    if args.check_proxy:
+        _keys = ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy")
+        print("=== 代理验证 ===", file=sys.stderr)
+        print("当前代理（.env + shell 继承）:", file=sys.stderr)
+        for k in _keys:
+            v = _PROXY_SNAPSHOT.get(k) or "(未设置)"
+            print(f"   {k}: {v}", file=sys.stderr)
+        import requests
+        s = requests.Session()
+        print(f"requests trust_env={s.trust_env} (会使用上述代理)", file=sys.stderr)
+        print("本脚本通过代理访问 Gemini API", file=sys.stderr)
+        sys.exit(0)
 
     if not args.image:
         try:
