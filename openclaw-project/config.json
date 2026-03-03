@@ -15,6 +15,7 @@
   },
   "openclaw": {
     "workspace_root": "./agents",
-    "node_version": "22"
+    "node_version": "22",
+    "webhook_url": "http://localhost:3123/api/openclaw/webhook"
   }
 }

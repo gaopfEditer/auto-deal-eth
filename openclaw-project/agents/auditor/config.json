@@ -1,4 +1,7 @@
 {
-  "api": {},
-  "rate_limit": {}
+  "skills": {
+    "local_search": true,
+    "path": "./skills",
+    "include_global": true
+  }
 }

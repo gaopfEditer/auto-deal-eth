@@ -1,42 +1,21 @@
+// C:\Users\eason\.openclaw\agents.json5 (或你软链接进去的那个)
 {
-  agents: {
-    // 全局默认配置，模型统一由 OpenClaw 分配，这里保持简洁
-    defaults: {
-      sandbox: { mode: "non-main", scope: "agent" },
+  "agents": [
+    {
+      "id": "trader",
+      "name": "Trader",
+      // 指向包含该 Agent 配置文件(config.json/AGENTS.md)的具体目录
+      "path": "openclaw-project/agents/trader", 
+      "skills_path": "openclaw-project/agents/trader/skills"
     },
-    list: [
-      {
-        id: "trader",
-        default: true,
-        // 关键：这个描述决定了 OpenClaw 什么时候拆解任务并调用它
-        description: "视频执行员：负责下载加密货币视频、转写文稿并触发分析流程。支持 YouTube 和 Binance 链接。",
-        workspace: "./agents/trader",
-        // 显式指定 Python 脚本，OpenClaw 会将其注册为可执行的 Tool
-        skills: [
-          "./skills/yt_whisper_worker.py" 
-        ],
-        tools: {
-          allow: ["exec", "read", "write"] // 允许执行 python 和文件读写
-        }
-      },
-      {
-        id: "auditor",
-        description: "量化分析员：负责读取转写文稿，利用 Gemini 进行深度策略分析并生成摘要。",
-        workspace: "./agents/auditor",
-        skills: [
-          "./skills/gemini_analyst.py",
-          "./skills/add.py"
-        ]
-      },
-      {
-        id: "operator",
-        description: "运营推送员：负责将最终摘要或交易信号通过 Telegram 发送给用户。",
-        workspace: "./agents/operator",
-        skills: [
-          "./skills/tg_pusher.py",
-          "./skills/add.py"
-        ]
-      }
-    ]
-  }
+    {
+      "id": "auditor",
+      "path": "openclaw-project/agents/auditor",
+      "skills_path": "openclaw-project/agents/auditor/skills"
+    }
+  ],
+  // 核心：把项目根目录作为全局搜索路径，解决 shared 模块找不到的问题
+  "global_paths": [
+    "openclaw-project/"
+  ]
 }

@@ -58,7 +58,7 @@ def main():
 
     result = add_one(n)
     out = {"input": n, "result": result, "agent": "operator"}
-    _notify_webhook({"type": "openclaw", "nextRole": "role:auditor", **out})
+    _notify_webhook({"type": "openclaw", "next": "role:auditor", **out})
     if args.json:
         print(json.dumps(out))
     else:

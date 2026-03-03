@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Operator 技能：数值加一。完成时通知 OpenClaw webhook（next=auditor），URL 从 config 读取。"""
+"""Auditor 技能：数值加一百。完成时通知 OpenClaw webhook（next=stop），URL 从 config 读取。"""
 import argparse
 import json
 import os
@@ -10,7 +10,7 @@ from pathlib import Path
 
 def _get_webhook_url() -> str:
     """从 openclaw-project/config.json 的 openclaw.webhook_url 读取。"""
-    root = Path(__file__).resolve().parents[3]  # skills -> operator -> agents -> openclaw-project
+    root = Path(__file__).resolve().parents[3]  # skills -> auditor -> agents -> openclaw-project
     cfg = root / "config.json"
     if cfg.exists():
         try:
@@ -37,12 +37,12 @@ def _notify_webhook(payload: dict):
         print(f"[WARN] webhook 通知失败: {e}", file=sys.stderr)
 
 
-def add_one(x: float) -> float:
-    return x + 1
+def add_hundred(x: float) -> float:
+    return x + 100
 
 
 def main():
-    ap = argparse.ArgumentParser(description="数值加一")
+    ap = argparse.ArgumentParser(description="数值加一百")
     ap.add_argument("n", type=float, nargs="?", help="输入数值")
     ap.add_argument("--json", action="store_true", help="JSON 输入/输出")
     args = ap.parse_args()
@@ -56,13 +56,13 @@ def main():
         if n is None:
             n = float(input("输入数值: ").strip() or 0)
 
-    result = add_one(n)
-    out = {"input": n, "result": result, "agent": "operator"}
-    _notify_webhook({"type": "openclaw", "nextRole": "role:auditor", **out})
+    result = add_hundred(n)
+    out = {"input": n, "result": result, "agent": "auditor"}
+    _notify_webhook({"type": "openclaw", "next": "stop", **out})
     if args.json:
         print(json.dumps(out))
     else:
-        print(f"{n} + 1 = {result}")
+        print(f"{n} + 100 = {result}")
 
 
 if __name__ == "__main__":

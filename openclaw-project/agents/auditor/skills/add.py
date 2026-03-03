@@ -1,18 +1,32 @@
 #!/usr/bin/env python3
-"""Auditor 技能：数值加一百。用于测试角色功能。完成时通知 webhook，next=stop。"""
+"""Auditor 技能：数值加一百。完成时通知 OpenClaw webhook（next=stop），URL 从 config 读取。"""
 import argparse
 import json
+import os
 import sys
 import urllib.request
+from pathlib import Path
 
 
-WEBHOOK_URL = "http://localhost:3123/api/openclaw/webhook"
+def _get_webhook_url() -> str:
+    """从 openclaw-project/config.json 的 openclaw.webhook_url 读取。"""
+    root = Path(__file__).resolve().parents[3]  # skills -> auditor -> agents -> openclaw-project
+    cfg = root / "config.json"
+    if cfg.exists():
+        try:
+            with open(cfg, "r", encoding="utf-8") as f:
+                url = json.load(f).get("openclaw", {}).get("webhook_url")
+                if url:
+                    return url
+        except Exception:
+            pass
+    return os.environ.get("OPENCLAW_WEBHOOK_URL", "http://localhost:3123/api/openclaw/webhook")
 
 
 def _notify_webhook(payload: dict):
     try:
         req = urllib.request.Request(
-            WEBHOOK_URL,
+            _get_webhook_url(),
             data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
             method="POST",
             headers={"Content-Type": "application/json"},
@@ -44,7 +58,7 @@ def main():
 
     result = add_hundred(n)
     out = {"input": n, "result": result, "agent": "auditor"}
-    _notify_webhook({"type": "openclaw", "next": "stop", **out})
+    _notify_webhook({"type": "openclaw", "nextRole": "stop", **out})
     if args.json:
         print(json.dumps(out))
     else:
