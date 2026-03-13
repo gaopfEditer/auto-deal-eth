@@ -78,3 +78,6 @@ print(result)  # {"propagation": 5, "nlp": ..., "market": None, "score": 5}
 ```
 
 市场联动需接入 1 分钟 K 线（BTC/Oil），当前为占位实现，可按项目数据源扩展 `getinfo/weight.py` 中的 `_fetch_crypto_minute` / `_fetch_oil_minute`。
+
+
+使用方式：python -m getinfo.run_calendar
