@@ -12,6 +12,7 @@
 - ✅ 输出JSON格式的交易策略
 - ✅ 支持钉钉/Telegram机器人通知
 - ✅ 灵活的时间区间调度（支持跨天时间段）
+- ✅ 资讯获取模块 **getinfo**：AkShare 宏观日历（4/5 星）、消息权重判定（传播/NLP/市场联动）
 
 ## 项目结构
 
@@ -20,6 +21,10 @@ auto-deal-eth/
 ├── config.py              # 配置文件（3部分）
 ├── browser_automation.py   # 浏览器自动化（3部分）
 ├── gemini_analyzer.py      # Gemini分析模块（3部分）
+├── getinfo/                # 资讯获取模块（宏观日历 + 消息权重）
+│   ├── calendar_akshare.py # 金十 4/5 星经济日历
+│   ├── weight.py           # 传播/NLP/市场联动三维权重
+│   └── README.md
 ├── notifier.py             # 通知模块（3部分）
 ├── main.py                 # 主程序（3部分）
 ├── requirements.txt        # 依赖包
@@ -30,14 +35,29 @@ auto-deal-eth/
 
 ### 1. 创建虚拟环境（推荐）
 
+**Windows 用户请用 [python.org](https://www.python.org/downloads/) 或 Microsoft Store 的 CPython 创建 venv。**
+
+**为什么会出现编译错误？** venv 不会“自带”另一个 Python，它用的是**创建 venv 时你选的那个 Python**。若当时用的是 **MSYS2/MingW 的 Python**（路径里带 `msys64\mingw64`），PyPI 上几乎没有针对该平台的 pandas/numpy **预编译 wheel**，pip 只能下源码包（.tar.gz）并在本机**编译**，编译会拉取 cmake、ninja 等，容易报错（make 不兼容、SSL 等）。若用 **Windows 官方 CPython** 建 venv，pip 会直接装 `win_amd64` 的 wheel，**无需编译**，依赖装完即用。
+
 ```bash
-python3 -m venv venv
-source venv/bin/activate  # macOS/Linux
-# 或
-venv\Scripts\activate  # Windows
+python -m venv venv
+# Windows PowerShell:
+.\venv\Scripts\activate
+# Windows CMD:
+venv\Scripts\activate.bat
+# macOS/Linux:
+source venv/bin/activate
 ```
 
-### 2. 安装Python依赖
+若当前 venv 是用 MSYS2 Python 建的，可删掉后用 Windows CPython 重建：
+
+```powershell
+# 删除旧 venv 后，用 Windows 版 Python 重建（路径按你本机安装位置改）
+& "C:\Users\你的用户名\AppData\Local\Programs\Python\Python312\python.exe" -m venv venv
+.\venv\Scripts\activate
+```
+
+### 2. 安装 Python 依赖
 
 ```bash
 pip install -r requirements.txt
