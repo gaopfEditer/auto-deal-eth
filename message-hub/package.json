@@ -1,0 +1,25 @@
+{
+  "name": "message-hub-client",
+  "version": "1.0.0",
+  "description": "Message Hub 客户端 - 连接到外部消息中心服务",
+  "main": "executor.js",
+  "scripts": {
+    "start": "node executor.js",
+    "test": "node test.js",
+    "openclaw": "node openclaw_executor.js",
+    "daemon": "node auto-restart.js start",
+    "daemon:start": "node auto-restart.js start",
+    "daemon:stop": "node auto-restart.js stop",
+    "daemon:restart": "node auto-restart.js restart",
+    "daemon:pm2": "node daemon.js start",
+    "daemon:pm2:stop": "node daemon.js stop",
+    "daemon:pm2:status": "node daemon.js status"
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "axios": "^1.7.9"
+  },
+  "keywords": ["openclaw", "message-hub", "websocket", "webhook"],
+  "author": "",
+  "license": "MIT"
+}
