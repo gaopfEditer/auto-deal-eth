@@ -1,3 +1,8 @@
+---
+name: message-hub
+description: 用于连接到外部消息中心服务的 JavaScript 客户端技能，提供 WebSocket 连接、Webhook 支持、心跳机制和 OpenClaw 集成。使用时需要连接到运行在 3123 端口的 JWT 认证系统消息中心，接收 openclaw_next_role 任务并处理，将任务结果发送回 Webhook。
+---
+
 # Message Hub 客户端技能
 
 用于连接到外部消息中心服务的 JavaScript 客户端技能。
