@@ -9,14 +9,17 @@
   - **1 星** = 低重要度
 - 返回的 DataFrame 会多一列 **「星级」**，格式如：`3星(5星·高)`、`2星(3-4星·中)`、`1星(低)`。
 - **筛选**：`importance_value="高"`（默认）只返回 3 星；`"中高"` 或 `"高与中"` 返回 2 星 + 3 星；`"中"` 只返回 2 星。
+- **时间范围**：默认「近一周」= 以昨天为起点的 7 天（`start_from_yesterday=True`）；可传 `start_from_yesterday=False` 改为从今天起 7 天，或传 `days=14` 拉取更多天。
 
 ```python
 from getinfo import get_high_impact_calendar, get_high_impact_calendar_columns
 
-# 默认：仅高影响（3 星 = 金十 5 星）
+# 默认：近一周（昨天起 7 天）、仅高影响（3 星 = 金十 5 星）
 df = get_high_impact_calendar()
 # 高 + 中（2 星 + 3 星）
 df = get_high_impact_calendar(importance_value="中高")
+# 从今天起 7 天
+df = get_high_impact_calendar(start_from_yesterday=False)
 if df is not None:
     cols = [c for c in get_high_impact_calendar_columns() if c in df.columns]
     print(df[cols].head(10))
@@ -79,5 +82,38 @@ print(result)  # {"propagation": 5, "nlp": ..., "market": None, "score": 5}
 
 市场联动需接入 1 分钟 K 线（BTC/Oil），当前为占位实现，可按项目数据源扩展 `getinfo/weight.py` 中的 `_fetch_crypto_minute` / `_fetch_oil_minute`。
 
+## 4. RSSHub 资讯简报
 
-使用方式：python -m getinfo.run_calendar
+从 [RSSHub](https://rsshub.app) 拉取多路 RSS，可选 Gemini 提纯后生成简报并推送 Telegram。
+
+**依赖**：`pip install feedparser`
+
+**环境变量（可选）**：
+
+| 变量 | 说明 |
+|------|------|
+| `GEMINI_API_URL` 或 `RSSHUB_GEMINI_API_URL` | 提纯用 Gemini 聊天接口（如 `https://xxx/gemini/chat`），不设则不做 AI 提纯 |
+| `RSSHUB_BASE` | RSSHub 基础 URL，默认 `https://rsshub.app` |
+| `RSSHUB_FEEDS` | JSON 数组覆盖默认订阅，格式 `[{"name":"","url":"","role":""}]` |
+| `GETINFO_DAILY_FILE` | 简报追加写入的文件路径，默认 `daily_insight.md` |
+| `GETINFO_SEND_TELEGRAM` | 是否推送到 Telegram（1/0），默认 1；需配置 `TELEGRAM_BOT_TOKEN`、`TELEGRAM_CHAT_ID` |
+
+**默认订阅示例**：Reuters 美洲、Github Trending、Hacker News 等；每源取前 3 条，提纯后写入 `daily_insight.md` 并推送 Telegram。
+
+```python
+from getinfo import get_rss_feeds, generate_morning_report
+
+# 使用默认或环境变量中的订阅列表
+report = generate_morning_report(
+    max_entries_per_feed=3,
+    use_gemini=True,      # 需配置 GEMINI_API_URL
+    save_path="daily_insight.md",
+    send_telegram=True,   # 需配置 Telegram
+)
+```
+
+**命令行**：`python -m getinfo.run_rsshub`
+
+---
+
+**使用方式**：`python -m getinfo.run_calendar` | `python -m getinfo.run_rsshub`

@@ -9,7 +9,7 @@ AkShare 宏观经济日历：抓取高/中重要度数据，并映射为金十�
 结果中会添加「星级」列，格式如：3星(5星·高)、2星(3-4星·中)、1星(低)。
 """
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Optional, List, Union
 
 try:
@@ -25,17 +25,25 @@ WSCN_STAR_TO_JIN10 = {
 }
 
 
-def _fetch_calendar_df(days_ahead: int = 7) -> Optional[pd.DataFrame]:
-    """使用 macro_info_ws 获取宏观日历，合并多日数据。"""
+def _fetch_calendar_df(
+    days: int = 7,
+    start_date: Optional[date] = None,
+) -> Optional[pd.DataFrame]:
+    """使用 macro_info_ws 获取宏观日历，合并多日数据。
+
+    Args:
+        days: 拉取天数。
+        start_date: 起始日期；None 则从今天开始。
+    """
     if ak is None:
         raise ImportError("请安装 akshare: pip install akshare")
     if not hasattr(ak, "macro_info_ws"):
         raise AttributeError(
             "当前 akshare 版本未找到经济日历接口 macro_info_ws。可尝试: pip install akshare --upgrade"
         )
-    base = datetime.now().date()
+    base = start_date if start_date is not None else datetime.now().date()
     frames: List[pd.DataFrame] = []
-    for i in range(days_ahead):
+    for i in range(days):
         d = base + timedelta(days=i)
         date_str = d.strftime("%Y%m%d")
         try:
@@ -56,8 +64,13 @@ def _normalize_wscn_star(v) -> Optional[int]:
     s = str(v).strip()
     try:
         n = int(float(s))
-        if 1 <= n <= 3:
-            return n
+        # 部分数据会出现 4 星，这里将 >=3 统一视为 3 星（高）
+        if n >= 3:
+            return 3
+        if n == 2:
+            return 2
+        if n == 1:
+            return 1
         return None
     except (ValueError, TypeError):
         return None
@@ -74,25 +87,34 @@ def _add_star_column(df: pd.DataFrame, imp_col: str) -> pd.DataFrame:
 def get_high_impact_calendar(
     from_date: Optional[datetime] = None,
     importance_value: Union[str, int, None] = None,
-    days_ahead: int = 7,
+    days: int = 7,
+    start_from_yesterday: bool = True,
 ) -> Optional[pd.DataFrame]:
     """
-    获取宏观经济日历（今日及以后），并添加「星级」列（华尔街 1～3 星 + 金十对应）。
+    获取宏观经济日历，并添加「星级」列（华尔街 1～3 星 + 金十对应）。
 
     华尔街见闻 1～3 星与金十对应：
       - 3 星 = 金十 5 星（高）；2 星 = 金十 3-4 星（中）；1 星 = 低。
 
     Args:
-        from_date: 筛选该日期及以后的事件；默认今日。
-        importance_value: 重要度筛选。None = 仅高（3 星）；"高" 或 3 = 3 星；"中" 或 2 = 2 星；
-            "中高" 或 "高与中" = 2 星 + 3 星。
-        days_ahead: 拉取未来几天数据（默认 7 天）。
+        from_date: 筛选该日期及以后的事件；默认由 start_from_yesterday 决定（昨天或今天）。
+        importance_value: 重要度筛选。None = 中+高（2星+3星，默认条数多）；"高" 或 3 = 仅 3 星；
+            "中" 或 2 = 仅 2 星；"中高" 或 "高与中" = 2 星 + 3 星。
+        days: 拉取天数（默认 7 天）。
+        start_from_yesterday: True = 近一周以昨天为起点（昨天、今天、…共 7 天）；False = 从今天起 7 天。
 
     Returns:
         带「星级」列的 DataFrame；列含：时间、地区、事件、重要度、星级、预测、前值等。
     """
+    today = datetime.now().date()
+    if start_from_yesterday:
+        start_date = today - timedelta(days=1)
+        filter_from = from_date.date() if from_date else start_date
+    else:
+        start_date = today
+        filter_from = from_date.date() if from_date else today
     try:
-        calendar_df = _fetch_calendar_df(days_ahead=days_ahead)
+        calendar_df = _fetch_calendar_df(days=days, start_date=start_date)
     except Exception as e:
         print(f"数据抓取失败: {e}")
         return None
@@ -120,7 +142,7 @@ def get_high_impact_calendar(
 
     # 按 importance_value 筛选（华尔街 3=高, 2=中, 1=低）
     if importance_value is None:
-        importance_value = "高"  # 默认只取高影响（3 星）
+        importance_value = "高"  # 默认仅 3星(5星·高)
     if importance_value in ("高", 3, "3"):
         mask = star_ser == 3
     elif importance_value in ("中", 2, "2"):
@@ -149,8 +171,7 @@ def get_high_impact_calendar(
     if date_col:
         high_impact_df = high_impact_df.copy()
         high_impact_df["_date"] = pd.to_datetime(high_impact_df[date_col], errors="coerce").dt.date
-        today = (from_date or datetime.now()).date()
-        high_impact_df = high_impact_df[high_impact_df["_date"].notna() & (high_impact_df["_date"] >= today)]
+        high_impact_df = high_impact_df[high_impact_df["_date"].notna() & (high_impact_df["_date"] >= filter_from)]
         high_impact_df = high_impact_df.drop(columns=["_date"], errors="ignore")
     return high_impact_df
 
