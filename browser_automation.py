@@ -25,6 +25,7 @@ from config import (
     CHROME_PROFILE_NAME
 )
 from PIL import Image
+from typing import Optional
 
 def check_chrome_running():
     """检查Chrome是否正在运行"""
@@ -145,11 +146,17 @@ def verify_chrome_profile(user_data_dir: str, profile_name: str):
         print("[提示] Profile 目录存在，但无法读取详细信息")
         return True  # 仍然返回 True，因为目录存在
 
-def init_browser():
-    """初始化浏览器"""
+def init_browser(use_remote_debugging: Optional[bool] = None):
+    """
+    初始化浏览器。
+
+    :param use_remote_debugging: 是否连接已开启远程调试的 Chrome。
+        None 时使用 config 中的 USE_REMOTE_DEBUGGING。
+    """
     try:
+        remote = USE_REMOTE_DEBUGGING if use_remote_debugging is None else use_remote_debugging
         # 如果使用远程调试模式，连接到已运行的Chrome
-        if USE_REMOTE_DEBUGGING:
+        if remote:
             print(f"[INFO] 使用远程调试模式，连接到已运行的Chrome（端口 {CHROME_DEBUG_PORT}）")
             print("[INFO] 请确保Chrome已启动并启用了远程调试")
             

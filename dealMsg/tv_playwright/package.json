@@ -1,0 +1,13 @@
+{
+  "name": "dealmsg-tv-playwright",
+  "private": true,
+  "description": "TradingView 截图：playwright-extra + stealth + 持久化用户目录，减轻 Reconnect/风控",
+  "scripts": {
+    "screenshot": "node screenshot.js"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0",
+    "playwright-extra": "^4.3.6",
+    "playwright-extra-plugin-stealth": "^2.4.0"
+  }
+}

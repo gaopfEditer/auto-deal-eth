@@ -93,56 +93,210 @@ def _extract_json(text: str) -> Optional[dict]:
         return None
 
 
-def _normalize_symbol(ticker: str) -> str:
+def _tv_binance_symbol(ticker: str) -> str:
     """
-    TradingView/BINANCE 常用符号：ETHUSDT
-    输入可能是 ETHUSD -> 转成 ETHUSDT
+    TradingView `BINANCE:` 后的符号部分。
+    - ETHUSD -> ETHUSDT
+    - SOLUSDT.P（永续）-> SOLUSDT.P
     """
     t = (ticker or "").strip().upper()
     if not t:
-        return t
+        return ""
+    is_perp = t.endswith(".P")
+    if is_perp:
+        t = t[:-2]
     if t.endswith("USD") and not t.endswith("USDT"):
-        return t[:-3] + "USDT"
-    return t
+        t = t[:-3] + "USDT"
+    return f"{t}.P" if is_perp else t
 
 
-def _tradingview_url(symbol_usdt: str, timeframe: str) -> str:
+def _tradingview_url(symbol_part: str, timeframe: str) -> str:
     """
     直接构造 TradingView 地址，避免依赖 config.py 中被注释的 TRADINGVIEW_BASE_URL。
     """
     # examples:
     # https://www.tradingview.com/chart/?symbol=BINANCE:ETHUSDT&interval=15m
-    return f"https://www.tradingview.com/chart/?symbol=BINANCE:{symbol_usdt}&interval={timeframe}"
+    # https://www.tradingview.com/chart/?symbol=BINANCE:SOLUSDT.P&interval=15m
+    return f"https://www.tradingview.com/chart/?symbol=BINANCE:{symbol_part}&interval={timeframe}"
+
+
+def _playwright_cdp_url() -> Optional[str]:
+    """
+    Playwright 是否通过 CDP 连接本机已启动的 Chrome（与 9222 远程调试一致）。
+    默认开启：DEALMSG_PLAYWRIGHT_USE_CDP=0 时才改为独立 launchPersistentContext。
+    """
+    v = os.getenv("DEALMSG_PLAYWRIGHT_USE_CDP", "1").strip().lower()
+    if v in ("0", "false", "no"):
+        return None
+    port = (
+        os.getenv("CHROME_DEBUG_PORT")
+        or os.getenv("DEALMSG_CHROME_DEBUG_PORT")
+        or "9222"
+    ).strip()
+    return f"http://127.0.0.1:{port}"
+
+
+def _capture_tradingview_playwright(url: str, out_path: str) -> str:
+    """使用 dealMsg/tv_playwright：默认 connectOverCDP(9222) 复用已打开的 Chrome；否则独立 user_data。"""
+    import shutil
+    import subprocess
+
+    script_dir = PROJECT_ROOT / "dealMsg" / "tv_playwright"
+    script = script_dir / "screenshot.js"
+    if not script.is_file():
+        raise FileNotFoundError(f"缺少 {script}，请先安装依赖，见 dealMsg/tv_playwright/README.md")
+    node = shutil.which("node")
+    if not node:
+        raise RuntimeError("未找到 node，请先安装 Node.js")
+    abs_out = os.path.abspath(out_path)
+    os.makedirs(os.path.dirname(abs_out) or ".", exist_ok=True)
+    timeout_ms = int(os.getenv("DEALMSG_PLAYWRIGHT_TIMEOUT_MS", "120000"))
+    cmd = [
+        node,
+        str(script),
+        "--url",
+        url,
+        "--out",
+        abs_out,
+        "--timeout",
+        str(timeout_ms),
+    ]
+    cdp = _playwright_cdp_url()
+    if cdp:
+        cmd.extend(["--cdp", cdp])
+        print(f"[INFO] Playwright 将 CDP 连接到 {cdp}（与 Selenium 远程调试同一 Chrome）", file=sys.stderr)
+    r = subprocess.run(
+        cmd,
+        cwd=str(script_dir),
+        capture_output=True,
+        text=True,
+        timeout=min(600, timeout_ms / 1000 + 180),
+    )
+    if r.returncode != 0:
+        err = (r.stderr or r.stdout or "").strip()
+        raise RuntimeError(f"Playwright 截图失败: {err}")
+    if r.stdout.strip():
+        print(r.stdout.strip(), file=sys.stderr)
+    return abs_out
+
+
+def _dealmsg_use_remote_debugging() -> bool:
+    """是否连接已开启远程调试的 Chrome。默认与 config 一致（通常为 True）。"""
+    v = os.getenv("DEALMSG_USE_REMOTE_DEBUGGING", "").strip().lower()
+    if v in ("1", "true", "yes"):
+        return True
+    if v in ("0", "false", "no"):
+        return False
+    # 未单独配置时读项目根 .env / 环境里的 USE_REMOTE_DEBUGGING
+    return os.getenv("USE_REMOTE_DEBUGGING", "True").strip().lower() == "true"
 
 
 def capture_tradingview_chart(ticker: str, timeframe: str, out_path: str) -> str:
     """
-    Selenium 截 TradingView 图到指定 out_path。
+    截 TradingView 图到指定 out_path。
+
+    - 设置 DEALMSG_USE_PLAYWRIGHT=1 时使用 Playwright + stealth（推荐缓解 Reconnect/风控）
+    - 否则使用 Selenium；远程调试模式在新标签页打开图表，截图后只关闭该标签
     """
+    import time
+    import traceback
+
+    os.makedirs(os.path.dirname(os.path.abspath(out_path)) or ".", exist_ok=True)
+
+    symbol_part = _tv_binance_symbol(ticker)
+    url = _tradingview_url(symbol_part, timeframe)
+
+    if os.getenv("DEALMSG_USE_PLAYWRIGHT", "0").strip().lower() in ("1", "true", "yes"):
+        print("[INFO] 使用 Playwright Stealth 截图（dealMsg/tv_playwright）", file=sys.stderr)
+        return _capture_tradingview_playwright(url, out_path)
+
+    from selenium.common.exceptions import TimeoutException, WebDriverException
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
 
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    use_remote = _dealmsg_use_remote_debugging()
+    driver = init_browser(use_remote_debugging=use_remote)
 
-    symbol_usdt = _normalize_symbol(ticker)
-    url = _tradingview_url(symbol_usdt, timeframe)
+    main_handle = None
+    opened_new_tab = False
+    wait_timeout = int(os.getenv("DEALMSG_CHART_WAIT_SEC", "45"))
 
-    driver = init_browser()
     try:
+        if use_remote and driver.window_handles:
+            main_handle = driver.current_window_handle
+            driver.execute_script("window.open('about:blank','_blank');")
+            WebDriverWait(driver, 15).until(lambda d: len(d.window_handles) > 1)
+            new_handles = [h for h in driver.window_handles if h != main_handle]
+            if new_handles:
+                driver.switch_to.window(new_handles[-1])
+                opened_new_tab = True
+
+        driver.set_page_load_timeout(90)
         driver.get(url)
-        # TradingView 图表加载等待
-        WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.ID, "chart-container"))
+
+        # 多选择器兜底（先长等 #chart-container，再短等其它）
+        chart_found = False
+        last_err = None
+        primary = ((By.ID, "chart-container"),)
+        fallbacks = (
+            (By.CSS_SELECTOR, "div#chart-container"),
+            (By.CSS_SELECTOR, "[id^='chart-container']"),
+            (By.CSS_SELECTOR, "#chart-container canvas"),
         )
-        # 再等一下，确保画面完成渲染
-        import time
+        try:
+            WebDriverWait(driver, wait_timeout).until(
+                EC.presence_of_element_located(primary[0])
+            )
+            chart_found = True
+        except (TimeoutException, WebDriverException) as e:
+            last_err = e
+            for by, sel in fallbacks:
+                try:
+                    WebDriverWait(driver, 12).until(EC.presence_of_element_located((by, sel)))
+                    chart_found = True
+                    break
+                except (TimeoutException, WebDriverException) as e2:
+                    last_err = e2
+
+        if not chart_found:
+            # 再等几秒后仍尝试截图（可能仅有部分元素或反爬页）
+            time.sleep(5)
+            if last_err:
+                print(
+                    f"[WARN] 未检测到 chart-container，仍尝试截图。最后错误: {type(last_err).__name__}: {last_err}",
+                    file=sys.stderr,
+                )
+
         time.sleep(3)
         driver.save_screenshot(out_path)
         return out_path
+    except Exception as e:
+        print(
+            f"[ERROR] TradingView 截图异常: {type(e).__name__}: {e!r}\n{traceback.format_exc()}",
+            file=sys.stderr,
+        )
+        raise
     finally:
         try:
-            driver.quit()
+            if use_remote and opened_new_tab and main_handle:
+                try:
+                    driver.close()
+                except Exception:
+                    pass
+                try:
+                    driver.switch_to.window(main_handle)
+                except Exception:
+                    pass
+            # 远程调试下 quit() 有时会结束整个浏览器；默认仍 quit 以释放会话，便于连续多条消息。
+            # 若 quit 会关掉 Chrome，可设 DEALMSG_REMOTE_SKIP_QUIT=1（仅单次截图或需手动结束 chromedriver）
+            skip_quit = use_remote and os.getenv("DEALMSG_REMOTE_SKIP_QUIT", "0").strip().lower() in (
+                "1",
+                "true",
+                "yes",
+            )
+            if not skip_quit:
+                driver.quit()
         except Exception:
             pass
 
@@ -294,9 +448,9 @@ def run_forever(ws_url: str) -> None:
             print(f"[WARN] 缺少 ticker/period: ticker={ticker} period={period}", file=sys.stderr)
             return
 
-        # 文件输出：例如 ETHUSDT_15m.png
-        symbol_usdt = _normalize_symbol(ticker)
-        out_path = os.path.join(get_screenshot_dir(), f"{symbol_usdt}_{period}.png")
+        # 文件输出：例如 ETHUSDT_15m.png、SOLUSDT.P_15m.png
+        symbol_part = _tv_binance_symbol(ticker)
+        out_path = os.path.join(get_screenshot_dir(), f"{symbol_part}_{period}.png")
 
         try:
             print(f"[INFO] 截图: {ticker} {period} -> {out_path}", file=sys.stderr)
