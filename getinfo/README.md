@@ -114,6 +114,42 @@ report = generate_morning_report(
 
 **命令行**：`python -m getinfo.run_rsshub`
 
+## 5. 币安广场热榜（CDP + 缓存 + Gemini 分析）
+
+通过 **Selenium** 以 `debuggerAddress` 连接本机已启动的 Chrome（默认 **9222** 端口，与 `config.CHROME_DEBUG_PORT` 一致），打开币安广场页面，解析 `/square/` 相关链接；结果缓存在 `getinfo/.cache/binance_square_hot.json`。出现**新条目**时，向 `https://bz.d.ezcoin.ink/gemini/chat` 发送 JSON：`{"role":"common","message":"..."}` 做简要分析。
+
+**前置**：先启动带远程调试的 Chrome，例如：
+
+```text
+chrome.exe --remote-debugging-port=9222
+```
+
+**环境变量（可选）**：
+
+| 变量 | 说明 |
+|------|------|
+| `CHROME_DEBUG_PORT` | 远程调试端口，默认 `9222` |
+| `BINANCE_SQUARE_URL` | 页面 URL，默认 `https://www.binance.com/zh-CN/square` |
+| `BINANCE_SQUARE_CACHE` | 缓存文件路径 |
+| `GEMINI_CHAT_URL` | Gemini 聊天接口，默认 `https://bz.d.ezcoin.ink/gemini/chat` |
+| `BINANCE_SQUARE_WAIT` | 打开页面后额外等待秒数（等 JS 渲染），默认 `5` |
+| `BINANCE_SQUARE_ANALYZE_FIRST` | 设为 `1` 时，首次运行也会对已抓取条目调 Gemini；默认首次只写入缓存、避免刷屏 |
+| `BINANCE_SQUARE_LOG` | 是否写日志，默认 `1`；设为 `0` 关闭 |
+| `BINANCE_SQUARE_LOG_PATH` | 日志文件路径，默认 `getinfo/logs/binance_square.log` |
+
+**命令行**：`python -m getinfo.run_binance_square`
+
+每次运行会把**本次抓取的条目列表**（标题、链接、id）**追加写入日志**（UTF-8），有新 Gemini 分析时也会写在同一段落之后。无需再用命令行查看明细，直接打开日志文件即可。
+
+缓存 JSON 仍含 `last_snapshot`（`getinfo/.cache/binance_square_hot.json`），便于程序读取。
+
+```python
+from getinfo import fetch_hot_and_process_new, call_gemini_chat
+
+# 单次拉取并处理新内容（自动连 CDP，明细写入日志）
+fetch_hot_and_process_new()
+```
+
 ---
 
-**使用方式**：`python -m getinfo.run_calendar` | `python -m getinfo.run_rsshub`
+**使用方式**：`python -m getinfo.run_calendar` | `python -m getinfo.run_rsshub` | `python -m getinfo.run_binance_square`

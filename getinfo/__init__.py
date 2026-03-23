@@ -21,6 +21,24 @@ except ImportError:
     pass
 
 try:
+    from getinfo.binance_square_cdp import (
+        fetch_hot_and_process_new,
+        call_gemini_chat,
+        run_binance_square_once,
+        log_snapshot_event,
+        show_last_snapshot_from_cache,
+    )
+    __all__ += [
+        "fetch_hot_and_process_new",
+        "call_gemini_chat",
+        "run_binance_square_once",
+        "log_snapshot_event",
+        "show_last_snapshot_from_cache",
+    ]
+except ImportError:
+    pass
+
+try:
     from getinfo.weight import (
         propagation_weight,
         nlp_weight_gemini,
