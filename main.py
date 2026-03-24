@@ -14,6 +14,8 @@ from gemini_analyzer import analyze_chart
 from notifier import format_analysis_message, send_notification
 from config import TARGET_URL
 
+ANALYSIS_SYMBOL = "ETH_1H"
+
 # 全局变量：是否使用 API 模式
 USE_API_MODE = False
 
@@ -44,7 +46,7 @@ def run_analysis(use_api: bool = False):
     
     analysis_result = None
     try:
-        analysis_result = analyze_chart(screenshot_path, "tophub", use_api=use_api)
+        analysis_result = analyze_chart(screenshot_path, ANALYSIS_SYMBOL, use_api=use_api)
         if analysis_result and analysis_result.get('status') == 'skipped':
             print("[INFO] AI 分析已跳过（未配置 API key）")
         elif analysis_result and analysis_result.get('status') == 'success':
@@ -59,7 +61,7 @@ def run_analysis(use_api: bool = False):
     # 步骤3: 发送通知（如果有分析结果）
     if analysis_result and analysis_result.get('status') not in ['skipped', 'error']:
         print(f"\n[步骤3] 发送通知...")
-        message = format_analysis_message({"tophub": analysis_result})
+        message = format_analysis_message({ANALYSIS_SYMBOL: analysis_result})
         send_notification(message)
     else:
         print(f"\n[步骤3] 跳过通知（无分析结果）")

@@ -476,7 +476,7 @@ def capture_target_page():
         for attempt in range(max_retries):
             try:
                 driver.get(TARGET_URL)
-                time.sleep(5)  # 等待页面完全加载
+                time.sleep(15)  # 等待15秒后再开始截图
                 break
             except Exception as e:
                 if attempt == max_retries - 1:

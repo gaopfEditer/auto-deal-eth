@@ -16,12 +16,10 @@ GEMINI_REQUEST_TIMEOUT = int(os.getenv('GEMINI_REQUEST_TIMEOUT', '45'))
 
 # 代理：不自动设置，避免 Gemini 被不稳定代理影响。需要时手动: source set_proxy_7890.sh
 
-# TradingView配置（已注释，暂时不使用）
-# TRADINGVIEW_BASE_URL = os.getenv('TRADINGVIEW_BASE_URL', 'https://www.tradingview.com/chart/?symbol=BINANCE:')
-# TRADINGVIEW_CHART_SELECTOR = os.getenv('TRADINGVIEW_SELECTOR', '#chart-container')
-
 # 目标页面配置
-TARGET_URL = os.getenv('TARGET_URL', 'https://tophub.today/c/developer')
+# 默认切换到 TradingView 的 ETHUSDT 1h 页面
+# interval=60 表示 1 小时周期
+TARGET_URL = os.getenv('TARGET_URL', 'https://www.tradingview.com/chart/?symbol=BINANCE:ETHUSDT&interval=60')
 TARGET_PAGE_SELECTOR = os.getenv('TARGET_PAGE_SELECTOR', 'body')  # 默认截图整个页面
 
 # 币种配置
