@@ -26,9 +26,7 @@ TradingView 图表依赖 WebSocket，自动化易被风控掐断。可启用独�
 cd dealMsg/tv_playwright && npm install && npx playwright install chromium
 export DEALMSG_USE_PLAYWRIGHT=1
 python dealMsg/runner.py
-```
-
-详见 [dealMsg/tv_playwright/README.md](tv_playwright/README.md)。
+```详见 [dealMsg/tv_playwright/README.md](tv_playwright/README.md)。
 
 ### 方式 B：Selenium + 远程调试 Chrome
 
@@ -39,4 +37,3 @@ python dealMsg/runner.py
   - `DEALMSG_CHART_WAIT_SEC`：等待图表出现的最长时间（秒），默认 `45`。
   - `DEALMSG_REMOTE_SKIP_QUIT`：远程调试时是否**不**调用 `driver.quit()`。默认 `0`（会 quit，便于连续多条消息）；若发现 quit 把整个 Chrome 关掉，可设为 `1`。
   - `DEALMSG_PLAYWRIGHT_TIMEOUT_MS`：仅 Playwright 模式，`goto` 超时（默认 `120000`）。
-
