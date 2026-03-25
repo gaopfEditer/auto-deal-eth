@@ -13,10 +13,21 @@ try:
     from getinfo.rsshub_feed import (
         get_rss_feeds,
         fetch_feed_entries,
+        fetch_rss_raw_via_selenium_cdp,
         generate_morning_report,
         filter_with_gemini,
+        filter_with_qwen,
+        purify_content,
     )
-    __all__ += ["get_rss_feeds", "fetch_feed_entries", "generate_morning_report", "filter_with_gemini"]
+    __all__ += [
+        "get_rss_feeds",
+        "fetch_feed_entries",
+        "fetch_rss_raw_via_selenium_cdp",
+        "generate_morning_report",
+        "filter_with_gemini",
+        "filter_with_qwen",
+        "purify_content",
+    ]
 except ImportError:
     pass
 

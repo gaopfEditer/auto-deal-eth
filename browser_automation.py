@@ -382,8 +382,14 @@ def take_screenshot(driver, symbol: str, timeframe: str) -> str:
         except TimeoutException:
             # 如果找不到 chart-container，尝试其他选择器
             pass
-        
-        time.sleep(2)  # 额外等待确保图表渲染完成
+        # TradingView 图表资源/脚本较多，建议额外等待渲染稳定后再截图
+        # 可通过环境变量 TRADINGVIEW_SCREENSHOT_WAIT 覆盖（秒），默认 10
+        try:
+            extra_wait = int(os.getenv("TRADINGVIEW_SCREENSHOT_WAIT", "10"))
+        except Exception:
+            extra_wait = 20
+        if extra_wait > 0:
+            time.sleep(extra_wait)
         
         # 截图整个页面
         driver.save_screenshot(screenshot_path)
@@ -614,6 +620,10 @@ def analyze_with_gemini_web(image_path: str, symbol: str, prompt: str = None):
                     # 步骤1: 查找并点击"添加文件"按钮（或类似的按钮）
                     add_file_button = None
                     add_file_selectors = [
+                        # Gemini 现网常见：加号按钮（Material），打开 upload-file-menu
+                        "button.upload-card-button[aria-controls='upload-file-menu']",
+                        "button.upload-card-button[aria-label='打开文件上传菜单']",
+                        "button.upload-card-button",
                         "//button[contains(text(), '添加文件')]",
                         "//button[contains(text(), 'Add file')]",
                         "//button[contains(@aria-label, '添加')]",
@@ -642,7 +652,17 @@ def analyze_with_gemini_web(image_path: str, symbol: str, prompt: str = None):
                                 time.sleep(0.3)
                                 add_file_button.click()
                                 print(f"  [OK] 已点击添加文件按钮")
-                                time.sleep(1.5)  # 等待浮窗出现
+                                # 等待菜单展开（aria-expanded 或菜单容器出现）
+                                try:
+                                    WebDriverWait(driver, 10).until(
+                                        lambda d: (
+                                            (add_file_button.get_attribute("aria-expanded") or "").strip().lower() in ("true", "1")
+                                            or len(d.find_elements(By.CSS_SELECTOR, "#upload-file-menu, [id='upload-file-menu'], [aria-controls='upload-file-menu'][aria-expanded='true']")) > 0
+                                        )
+                                    )
+                                except Exception:
+                                    # 给一点缓冲，避免后续立刻查找菜单项
+                                    time.sleep(0.8)
                                 break
                         except:
                             continue
@@ -651,20 +671,22 @@ def analyze_with_gemini_web(image_path: str, symbol: str, prompt: str = None):
                         print(f"  [WARNING] 未找到添加文件按钮，尝试直接查找上传文件按钮")
                     
                     # 步骤2: 等待浮窗出现，然后查找"上传文件"按钮并使用 pyautogui 点击
-                    if add_file_button or True:  # 即使没找到添加文件按钮，也尝试查找上传文件按钮
-                        time.sleep(1)  # 等待浮窗出现
+                    # 必须先点“添加文件/+”，否则菜单未展开，后续会稳定找不到“上传文件/文件输入框”
+                    if add_file_button:
+                        # 给菜单展开一个小缓冲，主等待交给 WebDriverWait
+                        time.sleep(0.8)
                         
                         # 查找"上传文件"按钮
                         upload_button = None
                         try:
                             # 查找包含"上传文件"文本的可点击父元素（浮窗中的）
-                            upload_button = WebDriverWait(driver, 3).until(
+                            upload_button = WebDriverWait(driver, 10).until(
                                 EC.presence_of_element_located((By.XPATH, "//*[contains(@class, 'mdc-list-item') and .//div[contains(text(), '上传文件')]] | //*[contains(@class, 'list-item') and .//*[contains(text(), '上传文件')]]"))
                             )
                             print(f"  [INFO] 找到上传文件按钮（浮窗中）")
                         except:
                             try:
-                                upload_button = WebDriverWait(driver, 3).until(
+                                upload_button = WebDriverWait(driver, 10).until(
                                     EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'menu-text') and contains(text(), '上传文件')] | //div[contains(text(), '上传文件')] | //span[contains(text(), '上传文件')] | //*[contains(text(), '上传文件')]"))
                                 )
                                 print(f"  [INFO] 找到上传文件按钮（文本元素）")
@@ -706,8 +728,14 @@ def analyze_with_gemini_web(image_path: str, symbol: str, prompt: str = None):
                                 pyautogui.PAUSE = 0.1
                                 pyautogui.click(screen_x, screen_y)
                                 print(f"  [OK] pyautogui 坐标点击完成")
-                                time.sleep(2)  # 等待文件选择对话框打开
-                                
+                                # 等待文件选择对话框/文件输入框出现（比固定 sleep 更稳）
+                                try:
+                                    WebDriverWait(driver, 10).until(
+                                        lambda d: d.find_elements(By.CSS_SELECTOR, "input[type='file']")
+                                    )
+                                except Exception:
+                                    pass
+
                                 # 验证是否真的点击成功（检查是否出现文件输入框）
                                 file_inputs = driver.find_elements(By.CSS_SELECTOR, "input[type='file']")
                                 if file_inputs:
@@ -1078,37 +1106,104 @@ def analyze_with_gemini_web(image_path: str, symbol: str, prompt: str = None):
                     continue
             
             if text_input:
-                # 清空并输入提示词
-                text_input.clear()
-                text_input.send_keys(analysis_prompt)
-                time.sleep(1)
-                
-                # 查找发送按钮并点击
-                send_selectors = [
-                    "button[type='submit']",
-                    "button[aria-label*='send']",
-                    "button[aria-label*='Send']",
-                    "[data-testid='send-button']",
-                    "button:contains('Send')",
-                    "button:contains('发送')",
-                    ".send-button"
-                ]
-                
-                send_button = None
-                for selector in send_selectors:
+                # 清空并输入提示词（并确保输入框获得焦点）
+                try:
+                    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", text_input)
+                except Exception:
+                    pass
+                try:
+                    text_input.click()
+                except Exception:
                     try:
-                        send_button = driver.find_element(By.CSS_SELECTOR, selector)
-                        if send_button and send_button.is_enabled():
-                            break
-                    except:
-                        continue
-                
+                        driver.execute_script("arguments[0].focus();", text_input)
+                    except Exception:
+                        pass
+                # 长 prompt 不用 send_keys 逐字敲（慢、易触发风控/卡顿），改为 JS 直接注入 + 触发事件
+                try:
+                    driver.execute_script(
+                        """
+                        var el = arguments[0];
+                        var v = arguments[1] || '';
+                        try {
+                          // textarea / input
+                          if (el && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && (el.type || '') !== 'file'))) {
+                            el.value = v;
+                          } else if (el && el.isContentEditable) {
+                            // contenteditable
+                            el.innerText = v;
+                          } else {
+                            // 兜底
+                            try { el.value = v; } catch (e) {}
+                            try { el.innerText = v; } catch (e) {}
+                          }
+                          // 触发前端监听（Angular/React）
+                          el.dispatchEvent(new Event('input', { bubbles: true }));
+                          el.dispatchEvent(new Event('change', { bubbles: true }));
+                          el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: ' ' }));
+                        } catch (e) {}
+                        """,
+                        text_input,
+                        analysis_prompt,
+                    )
+                    # 轻触发一次，让某些站点从“禁用发送”变为可发送
+                    text_input.send_keys(" ")
+                except Exception:
+                    # JS 注入失败再回退到 send_keys（尽量短）
+                    try:
+                        text_input.clear()
+                    except Exception:
+                        pass
+                    text_input.send_keys(analysis_prompt)
+
+                # Gemini 的“发送”按钮经常先禁用，且可能被 mic 图标层拦截点击
+                # 1) 优先等按钮变为可点（aria-disabled != true）
+                send_button = None
+                try:
+                    send_button = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, "button.send-button, button[aria-label='发送'], button[aria-label*='Send'], button[type='submit']"))
+                    )
+                except Exception:
+                    send_button = None
+
+                def _send_button_ready(btn):
+                    try:
+                        if not btn:
+                            return False
+                        aria = (btn.get_attribute("aria-disabled") or "").strip().lower()
+                        if aria in ("true", "1"):
+                            return False
+                        return btn.is_enabled()
+                    except Exception:
+                        return False
+
+                sent = False
                 if send_button:
-                    send_button.click()
-                else:
-                    # 如果找不到发送按钮，尝试按 Enter 键
+                    try:
+                        WebDriverWait(driver, 12).until(lambda d: _send_button_ready(send_button))
+                    except Exception:
+                        pass
+
+                    if _send_button_ready(send_button):
+                        try:
+                            send_button.click()
+                            sent = True
+                        except Exception:
+                            # 2) click 被拦截时，用 JS 点击兜底
+                            try:
+                                driver.execute_script("arguments[0].click();", send_button)
+                                sent = True
+                            except Exception:
+                                sent = False
+
+                if not sent:
+                    # 3) 最稳：在输入框里按 Enter 发送（多数聊天框支持）
+                    try:
+                        text_input.click()
+                    except Exception:
+                        pass
                     text_input.send_keys(Keys.RETURN)
-                
+                    sent = True
+
                 print(f"  ✓ 已发送分析请求")
             else:
                 print(f"  [WARNING] 未找到输入框，尝试使用键盘输入...")
@@ -1118,42 +1213,73 @@ def analyze_with_gemini_web(image_path: str, symbol: str, prompt: str = None):
                 actions.send_keys(Keys.RETURN)
                 actions.perform()
             
-            # 等待分析结果
+            # 等待分析结果（轮询到“新回复出现并稳定”）
             print(f"  等待分析结果...")
-            time.sleep(10)  # 等待 Gemini 生成结果
-            
-            # 查找结果区域
+            try:
+                max_wait = int(os.getenv("GEMINI_WEB_RESULT_WAIT", "90"))
+            except Exception:
+                max_wait = 90
+            try:
+                stable_sec = int(os.getenv("GEMINI_WEB_RESULT_STABLE", "4"))
+            except Exception:
+                stable_sec = 4
+
             result_selectors = [
                 ".response",
                 "[data-testid='response']",
                 ".message-content",
                 ".gemini-response",
                 "div[class*='response']",
-                "div[class*='message']"
+                "div[class*='message']",
             ]
-            
-            result_text = None
-            for selector in result_selectors:
-                try:
-                    result_elements = driver.find_elements(By.CSS_SELECTOR, selector)
-                    if result_elements:
-                        # 获取最后一个结果元素（最新的响应）
-                        result_text = result_elements[-1].text
-                        if result_text and len(result_text) > 50:  # 确保有实际内容
-                            break
-                except:
-                    continue
-            
-            # 如果找不到结果，尝试获取整个页面的文本
-            if not result_text:
+
+            def _latest_reply_text() -> str:
+                for selector in result_selectors:
+                    try:
+                        els = driver.find_elements(By.CSS_SELECTOR, selector)
+                        if els:
+                            t = (els[-1].text or "").strip()
+                            if t:
+                                return t
+                    except Exception:
+                        continue
                 try:
                     body = driver.find_element(By.TAG_NAME, "body")
-                    result_text = body.text
-                except:
-                    pass
-            
-            if result_text and len(result_text.strip()) > 50:
+                    return (body.text or "").strip()
+                except Exception:
+                    return ""
+
+            last = ""
+            last_len = 0
+            stable_for = 0
+            result_text = ""
+
+            # 先给一点点时间让回复容器出现
+            time.sleep(1.5)
+            for _ in range(max_wait):
+                t = _latest_reply_text()
+                if t and len(t) >= 50:
+                    result_text = t
+                    if len(t) > last_len:
+                        stable_for = 0
+                        last_len = len(t)
+                        last = t
+                    else:
+                        stable_for += 1
+                        # 内容连续 stable_sec 秒不变，认为生成完成
+                        if stable_for >= stable_sec:
+                            break
+                time.sleep(1)
+
+            if result_text and len(result_text.strip()) >= 50:
                 print(f"  ✓ 成功获取分析结果")
+                # 终端可读性：打印截断后的结果；完整文本仍写入 analysis_result
+                snippet = result_text.strip()
+                if len(snippet) > 1500:
+                    snippet = snippet[:1500] + "\n...（已截断显示）"
+                print("  ===== Gemini 结果（抓取） =====")
+                print(snippet)
+                print("  =============================")
                 analysis_result = {
                     'symbol': symbol,
                     'analysis': result_text,
@@ -1161,40 +1287,44 @@ def analyze_with_gemini_web(image_path: str, symbol: str, prompt: str = None):
                     'method': 'web'
                 }
             else:
-                print(f"  [INFO] 等待 Gemini 生成分析结果...")
-                print(f"  [提示] 如果结果未自动获取，请在浏览器中查看 Gemini 的分析结果")
-                # 再等待一段时间让 Gemini 生成结果
-                time.sleep(20)
-                # 再次尝试获取结果
+                # 不把“正在生成/抓不到 DOM”当成致命错误：
+                # 这里额外等一小段时间，再强力提取一次页面“最新回复”，并尽量打印出来。
                 try:
-                    body = driver.find_element(By.TAG_NAME, "body")
-                    result_text = body.text
-                    # 尝试提取更具体的结果内容
-                    if result_text and len(result_text.strip()) > 50:
-                        analysis_result = {
-                            'symbol': symbol,
-                            'analysis': result_text,
-                            'status': 'success',
-                            'method': 'web'
-                        }
-                        print(f"  ✓ 成功获取分析结果")
-                    else:
-                        # 即使无法自动获取，也返回成功状态，因为结果在浏览器中可见
-                        analysis_result = {
-                            'symbol': symbol,
-                            'status': 'success',
-                            'message': '分析结果已在浏览器中显示，请查看 Gemini 网页版',
-                            'method': 'web'
-                        }
-                        print(f"  [INFO] 分析结果已在浏览器中显示，请手动查看")
-                except:
+                    extra_wait = int(os.getenv("GEMINI_WEB_EXTRA_WAIT", "30"))
+                except Exception:
+                    extra_wait = 30
+
+                if extra_wait > 0:
+                    print(f"  [INFO] 先等待 {extra_wait}s 后再补抓最新回复内容...")
+                    time.sleep(extra_wait)
+
+                try:
+                    result_text2 = _latest_reply_text()
+                except Exception:
+                    result_text2 = ""
+
+                if result_text2 and len(result_text2.strip()) > 0:
+                    # 为了终端可读性，先截断打印；但写入结果里仍保留完整文本
+                    snippet = result_text2.strip()
+                    if len(snippet) > 1500:
+                        snippet = snippet[:1500] + "\n...（已截断显示）"
+                    print("  ===== Gemini 结果（补抓） =====")
+                    print(snippet)
+                    print("  =============================")
+                    analysis_result = {
+                        'symbol': symbol,
+                        'analysis': result_text2,
+                        'status': 'success',
+                        'method': 'web'
+                    }
+                else:
                     analysis_result = {
                         'symbol': symbol,
                         'status': 'success',
-                        'message': '分析结果已在浏览器中显示，请查看 Gemini 网页版',
+                        'message': '分析结果可能仍在生成或无法自动抓取，请直接查看 Gemini 网页版页面内容',
                         'method': 'web'
                     }
-                    print(f"  [INFO] 分析结果已在浏览器中显示，请手动查看")
+                    print(f"  [INFO] 未能自动抓取到最新回复文本；浏览器页面仍会继续生成，请直接查看。")
             
         except TimeoutException:
             print(f"  [ERROR] 页面元素加载超时")

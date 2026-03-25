@@ -92,13 +92,40 @@ print(result)  # {"propagation": 5, "nlp": ..., "market": None, "score": 5}
 
 | 变量 | 说明 |
 |------|------|
-| `GEMINI_API_URL` 或 `RSSHUB_GEMINI_API_URL` | 提纯用 Gemini 聊天接口（如 `https://xxx/gemini/chat`），不设则不做 AI 提纯 |
-| `RSSHUB_BASE` | RSSHub 基础 URL，默认 `https://rsshub.app` |
-| `RSSHUB_FEEDS` | JSON 数组覆盖默认订阅，格式 `[{"name":"","url":"","role":""}]` |
+| `QWEN_API_KEY` | 通义千问（阿里云 DashScope）API Key；与下两项配合，**简报提纯默认优先走 Qwen** |
+| `QWEN_API_URL` | 默认 `https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions` |
+| `QWEN_MODEL` | 默认 `qwen-turbo` |
+| `GETINFO_PURIFY_ENGINE` | 空=自动（先 Qwen 再 Gemini）；`qwen` / `gemini` 强制单一后端 |
+| `GEMINI_API_URL` 或 `RSSHUB_GEMINI_API_URL` | 提纯用 Gemini 聊天接口（如 `https://xxx/gemini/chat`）；无 `QWEN_API_KEY` 时使用 |
+| `RSSHUB_BASE` | 公共 RSSHub 镜像基础 URL，默认 `https://rsshub.app`（只影响内置默认那几条里的占位域名） |
+| `RSSHUB_FEEDS` | JSON 数组**完全覆盖**订阅列表，格式 `[{"name":"","url":"","role":""}]`；设了之后不再读下方「额外源」与默认列表 |
+| `FRESHRSS_RSS_URL` | [FreshRSS](https://freshrss.github.io/) 实例对外 **RSS** 地址。一般在后台「用户查询 → 分享」里选 **RSS/Atom** 复制链接（需开启 API）；勿把账号密码写进代码 |
+| `FRESHRSS_FEED_NAME` / `FRESHRSS_ROLE` | FreshRSS 源在简报里的名称与 Gemini `role`，默认 `FreshRSS` / `k_line_analysis` |
+| `RSSHUB_YOUTUBE_TRENDING_URL` | 自建 RSSHub 的**完整**路由 URL（含 `?token=` 等查询参数）。**token 只放 `.env` 或部署环境变量，勿提交仓库** |
+| `RSSHUB_SELF_BASE` + `RSSHUB_ACCESS_TOKEN` | 与上一行二选一：例如 `http://你的IP:1200` 与 token，程序会拼成 `.../youtube/trending/cn?token=...` |
+| `RSSHUB_YOUTUBE_FEED_NAME` / `RSSHUB_YOUTUBE_ROLE` | YouTube 热榜源名称与 role，默认 `YouTube-国内热榜` / `common` |
+| `RSSHUB_APPEND_DEFAULTS` | 设为 `0` 时**只拉** FreshRSS + 自建 YouTube 等额外源，不追加内置 Reuters / GitHub / HN；若额外源也为空则仍回退到内置默认列表 |
 | `GETINFO_DAILY_FILE` | 简报追加写入的文件路径，默认 `daily_insight.md` |
 | `GETINFO_SEND_TELEGRAM` | 是否推送到 Telegram（1/0），默认 1；需配置 `TELEGRAM_BOT_TOKEN`、`TELEGRAM_CHAT_ID` |
+| `GETINFO_RSS_USER_AGENT` | 拉取 RSS 的 HTTP User-Agent；不设则模拟 Chrome。若 FreshRSS 等返回 **403** 而浏览器能打开，多半是脚本 UA 被拦，可设为本机浏览器 UA 或留空使用默认模拟浏览器 |
+| `GETINFO_RSS_WARMUP_FIRST` | 设为 `1` 时**每次**先 GET 站点首页再拉 RSS（需 Cookie 的 WAF）；不设时仅在首次请求得到 **403** 后自动再试「预热 + 重拉」 |
+| `GETINFO_RSS_STRIP_REFERER` | 设为 `1` 时去掉 `Referer`（程序会自动在 403 时再试无 Referer，一般无需手动开） |
+| `GETINFO_RSS_SELENIUM_CDP` | 设为 `1` 时用 **Selenium** 连 **9222**（与 `run_binance_square` 相同）。在页面内用 **fetch / 同步 XHR / DOM 抠 XML** 取正文，**不**再走 Python `requests`（易被 WAF 403）；也不用纯 `page_source` 当 RSS |
+| `GETINFO_RSS_USE_PLAYWRIGHT` | 兼容旧名，效果同 `GETINFO_RSS_SELENIUM_CDP=1` |
+| `GETINFO_RSS_CDP_FALLBACK` | Selenium 失败时是否回退 `requests`，默认 **`0`**（避免 Python 再请求被 403，与「浏览器能开」不一致）；需回退时设 `1` |
+| `GETINFO_RSS_BROWSER_SUBFETCH` | 设为 `1` 时，在仅从导航 DOM 抠不出 RSS 时再尝试页面内 fetch/XHR（部分 WAF 会拦，默认关） |
 
-**默认订阅示例**：Reuters 美洲、Github Trending、Hacker News 等；每源取前 3 条，提纯后写入 `daily_insight.md` 并推送 Telegram。
+**默认订阅示例**（在未设置 `RSSHUB_FEEDS` 且 `RSSHUB_APPEND_DEFAULTS` 非 `0` 时）：Reuters 美洲、Github Trending、Hacker News；若配置了 `FRESHRSS_RSS_URL` 或 `RSSHUB_YOUTUBE_TRENDING_URL`（或 `RSSHUB_SELF_BASE`+`RSSHUB_ACCESS_TOKEN`），这些源会**排在前面**。每源取前 3 条，提纯后写入 `daily_insight.md` 并推送 Telegram。
+
+**对接自建实例示例**（`.env` 片段，请替换域名与 token）：
+
+```text
+FRESHRSS_RSS_URL=https://bz.c.ezcoin.ink/i/?get=...&f=rss&...
+RSSHUB_YOUTUBE_TRENDING_URL=http://149.88.80.60:1200/youtube/trending/cn?token=你的密钥
+# 或：RSSHUB_SELF_BASE=http://149.88.80.60:1200
+#     RSSHUB_ACCESS_TOKEN=你的密钥
+RSSHUB_APPEND_DEFAULTS=0
+```
 
 ```python
 from getinfo import get_rss_feeds, generate_morning_report
@@ -106,7 +133,7 @@ from getinfo import get_rss_feeds, generate_morning_report
 # 使用默认或环境变量中的订阅列表
 report = generate_morning_report(
     max_entries_per_feed=3,
-    use_gemini=True,      # 需配置 GEMINI_API_URL
+    use_gemini=True,      # 是否启用 LLM 提纯；需配置 QWEN_API_KEY 或 GEMINI_API_URL
     save_path="daily_insight.md",
     send_telegram=True,   # 需配置 Telegram
 )

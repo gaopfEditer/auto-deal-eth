@@ -56,7 +56,7 @@ except Exception:
     CHROME_DEBUG_PORT = int(os.getenv("CHROME_DEBUG_PORT", "9222"))
 
 DEFAULT_GEMINI_URL = "https://bz.d.ezcoin.ink/gemini/chat"
-DEFAULT_SQUARE_URL = "https://www.binance.com/zh-CN/square"
+DEFAULT_SQUARE_URL = "https://www.binance.com/zh-CN/square/trending"
 
 
 def _log_path() -> Path:
