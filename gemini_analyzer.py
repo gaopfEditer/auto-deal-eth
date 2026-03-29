@@ -2,9 +2,12 @@
 Gemini分析模块 - 使用 REST API，无需 google-generativeai
 """
 import base64
+import json
 import os
+import re
 import sys
 from multiprocessing import Process, Queue
+from typing import Any, Dict, Optional
 
 from config import GEMINI_API_KEY, GEMINI_REQUEST_TIMEOUT
 
@@ -71,38 +74,112 @@ def _generate_via_rest(key, prompt, image_path, timeout=60):
             r.raise_for_status()
     raise RuntimeError("所有模型均失败，请检查 API Key 或到 https://aistudio.google.com/apikey 新建")
 
-def get_analysis_prompt():
-    """获取分析提示词 (优化了 prompt 以适配 JSON 模式)"""
-    return """
-你是一个资深的加密货币技术分析师。请分析提供的 K 线图表，并严格按照 JSON 格式输出建议。
-分析要求：
-1. 识别当前趋势（上涨/下跌/震荡）
-2. 识别关键支撑位和阻力位
-3. 分析技术指标信号（MACD, RSI, Bollinger Bands 等）
-4. 给出明确交易建议（Long/Short/Neutral）
-5. 评估风险等级（Low/Medium/High）
-
-输出格式必须符合以下 JSON 结构：
-{
-    "trend": "string",
-    "support_level": "string",
-    "resistance_level": "string",
+def _kline_json_schema_text() -> str:
+    """与提示词中一致的 JSON 结构说明（字符串块，字段名保持一致即可）。"""
+    return r"""{
+    "symbol": "string",
+    "trend_regime": "string",
+    "trend": {
+        "summary": "string",
+        "decision": {
+            "support_level": "string",
+            "resistance_level": "string",
+            "entry_zone": "string",
+            "stop_loss": "string",
+            "take_profit": "string",
+            "recommendation": "string"
+        }
+    },
+    "candlestick_signals": [
+        {
+            "pattern": "string",
+            "note": "string"
+        }
+    ],
     "indicators": {
         "macd": "string",
         "rsi": "string",
-        "bb": "string"
+        "oversold_overbought": "string"
     },
-    "recommendation": "string",
+    "signal_strength": "string",
     "risk_level": "string",
     "reasoning": "string"
-}
+}"""
+
+
+def get_kline_analysis_prompt(symbol: str, *, multi_timeframe: bool = False) -> str:
+    """
+    K 线分析提示词：只写显著信号，少规则、少枚举，避免模型因约束过多出错。
+    仅输出 JSON（无 markdown 围栏）。
+    """
+    layout = ""
+    if multi_timeframe:
+        layout = """
+图表说明：可能为多周期拼图（如 2x2）；请按图上可见分区/标注区分周期。若实际只有一张单周期图，则按单图处理。
+"""
+    else:
+        layout = """
+图表说明：一般为**单一周期**的一张 K 线截图，请只基于本图时间与价位分析，不要臆造其它周期。
+"""
+    schema = _kline_json_schema_text()
+    return f"""你是加密货币技术分析师。**只输出一个 JSON 对象**，不要 markdown、不要代码围栏、不要多余说明。
+
+品种/图表标识：{symbol}
+{layout}
+**原则：少写规则、少做「全面汇总」。细碎波动、模棱两可的形态不要写；弱信号没有交易价值，不必提。**
+
+**只写图上足够醒目的内容（没有就写「无明显信号」或留空）：**
+- **趋势**：趋势方向，首先要看是单边还是横盘，因为趋势往往会延续，所以看k线之前先判断是否单边，写在 trend.summary。如果是单边，则继续判断趋势方向，上涨还是下跌，写在 trend.decision.direction。
+- **K 线**：重点看**射击之星**、**看涨/看跌吞没**、背离，上插针下插针频率，尤其短期连续插针的时候，这个作为主要判断标准；其它形态只有非常清晰才写。
+- **超买超卖 / 超买超卖**：写在 indicators.oversold_overbought。
+- **MACD**：是否**金叉 / 死叉**或清晰的多空转折（写在 indicators.macd）。
+- **RSI**：是否**明显过高 / 明显过低**（写在 indicators.rsi）。
+
+**禁止**把多个弱信号凑在一起「综合分析」；reasoning 里只简述与上述显著信号相关的依据即可。
+
+**价位与风格（短线）**：trend.decision 填支撑、阻力、入场、止损、止盈（数字与图表标尺一致）。默认按**短线**思路：**止损偏小**、入场与止盈区间**紧凑**，不要给过宽的价格带或过大的波动区间；trend.summary、trend_regime、signal_strength、risk_level 简短自然即可，**不要**为凑格式编造内容。
+
+**JSON 字段名与下表一致即可，取值自由、从简：**
+{schema}
 """
 
-def analyze_charts(key, image_paths: dict):
-    """分析多个周期的K线图"""
+
+def get_analysis_prompt():
+    """兼容旧接口：单图默认 ETH 周期未知时用通用标识。"""
+    return get_kline_analysis_prompt("ETH", multi_timeframe=False)
+
+
+def extract_json_from_gemini_text(text: str) -> Optional[Dict[str, Any]]:
+    """从模型返回文本中提取 JSON（去 markdown 围栏、截取第一个大括号对象）。"""
+    if not text or not str(text).strip():
+        return None
+    s = str(text).strip()
+    if s.startswith("```"):
+        lines = s.split("\n")
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        s = "\n".join(lines).strip()
+    try:
+        return json.loads(s)
+    except Exception:
+        pass
+    m = re.search(r"\{[\s\S]*\}", s)
+    if m:
+        try:
+            return json.loads(m.group(0))
+        except Exception:
+            return None
+    return None
+
+
+def analyze_charts(key, image_paths: dict, base_symbol: str = "ETH"):
+    """分析多个周期的K线图（每个周期单独一张图时使用）。"""
     results = {}
-    prompt = get_analysis_prompt()
     for timeframe, image_path in image_paths.items():
+        chart_id = f"{base_symbol}_{timeframe}"
+        prompt = get_kline_analysis_prompt(chart_id, multi_timeframe=False)
         try:
             print(f"正在分析 {timeframe} 周期...")
             text = _generate_via_rest(key, prompt, image_path, timeout=GEMINI_REQUEST_TIMEOUT or 60)
@@ -214,42 +291,9 @@ def _analyze_with_api(key, combined_image_path: str, symbol: str):
 }}
 """
         else:
-            # K线图分析
+            # K线图分析（组合图）
             print(f"  正在分析 {symbol} 组合图表...")
-            prompt = f"""
-你是一个资深的加密货币技术分析师。请分析提供的 K 线图表组合图，并严格按照 JSON 格式输出建议。
-
-图表说明：
-- 这是一张包含4个时间周期的组合图（2x2布局）
-- 左上角：15分钟周期
-- 右上角：30分钟周期
-- 左下角：1小时周期
-- 右下角：2小时周期
-- 币种：{symbol}
-
-分析要求：
-1. 识别当前趋势（上涨/下跌/震荡）
-2. 识别关键支撑位和阻力位
-3. 分析技术指标信号（MACD, RSI, Bollinger Bands 等）
-4. 综合4个周期的分析，给出明确交易建议（Long/Short/Neutral）
-5. 评估风险等级（Low/Medium/High）
-
-输出格式必须符合以下 JSON 结构：
-{{
-    "symbol": "{symbol}",
-    "trend": "string",
-    "support_level": "string",
-    "resistance_level": "string",
-    "indicators": {{
-        "macd": "string",
-        "rsi": "string",
-        "bb": "string"
-    }},
-    "recommendation": "string",
-    "risk_level": "string",
-    "reasoning": "string"
-}}
-"""
+            prompt = get_kline_analysis_prompt(symbol, multi_timeframe=True)
         
         # 通过 REST API 调用
         text = _generate_via_rest(key, prompt, combined_image_path, timeout=GEMINI_REQUEST_TIMEOUT or 60)
@@ -262,10 +306,10 @@ def _analyze_with_api(key, combined_image_path: str, symbol: str):
             'error': str(e)
         }
 
-def analyze_all_timeframes(image_paths: dict):
+def analyze_all_timeframes(image_paths: dict, base_symbol: str = "ETH"):
     """主入口（兼容旧接口）"""
     key = init_gemini()
     if key is None:
         print("[INFO] 跳过 AI 分析（未配置 API key）")
         return {}
-    return analyze_charts(key, image_paths)
+    return analyze_charts(key, image_paths, base_symbol=base_symbol)

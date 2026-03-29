@@ -19,8 +19,10 @@ import io
 import json
 import os
 from pathlib import Path
+import queue
 import re
 import sys
+import threading
 from typing import Any, Optional, Tuple
 
 import requests
@@ -110,14 +112,49 @@ def _tv_binance_symbol(ticker: str) -> str:
     return f"{t}.P" if is_perp else t
 
 
+def period_to_tradingview_interval(period: str) -> str:
+    """
+    将 15m / 30m / 1h / 4h / 1d 等转为 TradingView chart 的 interval 参数。
+    日内用分钟数字符串；日线等价 1440 分钟，TradingView 使用 1D（比 interval=1440 更稳定）。
+    """
+    p = (period or "").strip().lower()
+    if not p:
+        return "15"
+    table = {
+        "15m": "15",
+        "30m": "30",
+        "1h": "60",
+        "60m": "60",
+        "h1": "60",
+        "4h": "240",
+        "240m": "240",
+        "1d": "1D",
+        "1day": "1D",
+        "d": "1D",
+        "d1": "1D",
+        "1440": "1D",
+        "1440m": "1D",
+    }
+    if p in table:
+        return table[p]
+    if p.endswith("m") and p[:-1].isdigit():
+        return p[:-1]
+    if p.endswith("h") and p[:-1].isdigit():
+        return str(int(p[:-1]) * 60)
+    if p.isdigit():
+        return p
+    return p
+
+
 def _tradingview_url(symbol_part: str, timeframe: str) -> str:
     """
     直接构造 TradingView 地址，避免依赖 config.py 中被注释的 TRADINGVIEW_BASE_URL。
     """
     # examples:
-    # https://www.tradingview.com/chart/?symbol=BINANCE:ETHUSDT&interval=15m
-    # https://www.tradingview.com/chart/?symbol=BINANCE:SOLUSDT.P&interval=15m
-    return f"https://www.tradingview.com/chart/?symbol=BINANCE:{symbol_part}&interval={timeframe}"
+    # https://www.tradingview.com/chart/?symbol=ETHUSDT&interval=15
+    # https://www.tradingview.com/chart/?symbol=SOLUSDT.P&interval=60
+    interval = period_to_tradingview_interval(timeframe)
+    return f"https://www.tradingview.com/chart/?symbol={symbol_part}&interval={interval}"
 
 
 def _playwright_cdp_url() -> Optional[str]:
@@ -428,40 +465,69 @@ def parse_ws_payload(payload: dict) -> Tuple[Optional[str], Optional[str]]:
     return (t, period if t else None)
 
 
+def _run_forever_handle_raw_message(message: str) -> None:
+    """解析一条 WSS 文本并执行截图 + Gemini（由单 worker 串行调用）。"""
+    obj = _extract_json(message)
+    if not obj:
+        print("[WARN] 收到非 JSON 消息，忽略", file=sys.stderr)
+        return
+
+    print("[WS] obj:", json.dumps(obj, ensure_ascii=False, indent=2), file=sys.stderr)
+
+    ticker, period = parse_ws_payload(obj)
+    if not ticker:
+        print(f"[WARN] 缺少 ticker/period: ticker={ticker} period={period}", file=sys.stderr)
+        return
+
+    symbol_part = _tv_binance_symbol(ticker)
+    out_path = os.path.join(get_screenshot_dir(), f"{symbol_part}_{period}.png")
+
+    try:
+        print(f"[INFO] 截图: {ticker} {period} -> {out_path}", file=sys.stderr)
+        capture_tradingview_chart(ticker=ticker, timeframe=period, out_path=out_path)
+
+        print(f"[INFO] Gemini 分析请求: {out_path}", file=sys.stderr)
+        result = gemini_chat_kline(out_path)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    except Exception as e:
+        print(f"[ERROR] 处理失败: {e}", file=sys.stderr)
+        print(json.dumps({"error": str(e), "ticker": ticker, "period": period}, ensure_ascii=False))
+
+
 def run_forever(ws_url: str) -> None:
-    # websocket-client 依赖
+    """
+    阻塞监听 WSS。多条信号在短时间内到达时，使用 FIFO 队列 + 单 worker，
+    上一条截图+分析完成后才处理下一条。
+    """
     from websocket import WebSocketApp
+
+    signal_queue: queue.Queue = queue.Queue()
+
+    def _worker():
+        while True:
+            raw = signal_queue.get()
+            try:
+                if isinstance(raw, bytes):
+                    raw = raw.decode("utf-8", errors="replace")
+                _run_forever_handle_raw_message(raw)
+            except Exception as e:
+                print(f"[ERROR] worker 处理异常: {e}", file=sys.stderr)
+            finally:
+                signal_queue.task_done()
+
+    threading.Thread(target=_worker, daemon=True).start()
 
     def on_open(ws):
         print(f"[INFO] WS 连接成功: {ws_url}", file=sys.stderr)
 
     def on_message(ws, message):
-        obj = _extract_json(message)
-        if not obj:
-            print("[WARN] 收到非 JSON 消息，忽略", file=sys.stderr)
-            return
-
-        print("[WS] obj:", json.dumps(obj, ensure_ascii=False, indent=2), file=sys.stderr)
-
-        ticker, period = parse_ws_payload(obj)
-        if not ticker:
-            print(f"[WARN] 缺少 ticker/period: ticker={ticker} period={period}", file=sys.stderr)
-            return
-
-        # 文件输出：例如 ETHUSDT_15m.png、SOLUSDT.P_15m.png
-        symbol_part = _tv_binance_symbol(ticker)
-        out_path = os.path.join(get_screenshot_dir(), f"{symbol_part}_{period}.png")
-
-        try:
-            print(f"[INFO] 截图: {ticker} {period} -> {out_path}", file=sys.stderr)
-            capture_tradingview_chart(ticker=ticker, timeframe=period, out_path=out_path)
-
-            print(f"[INFO] Gemini 分析请求: {out_path}", file=sys.stderr)
-            result = gemini_chat_kline(out_path)
-            print(json.dumps(result, ensure_ascii=False, indent=2))
-        except Exception as e:
-            print(f"[ERROR] 处理失败: {e}", file=sys.stderr)
-            print(json.dumps({"error": str(e), "ticker": ticker, "period": period}, ensure_ascii=False))
+        signal_queue.put(message)
+        ut = signal_queue.unfinished_tasks
+        if ut > 1:
+            print(
+                f"[INFO] 当前积压 {ut} 条（含正在处理的一条），将按顺序逐条执行",
+                file=sys.stderr,
+            )
 
     def on_error(ws, error):
         print(f"[ERROR] WS 错误: {error}", file=sys.stderr)

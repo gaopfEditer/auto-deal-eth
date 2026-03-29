@@ -262,12 +262,14 @@ USE_REMOTE_DEBUGGING = False
 
 **Windows:**
 ```powershell
-& "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
+& "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 
 ```
 
 **Mac:**
 ```bash
 /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
+
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir="/Users/mac/frontend/chrome-debug"
 ```
 
 2. **在Chrome中登录TradingView**

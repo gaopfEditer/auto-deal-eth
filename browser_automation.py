@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 import os
+import sys
 import time
 import platform
 from config import (
@@ -560,32 +561,9 @@ def analyze_with_gemini_web(image_path: str, symbol: str, prompt: str = None):
     "summary": "string"
 }"""
         else:
-            default_prompt = f"""你是一个资深的加密货币技术分析师。请分析提供的 K 线图表，并严格按照 JSON 格式输出建议。
+            from gemini_analyzer import get_kline_analysis_prompt
 
-币种：{symbol}
-
-分析要求：
-1. 识别当前趋势（上涨/下跌/震荡）
-2. 识别关键支撑位和阻力位
-3. 分析技术指标信号（MACD, RSI, Bollinger Bands 等）
-4. 给出明确交易建议（Long/Short/Neutral）
-5. 评估风险等级（Low/Medium/High）
-
-输出格式必须符合以下 JSON 结构：
-{{
-    "symbol": "{symbol}",
-    "trend": "string",
-    "support_level": "string",
-    "resistance_level": "string",
-    "indicators": {{
-        "macd": "string",
-        "rsi": "string",
-        "bb": "string"
-    }},
-    "recommendation": "string",
-    "risk_level": "string",
-    "reasoning": "string"
-}}"""
+            default_prompt = get_kline_analysis_prompt(symbol, multi_timeframe=False)
         
         analysis_prompt = prompt if prompt else default_prompt
         
@@ -1272,14 +1250,20 @@ def analyze_with_gemini_web(image_path: str, symbol: str, prompt: str = None):
                 time.sleep(1)
 
             if result_text and len(result_text.strip()) >= 50:
-                print(f"  ✓ 成功获取分析结果")
-                # 终端可读性：打印截断后的结果；完整文本仍写入 analysis_result
+                print(f"  ✓ 成功获取分析结果", file=sys.stderr)
+                from gemini_analyzer import extract_json_from_gemini_text
+                import json as _json
+
                 snippet = result_text.strip()
-                if len(snippet) > 1500:
-                    snippet = snippet[:1500] + "\n...（已截断显示）"
-                print("  ===== Gemini 结果（抓取） =====")
-                print(snippet)
-                print("  =============================")
+                parsed = extract_json_from_gemini_text(snippet)
+                if parsed is not None:
+                    print(_json.dumps(parsed, ensure_ascii=False, indent=2))
+                else:
+                    if len(snippet) > 1500:
+                        snippet = snippet[:1500] + "\n...（已截断显示）"
+                    print("  ===== Gemini 结果（抓取） =====", file=sys.stderr)
+                    print(snippet)
+                    print("  =============================", file=sys.stderr)
                 analysis_result = {
                     'symbol': symbol,
                     'analysis': result_text,
@@ -1304,13 +1288,19 @@ def analyze_with_gemini_web(image_path: str, symbol: str, prompt: str = None):
                     result_text2 = ""
 
                 if result_text2 and len(result_text2.strip()) > 0:
-                    # 为了终端可读性，先截断打印；但写入结果里仍保留完整文本
+                    from gemini_analyzer import extract_json_from_gemini_text
+                    import json as _json
+
                     snippet = result_text2.strip()
-                    if len(snippet) > 1500:
-                        snippet = snippet[:1500] + "\n...（已截断显示）"
-                    print("  ===== Gemini 结果（补抓） =====")
-                    print(snippet)
-                    print("  =============================")
+                    parsed = extract_json_from_gemini_text(snippet)
+                    if parsed is not None:
+                        print(_json.dumps(parsed, ensure_ascii=False, indent=2))
+                    else:
+                        if len(snippet) > 1500:
+                            snippet = snippet[:1500] + "\n...（已截断显示）"
+                        print("  ===== Gemini 结果（补抓） =====", file=sys.stderr)
+                        print(snippet)
+                        print("  =============================", file=sys.stderr)
                     analysis_result = {
                         'symbol': symbol,
                         'analysis': result_text2,
