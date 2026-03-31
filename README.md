@@ -263,6 +263,7 @@ USE_REMOTE_DEBUGGING = False
 **Windows:**
 ```powershell
 & "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222  --user-data-dir="C:\Program Files\Google\Chrome\chrome-debug"
 ```
 
 **Mac:**
