@@ -180,3 +180,27 @@ fetch_hot_and_process_new()
 ---
 
 **使用方式**：`python -m getinfo.run_calendar` | `python -m getinfo.run_rsshub` | `python -m getinfo.run_binance_square`
+
+## 6. 脚本执行日志与回调
+
+以上三个入口脚本在执行时会自动上报：
+
+- 日志接口：`POST /api/log`
+- 回调接口：`POST /api/callback`
+
+默认上报地址：`http://127.0.0.1:8000`（可用 `GETINFO_REPORT_BASE_URL` 覆盖）。
+
+### 标识规则
+
+- `/api/log` 的 `identifier`：`auto-deal-eth-<script_key>`
+- `/api/callback` 的 `identifier`：默认 `auto-deal-eth`（可用 `GETINFO_CALLBACK_IDENTIFIER` 覆盖）
+- `script_key`：
+  - `run-calendar`
+  - `run-rsshub`
+  - `run-binance-square`
+
+### 回调结果示例
+
+- `run-calendar`: `{"ok": true, "count": 12}`
+- `run-rsshub`: `{"ok": true, "feeds": 2, "report_len": 3456}`
+- `run-binance-square`: `{"ok": true, "fetched": 30, "new_count": 3, "seeded": 0, "log_path": "..."}`
