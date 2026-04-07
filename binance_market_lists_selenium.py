@@ -36,6 +36,11 @@ try:
 except ModuleNotFoundError:  # 允许你只用 DOM 抓 Square Following
     requests = None
 
+try:
+    import pandas as pd  # 标准输出表格（与 getinfo/run_calendar 风格一致）
+except ModuleNotFoundError:
+    pd = None
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -46,6 +51,9 @@ from browser_automation import init_browser
 DEFAULT_URL = "https://www.binance.com/zh-CN/markets/overview"
 DEFAULT_WATCHLIST_URL = "https://www.binance.com/zh-CN/square?tab=Following"
 BINANCE_TICKER_24H = "https://api.binance.com/api/v3/ticker/24hr"
+
+# 标准输出每个区块最多行数（0 表示全部）；与 getinfo/run_calendar 的 MAX_ROWS 用法类似
+MAX_STDOUT_ROWS = 180
 
 # 从表格行文本里抠交易对（兼容 BTCUSDT / btcusdt / BTC/USDT）
 _ROW_SYMBOL_RE = re.compile(
@@ -599,6 +607,103 @@ def scrape_binance_lists(
         driver.quit()
 
 
+def _print_items_table(
+    label: str,
+    items: List[Dict[str, Any]],
+    columns: Optional[List[str]] = None,
+    max_rows: int = MAX_STDOUT_ROWS,
+) -> None:
+    """将列表字典打印为表格；风格对齐 getinfo/run_calendar（to_string + 截断提示）。"""
+    if label:
+        print(f"\n【{label}】")
+    if not items:
+        print("(无)")
+        return
+    limit = max_rows if max_rows > 0 else None
+
+    if pd is None:
+        keys = columns or list(items[0].keys())
+        rows_out = items if limit is None else items[:limit]
+        for i, row in enumerate(rows_out, 1):
+            if isinstance(row, dict):
+                parts = [f"{k}={row.get(k, '')}" for k in keys if k in row]
+                print(f"  {i}  " + "  ".join(parts))
+            else:
+                print(f"  {i}  {row}")
+        total = len(items)
+        if limit is not None and total > limit:
+            print(f"\n... 共 {total} 条，仅显示前 {limit} 条。")
+        elif total:
+            print(f"\n共 {total} 条。")
+        return
+
+    df = pd.DataFrame(items)
+    if columns:
+        use = [c for c in columns if c in df.columns]
+        if use:
+            df = df[use]
+    n = len(df)
+    if limit is not None and n > limit:
+        print(df.head(limit).to_string())
+        print(f"\n... 共 {n} 条，仅显示前 {limit} 条。")
+    else:
+        print(df.to_string())
+        if n:
+            print(f"\n共 {n} 条。")
+
+
+def print_result_to_stdout(result: Dict[str, Any], max_rows: int = MAX_STDOUT_ROWS) -> None:
+    script_key = "binance_market_lists"
+    wl = result.get("watchlist") or {}
+    lives = wl.get("lives") or []
+    posts = wl.get("latest_posts") or []
+    profiles = wl.get("follow_profiles_sample") or []
+    hot = (result.get("hot_rank") or {}).get("items") or []
+    gain = (result.get("gainers") or {}).get("items") or []
+    lose = (result.get("losers") or {}).get("items") or []
+
+    print(f"[{script_key}] 数据抓取完成，scraped_at={result.get('scraped_at', '')}")
+    print(
+        f"  关注直播={len(lives)}，最新动态={len(posts)}，"
+        f"关注主页样本={len(profiles)}，热榜={len(hot)}，涨幅={len(gain)}，跌幅={len(lose)}"
+    )
+
+    _print_items_table(
+        "关注 · 谁在直播",
+        lives,
+        columns=["author", "profile", "live_url", "title", "href", "time"],
+        max_rows=max_rows,
+    )
+    _print_items_table(
+        "关注 · 最新动态",
+        posts,
+        columns=["title", "author", "time", "href"],
+        max_rows=max_rows,
+    )
+    if profiles:
+        _print_items_table(
+            "关注 · 主页样本（巡检用）",
+            profiles,
+            columns=["name", "href"],
+            max_rows=max_rows,
+        )
+
+    ranking_cols = ["symbol", "price", "change", "quoteVolume"]
+    for title, key in (
+        ("热榜", "hot_rank"),
+        ("涨幅榜", "gainers"),
+        ("跌幅榜", "losers"),
+    ):
+        sec = result.get(key) or {}
+        items = sec.get("items") or []
+        src = sec.get("extraction_source", "")
+        note = (sec.get("note") or "").strip()
+        print(f"\n【{title}】  extraction_source={src}")
+        if note:
+            print(f"  note: {note}")
+        _print_items_table("", items, columns=ranking_cols, max_rows=max_rows)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="抓取币安关注（Square Following）、热榜、涨幅榜、跌幅榜（Selenium）"
@@ -631,6 +736,17 @@ def main():
         action="store_true",
         help="不逐个打开关注主页检测直播（更快，但 lives 可能为空）",
     )
+    parser.add_argument(
+        "--max-print-rows",
+        type=int,
+        default=MAX_STDOUT_ROWS,
+        help=f"标准输出每个区块最多显示行数（0 表示全部，默认 {MAX_STDOUT_ROWS}）",
+    )
+    parser.add_argument(
+        "--print-json",
+        action="store_true",
+        help="在表格之后仍将完整 JSON 打印到标准输出（默认仅写文件，终端为可读表格）",
+    )
     args = parser.parse_args()
 
     result = scrape_binance_lists(
@@ -644,7 +760,10 @@ def main():
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
 
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print_result_to_stdout(result, max_rows=args.max_print_rows)
+    if args.print_json:
+        print("\n" + "=" * 60 + "\n完整 JSON（--print-json）\n" + "=" * 60)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
     print(f"\n[OK] 已写入: {out_path}")
 
 
