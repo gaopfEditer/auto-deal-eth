@@ -92,23 +92,9 @@ USE_REMOTE_DEBUGGING=False
 CHROME_HEADLESS=False
 ```
 
-## 使用方法
+## 使用说明
 
-### 立即执行一次（测试用）
-
-```bash
-python main.py --once
-```
-
-立即执行一次分析，不进入定时任务模式。
-
-### 启动定时任务
-
-```bash
-python main.py
-```
-
-按照配置的时间区间和间隔自动执行。
+`README.md` 侧重功能与设计说明；项目启动、运行命令与参数示例请查看 `USAGE.md`。
 
 ## 工作流程
 

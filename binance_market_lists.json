@@ -1,6 +1,6 @@
 {
   "overview_url": "https://www.binance.com/zh-CN/markets/overview",
-  "scraped_at": "2026-04-07T17:29:47",
+  "scraped_at": "2026-04-09T17:41:35",
   "watchlist": {
     "section": "watchlist_following",
     "page_url": "https://www.binance.com/zh-CN/square?tab=Following",
@@ -8,7 +8,7 @@
     "note": "",
     "count_follow_profiles": 3,
     "count_lives": 3,
-    "count_latest_posts": 5,
+    "count_latest_posts": 4,
     "follow_profiles_sample": [
       {
         "href": "https://www.binance.com/zh-CN/square/profile/heyi",
@@ -39,31 +39,24 @@
       {
         "author": "cz",
         "profile": "https://www.binance.com/zh-CN/square/profile/cz",
-        "live_url": "https://www.binance.com/zh-CN/square/profile/cz?tab=live#ar",
+        "live_url": "https://www.binance.com/zh-CN/square/hashtag/CZ%E7%9B%B4%E6%92%AD%E8%B0%88%E6%96%B0%E4%B9%A6",
         "raw": "profile_live_probe"
       }
     ],
     "latest_posts": [
       {
-        "author": "Polymarket将升级交易所架构",
-        "href": "https://www.binance.com/zh-CN/square/hashtag/Polymarket%E5%B0%86%E5%8D%87%E7%BA%A7%E4%BA%A4%E6%98%93%E6%89%80%E6%9E%B6%E6%9E%84",
-        "raw": "Polymarket将升级交易所架构 0 次浏览 24 人讨论中 芝麻开门交易所，无故冻结账户三个月不给提现，投诉订单纠纷已经解决完了，一直限制账户，让我登录其他账户处理投诉，不是我的账户非要我处理。 霸王_茶姬 · 1次点赞 · 7.8k 次浏览",
+        "author": "币安人生",
+        "href": "https://www.binance.com/zh-CN/square/hashtag/%E5%B8%81%E5%AE%89%E4%BA%BA%E7%94%9F",
+        "raw": "币安人生 9.3M 次浏览 18,753 人讨论中 #币安人生 埃隆马斯克发币了！数字护照代币预 售只剩最后 22小时！ 🌌✨ 代币 = 数字身份 + 财富门票 + Musk’s Universe 公民卡。机会正在迅速消失，每一刻的犹豫，都是把 OG 公民的席位让给别人。 ✨ 代币🟰数字身份 + 财富门票 + Musk’s Universe 公民卡。 👉 埃隆马斯克已经开启了入口，你要做见证者，还是被历史淘汰的人？ 🌐官网：MUSKID.NET$币安人生 赵文静CCT · 12次点赞 · 3.6k 次浏览",
         "time": "",
-        "title": "Polymarket将升级交易所架构 0 次浏览 24 人讨论中 芝麻开门交易所，无故冻结账户三个月不给提现，投诉订单纠纷已经解决完了，一直限制账户，让我登录其他账户处理投诉，不是我的账户非要我处理。 霸王_茶姬 · 1次点赞 · 7.8k 次浏览"
+        "title": "币安人生 9.3M 次浏览 18,753 人讨论中 #币安人生 埃隆马斯克发币了！数字护照代币预 售只剩最后 22小时！ 🌌✨ 代币 = 数字身份 + 财富门票 +"
       },
       {
-        "author": "Chaos",
-        "href": "https://www.binance.com/zh-CN/square/hashtag/Chaos%20Labs%E9%80%80%E5%87%BAAave%20DAO",
-        "raw": "Chaos Labs退出Aave DAO 28 次浏览 22 人讨论中",
+        "author": "霍尔木兹海峡再次关闭",
+        "href": "https://www.binance.com/zh-CN/square/hashtag/%E9%9C%8D%E5%B0%94%E6%9C%A8%E5%85%B9%E6%B5%B7%E5%B3%A1%E5%86%8D%E6%AC%A1%E5%85%B3%E9%97%AD",
+        "raw": "霍尔木兹海峡再次关闭 141,961 次浏览 745 人讨论中",
         "time": "",
-        "title": "Chaos Labs退出Aave DAO 28 次浏览 22 人讨论中"
-      },
-      {
-        "author": "Strategy增持比特币",
-        "href": "https://www.binance.com/zh-CN/square/hashtag/Strategy%E5%A2%9E%E6%8C%81%E6%AF%94%E7%89%B9%E5%B8%81",
-        "raw": "Strategy增持比特币 52.9M 次浏览 89,367 人讨论中",
-        "time": "",
-        "title": "Strategy增持比特币 52.9M 次浏览 89,367 人讨论中"
+        "title": "霍尔木兹海峡再次关闭 141,961 次浏览 745 人讨论中"
       },
       {
         "author": "恐惧和贪婪指数",
@@ -97,213 +90,213 @@
     "items": [
       {
         "symbol": "USDCUSDT",
-        "price": "0.99990000",
-        "change": "-0.010%",
-        "quoteVolume": "1757784461.52030000",
-        "raw": "USDCUSDT 0.99990000 -0.010%"
+        "price": "0.99980000",
+        "change": "-0.030%",
+        "quoteVolume": "1422492819.84200000",
+        "raw": "USDCUSDT 0.99980000 -0.030%"
       },
       {
         "symbol": "BTCUSDT",
-        "price": "69040.28000000",
-        "change": "-1.283%",
-        "quoteVolume": "1079691778.71724150",
-        "raw": "BTCUSDT 69040.28000000 -1.283%"
+        "price": "71237.13000000",
+        "change": "-0.602%",
+        "quoteVolume": "1296277834.71065810",
+        "raw": "BTCUSDT 71237.13000000 -0.602%"
       },
       {
         "symbol": "ETHUSDT",
-        "price": "2125.24000000",
-        "change": "-1.631%",
-        "quoteVolume": "614240319.89034400",
-        "raw": "ETHUSDT 2125.24000000 -1.631%"
+        "price": "2185.34000000",
+        "change": "-2.884%",
+        "quoteVolume": "706515588.21375900",
+        "raw": "ETHUSDT 2185.34000000 -2.884%"
       },
       {
         "symbol": "SOLUSDT",
-        "price": "80.27000000",
-        "change": "-2.868%",
-        "quoteVolume": "183682818.38315000",
-        "raw": "SOLUSDT 80.27000000 -2.868%"
-      },
-      {
-        "symbol": "USD1USDT",
-        "price": "0.99990000",
-        "change": "-0.020%",
-        "quoteVolume": "103358137.82250000",
-        "raw": "USD1USDT 0.99990000 -0.020%"
-      },
-      {
-        "symbol": "XRPUSDT",
-        "price": "1.31940000",
-        "change": "-2.505%",
-        "quoteVolume": "97185265.10025000",
-        "raw": "XRPUSDT 1.31940000 -2.505%"
-      },
-      {
-        "symbol": "DOGEUSDT",
-        "price": "0.09113000",
-        "change": "-2.053%",
-        "quoteVolume": "55857898.38359000",
-        "raw": "DOGEUSDT 0.09113000 -2.053%"
-      },
-      {
-        "symbol": "ZECUSDT",
-        "price": "269.60000000",
-        "change": "5.527%",
-        "quoteVolume": "55442013.30618000",
-        "raw": "ZECUSDT 269.60000000 5.527%"
+        "price": "82.21000000",
+        "change": "-2.882%",
+        "quoteVolume": "214920883.76627000",
+        "raw": "SOLUSDT 82.21000000 -2.882%"
       },
       {
         "symbol": "TAOUSDT",
-        "price": "316.00000000",
-        "change": "-2.469%",
-        "quoteVolume": "53770098.53814000",
-        "raw": "TAOUSDT 316.00000000 -2.469%"
+        "price": "322.40000000",
+        "change": "-7.675%",
+        "quoteVolume": "165742378.06189000",
+        "raw": "TAOUSDT 322.40000000 -7.675%"
+      },
+      {
+        "symbol": "USD1USDT",
+        "price": "0.99950000",
+        "change": "0.000%",
+        "quoteVolume": "154467837.33440000",
+        "raw": "USD1USDT 0.99950000 0.000%"
+      },
+      {
+        "symbol": "XRPUSDT",
+        "price": "1.33550000",
+        "change": "-3.176%",
+        "quoteVolume": "152894906.77191000",
+        "raw": "XRPUSDT 1.33550000 -3.176%"
+      },
+      {
+        "symbol": "ZECUSDT",
+        "price": "317.76000000",
+        "change": "-3.668%",
+        "quoteVolume": "110137403.75635000",
+        "raw": "ZECUSDT 317.76000000 -3.668%"
       },
       {
         "symbol": "BNBUSDT",
-        "price": "604.50000000",
-        "change": "-0.481%",
-        "quoteVolume": "53048172.68926000",
-        "raw": "BNBUSDT 604.50000000 -0.481%"
+        "price": "601.28000000",
+        "change": "-1.747%",
+        "quoteVolume": "77098178.86864000",
+        "raw": "BNBUSDT 601.28000000 -1.747%"
       },
       {
-        "symbol": "REDUSDT",
-        "price": "0.20720000",
-        "change": "47.159%",
-        "quoteVolume": "50950769.60180000",
-        "raw": "REDUSDT 0.20720000 47.159%"
+        "symbol": "DOGEUSDT",
+        "price": "0.09161000",
+        "change": "-3.222%",
+        "quoteVolume": "73434534.13989000",
+        "raw": "DOGEUSDT 0.09161000 -3.222%"
       },
       {
-        "symbol": "AVAXUSDT",
-        "price": "8.69000000",
-        "change": "-7.945%",
-        "quoteVolume": "40502576.08530000",
-        "raw": "AVAXUSDT 8.69000000 -7.945%"
+        "symbol": "PAXGUSDT",
+        "price": "4720.77000000",
+        "change": "-1.173%",
+        "quoteVolume": "39761249.84966400",
+        "raw": "PAXGUSDT 4720.77000000 -1.173%"
       },
       {
-        "symbol": "STOUSDT",
-        "price": "0.13780000",
-        "change": "-12.950%",
-        "quoteVolume": "29482169.39685000",
-        "raw": "STOUSDT 0.13780000 -12.950%"
+        "symbol": "ENJUSDT",
+        "price": "0.02987000",
+        "change": "45.353%",
+        "quoteVolume": "39582977.44525100",
+        "raw": "ENJUSDT 0.02987000 45.353%"
       },
       {
-        "symbol": "PEPEUSDT",
-        "price": "0.00000338",
-        "change": "-3.704%",
-        "quoteVolume": "29214265.66486163",
-        "raw": "PEPEUSDT 0.00000338 -3.704%"
+        "symbol": "币安人生USDT",
+        "price": "0.07800000",
+        "change": "-16.667%",
+        "quoteVolume": "34734044.96393000",
+        "raw": "币安人生USDT 0.07800000 -16.667%"
       },
       {
         "symbol": "TRXUSDT",
-        "price": "0.31580000",
-        "change": "-0.598%",
-        "quoteVolume": "29199560.02242000",
-        "raw": "TRXUSDT 0.31580000 -0.598%"
+        "price": "0.31700000",
+        "change": "0.190%",
+        "quoteVolume": "31444440.80970000",
+        "raw": "TRXUSDT 0.31700000 0.190%"
+      },
+      {
+        "symbol": "PEPEUSDT",
+        "price": "0.00000345",
+        "change": "-6.250%",
+        "quoteVolume": "30713277.99617909",
+        "raw": "PEPEUSDT 0.00000345 -6.250%"
+      },
+      {
+        "symbol": "LINKUSDT",
+        "price": "8.76000000",
+        "change": "-4.989%",
+        "quoteVolume": "30335852.26530000",
+        "raw": "LINKUSDT 8.76000000 -4.989%"
+      },
+      {
+        "symbol": "STOUSDT",
+        "price": "0.14730000",
+        "change": "11.254%",
+        "quoteVolume": "29172104.65568000",
+        "raw": "STOUSDT 0.14730000 11.254%"
+      },
+      {
+        "symbol": "EURUSDT",
+        "price": "1.16710000",
+        "change": "-0.103%",
+        "quoteVolume": "29101192.05256000",
+        "raw": "EURUSDT 1.16710000 -0.103%"
       },
       {
         "symbol": "SUIUSDT",
-        "price": "0.88290000",
-        "change": "-1.900%",
-        "quoteVolume": "28464368.64624000",
-        "raw": "SUIUSDT 0.88290000 -1.900%"
+        "price": "0.91070000",
+        "change": "-3.904%",
+        "quoteVolume": "27418017.34345000",
+        "raw": "SUIUSDT 0.91070000 -3.904%"
+      },
+      {
+        "symbol": "NEARUSDT",
+        "price": "1.33200000",
+        "change": "-3.057%",
+        "quoteVolume": "26732079.73710000",
+        "raw": "NEARUSDT 1.33200000 -3.057%"
+      },
+      {
+        "symbol": "ADAUSDT",
+        "price": "0.25060000",
+        "change": "-3.430%",
+        "quoteVolume": "26261086.65887000",
+        "raw": "ADAUSDT 0.25060000 -3.430%"
       },
       {
         "symbol": "FDUSDUSDT",
         "price": "0.99930000",
-        "change": "-0.050%",
-        "quoteVolume": "26304467.49420000",
-        "raw": "FDUSDUSDT 0.99930000 -0.050%"
+        "change": "-0.040%",
+        "quoteVolume": "23212086.41630000",
+        "raw": "FDUSDUSDT 0.99930000 -0.040%"
       },
       {
-        "symbol": "TRUUSDT",
-        "price": "0.00810000",
-        "change": "-32.500%",
-        "quoteVolume": "26241153.73930000",
-        "raw": "TRUUSDT 0.00810000 -32.500%"
-      },
-      {
-        "symbol": "PAXGUSDT",
-        "price": "4673.16000000",
-        "change": "-0.321%",
-        "quoteVolume": "24159933.29676500",
-        "raw": "PAXGUSDT 4673.16000000 -0.321%"
-      },
-      {
-        "symbol": "ADAUSDT",
-        "price": "0.24450000",
-        "change": "-5.012%",
-        "quoteVolume": "24143364.13950000",
-        "raw": "ADAUSDT 0.24450000 -5.012%"
-      },
-      {
-        "symbol": "SUPERUSDT",
-        "price": "0.12430000",
-        "change": "25.810%",
-        "quoteVolume": "23227229.04210000",
-        "raw": "SUPERUSDT 0.12430000 25.810%"
-      },
-      {
-        "symbol": "EURUSDT",
-        "price": "1.15670000",
-        "change": "0.087%",
-        "quoteVolume": "22884696.57165000",
-        "raw": "EURUSDT 1.15670000 0.087%"
-      },
-      {
-        "symbol": "LINKUSDT",
-        "price": "8.85000000",
-        "change": "-2.747%",
-        "quoteVolume": "20231895.88800000",
-        "raw": "LINKUSDT 8.85000000 -2.747%"
-      },
-      {
-        "symbol": "XAUTUSDT",
-        "price": "4658.63000000",
-        "change": "-0.230%",
-        "quoteVolume": "19603952.38021400",
-        "raw": "XAUTUSDT 4658.63000000 -0.230%"
-      },
-      {
-        "symbol": "ESPUSDT",
-        "price": "0.08996000",
-        "change": "16.755%",
-        "quoteVolume": "19228586.19789000",
-        "raw": "ESPUSDT 0.08996000 16.755%"
-      },
-      {
-        "symbol": "币安人生USDT",
-        "price": "0.07180000",
-        "change": "4.971%",
-        "quoteVolume": "17380661.36559000",
-        "raw": "币安人生USDT 0.07180000 4.971%"
+        "symbol": "AVAXUSDT",
+        "price": "9.09000000",
+        "change": "-2.988%",
+        "quoteVolume": "21842142.33500000",
+        "raw": "AVAXUSDT 9.09000000 -2.988%"
       },
       {
         "symbol": "FETUSDT",
-        "price": "0.23940000",
-        "change": "-0.416%",
-        "quoteVolume": "16926759.93413000",
-        "raw": "FETUSDT 0.23940000 -0.416%"
+        "price": "0.24110000",
+        "change": "-6.150%",
+        "quoteVolume": "20310185.31767000",
+        "raw": "FETUSDT 0.24110000 -6.150%"
       },
       {
-        "symbol": "UUSDT",
-        "price": "0.99980000",
+        "symbol": "XAUTUSDT",
+        "price": "4710.24000000",
+        "change": "-1.039%",
+        "quoteVolume": "19862414.84126900",
+        "raw": "XAUTUSDT 4710.24000000 -1.039%"
+      },
+      {
+        "symbol": "RLUSDUSDT",
+        "price": "1.00000000",
         "change": "-0.010%",
-        "quoteVolume": "15735053.27910000",
-        "raw": "UUSDT 0.99980000 -0.010%"
+        "quoteVolume": "19729260.93520000",
+        "raw": "RLUSDUSDT 1.00000000 -0.010%"
       },
       {
-        "symbol": "BANKUSDT",
-        "price": "0.03560000",
-        "change": "27.599%",
-        "quoteVolume": "15641420.65337000",
-        "raw": "BANKUSDT 0.03560000 27.599%"
+        "symbol": "WLFIUSDT",
+        "price": "0.09130000",
+        "change": "-6.837%",
+        "quoteVolume": "15090375.30819000",
+        "raw": "WLFIUSDT 0.09130000 -6.837%"
       },
       {
         "symbol": "ENAUSDT",
-        "price": "0.08170000",
-        "change": "0.000%",
-        "quoteVolume": "14355117.67543500",
-        "raw": "ENAUSDT 0.08170000 0.000%"
+        "price": "0.08730000",
+        "change": "-6.431%",
+        "quoteVolume": "14062112.35341700",
+        "raw": "ENAUSDT 0.08730000 -6.431%"
+      },
+      {
+        "symbol": "BLURUSDT",
+        "price": "0.02399000",
+        "change": "30.027%",
+        "quoteVolume": "13126848.43478800",
+        "raw": "BLURUSDT 0.02399000 30.027%"
+      },
+      {
+        "symbol": "LTCUSDT",
+        "price": "53.91000000",
+        "change": "-2.248%",
+        "quoteVolume": "12445127.75354000",
+        "raw": "LTCUSDT 53.91000000 -2.248%"
       }
     ]
   },
@@ -329,11 +322,11 @@
         "raw": "CREAMUSDT 2.10000000 65.354%"
       },
       {
-        "symbol": "REDUSDT",
-        "price": "0.20720000",
-        "change": "47.159%",
-        "quoteVolume": "50950769.60180000",
-        "raw": "REDUSDT 0.20720000 47.159%"
+        "symbol": "ENJUSDT",
+        "price": "0.02987000",
+        "change": "45.353%",
+        "quoteVolume": "39582977.44525100",
+        "raw": "ENJUSDT 0.02987000 45.353%"
       },
       {
         "symbol": "PNTUSDT",
@@ -343,18 +336,18 @@
         "raw": "PNTUSDT 0.03500000 45.228%"
       },
       {
-        "symbol": "BANKUSDT",
-        "price": "0.03560000",
-        "change": "27.599%",
-        "quoteVolume": "15641420.65337000",
-        "raw": "BANKUSDT 0.03560000 27.599%"
+        "symbol": "TNSRUSDT",
+        "price": "0.04870000",
+        "change": "31.622%",
+        "quoteVolume": "9690822.46342000",
+        "raw": "TNSRUSDT 0.04870000 31.622%"
       },
       {
-        "symbol": "SUPERUSDT",
-        "price": "0.12430000",
-        "change": "25.810%",
-        "quoteVolume": "23227229.04210000",
-        "raw": "SUPERUSDT 0.12430000 25.810%"
+        "symbol": "BLURUSDT",
+        "price": "0.02399000",
+        "change": "30.027%",
+        "quoteVolume": "13126848.43478800",
+        "raw": "BLURUSDT 0.02399000 30.027%"
       },
       {
         "symbol": "KDAUSDT",
@@ -364,18 +357,11 @@
         "raw": "KDAUSDT 0.00600000 17.647%"
       },
       {
-        "symbol": "ESPUSDT",
-        "price": "0.08996000",
-        "change": "16.755%",
-        "quoteVolume": "19228586.19789000",
-        "raw": "ESPUSDT 0.08996000 16.755%"
-      },
-      {
-        "symbol": "MEUSDT",
-        "price": "0.11740000",
-        "change": "15.324%",
-        "quoteVolume": "2065543.87364800",
-        "raw": "MEUSDT 0.11740000 15.324%"
+        "symbol": "ONGUSDT",
+        "price": "0.09037000",
+        "change": "14.450%",
+        "quoteVolume": "4322280.46643000",
+        "raw": "ONGUSDT 0.09037000 14.450%"
       },
       {
         "symbol": "CLVUSDT",
@@ -392,6 +378,13 @@
         "raw": "MDXUSDT 0.03450000 13.524%"
       },
       {
+        "symbol": "PARTIUSDT",
+        "price": "0.09580000",
+        "change": "13.105%",
+        "quoteVolume": "3060711.24683000",
+        "raw": "PARTIUSDT 0.09580000 13.105%"
+      },
+      {
         "symbol": "WAVESUSDT",
         "price": "1.07600000",
         "change": "11.967%",
@@ -399,25 +392,25 @@
         "raw": "WAVESUSDT 1.07600000 11.967%"
       },
       {
-        "symbol": "KERNELUSDT",
-        "price": "0.10740000",
-        "change": "10.494%",
-        "quoteVolume": "4096986.42939000",
-        "raw": "KERNELUSDT 0.10740000 10.494%"
+        "symbol": "STOUSDT",
+        "price": "0.14730000",
+        "change": "11.254%",
+        "quoteVolume": "29172104.65568000",
+        "raw": "STOUSDT 0.14730000 11.254%"
       },
       {
-        "symbol": "DUSDT",
-        "price": "0.01288000",
-        "change": "9.524%",
-        "quoteVolume": "11750789.18066000",
-        "raw": "DUSDT 0.01288000 9.524%"
+        "symbol": "PIXELUSDT",
+        "price": "0.00745000",
+        "change": "10.044%",
+        "quoteVolume": "4394976.81017200",
+        "raw": "PIXELUSDT 0.00745000 10.044%"
       },
       {
-        "symbol": "METUSDT",
-        "price": "0.14190000",
-        "change": "9.154%",
-        "quoteVolume": "3286034.08953000",
-        "raw": "METUSDT 0.14190000 9.154%"
+        "symbol": "DYMUSDT",
+        "price": "0.02190000",
+        "change": "9.500%",
+        "quoteVolume": "4499033.40534000",
+        "raw": "DYMUSDT 0.02190000 9.500%"
       },
       {
         "symbol": "ELFUSDT",
@@ -425,20 +418,6 @@
         "change": "8.812%",
         "quoteVolume": "636799.68008000",
         "raw": "ELFUSDT 0.22720000 8.812%"
-      },
-      {
-        "symbol": "DEGOUSDT",
-        "price": "0.30000000",
-        "change": "8.696%",
-        "quoteVolume": "10818234.29543000",
-        "raw": "DEGOUSDT 0.30000000 8.696%"
-      },
-      {
-        "symbol": "GUNUSDT",
-        "price": "0.01483000",
-        "change": "8.565%",
-        "quoteVolume": "3262568.39374000",
-        "raw": "GUNUSDT 0.01483000 8.565%"
       },
       {
         "symbol": "RENUSDT",
@@ -455,25 +434,53 @@
         "raw": "FLMUSDT 0.01670000 8.442%"
       },
       {
-        "symbol": "KITEUSDT",
-        "price": "0.15050000",
-        "change": "6.889%",
-        "quoteVolume": "14006376.48603000",
-        "raw": "KITEUSDT 0.15050000 6.889%"
-      },
-      {
-        "symbol": "BICOUSDT",
-        "price": "0.02440000",
-        "change": "6.550%",
-        "quoteVolume": "589731.04726200",
-        "raw": "BICOUSDT 0.02440000 6.550%"
+        "symbol": "ATMUSDT",
+        "price": "1.08000000",
+        "change": "8.108%",
+        "quoteVolume": "2006839.11525000",
+        "raw": "ATMUSDT 1.08000000 8.108%"
       },
       {
         "symbol": "ZBTUSDT",
-        "price": "0.10380000",
-        "change": "6.244%",
-        "quoteVolume": "5579020.55753000",
-        "raw": "ZBTUSDT 0.10380000 6.244%"
+        "price": "0.11030000",
+        "change": "7.610%",
+        "quoteVolume": "2794760.81129000",
+        "raw": "ZBTUSDT 0.11030000 7.610%"
+      },
+      {
+        "symbol": "DEGOUSDT",
+        "price": "0.31800000",
+        "change": "7.071%",
+        "quoteVolume": "2705741.65216000",
+        "raw": "DEGOUSDT 0.31800000 7.071%"
+      },
+      {
+        "symbol": "MAGICUSDT",
+        "price": "0.06260000",
+        "change": "6.644%",
+        "quoteVolume": "9430436.22455000",
+        "raw": "MAGICUSDT 0.06260000 6.644%"
+      },
+      {
+        "symbol": "COMPUSDT",
+        "price": "18.66000000",
+        "change": "6.568%",
+        "quoteVolume": "4487776.02453000",
+        "raw": "COMPUSDT 18.66000000 6.568%"
+      },
+      {
+        "symbol": "AIXBTUSDT",
+        "price": "0.02640000",
+        "change": "6.452%",
+        "quoteVolume": "7664238.39405000",
+        "raw": "AIXBTUSDT 0.02640000 6.452%"
+      },
+      {
+        "symbol": "DEXEUSDT",
+        "price": "8.00300000",
+        "change": "6.395%",
+        "quoteVolume": "2518784.19287000",
+        "raw": "DEXEUSDT 8.00300000 6.395%"
       },
       {
         "symbol": "HIFIUSDT",
@@ -483,25 +490,11 @@
         "raw": "HIFIUSDT 0.12700000 6.187%"
       },
       {
-        "symbol": "2ZUSDT",
-        "price": "0.08781000",
-        "change": "5.936%",
-        "quoteVolume": "1951809.83498000",
-        "raw": "2ZUSDT 0.08781000 5.936%"
-      },
-      {
-        "symbol": "KMNOUSDT",
-        "price": "0.01891000",
-        "change": "5.761%",
-        "quoteVolume": "1039447.56901000",
-        "raw": "KMNOUSDT 0.01891000 5.761%"
-      },
-      {
-        "symbol": "LAYERUSDT",
-        "price": "0.08360000",
-        "change": "5.689%",
-        "quoteVolume": "3248379.04489800",
-        "raw": "LAYERUSDT 0.08360000 5.689%"
+        "symbol": "AIUSDT",
+        "price": "0.02010000",
+        "change": "5.789%",
+        "quoteVolume": "1298725.23291000",
+        "raw": "AIUSDT 0.02010000 5.789%"
       },
       {
         "symbol": "ERNUSDT",
@@ -518,18 +511,18 @@
         "raw": "PLAUSDT 0.23470000 5.531%"
       },
       {
-        "symbol": "ZECUSDT",
-        "price": "269.60000000",
-        "change": "5.527%",
-        "quoteVolume": "55442013.30618000",
-        "raw": "ZECUSDT 269.60000000 5.527%"
-      },
-      {
         "symbol": "LITUSDT",
         "price": "0.74300000",
         "change": "5.241%",
         "quoteVolume": "799655.06630000",
         "raw": "LITUSDT 0.74300000 5.241%"
+      },
+      {
+        "symbol": "XMRUSDT",
+        "price": "118.70000000",
+        "change": "4.766%",
+        "quoteVolume": "574681.07740000",
+        "raw": "XMRUSDT 118.70000000 4.766%"
       }
     ]
   },
@@ -589,6 +582,13 @@
         "raw": "SXPUSDT 0.00220000 -46.341%"
       },
       {
+        "symbol": "FUNUSDT",
+        "price": "0.00087000",
+        "change": "-41.296%",
+        "quoteVolume": "3847412.39209800",
+        "raw": "FUNUSDT 0.00087000 -41.296%"
+      },
+      {
         "symbol": "HARDUSDT",
         "price": "0.00950000",
         "change": "-40.252%",
@@ -608,13 +608,6 @@
         "change": "-33.333%",
         "quoteVolume": "400933.16687000",
         "raw": "NTRNUSDT 0.00160000 -33.333%"
-      },
-      {
-        "symbol": "TRUUSDT",
-        "price": "0.00810000",
-        "change": "-32.500%",
-        "quoteVolume": "26241153.73930000",
-        "raw": "TRUUSDT 0.00810000 -32.500%"
       },
       {
         "symbol": "DATAUSDT",
@@ -638,6 +631,13 @@
         "raw": "BURGERUSDT 0.01720000 -28.631%"
       },
       {
+        "symbol": "BIFIUSDT",
+        "price": "77.00000000",
+        "change": "-26.245%",
+        "quoteVolume": "861322.54710000",
+        "raw": "BIFIUSDT 77.00000000 -26.245%"
+      },
+      {
         "symbol": "PROSUSDT",
         "price": "0.03720000",
         "change": "-25.896%",
@@ -650,6 +650,13 @@
         "change": "-25.000%",
         "quoteVolume": "415626.48360000",
         "raw": "FIROUSDT 0.30000000 -25.000%"
+      },
+      {
+        "symbol": "FIOUSDT",
+        "price": "0.00482000",
+        "change": "-24.688%",
+        "quoteVolume": "2570531.72465000",
+        "raw": "FIOUSDT 0.00482000 -24.688%"
       },
       {
         "symbol": "OOKIUSDT",
@@ -673,11 +680,18 @@
         "raw": "EPXUSDT 0.00001940 -24.514%"
       },
       {
-        "symbol": "BELUSDT",
-        "price": "0.10300000",
-        "change": "-23.420%",
-        "quoteVolume": "7341602.72180000",
-        "raw": "BELUSDT 0.10300000 -23.420%"
+        "symbol": "OXTUSDT",
+        "price": "0.01190000",
+        "change": "-23.718%",
+        "quoteVolume": "1689279.15800000",
+        "raw": "OXTUSDT 0.01190000 -23.718%"
+      },
+      {
+        "symbol": "MDTUSDT",
+        "price": "0.00661000",
+        "change": "-23.672%",
+        "quoteVolume": "1038679.53289600",
+        "raw": "MDTUSDT 0.00661000 -23.672%"
       },
       {
         "symbol": "TROYUSDT",
@@ -734,27 +748,6 @@
         "change": "-19.014%",
         "quoteVolume": "183519.31426000",
         "raw": "VIDTUSDT 0.00115000 -19.014%"
-      },
-      {
-        "symbol": "DREPUSDT",
-        "price": "0.02560000",
-        "change": "-18.211%",
-        "quoteVolume": "404593.40490000",
-        "raw": "DREPUSDT 0.02560000 -18.211%"
-      },
-      {
-        "symbol": "DFUSDT",
-        "price": "0.00164000",
-        "change": "-17.588%",
-        "quoteVolume": "107337.29702000",
-        "raw": "DFUSDT 0.00164000 -17.588%"
-      },
-      {
-        "symbol": "LEVERUSDT",
-        "price": "0.00017500",
-        "change": "-17.062%",
-        "quoteVolume": "388103.81757800",
-        "raw": "LEVERUSDT 0.00017500 -17.062%"
       }
     ]
   }
