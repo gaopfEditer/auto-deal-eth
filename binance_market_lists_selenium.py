@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
 import re
 import time
 from datetime import datetime, timezone
@@ -289,6 +290,21 @@ def _scrape_log(msg: str) -> None:
     print(f"[binance_market_lists {ts}] {msg}", flush=True)
 
 
+def _human_pause(lo: float = 0.35, hi: float = 1.25) -> None:
+    """随机短停顿，模拟用户操作间隔。"""
+    time.sleep(random.uniform(lo, hi))
+
+
+def _human_pause_after_nav(lo: float = 0.85, hi: float = 2.9) -> None:
+    """进入新页面后等待渲染与扫视，随机停顿。"""
+    time.sleep(random.uniform(lo, hi))
+
+
+def _human_jitter_scroll_pause() -> None:
+    """滚动时每一步间隔略随机。"""
+    time.sleep(random.uniform(0.16, 0.38))
+
+
 def _priority_slugs_ordered() -> List[str]:
     """从 PRIORITY_FOLLOW_PROFILES 解析 slug，保持列表顺序、去重。"""
     out: List[str] = []
@@ -382,9 +398,9 @@ def _scroll_page_load_lists(driver, scrolls: int = 14) -> None:
     """虚拟列表需要多次滚动才能把行渲染进 DOM。"""
     for _ in range(scrolls):
         driver.execute_script("window.scrollBy(0, Math.floor(window.innerHeight * 0.9));")
-        time.sleep(0.28)
+        _human_jitter_scroll_pause()
     driver.execute_script("window.scrollTo(0, 0);")
-    time.sleep(0.4)
+    _human_pause(0.28, 0.62)
 
 
 def _scroll_feed_down_only(driver, scrolls: int) -> None:
@@ -393,7 +409,7 @@ def _scroll_feed_down_only(driver, scrolls: int) -> None:
         driver.execute_script(
             "window.scrollBy(0, Math.floor(window.innerHeight * 0.88));"
         )
-        time.sleep(0.26)
+        _human_jitter_scroll_pause()
 
 
 def _scroll_profile_feed_until_stable(driver, max_rounds: int = 32) -> None:
@@ -439,6 +455,7 @@ return false;
         else:
             stable = 0
         last = n
+        _human_pause(0.08, 0.32)
 
 
 def _merge_posts_by_href(*lists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -580,7 +597,8 @@ def _enrich_post_images_from_detail_pages(
             WebDriverWait(driver, 18).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
-            time.sleep(1.4)
+            _human_pause_after_nav(1.0, 2.6)
+            _human_pause(0.12, 0.45)
             extra = driver.execute_script(
                 _SQUARE_ATTACHMENT_IMG_JS + "\nreturn _bnDetailArticleImages();"
             )
@@ -842,9 +860,9 @@ def _extract_square_profile_posts(
     WebDriverWait(driver, 25).until(
         EC.presence_of_element_located((By.TAG_NAME, "body"))
     )
-    time.sleep(2.2)
+    _human_pause_after_nav(1.5, 3.2)
     _scroll_profile_feed_until_stable(driver)
-    time.sleep(0.6)
+    _human_pause(0.35, 0.95)
     slug_l = (author_slug or "").lower().strip()
     return driver.execute_script(
         _SQUARE_ATTACHMENT_IMG_JS
@@ -1033,14 +1051,14 @@ def _probe_live_from_profiles(
             WebDriverWait(driver, 12).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
-            time.sleep(1.4)
+            _human_pause_after_nav(1.0, 2.3)
             status = _detect_live_on_current_square_page(driver)
             if not status.get("is_live"):
                 driver.get(href)
                 WebDriverWait(driver, 12).until(
                     EC.presence_of_element_located((By.TAG_NAME, "body"))
                 )
-                time.sleep(1.0)
+                _human_pause_after_nav(0.75, 1.9)
                 status = _detect_live_on_current_square_page(driver)
             if status.get("is_live"):
                 links = status.get("live_links") or []
@@ -1120,7 +1138,7 @@ def _click_first_text(driver, texts: List[str], timeout_sec: int = 8) -> bool:
                 EC.element_to_be_clickable((By.XPATH, xpath))
             )
             driver.execute_script("arguments[0].click();", elem)
-            time.sleep(1.8)
+            _human_pause(1.15, 2.55)
             return True
         except Exception:
             continue
@@ -1136,7 +1154,7 @@ def _collect_section(
 ) -> Dict[str, object]:
     clicked = _click_first_text(driver, tab_text_candidates)
     _scroll_page_load_lists(driver)
-    time.sleep(1.0)
+    _human_pause(0.65, 1.45)
     try:
         WebDriverWait(driver, 18).until(
             EC.presence_of_element_located(
@@ -1209,7 +1227,7 @@ def scrape_binance_lists(
         WebDriverWait(driver, 25).until(
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
-        time.sleep(3.0)
+        _human_pause_after_nav(2.0, 4.0)
         _scrape_log(
             "解析 Following 信息流中的帖子"
             + ("（仅保留重点关注用户）" if has_priority else "")
@@ -1325,7 +1343,7 @@ def scrape_binance_lists(
         WebDriverWait(driver, 25).until(
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
-        time.sleep(2.5)
+        _human_pause_after_nav(1.7, 3.5)
 
         _scrape_log(f"处理涨幅榜（取前 {top_n}）…")
         sec_gainers = _collect_section(
