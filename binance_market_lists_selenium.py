@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
 使用 Selenium 抓取币安市场列表：
-1) 自选/关注列表
-2) 热榜
-3) 涨幅榜
-4) 跌幅榜
+1) Square Following：可配置重点关注用户，仅巡检其是否直播、是否发文章
+2) 涨幅榜 / 跌幅榜（各前 N，默认 10；DOM 失败时回退 24h API）
+3) 可选：全局成交额热榜（--include-hot-rank）
 
 默认连接已开启远程调试的 Chrome（复用登录态）：
   Mac:
@@ -17,8 +16,13 @@
 
 说明：
   - 关注列表请使用币安 Square Following 页面（默认 .../square?tab=Following），需已登录。
-  - 「谁在直播」：在 Following 页收集 `/square/profile/` 关注主页，再逐个打开（先 `?tab=live`）检测直播并给出 `live_url`。
-  - 热榜/涨幅/跌幅若页面虚拟列表未解析到行，会自动回退到官方 /api/v3/ticker/24hr（无需 Key）。
+  - 重点关注用户在源码中 PRIORITY_FOLLOW_PROFILES 列表配置（完整 profile URL 或 slug）；
+    仅对这些用户巡检「是否直播」与「是否发文章」；列表为空时仍巡检 Following 页收集到的全部主页。
+  - 行情：默认只输出涨幅榜、跌幅榜各前 N（--market-top，默认 10）；全局热榜需加 --include-hot-rank。
+  - 热榜/涨幅/跌幅若页面 DOM 抓不到，涨幅与跌幅会回退到官方 /api/v3/ticker/24hr（无需 Key）。
+  - 关注流帖子默认合并 binance_posts_state.json：保留 12 小时内文章，新帖终端提示并用 Gemini 判多空；
+    可用 --skip-posts-state 仅输出本次快照。
+  - 重点关注用户会额外打开其主页并深度下滚，合并时间线帖子（条数见 --max-items）；帖子卡片内图片可保存到 --square-images-dir。
 """
 
 from __future__ import annotations
@@ -28,8 +32,8 @@ import json
 import os
 import re
 import time
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Set
 
 try:
     import requests  # 用于热榜/涨跌幅 API 回退
@@ -47,10 +51,26 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from browser_automation import init_browser
 
+from binance_posts_state import (
+    POST_RETENTION_HOURS,
+    beijing_time_str,
+    enrich_post_published_fields,
+    filter_posts_by_published_age,
+    process_watchlist_posts,
+)
+
 
 DEFAULT_URL = "https://www.binance.com/zh-CN/markets/overview"
 DEFAULT_WATCHLIST_URL = "https://www.binance.com/zh-CN/square?tab=Following"
 BINANCE_TICKER_24H = "https://api.binance.com/api/v3/ticker/24hr"
+# 行情页热榜 / 涨幅榜 / 跌幅榜默认只取前 N（与 Square 关注流的 --max-items 无关）
+DEFAULT_MARKET_RANK_TOP_N = 10
+
+# 重点关注用户：Square profile 完整 URL 或单独 slug（与下方顺序一致）；可随意增删。
+# 为空列表时：直播/文章巡检范围仍为 Following 页收集到的全部主页。
+PRIORITY_FOLLOW_PROFILES: List[str] = [
+    "https://www.binance.com/zh-CN/square/profile/yanchibit",
+]
 
 # 标准输出每个区块最多行数（0 表示全部）；与 getinfo/run_calendar 的 MAX_ROWS 用法类似
 MAX_STDOUT_ROWS = 180
@@ -61,9 +81,291 @@ _ROW_SYMBOL_RE = re.compile(
     r"|([A-Za-z0-9]{2,15}/[A-Za-z0-9]{2,15})\b"
 )
 
+# 仅采集帖子链接下方的「附图」：排除头像/图标/小图（与 execute_script 内 _bn* 一致）
+_SQUARE_ATTACHMENT_IMG_JS = r"""
+function _bnNoiseImgUrl(src) {
+  const s = (src || '').toLowerCase();
+  if (!s || s.startsWith('data:')) return true;
+  if (s.includes('avatar')) return true;
+  if (s.includes('userpic')) return true;
+  if (s.includes('/icon')) return true;
+  if (s.includes('favicon')) return true;
+  if (s.includes('emoji')) return true;
+  if (s.includes('badge')) return true;
+  if (s.includes('qrcode') || s.includes('qr-code')) return true;
+  if (s.includes('sprite')) return true;
+  if (s.includes('logo') && s.includes('binance')) return true;
+  const wh = s.match(/\b(\d{1,3})x(\d{1,3})\b/);
+  if (wh) {
+    const w = parseInt(wh[1], 10), h = parseInt(wh[2], 10);
+    if (w <= 96 && h <= 96) return true;
+  }
+  return false;
+}
+
+function _bnInAvatarOrHeader(im) {
+  let n = im;
+  for (let i = 0; i < 14 && n; i++) {
+    const cls = String(n.className || '');
+    const tag = (n.tagName || '').toLowerCase();
+    if (/avatar|user-?pic|head-?portrait|author.?pic|profile.?pic/i.test(cls)) return true;
+    if (tag === 'header' || tag === 'nav') return true;
+    if (/sidebar|side-bar|leftnav|rightnav|global-nav/i.test(cls)) return true;
+    n = n.parentElement;
+  }
+  return false;
+}
+
+function _bnCollectArticleImagesRelaxed(a) {
+  const card = a.closest('article')
+    || a.closest('[class*="article"]')
+    || a.closest('[class*="Article"]')
+    || a.closest('[class*="PostCard"]')
+    || a.closest('[class*="post-card"]')
+    || a.parentElement;
+  if (!card) return [];
+  const urls = [];
+  const imgs = card.querySelectorAll('img[src]');
+  for (const im of imgs) {
+    if (!im || a.contains(im)) continue;
+    if (_bnInAvatarOrHeader(im)) continue;
+    let src = im.currentSrc || im.src
+      || (im.getAttribute && (im.getAttribute('src') || im.getAttribute('data-src'))) || '';
+    if (_bnNoiseImgUrl(src)) continue;
+    const iw = im.naturalWidth || 0;
+    const ih = im.naturalHeight || 0;
+    const ir = im.getBoundingClientRect();
+    if (iw > 0 && ih > 0) {
+      if (iw < 64 || ih < 64) continue;
+      if (iw * ih < 4096) continue;
+    } else if (ir.width < 56 || ir.height < 56) {
+      continue;
+    }
+    urls.push(src);
+  }
+  return [...new Set(urls)].slice(0, 16);
+}
+
+function _bnReadCreateTimeFromNickContainer(root) {
+  if (!root || !root.querySelector) return { publishedIso: '', timeLabel: '' };
+  const nick = root.querySelector('[class*="avatar-nick-container"]');
+  if (!nick) return { publishedIso: '', timeLabel: '' };
+  const ct = nick.querySelector('[class*="create-time"]')
+    || nick.querySelector('.create-time');
+  if (!ct) return { publishedIso: '', timeLabel: '' };
+  let publishedIso = '';
+  let timeLabel = '';
+  const te = ct.querySelector('time[datetime]');
+  if (te) {
+    publishedIso = te.getAttribute('datetime') || '';
+    timeLabel = (te.innerText || '').trim();
+  }
+  if (!timeLabel) {
+    timeLabel = (ct.innerText || ct.textContent || '').trim();
+  }
+  return { publishedIso, timeLabel };
+}
+
+function _bnPostTimeFromCard(a) {
+  let publishedIso = '';
+  let timeLabel = '';
+  let isPinned = false;
+  const card = a.closest('article')
+    || a.closest('[class*="post"]')
+    || a.closest('[class*="Article"]')
+    || a.parentElement;
+  let el = a;
+  for (let depth = 0; depth < 24 && el; depth++) {
+    const got = _bnReadCreateTimeFromNickContainer(el);
+    if (got.timeLabel || got.publishedIso) {
+      publishedIso = got.publishedIso;
+      timeLabel = got.timeLabel;
+      break;
+    }
+    el = el.parentElement;
+  }
+  if (!timeLabel && !publishedIso && card) {
+    const got = _bnReadCreateTimeFromNickContainer(card);
+    publishedIso = got.publishedIso;
+    timeLabel = got.timeLabel;
+  }
+  if (!timeLabel && !publishedIso && card) {
+    const te = card.querySelector('time[datetime]');
+    if (te) {
+      publishedIso = te.getAttribute('datetime') || '';
+      timeLabel = (te.innerText || '').trim();
+    }
+  }
+  if (!timeLabel && card) {
+    const cand = card.querySelectorAll('span,div,time,p,label,small,em,i');
+    for (const el2 of cand) {
+      const tx = (el2.innerText || '').trim();
+      if (tx.length > 80) continue;
+      if (/^\d{4}-\d{2}-\d{2}/.test(tx) || /\d{1,2}:\d{2}/.test(tx)
+          || /分钟前|小时前|天前|秒前|昨天|前天|刚刚/.test(tx)
+          || /\d{1,2}\s*月\s*\d{1,2}\s*日/.test(tx)
+          || /\d+\s*(?:小时|分钟|秒)(?:前)?$/.test(tx)
+          || /\d+\s*(?:hours?|minutes?|seconds?|hrs?|mins?)\s*ago/i.test(tx)) {
+        timeLabel = tx;
+        break;
+      }
+    }
+  }
+  if (!timeLabel && card) {
+    const blob = (card.innerText || '').replace(/\s+/g, ' ');
+    const m = blob.match(
+      /\d{1,2}\s*月\s*\d{1,2}\s*日|\d+\s*(?:小时|分钟|秒)(?:前)?(?=\s|$)|\d{4}-\d{2}-\d{2}[^\s]{0,20}|\d+\s*(?:hours?|minutes?|seconds?)\s*ago/i
+    );
+    if (m) timeLabel = m[0].trim();
+  }
+  if (card) {
+    const head = (card.innerText || '').slice(0, 900);
+    if (/置顶|pinned|🔝/i.test(head)) isPinned = true;
+  }
+  return { published_iso: publishedIso, time_label: timeLabel, is_pinned: isPinned };
+}
+
+function _bnDetailArticleImages() {
+  const roots = [];
+  const m = document.querySelector('main');
+  if (m) roots.push(m);
+  document.querySelectorAll('[class*="article"], [class*="Article"], [class*="detail"], [class*="Detail"], [class*="content"]').forEach((el) => {
+    if (roots.length < 8) roots.push(el);
+  });
+  if (!roots.length) roots.push(document.body);
+  const urls = [];
+  const seen = new Set();
+  for (const root of roots) {
+    root.querySelectorAll('img[src]').forEach((im) => {
+      let src = im.currentSrc || im.src
+        || (im.getAttribute && (im.getAttribute('src') || im.getAttribute('data-src'))) || '';
+      if (_bnNoiseImgUrl(src)) return;
+      if (_bnInAvatarOrHeader(im)) return;
+      const iw = im.naturalWidth || 0, ih = im.naturalHeight || 0;
+      const ir = im.getBoundingClientRect();
+      if (iw > 0 && ih > 0) {
+        if (iw < 64 || ih < 64) return;
+      } else if (ir.width < 56 || ir.height < 56) return;
+      if (src && !seen.has(src)) {
+        seen.add(src);
+        urls.push(src);
+      }
+    });
+  }
+  return urls.slice(0, 20);
+}
+"""
+
 
 def _visible_text(s: str) -> str:
     return re.sub(r"\s+", " ", (s or "")).strip()
+
+
+def _square_noise_url(href: str) -> bool:
+    """非「我关注的人」动态：话题、指数、泛入口等（Following 页侧栏/推荐里常见）。"""
+    if not href:
+        return True
+    h = href.lower()
+    noise = (
+        "/square/hashtag/",
+        "/square/hashtags/",
+        "fear-and-greed",
+        "/square/topics/",
+        "/square/market",
+        "/square/leaderboard",
+        "/square/ranking",
+    )
+    return any(x in h for x in noise)
+
+
+def _profile_slug(href: str) -> str:
+    m = re.search(r"/square/profile/([^/?#]+)", href or "", re.I)
+    return (m.group(1) or "").strip()
+
+
+def _scrape_log(msg: str) -> None:
+    """阶段性状态，便于观察当前执行到哪一步。"""
+    ts = datetime.now().strftime("%H:%M:%S")
+    print(f"[binance_market_lists {ts}] {msg}", flush=True)
+
+
+def _priority_slugs_ordered() -> List[str]:
+    """从 PRIORITY_FOLLOW_PROFILES 解析 slug，保持列表顺序、去重。"""
+    out: List[str] = []
+    seen: Set[str] = set()
+    for raw in PRIORITY_FOLLOW_PROFILES:
+        s = (raw or "").strip()
+        if not s:
+            continue
+        if "/square/profile/" in s:
+            slug = _profile_slug(s).lower()
+        else:
+            slug = s.strip().strip("/").lower()
+        if slug and slug not in seen:
+            seen.add(slug)
+            out.append(slug)
+    return out
+
+
+def _profile_live_tab_url(profile_href: str) -> str:
+    base = (profile_href or "").split("#")[0].strip()
+    if not base:
+        return ""
+    sep = "&" if "?" in base else "?"
+    return f"{base}{sep}tab=live"
+
+
+def _merge_priority_profiles(
+    collected: List[Dict[str, str]],
+    priority_slugs_ordered: List[str],
+) -> List[Dict[str, str]]:
+    """对每个重点 slug（按配置顺序）：Following 页有则用之，否则拼 profile URL 仍做巡检。"""
+    if not priority_slugs_ordered:
+        return collected
+    by_slug: Dict[str, Dict[str, str]] = {}
+    for p in collected:
+        sl = (p.get("slug") or _profile_slug(p.get("href") or "")).lower()
+        if sl:
+            by_slug[sl] = p
+    out: List[Dict[str, str]] = []
+    for slug in priority_slugs_ordered:
+        if slug in by_slug:
+            out.append(by_slug[slug])
+        else:
+            out.append(
+                {
+                    "name": slug,
+                    "slug": slug,
+                    "href": f"https://www.binance.com/zh-CN/square/profile/{slug}",
+                }
+            )
+    return out
+
+
+def _pick_live_url(profile_href: str, links: List[str]) -> str:
+    """从页面链接中选「该用户」的直播入口，排除话题/帖子误匹配。"""
+    slug = _profile_slug(profile_href).lower()
+    if not slug:
+        return _profile_live_tab_url(profile_href)
+    good: List[str] = []
+    for u in links or []:
+        if not u or _square_noise_url(u):
+            continue
+        ul = u.lower()
+        if "/square/post/" in ul:
+            continue
+        if "/square/hashtag/" in ul:
+            continue
+        good.append(u)
+    prof_path = f"/square/profile/{slug}"
+    for u in good:
+        ul = u.lower()
+        if prof_path in ul and ("tab=live" in ul or "/live" in ul or "broadcast" in ul):
+            return u
+    for u in good:
+        if prof_path in ul:
+            return u
+    return _profile_live_tab_url(profile_href)
 
 
 def _parse_symbol_from_row_text(txt: str) -> Optional[str]:
@@ -83,6 +385,212 @@ def _scroll_page_load_lists(driver, scrolls: int = 14) -> None:
         time.sleep(0.28)
     driver.execute_script("window.scrollTo(0, 0);")
     time.sleep(0.4)
+
+
+def _scroll_feed_down_only(driver, scrolls: int) -> None:
+    """只向下滚（不回到顶部），用于 profile 时间线加载更多帖子。"""
+    for _ in range(scrolls):
+        driver.execute_script(
+            "window.scrollBy(0, Math.floor(window.innerHeight * 0.88));"
+        )
+        time.sleep(0.26)
+
+
+def _scroll_profile_feed_until_stable(driver, max_rounds: int = 32) -> None:
+    """
+    主页时间线下滚：若任意 create-time 出现「n月n日」则至少已超约一天，停止继续下滚；
+    否则直到帖子链接数不再增长。
+    """
+    last = -1
+    stable = 0
+    for _ in range(max_rounds):
+        _scroll_feed_down_only(driver, scrolls=5)
+        try:
+            hit_month_day = driver.execute_script(
+                r"""
+const nodes = document.querySelectorAll('[class*="create-time"]');
+for (const n of nodes) {
+  const t = (n.innerText || n.textContent || '').replace(/\s+/g, ' ').trim();
+  if (/\d{1,2}\s*月\s*\d{1,2}\s*日/.test(t)) return true;
+}
+return false;
+"""
+            )
+            if hit_month_day:
+                _scrape_log(
+                    "时间线已出现「月日」形式日期（通常 ≥1 天前），停止继续下滚"
+                )
+                break
+        except Exception:
+            pass
+        try:
+            n = int(
+                driver.execute_script(
+                    'return document.querySelectorAll(\'a[href*="/square/post/"]\').length'
+                )
+                or 0
+            )
+        except Exception:
+            n = 0
+        if n == last:
+            stable += 1
+            if stable >= 4 and n > 0:
+                break
+        else:
+            stable = 0
+        last = n
+
+
+def _merge_posts_by_href(*lists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """按 href 去重合并；正文取更长者，image_urls 合并去重。"""
+    by_href: Dict[str, Dict[str, Any]] = {}
+    for lst in lists:
+        for p in lst:
+            if not isinstance(p, dict):
+                continue
+            h = (p.get("href") or "").strip()
+            if not h:
+                continue
+            if h not in by_href:
+                by_href[h] = dict(p)
+                continue
+            o = by_href[h]
+            imgs = (o.get("image_urls") or []) + (p.get("image_urls") or [])
+            o["image_urls"] = list(dict.fromkeys(imgs))[:24]
+            if len(str(p.get("raw") or "")) > len(str(o.get("raw") or "")):
+                o["raw"] = p.get("raw", "")
+                o["title"] = p.get("title", o.get("title", ""))
+                o["author"] = p.get("author", o.get("author", ""))
+                o["time"] = p.get("time", o.get("time", ""))
+            o["published_iso"] = (p.get("published_iso") or o.get("published_iso") or "")
+            o["time_label"] = (p.get("time_label") or o.get("time_label") or "")
+            o["is_pinned"] = bool(o.get("is_pinned") or p.get("is_pinned"))
+    return list(by_href.values())
+
+
+def _post_id_from_href(href: str) -> str:
+    m = re.search(r"/square/post/(\d+)", href or "", re.I)
+    if m:
+        return m.group(1)
+    return re.sub(r"\W+", "_", (href or ""))[-48:]
+
+
+def _is_noise_image_url(u: str) -> bool:
+    """与页面端 _bnNoiseImgUrl 对齐，下载前再滤一层（含历史 JSON 里的脏链）。"""
+    s = (u or "").lower()
+    if not s or s.startswith("data:"):
+        return True
+    for k in (
+        "avatar",
+        "userpic",
+        "/icon",
+        "favicon",
+        "emoji",
+        "badge",
+        "qrcode",
+        "sprite",
+    ):
+        if k in s:
+            return True
+    if "logo" in s and "binance" in s:
+        return True
+    m = re.search(r"\b(\d{1,3})x(\d{1,3})\b", s)
+    if m and int(m.group(1)) <= 96 and int(m.group(2)) <= 96:
+        return True
+    return False
+
+
+def _download_square_post_images(
+    driver, posts: List[Dict[str, Any]], base_dir: str
+) -> None:
+    """下载列表与正文页合并后的 image_urls（已滤噪声链）。"""
+    if requests is None:
+        _scrape_log("未安装 requests，跳过图片下载")
+        return
+    root = os.path.abspath(base_dir)
+    os.makedirs(root, exist_ok=True)
+    session = requests.Session()
+    session.headers.update(
+        {
+            "User-Agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            )
+        }
+    )
+    try:
+        for c in driver.get_cookies():
+            session.cookies.set(c["name"], c["value"], domain=c.get("domain"))
+    except Exception:
+        pass
+
+    for p in posts:
+        if not isinstance(p, dict):
+            continue
+        urls = [x for x in (p.get("image_urls") or []) if not _is_noise_image_url(str(x))]
+        if not urls:
+            continue
+        href = (p.get("href") or "").strip()
+        pid = _post_id_from_href(href)
+        sub = os.path.join(root, pid)
+        os.makedirs(sub, exist_ok=True)
+        saved: List[str] = []
+        for i, u in enumerate(urls[:12]):
+            u = (u or "").strip()
+            if not u or u.startswith("data:"):
+                continue
+            try:
+                r = session.get(u, timeout=45)
+                r.raise_for_status()
+                ct = (r.headers.get("Content-Type") or "").lower()
+                ext = ".jpg"
+                if "png" in ct or u.lower().endswith(".png"):
+                    ext = ".png"
+                elif "webp" in ct or u.lower().endswith(".webp"):
+                    ext = ".webp"
+                elif "gif" in ct:
+                    ext = ".gif"
+                fp = os.path.join(sub, f"img_{i}{ext}")
+                with open(fp, "wb") as f:
+                    f.write(r.content)
+                saved.append(fp)
+            except Exception as e:
+                _scrape_log(f"图片下载失败 ({i}): {u[:60]}… — {e}")
+        if saved:
+            p["saved_image_paths"] = saved
+            _scrape_log(f"已保存 {len(saved)} 张图片 → {sub}")
+
+
+def _enrich_post_images_from_detail_pages(
+    driver, posts: List[Dict[str, Any]], max_pages: int = 40
+) -> None:
+    """进入 /square/post/ 正文页抓取正文区域配图（与列表卡片合并去重）。"""
+    if not posts:
+        return
+    n = min(max_pages, len(posts))
+    _scrape_log(f"打开帖子正文页补充配图（最多 {n} 篇）…")
+    for p in posts[:n]:
+        if not isinstance(p, dict):
+            continue
+        href = (p.get("href") or "").strip()
+        if not href or "/square/post/" not in href.lower():
+            continue
+        try:
+            driver.get(href)
+            WebDriverWait(driver, 18).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+            time.sleep(1.4)
+            extra = driver.execute_script(
+                _SQUARE_ATTACHMENT_IMG_JS + "\nreturn _bnDetailArticleImages();"
+            )
+            if not extra:
+                continue
+            cur = [x for x in (p.get("image_urls") or []) if x]
+            merged = list(dict.fromkeys(cur + list(extra)))[:24]
+            p["image_urls"] = merged
+        except Exception:
+            continue
 
 
 def _extract_rows_from_table_elements(driver, max_items: int) -> List[Dict[str, str]]:
@@ -206,32 +714,45 @@ def _extract_rows_best_effort(driver, max_items: int) -> List[Dict[str, str]]:
     return rows
 
 
-def _extract_square_following(driver, max_items: int) -> Dict[str, List[Dict[str, str]]]:
+def _extract_square_following(
+    driver, max_items: int, priority_slugs: Optional[Set[str]] = None
+) -> Dict[str, List[Dict[str, str]]]:
     """
-    抓币安 Square Following 页面：
-    - lives：谁在直播（文本/按钮里出现“直播/LIVE/正在直播”）
-    - latest_posts：最新文章/动态（其余非直播条目）
+    抓币安 Square Following 页（tab=Following）信息流：
+    - latest_posts：仅保留 `/square/post/` 动态（代表关注流里的帖子/文章），排除话题/指数等泛链
+    - lives：留空（谁在直播以 profile 巡检为准，避免把话题/帖子误当直播）
 
-    由于币安 Square DOM 可能随版本变更，这里做宽松解析：基于卡片内文本+链接做去重。
+    说明：侧栏「热门话题」等也会出现 /square/ 链接，必须过滤。
     """
     # 兜底多滚动一下，确保虚拟列表渲染
-    _scroll_page_load_lists(driver, scrolls=18)
+    _scroll_page_load_lists(driver, scrolls=28)
 
+    priority_arg = (
+        sorted(priority_slugs) if priority_slugs else []
+    )
     return driver.execute_script(
-        """
+        _SQUARE_ATTACHMENT_IMG_JS
+        + """
 const maxItems = arguments[0];
+const prioritySlugs = new Set((arguments[1] || []).map((s) => String(s).toLowerCase()));
 const out = { lives: [], latest_posts: [] };
 const seen = new Set();
 
-// 取所有疑似 Square 卡片链接（不严格依赖具体 class）
-const anchors = Array.from(document.querySelectorAll('a[href*="/square/"]'));
+const isNoise = (href) => {
+  const h = (href || '').toLowerCase();
+  if (h.includes('/square/hashtag/')) return true;
+  if (h.includes('/square/hashtags/')) return true;
+  if (h.includes('fear-and-greed')) return true;
+  if (h.includes('/square/topics/')) return true;
+  if (h.includes('/square/market')) return true;
+  if (h.includes('/square/leaderboard')) return true;
+  return false;
+};
+
+// 只从「帖子」链接抓文章；关注流里帖子一般为 /square/post/{id}
+const anchors = Array.from(document.querySelectorAll('a[href*="/square/post/"]'));
 
 const norm = (s) => (s || '').replace(/\\s+/g, ' ').trim();
-const splitLines = (t) => norm(t).split(' ').filter(Boolean);
-const isLive = (t) => {
-  const s = (t || '').toLowerCase();
-  return s.includes('直播') || s.includes('live') || s.includes('正在直播');
-};
 
 const findTime = (t) => {
   if (!t) return '';
@@ -242,61 +763,198 @@ const findTime = (t) => {
 };
 
 for (const a of anchors) {
-  if (out.lives.length >= maxItems && out.latest_posts.length >= maxItems) break;
+  if (out.latest_posts.length >= maxItems) break;
   const href = a.href || '';
-  if (!href) continue;
-  // 去重：按 href
-  if (seen.has(href)) continue;
+  if (!href || seen.has(href)) continue;
+  if (isNoise(href)) continue;
+  let authorSlug = '';
+  let n = a;
+  for (let i = 0; i < 18 && n; i++) {
+    const prof = Array.from(n.querySelectorAll ? n.querySelectorAll('a[href*="/square/profile/"]') : []);
+    for (const pa of prof) {
+      const ph = (pa.href || '').split('#')[0];
+      const m = ph.match(/\\/square\\/profile\\/([^\\/?#]+)/i);
+      if (m && m[1]) { authorSlug = String(m[1]).toLowerCase(); break; }
+    }
+    if (authorSlug) break;
+    n = n.parentElement;
+  }
+  if (prioritySlugs.size > 0) {
+    if (!authorSlug || !prioritySlugs.has(authorSlug)) continue;
+  }
   const text = (a.innerText || a.textContent || '').trim();
-  if (!text || text.length < 6) continue;
+  if (!text || text.length < 4) continue;
 
-  const live = isLive(text);
-  // 标题尽量取前几段“第一行/前若干词”
   const clean = norm(text);
   const parts = clean.split(' ').filter(Boolean);
   const title = parts.slice(0, 16).join(' ');
   const time = findTime(clean);
 
-  // 作者尽量在直播/动态卡片中第二段或包含“·”分隔处
   let author = '';
   const dotIdx = clean.indexOf('·');
   if (dotIdx > 0 && dotIdx < 80) author = clean.slice(0, dotIdx).trim();
   if (!author) {
-    // 简单启发：取不包含关键字的短词
     for (const p of parts) {
-      if (p.length >= 2 && p.length <= 18 && !isLive(p) && !/直播|live/i.test(p)) { author = p; break; }
+      if (p.length >= 2 && p.length <= 24) { author = p; break; }
     }
   }
 
-  const item = { href, title, author, time, raw: clean };
-  if (live) out.lives.push(item);
-  else out.latest_posts.push(item);
+  const meta = _bnPostTimeFromCard(a);
+  const imageUrls = _bnCollectArticleImagesRelaxed(a);
+  const item = {
+    href,
+    title,
+    author,
+    author_slug: authorSlug,
+    time: meta.time_label || findTime(clean),
+    raw: clean,
+    image_urls: imageUrls,
+    published_iso: meta.published_iso,
+    time_label: meta.time_label,
+    is_pinned: meta.is_pinned,
+  };
+  out.latest_posts.push(item);
   seen.add(href);
 }
 
-// 保底截断
-out.lives = out.lives.slice(0, maxItems);
 out.latest_posts = out.latest_posts.slice(0, maxItems);
 return out;
         """,
         max_items,
+        priority_arg,
     )
 
 
+def _extract_square_profile_posts(
+    driver,
+    profile_href: str,
+    author_slug: str,
+    max_items: int,
+) -> List[Dict[str, str]]:
+    """
+    打开用户 Square 主页，深度下滚加载虚拟列表，抓取该用户帖子（数量通常多于 Following 流首屏）。
+    """
+    base = (profile_href or "").split("#")[0].strip()
+    if not base:
+        return []
+    _scrape_log(f"打开主页拉取帖子: {base}")
+    driver.get(base)
+    WebDriverWait(driver, 25).until(
+        EC.presence_of_element_located((By.TAG_NAME, "body"))
+    )
+    time.sleep(2.2)
+    _scroll_profile_feed_until_stable(driver)
+    time.sleep(0.6)
+    slug_l = (author_slug or "").lower().strip()
+    return driver.execute_script(
+        _SQUARE_ATTACHMENT_IMG_JS
+        + """
+const maxItems = arguments[0];
+const authorSlug = String(arguments[1] || '').toLowerCase();
+const out = [];
+const seen = new Set();
+
+const isNoise = (href) => {
+  const h = (href || '').toLowerCase();
+  if (h.includes('/square/hashtag/')) return true;
+  if (h.includes('/square/hashtags/')) return true;
+  if (h.includes('fear-and-greed')) return true;
+  if (h.includes('/square/topics/')) return true;
+  if (h.includes('/square/market')) return true;
+  if (h.includes('/square/leaderboard')) return true;
+  return false;
+};
+
+const anchors = Array.from(document.querySelectorAll('a[href*="/square/post/"]'));
+const norm = (s) => (s || '').replace(/\\s+/g, ' ').trim();
+
+const findTime = (t) => {
+  if (!t) return '';
+  const m = (t.match(/\\d{1,2}:\\d{2}/) || [])[0] || '';
+  if (m) return m;
+  const d = (t.match(/\\d{4}-\\d{2}-\\d{2}/) || [])[0] || '';
+  return d;
+};
+
+for (const a of anchors) {
+  if (out.length >= maxItems) break;
+  const href = (a.href || '').split('#')[0];
+  if (!href || seen.has(href)) continue;
+  if (isNoise(href)) continue;
+  const text = (a.innerText || a.textContent || '').trim();
+  if (!text || text.length < 4) continue;
+
+  const clean = norm(text);
+  const parts = clean.split(' ').filter(Boolean);
+  const title = parts.slice(0, 20).join(' ');
+
+  let author = authorSlug;
+  const dotIdx = clean.indexOf('·');
+  if (dotIdx > 0 && dotIdx < 80) author = clean.slice(0, dotIdx).trim() || authorSlug;
+
+  const meta = _bnPostTimeFromCard(a);
+  const imageUrls = _bnCollectArticleImagesRelaxed(a);
+  out.push({
+    href,
+    title,
+    author,
+    author_slug: authorSlug,
+    time: meta.time_label || findTime(clean),
+    raw: clean,
+    image_urls: imageUrls,
+    published_iso: meta.published_iso,
+    time_label: meta.time_label,
+    is_pinned: meta.is_pinned,
+  });
+  seen.add(href);
+}
+return out;
+        """,
+        max_items,
+        slug_l,
+    ) or []
+
+
 def _collect_following_profile_links(driver, max_profiles: int = 60) -> List[Dict[str, str]]:
-    """在 Following 页面收集关注用户主页链接。"""
+    """在 Following 页主内容区收集「当前账号关注」的 profile 链接，排除侧栏/导航。"""
     _scroll_page_load_lists(driver, scrolls=14)
     profiles = driver.execute_script(
         """
 const maxProfiles = arguments[0];
 const out = [];
 const seen = new Set();
-const anchors = Array.from(document.querySelectorAll('a[href*="/square/profile/"]'));
+
+function isInChrome(el) {
+  let n = el;
+  for (let i = 0; i < 12 && n; i++) {
+    const role = n.getAttribute && n.getAttribute('role');
+    const tag = (n.tagName || '').toLowerCase();
+    const cls = String(n.className || '');
+    if (role === 'navigation' || role === 'banner' || role === 'contentinfo') return true;
+    if (tag === 'nav' || tag === 'header' || tag === 'footer') return true;
+    if (/sidebar|side-bar|leftnav|rightnav|global-nav/i.test(cls)) return true;
+    n = n.parentElement;
+  }
+  return false;
+}
+
+let anchors = Array.from(
+  document.querySelectorAll('main a[href*="/square/profile/"], [role="main"] a[href*="/square/profile/"]')
+);
+if (anchors.length < 2) {
+  anchors = Array.from(document.querySelectorAll('a[href*="/square/profile/"]')).filter(
+    (a) => !isInChrome(a)
+  );
+}
+
 for (const a of anchors) {
-  const href = a.href || '';
+  const href = (a.href || '').split('#')[0];
   if (!href || seen.has(href)) continue;
   const name = (a.innerText || a.textContent || '').replace(/\\s+/g, ' ').trim();
-  out.push({ name, href });
+  const parts = href.split('/').filter(Boolean);
+  const slug = (parts[parts.length - 1] || '').split('?')[0] || '';
+  const displayName = name || slug;
+  out.push({ name: displayName, slug, href });
   seen.add(href);
   if (out.length >= maxProfiles) break;
 }
@@ -314,18 +972,25 @@ def _detect_live_on_current_square_page(driver) -> Dict[str, Any]:
     return driver.execute_script(
         """
 const raw = (document.body && document.body.innerText) || '';
-// 避免英文单词里误命中（如 deliver 含 live）
 const hitCn = raw.includes('正在直播') || raw.includes('直播中');
 const hitEn =
   /\\b(live\\s*now|is\\s+live|live\\s*stream|live\\s*broadcast|going\\s*live)\\b/i.test(raw);
-const hit = hitCn || hitEn;
+const hitText = hitCn || hitEn;
+
+const bad = (href) => {
+  const h = (href || '').toLowerCase();
+  if (h.includes('/square/hashtag/')) return true;
+  if (h.includes('fear-and-greed')) return true;
+  if (h.includes('/square/post/')) return true;
+  return false;
+};
 
 const links = [];
 const seen = new Set();
 for (const a of Array.from(document.querySelectorAll('a[href]'))) {
-  const href = a.href || '';
+  const href = (a.href || '').split('#')[0];
   const t = (a.innerText || a.textContent || '') || '';
-  if (!href) continue;
+  if (!href || bad(href)) continue;
   const hl = href.toLowerCase();
   if (
     hl.includes('/live') ||
@@ -340,7 +1005,8 @@ for (const a of Array.from(document.querySelectorAll('a[href]'))) {
     }
   }
 }
-return { is_live: hit || links.length > 0, live_links: links.slice(0, 8) };
+const isLive = hitText || links.length > 0;
+return { is_live: isLive, live_links: links.slice(0, 8) };
         """
     )
 
@@ -359,6 +1025,8 @@ def _probe_live_from_profiles(
         name = _visible_text(p.get("name") or "")
         if not href:
             continue
+        slug = (p.get("slug") or _profile_slug(href) or "").strip()
+        _scrape_log(f"巡检是否在直播 → {name or slug} ({href})")
         try:
             sep = "&" if ("?" in href) else "?"
             driver.get(f"{href}{sep}tab=live")
@@ -376,11 +1044,13 @@ def _probe_live_from_profiles(
                 status = _detect_live_on_current_square_page(driver)
             if status.get("is_live"):
                 links = status.get("live_links") or []
-                live_url = links[0] if links else f"{href}{sep}tab=live"
+                live_url = _pick_live_url(href, links)
                 lives.append(
                     {
-                        "author": name or href.rsplit("/", 1)[-1],
-                        "profile": href,
+                        "author": name
+                        or _profile_slug(href)
+                        or href.rsplit("/", 1)[-1].split("?")[0],
+                        "profile": href.split("#")[0],
                         "live_url": live_url,
                         "raw": "profile_live_probe",
                     }
@@ -498,43 +1168,122 @@ def _collect_section(
 
 def scrape_binance_lists(
     url: str,
-    max_items: int = 30,
+    max_items: int = 120,
     watchlist_url: str = DEFAULT_WATCHLIST_URL,
     max_profiles_to_probe: int = 40,
     skip_profile_live_probe: bool = False,
+    market_rank_top_n: int = DEFAULT_MARKET_RANK_TOP_N,
+    include_hot_rank: bool = False,
+    square_images_dir: Optional[str] = "square_post_images",
+    skip_square_images: bool = False,
 ) -> Dict[str, object]:
+    priority_order = _priority_slugs_ordered()
+    priority_slugs: Set[str] = set(priority_order)
+    has_priority = bool(priority_slugs)
+    top_n = max(1, min(100, int(market_rank_top_n)))
+    _scrape_log("开始抓取")
+    if has_priority:
+        _scrape_log(f"重点关注用户（共 {len(priority_order)} 个，顺序与源码一致）: {priority_order}")
+    else:
+        _scrape_log(
+            "PRIORITY_FOLLOW_PROFILES 为空：文章/直播将按 Following 页收集到的全部主页处理"
+        )
     # 热榜/涨跌幅 DOM 抓不到时才用 API 回退；你本地缺 requests 也不影响 Square Following 的解析
+    _scrape_log("预取 Binance 24h ticker（作涨跌榜 DOM 失败时的回退）…")
     try:
-        api_rankings = fetch_rankings_from_binance_api(max_items)
+        api_rankings = fetch_rankings_from_binance_api(top_n)
+        _scrape_log("24h ticker 回退数据已就绪")
     except Exception:
         api_rankings = {
             "hot_rank": [],
             "gainers": [],
             "losers": [],
         }
+        _scrape_log("警告：24h ticker 预取失败，涨跌榜将仅依赖页面 DOM")
+    _scrape_log("正在连接浏览器（远程调试 Chrome）…")
     driver = init_browser(use_remote_debugging=True)
     try:
         # 关注：打开 Square Following 页面并抽取“直播/最新文章”
+        _scrape_log(f"打开关注列表（Square Following）: {watchlist_url}")
         driver.get(watchlist_url)
         WebDriverWait(driver, 25).until(
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
         time.sleep(3.0)
-        square_data = _extract_square_following(driver, max_items=max_items)
+        _scrape_log(
+            "解析 Following 信息流中的帖子"
+            + ("（仅保留重点关注用户）" if has_priority else "")
+            + "…"
+        )
+        square_data = _extract_square_following(
+            driver,
+            max_items=max_items,
+            priority_slugs=priority_slugs if has_priority else None,
+        )
         lives_feed = square_data.get("lives") or []
-        posts = square_data.get("latest_posts") or []
+        posts = [
+            p
+            for p in (square_data.get("latest_posts") or [])
+            if isinstance(p, dict)
+            and "/square/post/" in (p.get("href") or "").lower()
+            and not _square_noise_url(p.get("href") or "")
+        ]
+        _scrape_log(f"Following 帖子解析完成（符合条件 {len(posts)} 条）")
 
-        # 关注列表里「谁在直播」：从 Following 页收集 profile，再逐个打开检测（比 Feed 锚点更准）
+        _scrape_log("从 Following 页收集 profile 链接…")
+        collected = _collect_following_profile_links(
+            driver, max_profiles=max(10, max_profiles_to_probe)
+        )
+        follow_profiles = (
+            _merge_priority_profiles(collected, priority_order)
+            if has_priority
+            else collected
+        )
+
+        if has_priority and follow_profiles:
+            _scrape_log(
+                "从各重点关注用户主页深度滚动合并帖子（补齐时间线中更多篇）…"
+            )
+            for fp in follow_profiles:
+                ph = (fp.get("href") or "").strip()
+                slug = (fp.get("slug") or _profile_slug(ph)).lower()
+                if not ph or not slug:
+                    continue
+                extra = _extract_square_profile_posts(
+                    driver, ph, slug, max_items=max_items
+                )
+                if extra:
+                    posts = _merge_posts_by_href(posts, extra)
+            _scrape_log(f"合并 Following + 主页后帖子共 {len(posts)} 条")
+
+        ref_now = datetime.now(timezone.utc)
+        for p in posts:
+            if isinstance(p, dict):
+                enrich_post_published_fields(p, ref_now)
+        before_f = len(posts)
+        posts = filter_posts_by_published_age(posts, POST_RETENTION_HOURS, ref_now)
+        _scrape_log(
+            f"按发帖时间在近 {POST_RETENTION_HOURS} 小时内过滤："
+            f"{before_f} → {len(posts)} 条（无法解析时间或超期/久远置顶已丢弃）"
+        )
+
+        if not skip_square_images and posts and square_images_dir:
+            _enrich_post_images_from_detail_pages(driver, posts)
+            _scrape_log("下载帖子配图到本地…")
+            _download_square_post_images(driver, posts, square_images_dir)
+
+        # 关注列表里「谁在直播」：逐个 profile 打开检测
         if skip_profile_live_probe:
-            follow_profiles = []
+            _scrape_log("已跳过直播巡检（--skip-profile-live-probe）")
             lives_probed = []
         else:
-            follow_profiles = _collect_following_profile_links(
-                driver, max_profiles=max(10, max_profiles_to_probe)
+            _scrape_log(
+                f"开始逐个 profile 巡检是否在直播（共 {len(follow_profiles)} 个）…"
             )
             lives_probed = _probe_live_from_profiles(
                 driver, follow_profiles, max_lives=max_items
             )
+            _scrape_log(f"直播巡检结束（命中 {len(lives_probed)} 条）")
         # 合并：以 profile 探测为准，再补上 Feed 里命中的直播链（按 href 去重）
         lives = list(lives_probed)
         seen_hrefs = {
@@ -546,15 +1295,22 @@ def scrape_binance_lists(
                 lives.append(it)
                 seen_hrefs.add(h)
 
+        wl_note = ""
+        if not (lives or posts or follow_profiles):
+            wl_note = "未解析到关注/文章：请确认已登录，且页面已加载完成或页面结构已变更。"
+        elif has_priority and not (lives or posts):
+            wl_note = (
+                "已配置重点关注用户，但本次未解析到其直播或文章（可能未关注、"
+                "Feed 中暂无其帖子或 DOM 结构变更）。"
+            )
         watchlist: Dict[str, object] = {
             "section": "watchlist_following",
             "page_url": watchlist_url,
+            "priority_follow_slugs": list(priority_order),
             "extraction_source": "dom_square"
             if (lives or posts or follow_profiles)
             else "empty",
-            "note": ""
-            if (lives or posts or follow_profiles)
-            else "未解析到关注/文章：请确认已登录，且页面已加载完成或页面结构已变更。",
+            "note": wl_note,
             "count_follow_profiles": len(follow_profiles),
             "count_lives": len(lives),
             "count_latest_posts": len(posts),
@@ -564,44 +1320,65 @@ def scrape_binance_lists(
         }
 
         # 热榜 / 涨幅 / 跌幅：overview 上尝试 DOM，失败则用 24h API
+        _scrape_log(f"打开行情总览页（涨跌榜）: {url}")
         driver.get(url)
         WebDriverWait(driver, 25).until(
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
         time.sleep(2.5)
 
-        data = {
+        _scrape_log(f"处理涨幅榜（取前 {top_n}）…")
+        sec_gainers = _collect_section(
+            driver,
+            "gainers",
+            ["涨幅榜", "涨幅", "Gainers", "Top Gainers", "涨跌幅"],
+            top_n,
+            api_fallback=api_rankings["gainers"],
+        )
+        _scrape_log(f"涨幅榜完成（{sec_gainers.get('count', 0)} 条，来源 {sec_gainers.get('extraction_source', '')}）")
+
+        _scrape_log(f"处理跌幅榜（取前 {top_n}）…")
+        sec_losers = _collect_section(
+            driver,
+            "losers",
+            ["跌幅榜", "跌幅", "Losers", "Top Losers"],
+            top_n,
+            api_fallback=api_rankings["losers"],
+        )
+        _scrape_log(f"跌幅榜完成（{sec_losers.get('count', 0)} 条，来源 {sec_losers.get('extraction_source', '')}）")
+
+        data: Dict[str, object] = {
             "overview_url": url,
-            "scraped_at": datetime.now().isoformat(timespec="seconds"),
+            "scraped_at": beijing_time_str(),
             "watchlist": watchlist,
-            "hot_rank": _collect_section(
+            "gainers": sec_gainers,
+            "losers": sec_losers,
+        }
+        if include_hot_rank:
+            _scrape_log(f"处理全局热榜（取前 {top_n}）…")
+            data["hot_rank"] = _collect_section(
                 driver,
                 "hot_rank",
                 ["热榜", "热门", "Hot", "Trending", "成交额"],
-                max_items,
+                top_n,
                 api_fallback=api_rankings["hot_rank"],
-            ),
-            "gainers": _collect_section(
-                driver,
-                "gainers",
-                ["涨幅榜", "涨幅", "Gainers", "Top Gainers", "涨跌幅"],
-                max_items,
-                api_fallback=api_rankings["gainers"],
-            ),
-            "losers": _collect_section(
-                driver,
-                "losers",
-                ["跌幅榜", "跌幅", "Losers", "Top Losers"],
-                max_items,
-                api_fallback=api_rankings["losers"],
-            ),
-        }
+            )
+            hr = data["hot_rank"]
+            _scrape_log(
+                f"热榜完成（{hr.get('count', 0)} 条，来源 {hr.get('extraction_source', '')}）"
+            )
+        else:
+            _scrape_log("已跳过全局热榜（未加 --include-hot-rank）")
 
         # 只清洗榜单 items 的 raw 字段（watchlist 结构不同）
         for key in ("hot_rank", "gainers", "losers"):
-            for item in data.get(key, {}).get("items", []):
+            sec = data.get(key)
+            if not isinstance(sec, dict):
+                continue
+            for item in sec.get("items", []) or []:
                 if isinstance(item, dict) and "raw" in item:
                     item["raw"] = _visible_text(str(item.get("raw", "")))
+        _scrape_log("全部步骤完成，关闭浏览器")
         return data
     finally:
         driver.quit()
@@ -658,15 +1435,20 @@ def print_result_to_stdout(result: Dict[str, Any], max_rows: int = MAX_STDOUT_RO
     lives = wl.get("lives") or []
     posts = wl.get("latest_posts") or []
     profiles = wl.get("follow_profiles_sample") or []
-    hot = (result.get("hot_rank") or {}).get("items") or []
+    hot_sec = result.get("hot_rank")
+    hot = (hot_sec or {}).get("items") or [] if hot_sec is not None else []
     gain = (result.get("gainers") or {}).get("items") or []
     lose = (result.get("losers") or {}).get("items") or []
 
     print(f"[{script_key}] 数据抓取完成，scraped_at={result.get('scraped_at', '')}")
-    print(
+    summary = (
         f"  关注直播={len(lives)}，最新动态={len(posts)}，"
-        f"关注主页样本={len(profiles)}，热榜={len(hot)}，涨幅={len(gain)}，跌幅={len(lose)}"
+        f"关注主页样本={len(profiles)}，"
     )
+    if hot_sec is not None:
+        summary += f"热榜={len(hot)}，"
+    summary += f"涨幅={len(gain)}，跌幅={len(lose)}"
+    print(summary)
 
     _print_items_table(
         "关注 · 谁在直播",
@@ -677,7 +1459,16 @@ def print_result_to_stdout(result: Dict[str, Any], max_rows: int = MAX_STDOUT_RO
     _print_items_table(
         "关注 · 最新动态",
         posts,
-        columns=["title", "author", "time", "href"],
+        columns=[
+            "title",
+            "author",
+            "author_slug",
+            "published_at",
+            "is_pinned",
+            "gemini_bias_zh",
+            "time",
+            "href",
+        ],
         max_rows=max_rows,
     )
     if profiles:
@@ -689,11 +1480,10 @@ def print_result_to_stdout(result: Dict[str, Any], max_rows: int = MAX_STDOUT_RO
         )
 
     ranking_cols = ["symbol", "price", "change", "quoteVolume"]
-    for title, key in (
-        ("热榜", "hot_rank"),
-        ("涨幅榜", "gainers"),
-        ("跌幅榜", "losers"),
-    ):
+    sections = [("涨幅榜", "gainers"), ("跌幅榜", "losers")]
+    if hot_sec is not None:
+        sections.insert(0, ("热榜", "hot_rank"))
+    for title, key in sections:
         sec = result.get(key) or {}
         items = sec.get("items") or []
         src = sec.get("extraction_source", "")
@@ -706,7 +1496,7 @@ def print_result_to_stdout(result: Dict[str, Any], max_rows: int = MAX_STDOUT_RO
 
 def main():
     parser = argparse.ArgumentParser(
-        description="抓取币安关注（Square Following）、热榜、涨幅榜、跌幅榜（Selenium）"
+        description="抓取币安关注（Square Following）、涨幅/跌幅榜；可选全局热榜（Selenium）"
     )
     parser.add_argument("--url", default=DEFAULT_URL, help="行情总览页 URL（热榜/涨跌尝试）")
     parser.add_argument(
@@ -717,8 +1507,20 @@ def main():
     parser.add_argument(
         "--max-items",
         type=int,
-        default=30,
-        help="每个榜单最多提取条数（默认 30）",
+        default=120,
+        help="Square 帖子条数上限（Following + 各主页时间线；默认 120）；涨跌榜见 --market-top",
+    )
+    parser.add_argument(
+        "--market-top",
+        type=int,
+        default=DEFAULT_MARKET_RANK_TOP_N,
+        help=f"涨幅榜/跌幅榜各取前 N 名（默认 {DEFAULT_MARKET_RANK_TOP_N}）；"
+        f"加 --include-hot-rank 时热榜也取前 N",
+    )
+    parser.add_argument(
+        "--include-hot-rank",
+        action="store_true",
+        help="额外抓取并输出全局成交额热榜（默认仅涨幅/跌幅榜）",
     )
     parser.add_argument(
         "--out",
@@ -747,6 +1549,31 @@ def main():
         action="store_true",
         help="在表格之后仍将完整 JSON 打印到标准输出（默认仅写文件，终端为可读表格）",
     )
+    parser.add_argument(
+        "--skip-posts-state",
+        action="store_true",
+        help="不合并 12 小时帖子状态与 Gemini（写入的 JSON 仅为本次抓取快照）",
+    )
+    parser.add_argument(
+        "--posts-state",
+        default=None,
+        help="帖子状态文件路径（默认与 --out 同目录的 binance_posts_state.json）",
+    )
+    parser.add_argument(
+        "--skip-posts-gemini",
+        action="store_true",
+        help="仍合并 12h 状态但不对新帖调用 Gemini",
+    )
+    parser.add_argument(
+        "--square-images-dir",
+        default="square_post_images",
+        help="帖子卡片内图片保存目录（默认 square_post_images）",
+    )
+    parser.add_argument(
+        "--skip-square-images",
+        action="store_true",
+        help="不下载帖子中的图片",
+    )
     args = parser.parse_args()
 
     result = scrape_binance_lists(
@@ -755,8 +1582,19 @@ def main():
         watchlist_url=args.watchlist_url,
         max_profiles_to_probe=max(5, args.max_profiles),
         skip_profile_live_probe=args.skip_profile_live_probe,
+        market_rank_top_n=max(1, args.market_top),
+        include_hot_rank=args.include_hot_rank,
+        square_images_dir=None if args.skip_square_images else args.square_images_dir,
+        skip_square_images=args.skip_square_images,
     )
     out_path = os.path.abspath(args.out)
+    if not args.skip_posts_state:
+        process_watchlist_posts(
+            result,
+            out_path,
+            state_path=args.posts_state,
+            skip_gemini=args.skip_posts_gemini,
+        )
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
 

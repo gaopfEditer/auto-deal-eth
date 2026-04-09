@@ -313,3 +313,86 @@ def analyze_all_timeframes(image_paths: dict, base_symbol: str = "ETH"):
         print("[INFO] 跳过 AI 分析（未配置 API key）")
         return {}
     return analyze_charts(key, image_paths, base_symbol=base_symbol)
+
+
+def _generate_text_via_rest(key: str, prompt: str, timeout: int = 60) -> str:
+    """纯文本 generateContent（无图片），用于帖子方向分类等。"""
+    import requests
+
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"response_mime_type": "application/json"},
+    }
+    for model in _get_available_models(key)[:6]:
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{model}:generateContent?key={key}"
+        )
+        r = requests.post(url, json=payload, timeout=timeout)
+        if r.status_code == 200:
+            data = r.json()
+            parts = (
+                data.get("candidates", [{}])[0]
+                .get("content", {})
+                .get("parts", [])
+            )
+            if parts and parts[0].get("text"):
+                return parts[0]["text"]
+            raise RuntimeError("Gemini 返回无 text 字段")
+        if r.status_code in (403, 404):
+            try:
+                err = r.json().get("error", {}).get("message", "")[:120]
+            except Exception:
+                err = ""
+            if err and "leaked" not in err.lower():
+                print(f"[WARN] {model} {r.status_code}: {err}")
+        else:
+            r.raise_for_status()
+    raise RuntimeError("所有模型均失败，请检查 API Key 或网络")
+
+
+def classify_square_post_direction(
+    title: str,
+    raw_text: str,
+    *,
+    author: str = "",
+) -> Optional[Dict[str, Any]]:
+    """
+    根据 Square 帖子标题与正文，判断作者倾向做多 / 做空 / 中性 / 不明。
+    返回 JSON 字典，含 direction、confidence、reason；失败返回 None。
+    """
+    key = init_gemini()
+    if key is None:
+        return None
+    body = (raw_text or "")[:12000]
+    auth = (author or "").strip()
+    prompt = f"""你是加密货币交易内容分析师。根据以下币安 Square 动态（可能是中文），判断作者**主要**表达的交易方向倾向。
+
+只输出**一个** JSON 对象，不要 markdown、不要代码围栏。字段：
+- direction: 必须是以下之一： "long" | "short" | "neutral" | "unclear"
+  - long: 明确看多、做多、低吸、反弹做多、突破做多、看涨等
+  - short: 明确看空、做空、开空、压力做空、看跌、包空等
+  - neutral: 纯闲聊、引流、无方向复盘、教学无多空立场
+  - unclear: 信息不足无法归类
+- confidence: "high" | "medium" | "low"
+- reason: 一句简短中文理由（不超过 80 字）
+
+作者（若有）: {auth}
+标题: {title}
+正文:
+{body}
+"""
+    try:
+        text = _generate_text_via_rest(
+            key, prompt, timeout=GEMINI_REQUEST_TIMEOUT or 45
+        )
+        parsed = extract_json_from_gemini_text(text)
+        if not isinstance(parsed, dict):
+            return None
+        d = str(parsed.get("direction", "unclear")).lower()
+        if d not in ("long", "short", "neutral", "unclear"):
+            parsed["direction"] = "unclear"
+        return parsed
+    except Exception as e:
+        print(f"[WARN] Gemini 帖子方向分类失败: {e}")
+        return None

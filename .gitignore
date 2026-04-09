@@ -38,6 +38,7 @@ venv.bak/
 
 # Screenshots
 screenshots/
+square_posts_images/
 *.png
 *.jpg
 *.jpeg
