@@ -1,7 +1,8 @@
 """
-Square 关注流帖子：12 小时滚动窗口、状态持久化、新帖提示、Gemini 多空判断。
+Square 关注流帖子：24 小时滚动窗口、状态持久化、新帖提示、Gemini 多空判断。
 
 状态文件默认与 --out 同目录下的 binance_posts_state.json。
+posts 结构为 { 关注者 author_slug: { 帖子 href: 记录 } }；旧版扁平 { href: 记录 } 会在加载时自动迁移。
 """
 from __future__ import annotations
 
@@ -10,13 +11,19 @@ import os
 import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from zoneinfo import ZoneInfo
 
 TZ_BEIJING = ZoneInfo("Asia/Shanghai")
 
-POST_RETENTION_HOURS = 12
+POST_RETENTION_HOURS = 24
 DEFAULT_STATE_BASENAME = "binance_posts_state.json"
+
+# 发帖时间不得晚于「当前」超过该容差（避免时钟误差误判）
+_PUBLISHED_MAX_FUTURE_SKEW = timedelta(minutes=2)
+
+# 无 author_slug 时的分桶键（便于与真实 slug 区分）
+_POSTS_BUCKET_UNKNOWN = "_unknown"
 
 
 def _dt_utc(dt: datetime) -> datetime:
@@ -25,9 +32,20 @@ def _dt_utc(dt: datetime) -> datetime:
     return dt.astimezone(timezone.utc)
 
 
+def _reject_future_published_dt(
+    dt: Optional[datetime], ref_now: datetime
+) -> Optional[datetime]:
+    """发帖时间不得晚于当前（未来时间视为无效，避免写入错误 published_at）。"""
+    if dt is None:
+        return None
+    if _dt_utc(dt) <= _dt_utc(ref_now) + _PUBLISHED_MAX_FUTURE_SKEW:
+        return dt
+    return None
+
+
 def parse_published_to_dt(post: Dict[str, Any], ref_now: datetime) -> Optional[datetime]:
     """
-    从帖子字段解析「发帖时间」为 UTC，用于 12 小时窗口。
+    从帖子字段解析「发帖时间」为 UTC，用于 24 小时窗口。
     优先 published_iso（time[datetime]），其次 time_label / time 的中文相对时间。
     """
     iso = (post.get("published_iso") or "").strip()
@@ -37,14 +55,14 @@ def parse_published_to_dt(post: Dict[str, Any], ref_now: datetime) -> Optional[d
             dt = datetime.fromisoformat(t)
             if dt.tzinfo is None:
                 dt = dt.replace(tzinfo=timezone.utc)
-            return _dt_utc(dt)
+            return _reject_future_published_dt(_dt_utc(dt), ref_now)
         except ValueError:
             pass
     label = (post.get("time_label") or post.get("time") or "").strip()
     if label:
         dt = _parse_zh_time_label(label, ref_now)
         if dt:
-            return _dt_utc(dt)
+            return _reject_future_published_dt(_dt_utc(dt), ref_now)
     return None
 
 
@@ -60,18 +78,26 @@ def _parse_zh_time_label(label: str, ref_now: datetime) -> Optional[datetime]:
     if "刚刚" in s or s == "现在":
         return ref
 
-    # 币安 create-time：「4月10日」类（至少跨日；12 小时窗口会筛掉）
-    m = re.search(r"(\d{1,2})\s*月\s*(\d{1,2})\s*日", s)
+    # 完整日历：2025年5月22日 / 2024年8月30日（须优先于下方仅「M月D日」规则，否则会误用 ref.year）
+    m = re.search(r"(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日", s)
     if m:
-        mo, d = int(m.group(1)), int(m.group(2))
-        y = ref.year
+        y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
         try:
             return datetime(y, mo, d, 12, 0, tzinfo=TZ_BEIJING)
         except ValueError:
+            pass
+
+    # 币安 create-time：「4月10日」类（无年份时用 ref 年；若落在未来则退回上一年）
+    m = re.search(r"(\d{1,2})\s*月\s*(\d{1,2})\s*日", s)
+    if m:
+        mo, d = int(m.group(1)), int(m.group(2))
+        for y in (ref.year, ref.year - 1):
             try:
-                return datetime(y - 1, mo, d, 12, 0, tzinfo=TZ_BEIJING)
+                dt = datetime(y, mo, d, 12, 0, tzinfo=TZ_BEIJING)
             except ValueError:
-                pass
+                continue
+            if dt <= ref:
+                return dt
 
     # 英文（币安可能随语言显示）
     m = re.search(r"(\d+)\s*(?:hours?|hrs?)\s*ago", s, re.I)
@@ -213,7 +239,9 @@ def _published_dt_for_record(rec: Dict[str, Any], ref_now: datetime) -> Optional
         t2 = re.sub(r"\s*北京时间\s*$", "", pa).strip()
         try:
             naive = datetime.strptime(t2, "%Y-%m-%d %H:%M:%S")
-            return naive.replace(tzinfo=TZ_BEIJING)
+            return _reject_future_published_dt(
+                naive.replace(tzinfo=TZ_BEIJING), ref_now
+            )
         except ValueError:
             pass
     return None
@@ -276,6 +304,46 @@ def _direction_zh(direction: str) -> str:
     return m.get((direction or "").lower(), direction or "不明")
 
 
+def _normalize_posts_to_buckets(posts: Any) -> Dict[str, Dict[str, Any]]:
+    """
+    规范为 { 关注者标识(author_slug): { 帖子 href: 记录 } }。
+    兼容旧版扁平结构 { href: 记录 }（按条目的 author_slug 归入桶）。
+    """
+    if not isinstance(posts, dict) or not posts:
+        return {}
+    any_key = next(iter(posts.keys()))
+    if "/square/post/" in str(any_key):
+        out: Dict[str, Dict[str, Any]] = {}
+        for href, rec in posts.items():
+            if not isinstance(rec, dict):
+                continue
+            slug = (rec.get("author_slug") or "").strip().lower() or _POSTS_BUCKET_UNKNOWN
+            out.setdefault(slug, {})[str(href)] = rec
+        return out
+    out2: Dict[str, Dict[str, Any]] = {}
+    for slug, inner in posts.items():
+        if not isinstance(inner, dict):
+            continue
+        bucket: Dict[str, Any] = {}
+        for href, rec in inner.items():
+            if isinstance(rec, dict) and "/square/post/" in str(href).lower():
+                bucket[str(href)] = rec
+        if bucket:
+            out2[str(slug)] = bucket
+    return out2
+
+
+def _href_slug_index(buckets: Dict[str, Dict[str, Any]]) -> Dict[str, str]:
+    """href -> 所在桶（slug）。"""
+    idx: Dict[str, str] = {}
+    for slug, inner in buckets.items():
+        if not isinstance(inner, dict):
+            continue
+        for href in inner:
+            idx[href] = slug
+    return idx
+
+
 def _load_state(path: str) -> Dict[str, Any]:
     if not os.path.isfile(path):
         return {"version": 1, "posts": {}}
@@ -284,10 +352,12 @@ def _load_state(path: str) -> Dict[str, Any]:
             data = json.load(f)
         if not isinstance(data, dict):
             return {"version": 1, "posts": {}}
-        posts = data.get("posts")
-        if not isinstance(posts, dict):
-            posts = {}
-        return {"version": 1, "posts": posts}
+        posts_raw = data.get("posts")
+        posts = _normalize_posts_to_buckets(posts_raw if isinstance(posts_raw, dict) else {})
+        out: Dict[str, Any] = {"version": int(data.get("version", 1)), "posts": posts}
+        if "updated_at" in data:
+            out["updated_at"] = data["updated_at"]
+        return out
     except Exception:
         return {"version": 1, "posts": {}}
 
@@ -313,29 +383,43 @@ def process_watchlist_posts(
     """
     spath = state_path or default_posts_state_path(out_json_path)
     state = _load_state(spath)
-    posts_map: Dict[str, Any] = state.get("posts") or {}
+    posts_map: Dict[str, Dict[str, Any]] = _normalize_posts_to_buckets(
+        state.get("posts") or {}
+    )
 
     scraped = result.get("scraped_at")
     now = _parse_iso(scraped) if scraped else _utc_now()
 
     cutoff = _dt_utc(now) - timedelta(hours=POST_RETENTION_HOURS)
     removed = 0
-    to_del: List[str] = []
-    for href, rec in list(posts_map.items()):
-        if not isinstance(rec, dict):
-            to_del.append(href)
+    href_index = _href_slug_index(posts_map)
+    to_del: List[Tuple[str, str]] = []
+    for slug, inner in list(posts_map.items()):
+        if not isinstance(inner, dict):
+            to_del.append((slug, "__drop_bucket__"))
             continue
-        pdt = _published_dt_for_record(rec, now)
-        if pdt is None or _dt_utc(pdt) < cutoff:
-            to_del.append(href)
-    for href in to_del:
-        posts_map.pop(href, None)
-        removed += 1
+        for href, rec in list(inner.items()):
+            if not isinstance(rec, dict):
+                to_del.append((slug, href))
+                continue
+            pdt = _published_dt_for_record(rec, now)
+            if pdt is None or _dt_utc(pdt) < cutoff:
+                to_del.append((slug, href))
+    for slug, href in to_del:
+        inner = posts_map.get(slug)
+        if href == "__drop_bucket__":
+            posts_map.pop(slug, None)
+            continue
+        if isinstance(inner, dict) and href in inner:
+            del inner[href]
+            href_index.pop(href, None)
+            removed += 1
+        if isinstance(inner, dict) and not inner:
+            posts_map.pop(slug, None)
 
     incoming: List[Dict[str, Any]] = list(
         (result.get("watchlist") or {}).get("latest_posts") or []
     )
-    previous_hrefs = set(posts_map.keys())
 
     alerts: List[Dict[str, Any]] = []
 
@@ -352,14 +436,16 @@ def process_watchlist_posts(
         raw = (p.get("raw") or "")[:12000]
         author = (p.get("author") or "")[:500]
         slug = (p.get("author_slug") or "")[:200]
+        bucket = (slug or "").strip().lower() or _POSTS_BUCKET_UNKNOWN
         tm = (p.get("time") or "")[:80]
         pub_at = (p.get("published_at") or "")[:80]
         p_iso = (p.get("published_iso") or "")[:80]
         t_label = (p.get("time_label") or "")[:120]
         is_pin = bool(p.get("is_pinned"))
 
-        if href in posts_map:
-            rec = posts_map[href]
+        if href in href_index:
+            old_slug = href_index[href]
+            rec = posts_map[old_slug][href]
             rec["title"] = title
             rec["raw"] = raw
             rec["author"] = author
@@ -373,6 +459,12 @@ def process_watchlist_posts(
             rec["image_urls"] = list(dict.fromkeys(imgs))[:24]
             if p.get("saved_image_paths"):
                 rec["saved_image_paths"] = p.get("saved_image_paths")
+            if old_slug != bucket:
+                del posts_map[old_slug][href]
+                if not posts_map[old_slug]:
+                    del posts_map[old_slug]
+                posts_map.setdefault(bucket, {})[href] = rec
+                href_index[href] = bucket
         else:
             rec = {
                 "href": href,
@@ -392,8 +484,8 @@ def process_watchlist_posts(
                 "gemini_reason": None,
                 "gemini_bias_zh": None,
             }
-            posts_map[href] = rec
-            previous_hrefs.add(href)
+            posts_map.setdefault(bucket, {})[href] = rec
+            href_index[href] = bucket
 
             g: Optional[Dict[str, Any]] = None
             if not skip_gemini:
@@ -445,29 +537,32 @@ def process_watchlist_posts(
 
     # 输出列表：按发帖时间新到旧
     merged: List[Dict[str, Any]] = []
-    for href, rec in posts_map.items():
-        if not isinstance(rec, dict):
+    for _slug, inner in posts_map.items():
+        if not isinstance(inner, dict):
             continue
-        merged.append(
-            {
-                "author": rec.get("author", ""),
-                "author_slug": rec.get("author_slug", ""),
-                "href": href,
-                "raw": rec.get("raw", ""),
-                "time": rec.get("time", ""),
-                "title": rec.get("title", ""),
-                "published_at": rec.get("published_at", ""),
-                "published_iso": rec.get("published_iso", ""),
-                "time_label": rec.get("time_label", ""),
-                "is_pinned": rec.get("is_pinned", False),
-                "image_urls": rec.get("image_urls") or [],
-                "saved_image_paths": rec.get("saved_image_paths") or [],
-                "gemini_direction": rec.get("gemini_direction"),
-                "gemini_bias_zh": rec.get("gemini_bias_zh"),
-                "gemini_confidence": rec.get("gemini_confidence"),
-                "gemini_reason": rec.get("gemini_reason"),
-            }
-        )
+        for href, rec in inner.items():
+            if not isinstance(rec, dict):
+                continue
+            merged.append(
+                {
+                    "author": rec.get("author", ""),
+                    "author_slug": rec.get("author_slug", ""),
+                    "href": href,
+                    "raw": rec.get("raw", ""),
+                    "time": rec.get("time", ""),
+                    "title": rec.get("title", ""),
+                    "published_at": rec.get("published_at", ""),
+                    "published_iso": rec.get("published_iso", ""),
+                    "time_label": rec.get("time_label", ""),
+                    "is_pinned": rec.get("is_pinned", False),
+                    "image_urls": rec.get("image_urls") or [],
+                    "saved_image_paths": rec.get("saved_image_paths") or [],
+                    "gemini_direction": rec.get("gemini_direction"),
+                    "gemini_bias_zh": rec.get("gemini_bias_zh"),
+                    "gemini_confidence": rec.get("gemini_confidence"),
+                    "gemini_reason": rec.get("gemini_reason"),
+                }
+            )
     merged.sort(
         key=lambda x: _published_dt_for_record(x, now)
         or datetime(1970, 1, 1, tzinfo=TZ_BEIJING),

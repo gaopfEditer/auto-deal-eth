@@ -20,7 +20,7 @@
     仅对这些用户巡检「是否直播」与「是否发文章」；列表为空时仍巡检 Following 页收集到的全部主页。
   - 行情：默认只输出涨幅榜、跌幅榜各前 N（--market-top，默认 10）；全局热榜需加 --include-hot-rank。
   - 热榜/涨幅/跌幅若页面 DOM 抓不到，涨幅与跌幅会回退到官方 /api/v3/ticker/24hr（无需 Key）。
-  - 关注流帖子默认合并 binance_posts_state.json：保留 12 小时内文章，新帖终端提示并用 Gemini 判多空；
+  - 关注流帖子默认合并 binance_posts_state.json：保留 24 小时内文章，新帖终端提示并用 Gemini 判多空；
     可用 --skip-posts-state 仅输出本次快照。
   - 重点关注用户会额外打开其主页并深度下滚，合并时间线帖子（条数见 --max-items）；帖子卡片内图片可保存到 --square-images-dir。
 """
@@ -69,12 +69,16 @@ DEFAULT_MARKET_RANK_TOP_N = 10
 
 # 重点关注用户：Square profile 完整 URL 或单独 slug（与下方顺序一致）；可随意增删。
 # 为空列表时：直播/文章巡检范围仍为 Following 页收集到的全部主页。
+PRIORITY_PROFILE_BASE = "https://www.binance.com/zh-CN/square/profile/"
 PRIORITY_FOLLOW_PROFILES: List[str] = [
-    "https://www.binance.com/zh-CN/square/profile/yanchibit",
+    f"{PRIORITY_PROFILE_BASE}yanchibit",
 ]
 
 # 标准输出每个区块最多行数（0 表示全部）；与 getinfo/run_calendar 的 MAX_ROWS 用法类似
 MAX_STDOUT_ROWS = 180
+
+# 进入帖子正文页补充配图时，最多打开的帖子数（避免耗时过长）
+MAX_POST_DETAIL_ENRICH_PAGES = 15
 
 # 从表格行文本里抠交易对（兼容 BTCUSDT / btcusdt / BTC/USDT）
 _ROW_SYMBOL_RE = re.compile(
@@ -579,12 +583,14 @@ def _download_square_post_images(
 
 
 def _enrich_post_images_from_detail_pages(
-    driver, posts: List[Dict[str, Any]], max_pages: int = 40
+    driver,
+    posts: List[Dict[str, Any]],
+    max_pages: int = MAX_POST_DETAIL_ENRICH_PAGES,
 ) -> None:
     """进入 /square/post/ 正文页抓取正文区域配图（与列表卡片合并去重）。"""
     if not posts:
         return
-    n = min(max_pages, len(posts))
+    n = min(MAX_POST_DETAIL_ENRICH_PAGES, max_pages, len(posts))
     _scrape_log(f"打开帖子正文页补充配图（最多 {n} 篇）…")
     for p in posts[:n]:
         if not isinstance(p, dict):
@@ -1570,7 +1576,7 @@ def main():
     parser.add_argument(
         "--skip-posts-state",
         action="store_true",
-        help="不合并 12 小时帖子状态与 Gemini（写入的 JSON 仅为本次抓取快照）",
+        help="不合并 24 小时帖子状态与 Gemini（写入的 JSON 仅为本次抓取快照）",
     )
     parser.add_argument(
         "--posts-state",
