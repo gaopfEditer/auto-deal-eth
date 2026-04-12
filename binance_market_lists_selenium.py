@@ -72,6 +72,14 @@ DEFAULT_MARKET_RANK_TOP_N = 10
 PRIORITY_PROFILE_BASE = "https://www.binance.com/zh-CN/square/profile/"
 PRIORITY_FOLLOW_PROFILES: List[str] = [
     f"{PRIORITY_PROFILE_BASE}yanchibit",
+    f"{PRIORITY_PROFILE_BASE}aleng888888",
+    f"{PRIORITY_PROFILE_BASE}carrywang55688",
+    f"{PRIORITY_PROFILE_BASE}square-creator-857dc547d",
+    f"{PRIORITY_PROFILE_BASE}sanmageshuai",
+    f"{PRIORITY_PROFILE_BASE}square-creator-f69ded460",
+    f"{PRIORITY_PROFILE_BASE}haoge666",
+    f"{PRIORITY_PROFILE_BASE}square-creator-4bd102843",
+    # f"{PRIORITY_PROFILE_BASE}sanmageshuai",
 ]
 
 # 标准输出每个区块最多行数（0 表示全部）；与 getinfo/run_calendar 的 MAX_ROWS 用法类似
