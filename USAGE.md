@@ -95,7 +95,44 @@ python binance_market_lists_selenium.py --watchlist-url "https://www.binance.com
 - `--max-profiles`：关注主页巡检上限
 - `--skip-profile-live-probe`：跳过逐个主页直播巡检（更快，但直播命中可能更少）
 
-## 5. 常见启动顺序（建议）
+## 5. 资源分析（`browser_media_runner`）
+
+说明：当前 `browser_media_runner.runner` 的设计是**资源列表（本地文件）+ 提示词输入**，然后交给 Gemini 网页版上传分析。  
+它**不负责** URL 截图/下载，也不走 REST。
+
+### 5.1 本地文件分析（通用文件，按图片方式上传）
+
+```bash
+python -m browser_media_runner.runner "D:\frontend\main\python\auto-deal-eth\screenshots\tophub_page.png" -p generic_screenshot.txt --tag smoke
+```
+
+- `resources`：一个或多个本地文件路径
+- `-p/--prompt`：默认按提示词文件名读取（相对 `browser_media_runner/prompts/`）
+
+### 5.2 本地图片分析（直接传提示词正文）
+
+```bash
+python -m browser_media_runner.runner "D:\frontend\main\python\auto-deal-eth\screenshots\tophub_page.png" -p "请只输出 JSON，分析图片核心内容" --prompt-text --tag image
+```
+
+- `--prompt-text`：表示 `-p` 传入的是提示词正文，而不是文件名
+
+### 5.3 URL 分析（推荐流程）
+
+`runner` 不直接接收 URL。推荐先把 URL 内容变成本地截图，再走 5.1 / 5.2。
+
+**示例流程：**
+
+1) 先截图 URL（可用你现有浏览器自动化逻辑）  
+2) 再执行：
+
+```bash
+python -m browser_media_runner.runner "D:\path\to\url_shot.png" -p twitter_style_timeline.txt --tag url
+```
+
+如果你希望“直接传 URL 自动打开并截图再分析”，建议单独做一层 URL 预处理脚本，然后把截图路径传给 `runner`。
+
+## 6. 常见启动顺序（建议）
 
 1. 激活虚拟环境  
 2. `pip install -r requirements.txt`  

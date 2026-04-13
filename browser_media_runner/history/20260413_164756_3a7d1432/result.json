@@ -1,0 +1,16 @@
+{
+  "ok": false,
+  "error": "没有可用的图片素材（请检查资源列表或网络/浏览器）",
+  "domain_tag": "smoke",
+  "prompt_name": "generic_screenshot.txt",
+  "run_id": "20260413_164756_3a7d1432",
+  "history_dir": "D:\\frontend\\main\\python\\auto-deal-eth\\browser_media_runner\\history\\20260413_164756_3a7d1432",
+  "materialized_images": [],
+  "materialize_meta": [
+    {
+      "kind": "skip",
+      "source": "‪D:\\frontend\\main\\python\\auto-deal-eth\\screenshots\\tophub_page.png",
+      "detail": "非 URL 且非本地图片"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "count": 1,
+  "results": [
+    {
+      "symbol": "url",
+      "analysis": "Gemini 说\n{\n\"thread_or_timeline_summary\": \"今日热榜 (Tophub) 开发频道截图，展示了来自 GitHub、CSDN、人人都是产品经理、掘金、开源中国等平台的实时热门技术资讯和项目趋势，重点涵盖 AI 代理、DeepSeek、Claude Code 及机器人技术。\",\n\"tweets_or_cards\": [\n{\n\"visible_text_excerpt\": \"GitHub Trending: NousResearch / hermes-agent (7.3万), forrestchang / andrej-karpathy-skills (1.9万), microsoft / markitdown (10.6万)\",\n\"hashtags_or_cashtags\": [],\n\"apparent_intent\": \"展示当前全球最热门的开源项目和代码库趋势。\"\n},\n{\n\"visible_text_excerpt\": \"CSDN: 55岁程序员遭降级不满，怒植“自毁代码”：被裁当天，公司系统全面崩溃。\",\n\"hashtags_or_cashtags\": [],\n\"apparent_intent\": \"报道职场冲突与极端技术报复相关的社会新闻。\"\n},\n{\n\"visible_text_excerpt\": \"CSDN: 顶配超10万！两台Mac Studio在家就能跑满血DeepSeek，网友：这是性价比最高的模型\",\n\"hashtags_or_cashtags\": [\"#DeepSeek\"],\n\"apparent_intent\": \"分享运行大型 AI 模型的硬件配置心得。\"\n},\n{\n\"visible_text_excerpt\": \"人人都是产品经理: AI日报：宇树机器人跑出10m/s刷新世界纪录\",\n\"hashtags_or_cashtags\": [],\n\"apparent_intent\": \"播报人工智能与具身智能领域的最新技术突破。\"\n},\n{\n\"visible_text_excerpt\": \"掘金: Claude Code 的 skills 源码解析; AI 时代的管理后台框架应该是什么样子？\",\n\"hashtags_or_cashtags\": [\"#ClaudeCode\"],\n\"apparent_intent\": \"深入探讨特定 AI 工具的实现原理及行业架构思考。\"\n},\n{\n\"visible_text_excerpt\": \"咖啡日报: 大厂产品专家手把手教你如何写好周报（附模版）\",\n\"hashtags_or_cashtags\": [],\n\"apparent_intent\": \"提供职场技能培训与办公效率建议。\"\n}\n],\n\"stance_or_tone\": \"neutral\",\n\"notes_on_image_quality\": \"图像清晰，文字识别度高。截图属于聚合类资讯网站而非社交媒体时间线，因此缺乏典型的 Hashtag 格式，但技术标签非常明确。\"\n}",
+      "status": "success",
+      "method": "web",
+      "resource": "https://tophub.today/c/developer",
+      "resource_snapshot": "C:\\Users\\eason\\AppData\\Local\\Temp\\gemini_web_url_2e45adc3f79745fc83e33bbd7904af98.png"
+    }
+  ]
+}

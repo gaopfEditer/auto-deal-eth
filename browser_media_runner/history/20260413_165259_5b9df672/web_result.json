@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "count": 1,
+  "results": [
+    {
+      "symbol": "smoke",
+      "analysis": "Gemini\nPRO\n与 Gemini 对话\n请只输出 JSON，分析图片核心内容\n快速\n\n添加文件",
+      "status": "success",
+      "method": "web",
+      "resource": "D:\\frontend\\main\\python\\auto-deal-eth\\screenshots\\tophub_page.png"
+    }
+  ]
+}

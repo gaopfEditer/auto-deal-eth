@@ -1,0 +1,25 @@
+{
+  "ok": false,
+  "domain_tag": "url",
+  "prompt_name": "twitter_style_timeline.txt",
+  "run_id": "20260413_171821_430e584e",
+  "history_dir": "D:\\frontend\\main\\python\\auto-deal-eth\\browser_media_runner\\history\\20260413_171821_430e584e",
+  "resources": [
+    "https://tophub.today/c/developer"
+  ],
+  "resource_meta": [],
+  "web_result": {
+    "ok": false,
+    "count": 1,
+    "results": [
+      {
+        "symbol": "url",
+        "status": "error",
+        "error": "cannot access local variable 'ActionChains' where it is not associated with a value",
+        "method": "web",
+        "resource": "https://tophub.today/c/developer",
+        "resource_snapshot": "C:\\Users\\eason\\AppData\\Local\\Temp\\gemini_web_url_59b05bcef1ca43feab520eccee53aecd.png"
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+画面可能为 X(Twitter) 或类似「推文 / 时间线」截图。请提取**可见**的帖子要点、话题标签、提及的符号（如 #BTC / $ETH）、以及任何可读链接文本（不必保证链接可访问）。
+
+只输出**一个** JSON 对象，无 markdown 围栏：
+{
+  "thread_or_timeline_summary": "string",
+  "tweets_or_cards": [
+    {
+      "visible_text_excerpt": "string",
+      "hashtags_or_cashtags": ["string"],
+      "apparent_intent": "string"
+    }
+  ],
+  "stance_or_tone": "bullish|bearish|neutral|unclear|mixed",
+  "notes_on_image_quality": "string"
+}

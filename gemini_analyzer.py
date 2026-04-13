@@ -31,7 +31,7 @@ def _get_available_models(key):
             timeout=10
         )
         if r.status_code != 200:
-            return ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"]
+            return ["gemini-1.5-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"]
         names = [
             m["name"].replace("models/", "")
             for m in r.json().get("models", [])
@@ -74,6 +74,60 @@ def _generate_via_rest(key, prompt, image_path, timeout=60):
             r.raise_for_status()
     raise RuntimeError("所有模型均失败，请检查 API Key 或到 https://aistudio.google.com/apikey 新建")
 
+
+def _mime_for_image_path(image_path: str) -> str:
+    low = (image_path or "").lower()
+    if low.endswith(".png"):
+        return "image/png"
+    if low.endswith(".webp"):
+        return "image/webp"
+    if low.endswith(".gif"):
+        return "image/gif"
+    return "image/jpeg"
+
+
+def generate_multimodal_via_rest(
+    key: str,
+    prompt: str,
+    image_paths: list,
+    *,
+    timeout: int = 60,
+    response_mime_type: str = "application/json",
+) -> str:
+    """
+    多图 + 文本一次 generateContent（与 _generate_via_rest 相同模型轮询策略）。
+    image_paths：本地文件路径列表，顺序会保留在 parts 中。
+    """
+    import requests
+
+    parts: list = [{"text": prompt}]
+    for p in image_paths:
+        with open(p, "rb") as f:
+            b64 = base64.standard_b64encode(f.read()).decode()
+        parts.append(
+            {"inline_data": {"mime_type": _mime_for_image_path(p), "data": b64}}
+        )
+    payload = {
+        "contents": [{"parts": parts}],
+        "generationConfig": {"response_mime_type": response_mime_type},
+    }
+    for model in _get_available_models(key)[:6]:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
+        r = requests.post(url, json=payload, timeout=timeout)
+        if r.status_code == 200:
+            return r.json()["candidates"][0]["content"]["parts"][0]["text"]
+        if r.status_code in (403, 404):
+            try:
+                err = r.json().get("error", {}).get("message", "")[:100]
+            except Exception:
+                err = ""
+            if err and "leaked" not in err.lower():
+                print(f"[WARN] {model} {r.status_code}: {err}")
+        else:
+            r.raise_for_status()
+    raise RuntimeError("所有模型均失败，请检查 API Key 或到 https://aistudio.google.com/apikey 新建")
+
+
 def _kline_json_schema_text() -> str:
     """与提示词中一致的 JSON 结构说明（字符串块，字段名保持一致即可）。"""
     return r"""{
@@ -111,16 +165,29 @@ def get_kline_analysis_prompt(symbol: str, *, multi_timeframe: bool = False) -> 
     """
     K 线分析提示词：只写显著信号，少规则、少枚举，避免模型因约束过多出错。
     仅输出 JSON（无 markdown 围栏）。
+
+    正文来自 ``browser_media_runner/prompts/kline_analysis_single.txt`` 或
+    ``kline_analysis_multi.txt``（占位 ``<<SYMBOL>>``）；若文件缺失则回退到内置拼接。
     """
-    layout = ""
-    if multi_timeframe:
-        layout = """
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent / "browser_media_runner" / "prompts"
+    name = (
+        "kline_analysis_multi.txt" if multi_timeframe else "kline_analysis_single.txt"
+    )
+    path = root / name
+    if path.is_file():
+        return path.read_text(encoding="utf-8").replace("<<SYMBOL>>", str(symbol))
+
+    layout = (
+        """
 图表说明：可能为多周期拼图（如 2x2）；请按图上可见分区/标注区分周期。若实际只有一张单周期图，则按单图处理。
 """
-    else:
-        layout = """
+        if multi_timeframe
+        else """
 图表说明：一般为**单一周期**的一张 K 线截图，请只基于本图时间与价位分析，不要臆造其它周期。
 """
+    )
     schema = _kline_json_schema_text()
     return f"""你是加密货币技术分析师。**只输出一个 JSON 对象**，不要 markdown、不要代码围栏、不要多余说明。
 

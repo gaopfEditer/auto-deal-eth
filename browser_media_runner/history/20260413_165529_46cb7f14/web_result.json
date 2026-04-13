@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "count": 1,
+  "results": [
+    {
+      "symbol": "smoke",
+      "analysis": "Gemini\nPRO\n发起新对话\n我的内容\nGem\n对话\n程序员英语学习软件推荐\n信号类型转时间戳问题排查\nETH/USDT 1H 技术分析\nRAG Agent：智能体与知识库结合\nLinux 文件夹占用大小查看\n找回 X 账号注册邮箱方法\nQwen vs. Gemini: Vision & Reasoning\nElement Plus 树形组件自定义实现\n俄乌复活节停火分析\n推特用户名修改与资料安全\nAI 驱动内容创作自动化方案\nAbliterated 模型能力解析\nCursor 在中国大陆使用指南\n设置和帮助\n与 Gemini 对话\n你说\n请只输出 JSON，分析图片核心内容\n\n工具\n快速\nGemini 是一款 AI 工具，其回答未必正确无误。",
+      "status": "success",
+      "method": "web",
+      "resource": "D:\\frontend\\main\\python\\auto-deal-eth\\screenshots\\tophub_page.png"
+    }
+  ]
+}

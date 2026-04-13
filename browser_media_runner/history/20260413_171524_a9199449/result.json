@@ -1,0 +1,16 @@
+{
+  "ok": false,
+  "error": "没有可上传的本地文件资源",
+  "domain_tag": "url",
+  "prompt_name": "twitter_style_timeline.txt",
+  "run_id": "20260413_171524_a9199449",
+  "history_dir": "D:\\frontend\\main\\python\\auto-deal-eth\\browser_media_runner\\history\\20260413_171524_a9199449",
+  "resources": [],
+  "resource_meta": [
+    {
+      "kind": "skip",
+      "source": "https://tophub.today/c/developer",
+      "detail": "非本地文件路径"
+    }
+  ]
+}
