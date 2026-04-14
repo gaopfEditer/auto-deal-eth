@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "count": 1,
+  "results": [
+    {
+      "symbol": "image",
+      "analysis": "Gemini 说\n请上传您想要分析的图片。由于我目前无法看到您之前的上下文或未附加的文件，请提供图片，我将立即为您输出包含核心内容分析的 JSON 数据。\n如果您已经上传了图片但尚未收到回复，请重新发送。输出格式将严格遵循您的要求：\nJSON\n{\n  \"核心内容\": {\n    \"主体对象\": \"...\",\n    \"场景描述\": \"...\",\n    \"主要特征\": [\"...\", \"...\"],\n    \"情感/氛围\": \"...\",\n    \"关键细节\": {\n      \"元素A\": \"...\",\n      \"元素B\": \"...\"\n    }\n  }\n}",
+      "status": "success",
+      "method": "web",
+      "resource": "D:\\frontend\\main\\python\\auto-deal-eth\\screenshots\\tophub_page.png"
+    }
+  ]
+}

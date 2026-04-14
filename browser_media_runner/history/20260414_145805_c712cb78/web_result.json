@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "count": 1,
+  "results": [
+    {
+      "symbol": "url",
+      "analysis": "你说\n画面可能为 X(Twitter) 或类似「推文 / 时间线」截图。请提取**可见**的帖子要点、话题标签、提及的符号（如 #BTC / $ETH）、以及任何可读链接文本（不必保证链接可访问）。\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nGemini 说",
+      "status": "success",
+      "method": "web",
+      "resource": "https://x.com/yangyi/status/2043661337839141187",
+      "resource_snapshot": "C:\\Users\\eason\\AppData\\Local\\Temp\\gemini_web_url_086af8625c8a447e834b0968624b7b30.png"
+    }
+  ]
+}

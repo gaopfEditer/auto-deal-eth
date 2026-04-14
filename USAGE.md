@@ -127,7 +127,7 @@ python -m browser_media_runner.runner "D:\frontend\main\python\auto-deal-eth\scr
 2) 再执行：
 
 ```bash
-python -m browser_media_runner.runner "D:\path\to\url_shot.png" -p twitter_style_timeline.txt --tag url
+python -m browser_media_runner.runner "https://x.com/yangyi/status/2043661337839141187" -p twitter_style_timeline.txt --tag url
 ```
 
 如果你希望“直接传 URL 自动打开并截图再分析”，建议单独做一层 URL 预处理脚本，然后把截图路径传给 `runner`。

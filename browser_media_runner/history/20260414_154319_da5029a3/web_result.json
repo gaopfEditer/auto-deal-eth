@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "count": 1,
+  "results": [
+    {
+      "symbol": "url",
+      "analysis": "Gemini 说\n{\n\"thread_or_timeline_summary\": \"这是一篇发布在币安广场（Binance Square）上的短帖，作者“三马哥”通过对比2022年熊市的走势，对2026年（今年）比特币（BTC）的反弹幅度及后续走势进行了预测和技术分析。\",\n\"tweets_or_cards\": [\n{\n\"visible_text_excerpt\": \"2022年熊市BTC触底反弹了46%，即从32000U涨到48000U后骗人上车后暴跌到15000U。2026年（今年）熊市BTC触碰6万U，如果按照2022年反弹幅度46%的话是涨到87000U，骗人上车后再暴跌破5万U？不过今年BTC的缺口是在84000U左右并不是87000，需要注意的是...\",\n\"hashtags_or_cashtags\": [\"#BTC\"],\n\"apparent_intent\": \"通过历史行情对比（分形分析）来预测当前价格走势，警示潜在的回调风险。\"\n}\n],\n\"stance_or_tone\": \"bearish\",\n\"notes_on_image_quality\": \"图像清晰，界面语言为简体中文。右侧有Cookie弹窗遮挡了部分背景内容，但不影响对主要帖子的阅读。帖中提到的“2026年”与现实时间线存在前瞻性设定或特定背景假设。\"\n}",
+      "status": "success",
+      "method": "web",
+      "resource": "https://x.com/yangyi/status/2043661337839141187",
+      "resource_snapshot": "C:\\Users\\eason\\AppData\\Local\\Temp\\gemini_web_url_cb6599509c6f4ec191f41ba58605b427.png"
+    }
+  ]
+}

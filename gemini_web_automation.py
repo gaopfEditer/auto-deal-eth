@@ -13,6 +13,7 @@ import sys
 import tempfile
 import time
 import uuid
+from io import BytesIO
 from typing import Optional
 
 from selenium.common.exceptions import TimeoutException
@@ -82,11 +83,264 @@ def analyze_with_gemini_web(
             # 查找输入框或上传按钮
             # Gemini 网页版可能有不同的界面，需要尝试多种选择器
             print(f"  等待页面元素加载...")
-            time.sleep(3)
+            time.sleep(7)
             
             # 尝试查找上传图片的按钮或区域
             # Gemini 网页版需要先点击"添加文件"按钮，然后在浮窗中点击"上传文件"
             file_input = None
+            pasted_upload = False
+
+            def _try_paste_image_via_clipboard(img_path: str) -> bool:
+                """
+                优先走剪贴板粘贴上传（Windows）。
+                成功后可跳过“添加文件/上传文件”按钮定位流程。
+                """
+                print(f"  [INFO] 尝试剪贴板上传: {img_path}")
+                if os.name != "nt":
+                    print("  [INFO] 非 Windows 环境，跳过剪贴板上传")
+                    return False
+                if not os.path.isfile(img_path):
+                    print("  [WARNING] 图片文件不存在，无法剪贴板上传")
+                    return False
+
+                def _set_file_clipboard_via_ctypes(file_path: str) -> bool:
+                    """零依赖：使用 ctypes 写入 CF_HDROP（文件剪贴板）。"""
+                    try:
+                        import ctypes
+                        from ctypes import wintypes
+
+                        class POINT(ctypes.Structure):
+                            _fields_ = [("x", wintypes.LONG), ("y", wintypes.LONG)]
+
+                        class DROPFILES(ctypes.Structure):
+                            _fields_ = [
+                                ("pFiles", wintypes.DWORD),
+                                ("pt", POINT),
+                                ("fNC", wintypes.BOOL),
+                                ("fWide", wintypes.BOOL),
+                            ]
+
+                        CF_HDROP = 15
+                        GMEM_MOVEABLE = 0x0002
+                        GMEM_ZEROINIT = 0x0040
+                        GHND = GMEM_MOVEABLE | GMEM_ZEROINIT
+
+                        user32 = ctypes.windll.user32
+                        kernel32 = ctypes.windll.kernel32
+
+                        # 双零结尾的 UTF-16LE 文件路径列表（可支持多文件，这里只放一个）
+                        payload = (file_path + "\0\0").encode("utf-16le")
+                        header = DROPFILES()
+                        header.pFiles = ctypes.sizeof(DROPFILES)
+                        header.pt = POINT(0, 0)
+                        header.fNC = False
+                        header.fWide = True
+
+                        total_size = ctypes.sizeof(DROPFILES) + len(payload)
+                        hmem = kernel32.GlobalAlloc(GHND, total_size)
+                        if not hmem:
+                            return False
+                        ptr = kernel32.GlobalLock(hmem)
+                        if not ptr:
+                            kernel32.GlobalFree(hmem)
+                            return False
+                        try:
+                            ctypes.memmove(ptr, ctypes.byref(header), ctypes.sizeof(DROPFILES))
+                            ctypes.memmove(
+                                ptr + ctypes.sizeof(DROPFILES), payload, len(payload)
+                            )
+                        finally:
+                            kernel32.GlobalUnlock(hmem)
+
+                        if not user32.OpenClipboard(None):
+                            kernel32.GlobalFree(hmem)
+                            return False
+                        try:
+                            user32.EmptyClipboard()
+                            if not user32.SetClipboardData(CF_HDROP, hmem):
+                                kernel32.GlobalFree(hmem)
+                                return False
+                            # 成功后所有权转移给系统，不再手动 free
+                            hmem = None
+                            return True
+                        finally:
+                            user32.CloseClipboard()
+                    except Exception as e:
+                        print(f"  [DEBUG] ctypes 写文件到剪贴板失败: {e}")
+                        return False
+
+                try:
+                    import win32clipboard  # type: ignore
+                    from PIL import Image
+                except Exception:
+                    print("  [INFO] 缺少 pywin32/Pillow，回退 ctypes 文件剪贴板方案")
+                    if not _set_file_clipboard_via_ctypes(img_path):
+                        print("  [WARNING] ctypes 文件剪贴板写入失败")
+                        return False
+                    print("  [OK] 已通过 ctypes 写入文件到系统剪贴板")
+                    # 复用下方粘贴逻辑：只需标记已写剪贴板即可
+                    try:
+                        body = driver.find_element(By.TAG_NAME, "body")
+                        body.click()
+                    except Exception:
+                        pass
+                    pasted = False
+                    try:
+                        import pyautogui  # type: ignore
+
+                        pyautogui.PAUSE = 0.1
+                        pyautogui.hotkey("ctrl", "v")
+                        pasted = True
+                        print("  [INFO] 已执行 pyautogui Ctrl+V")
+                    except Exception as e:
+                        print(f"  [DEBUG] pyautogui Ctrl+V 失败，回退 ActionChains: {e}")
+                        try:
+                            ActionChains(driver).key_down(Keys.CONTROL).send_keys("v").key_up(
+                                Keys.CONTROL
+                            ).perform()
+                            pasted = True
+                            print("  [INFO] 已执行 ActionChains Ctrl+V")
+                        except Exception as e2:
+                            print(f"  [DEBUG] ActionChains Ctrl+V 失败: {e2}")
+                            pasted = False
+                    if not pasted:
+                        return False
+                    try:
+                        WebDriverWait(driver, 8).until(
+                            lambda d: _has_uploaded_attachment_signal()
+                        )
+                    except Exception:
+                        pass
+                    if _has_uploaded_attachment_signal():
+                        print("  [OK] 文件剪贴板粘贴上传已验证成功（检测到附件信号）")
+                        return True
+                    print("  [WARNING] 已执行文件粘贴，但未检测到附件信号")
+                    return False
+
+                def _has_uploaded_attachment_signal() -> bool:
+                    selectors = [
+                        "img[src^='blob:']",
+                        "img[src^='data:image']",
+                        "button[aria-label*='移除']",
+                        "button[aria-label*='Remove']",
+                        "[class*='upload'] img",
+                        "[class*='attachment'] img",
+                    ]
+                    for sel in selectors:
+                        try:
+                            els = driver.find_elements(By.CSS_SELECTOR, sel)
+                            if els:
+                                return True
+                        except Exception:
+                            continue
+                    return False
+
+                try:
+                    # 写入剪贴板（CF_DIB 需要去掉 BMP 头 14 字节）
+                    img = Image.open(img_path).convert("RGB")
+                    bio = BytesIO()
+                    img.save(bio, format="BMP")
+                    dib = bio.getvalue()[14:]
+                    bio.close()
+
+                    win32clipboard.OpenClipboard()
+                    try:
+                        win32clipboard.EmptyClipboard()
+                        win32clipboard.SetClipboardData(win32clipboard.CF_DIB, dib)
+                    finally:
+                        win32clipboard.CloseClipboard()
+                    print("  [OK] 图片已写入系统剪贴板")
+
+                    # 聚焦页面并粘贴
+                    try:
+                        body = driver.find_element(By.TAG_NAME, "body")
+                        body.click()
+                    except Exception:
+                        pass
+                    pasted = False
+                    # 优先真实键盘热键（更接近用户操作）
+                    try:
+                        import pyautogui  # type: ignore
+
+                        pyautogui.PAUSE = 0.1
+                        pyautogui.hotkey("ctrl", "v")
+                        pasted = True
+                        print("  [INFO] 已执行 pyautogui Ctrl+V")
+                    except Exception as e:
+                        print(f"  [DEBUG] pyautogui Ctrl+V 失败，回退 ActionChains: {e}")
+                        try:
+                            ActionChains(driver).key_down(Keys.CONTROL).send_keys("v").key_up(
+                                Keys.CONTROL
+                            ).perform()
+                            pasted = True
+                            print("  [INFO] 已执行 ActionChains Ctrl+V")
+                        except Exception as e2:
+                            print(f"  [DEBUG] ActionChains Ctrl+V 失败: {e2}")
+                            pasted = False
+
+                    if not pasted:
+                        return False
+
+                    # 粘贴后验证是否出现附件信号
+                    try:
+                        WebDriverWait(driver, 8).until(
+                            lambda d: _has_uploaded_attachment_signal()
+                        )
+                    except Exception:
+                        pass
+                    if _has_uploaded_attachment_signal():
+                        print("  [OK] 剪贴板粘贴上传已验证成功（检测到附件信号）")
+                        return True
+                    print("  [WARNING] 已执行粘贴，但未检测到附件信号")
+                    return False
+                except Exception as e:
+                    print(f"  [DEBUG] 剪贴板粘贴上传失败: {e}")
+                    return False
+
+            # 优先：剪贴板粘贴上传，成功则跳过“添加文件按钮”流程
+            pasted_upload = _try_paste_image_via_clipboard(os.path.abspath(image_path))
+
+            def _dismiss_upload_intercept_confirm() -> bool:
+                """
+                某些账号/场景下，Gemini 会在添加文件后弹确认拦截层（如“确定/继续”）。
+                尝试自动点击一次，避免流程卡住。
+                """
+                texts = (
+                    "确定",
+                    "继续",
+                    "允许",
+                    "我知道了",
+                    "继续上传",
+                    "confirm",
+                    "continue",
+                    "allow",
+                    "ok",
+                )
+                clicked = False
+                for t in texts:
+                    xpath = (
+                        "//*[self::button or @role='button' or self::div]"
+                        f"[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{t.lower()}')]"
+                    )
+                    try:
+                        btn = WebDriverWait(driver, 1).until(
+                            EC.element_to_be_clickable((By.XPATH, xpath))
+                        )
+                        driver.execute_script(
+                            "arguments[0].scrollIntoView({block:'center'});", btn
+                        )
+                        time.sleep(0.15)
+                        try:
+                            btn.click()
+                        except Exception:
+                            driver.execute_script("arguments[0].click();", btn)
+                        print(f"  [INFO] 已处理上传拦截确认：{t}")
+                        clicked = True
+                        time.sleep(0.4)
+                        break
+                    except Exception:
+                        continue
+                return clicked
             
             # 方法1: 直接查找文件输入框（可能隐藏）
             try:
@@ -98,7 +352,7 @@ def analyze_with_gemini_web(
                 pass
             
             # 方法2: 先点击"添加文件"按钮，然后在浮窗中点击"上传文件"
-            if not file_input:
+            if not file_input and not pasted_upload:
                 try:
                     # 步骤1: 查找并点击"添加文件"按钮（或类似的按钮）
                     add_file_button = None
@@ -134,6 +388,7 @@ def analyze_with_gemini_web(
                                 driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", add_file_button)
                                 time.sleep(0.3)
                                 add_file_button.click()
+                                _dismiss_upload_intercept_confirm()
                                 print(f"  [OK] 已点击添加文件按钮")
                                 # 等待菜单展开（aria-expanded 或菜单容器出现）
                                 try:
@@ -211,6 +466,7 @@ def analyze_with_gemini_web(
                                 pyautogui.PAUSE = 0.1
                                 pyautogui.click(screen_x, screen_y)
                                 print(f"  [OK] pyautogui 坐标点击完成")
+                                _dismiss_upload_intercept_confirm()
                                 # 等待文件选择对话框/文件输入框出现（比固定 sleep 更稳）
                                 try:
                                     WebDriverWait(driver, 10).until(
@@ -230,6 +486,7 @@ def analyze_with_gemini_web(
                                 print(f"  [WARNING] pyautogui 未安装，尝试其他方法")
                                 # 回退到普通点击
                                 upload_button.click()
+                                _dismiss_upload_intercept_confirm()
                                 time.sleep(2)
                                 file_inputs = driver.find_elements(By.CSS_SELECTOR, "input[type='file']")
                                 if file_inputs:
@@ -476,7 +733,7 @@ def analyze_with_gemini_web(
                     print(f"  [DEBUG] 通过文本查找失败: {e}")
             
             # 方法3: 尝试其他常见的选择器（使用 pyautogui 点击）
-            if not file_input:
+            if not file_input and not pasted_upload:
                 upload_selectors = [
                     "button[aria-label*='upload']",
                     "button[aria-label*='Upload']",
@@ -535,7 +792,7 @@ def analyze_with_gemini_web(
                         continue
             
             # 方法4: 再次查找文件输入框（可能在点击后出现）
-            if not file_input:
+            if not file_input and not pasted_upload:
                 try:
                     file_inputs = WebDriverWait(driver, 3).until(
                         EC.presence_of_all_elements_located((By.CSS_SELECTOR, "input[type='file']"))
@@ -546,7 +803,9 @@ def analyze_with_gemini_web(
                 except:
                     pass
             
-            if file_input:
+            if pasted_upload:
+                print("  ✓ 已通过剪贴板粘贴完成图片上传")
+            elif file_input:
                 print(f"  正在上传图片: {image_path}")
                 # 上传图片
                 abs_image_path = os.path.abspath(image_path)

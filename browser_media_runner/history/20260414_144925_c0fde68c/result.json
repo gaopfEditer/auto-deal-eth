@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "domain_tag": "url",
+  "prompt_name": "twitter_style_timeline.txt",
+  "run_id": "20260414_144925_c0fde68c",
+  "history_dir": "D:\\frontend\\main\\python\\auto-deal-eth\\browser_media_runner\\history\\20260414_144925_c0fde68c",
+  "resources": [
+    "https://x.com/yangyi/status/2043661337839141187"
+  ],
+  "resource_meta": [],
+  "web_result": {
+    "ok": true,
+    "count": 1,
+    "results": [
+      {
+        "symbol": "url",
+        "analysis": "Gemini 说\n{\n\"thread_or_timeline_summary\": \"No image provided for analysis. Please upload a screenshot of a Twitter/X timeline or a specific post to extract information.\",\n\"tweets_or_cards\": [],\n\"stance_or_tone\": \"unclear\",\n\"notes_on_image_quality\": \"No image detected in the input. Please provide a visual file to proceed with data extraction.\"\n}",
+        "status": "success",
+        "method": "web",
+        "resource": "https://x.com/yangyi/status/2043661337839141187",
+        "resource_snapshot": "C:\\Users\\eason\\AppData\\Local\\Temp\\gemini_web_url_b561b8be8d5a4d86aa266539f7ffdf6c.png"
+      }
+    ]
+  }
+}

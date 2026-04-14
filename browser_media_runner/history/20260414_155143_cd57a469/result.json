@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "domain_tag": "url",
+  "prompt_name": "twitter_style_timeline.txt",
+  "run_id": "20260414_155143_cd57a469",
+  "history_dir": "D:\\frontend\\main\\python\\auto-deal-eth\\browser_media_runner\\history\\20260414_155143_cd57a469",
+  "resources": [
+    "https://x.com/yangyi/status/2043661337839141187"
+  ],
+  "resource_meta": [],
+  "web_result": {
+    "ok": true,
+    "count": 1,
+    "results": [
+      {
+        "symbol": "url",
+        "analysis": "Gemini 说\n{\n\"thread_or_timeline_summary\": \"A social media post on X (Twitter) by user @yangyi discussing the commercial success of simple 'vibe coding' scripts on Xiaohongshu (Little Red Book).\",\n\"tweets_or_cards\": [\n{\n\"visible_text_excerpt\": \"说真的，很难想象 就这么一个小红书收藏夹整理的vibe coding代码，能在小红书上跑3000点赞，9.9一份卖个插件还能卖出去 这不就跟牛马AI说一句话的事儿吗？\",\n\"hashtags_or_cashtags\": [],\n\"apparent_intent\": \"Expressing disbelief or skepticism about the market value of simple AI-generated scripts/plugins being sold for profit.\"\n},\n{\n\"visible_text_excerpt\": \"Relevant people: Yangyi @yangyi. 人机协同架构师 Reverb Marketing布道者 新时代人机协同基站 - 牛马AI niuma.limyai.com Yangyi实战手记 https://www.google.com/search?q=yangyixxxx.substack.com\",\n\"hashtags_or_cashtags\": [],\n\"apparent_intent\": \"User profile information and promotion of personal links/projects.\"\n}\n],\n\"stance_or_tone\": \"neutral\",\n\"notes_on_image_quality\": \"High-quality, clear screenshot of a dark-mode X (Twitter) interface. All text in the main post and sidebar is legible. Includes a nested image showing a Xiaohongshu interface.\"\n}",
+        "status": "success",
+        "method": "web",
+        "resource": "https://x.com/yangyi/status/2043661337839141187",
+        "resource_snapshot": "C:\\Users\\eason\\AppData\\Local\\Temp\\gemini_web_url_49755c203ea4438db0d528b0b59fa98b.png"
+      }
+    ]
+  }
+}
