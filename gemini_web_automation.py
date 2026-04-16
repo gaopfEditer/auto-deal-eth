@@ -341,6 +341,21 @@ def analyze_with_gemini_web(
                     except Exception:
                         continue
                 return clicked
+
+            def _drain_upload_intercepts(max_rounds: int = 4, gap_sec: float = 0.35) -> int:
+                """
+                连续清理上传拦截弹窗：有些场景会连弹 2-3 层确认。
+                返回成功点击次数，便于日志观察是否被 Gemini 拦截。
+                """
+                clicks = 0
+                for _ in range(max_rounds):
+                    if not _dismiss_upload_intercept_confirm():
+                        break
+                    clicks += 1
+                    time.sleep(gap_sec)
+                if clicks > 0:
+                    print(f"  [INFO] 已连续处理上传拦截弹窗: {clicks} 次")
+                return clicks
             
             # 方法1: 直接查找文件输入框（可能隐藏）
             try:
@@ -388,7 +403,7 @@ def analyze_with_gemini_web(
                                 driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", add_file_button)
                                 time.sleep(0.3)
                                 add_file_button.click()
-                                _dismiss_upload_intercept_confirm()
+                                _drain_upload_intercepts()
                                 print(f"  [OK] 已点击添加文件按钮")
                                 # 等待菜单展开（aria-expanded 或菜单容器出现）
                                 try:
@@ -401,6 +416,8 @@ def analyze_with_gemini_web(
                                 except Exception:
                                     # 给一点缓冲，避免后续立刻查找菜单项
                                     time.sleep(0.8)
+                                # 菜单展开后再清一轮确认层，避免遮挡“上传文件”菜单项
+                                _drain_upload_intercepts(max_rounds=2, gap_sec=0.25)
                                 break
                         except:
                             continue
@@ -466,7 +483,7 @@ def analyze_with_gemini_web(
                                 pyautogui.PAUSE = 0.1
                                 pyautogui.click(screen_x, screen_y)
                                 print(f"  [OK] pyautogui 坐标点击完成")
-                                _dismiss_upload_intercept_confirm()
+                                _drain_upload_intercepts(max_rounds=3, gap_sec=0.25)
                                 # 等待文件选择对话框/文件输入框出现（比固定 sleep 更稳）
                                 try:
                                     WebDriverWait(driver, 10).until(
@@ -486,7 +503,7 @@ def analyze_with_gemini_web(
                                 print(f"  [WARNING] pyautogui 未安装，尝试其他方法")
                                 # 回退到普通点击
                                 upload_button.click()
-                                _dismiss_upload_intercept_confirm()
+                                _drain_upload_intercepts(max_rounds=3, gap_sec=0.25)
                                 time.sleep(2)
                                 file_inputs = driver.find_elements(By.CSS_SELECTOR, "input[type='file']")
                                 if file_inputs:
@@ -734,6 +751,26 @@ def analyze_with_gemini_web(
             
             # 方法3: 尝试其他常见的选择器（使用 pyautogui 点击）
             if not file_input and not pasted_upload:
+                def _locate_file_input_after_click(wait_sec: int = 3):
+                    # 先用常规选择器等待，再做一次 JS 全量扫描（兼容 display:none/复杂 DOM）
+                    try:
+                        file_inputs_wait = WebDriverWait(driver, wait_sec).until(
+                            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "input[type='file']"))
+                        )
+                        if file_inputs_wait:
+                            return file_inputs_wait[0]
+                    except Exception:
+                        pass
+                    try:
+                        js_input = driver.execute_script(
+                            "return document.querySelector('input[type=\"file\"]');"
+                        )
+                        if js_input is not None:
+                            return js_input
+                    except Exception:
+                        pass
+                    return None
+
                 upload_selectors = [
                     "button[aria-label*='upload']",
                     "button[aria-label*='Upload']",
@@ -779,10 +816,10 @@ def analyze_with_gemini_web(
                             print(f"  [INFO] 回退到 JavaScript 点击")
                         
                         time.sleep(2)
-                        # 验证是否真的点击成功
-                        file_inputs = driver.find_elements(By.CSS_SELECTOR, "input[type='file']")
-                        if file_inputs:
-                            file_input = file_inputs[0]
+                        # 验证是否真的点击成功（常规查找 + JS 扫描）
+                        found_input = _locate_file_input_after_click(wait_sec=2)
+                        if found_input:
+                            file_input = found_input
                             print(f"  [OK] 点击成功，找到文件输入框")
                             break
                         else:
@@ -794,14 +831,116 @@ def analyze_with_gemini_web(
             # 方法4: 再次查找文件输入框（可能在点击后出现）
             if not file_input and not pasted_upload:
                 try:
-                    file_inputs = WebDriverWait(driver, 3).until(
-                        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "input[type='file']"))
-                    )
-                    if file_inputs:
-                        file_input = file_inputs[0]
+                    file_input = _locate_file_input_after_click(wait_sec=3)
+                    if file_input:
                         print(f"  [INFO] 最终找到文件输入框")
                 except:
                     pass
+
+            # 方法5: 若点击“上传文件”失效，则重新点击 file-uploader 展开下拉后再点“上传文件”
+            if not file_input and not pasted_upload:
+                def _reopen_uploader_and_click_upload_once() -> bool:
+                    trigger_selectors = [
+                        "#file-uploader",
+                        "file-uploader",
+                        "[id*='file-uploader']",
+                        "button.upload-card-button[aria-controls='upload-file-menu']",
+                        "button.upload-card-button",
+                        "[data-testid='add-file-button']",
+                    ]
+                    trigger = None
+                    for sel in trigger_selectors:
+                        try:
+                            trigger = WebDriverWait(driver, 2).until(
+                                EC.element_to_be_clickable((By.CSS_SELECTOR, sel))
+                            )
+                            if trigger:
+                                print(f"  [INFO] 找到 file-uploader 触发器: {sel}")
+                                break
+                        except Exception:
+                            continue
+                    if not trigger:
+                        return False
+
+                    try:
+                        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", trigger)
+                    except Exception:
+                        pass
+
+                    clicked = False
+                    try:
+                        trigger.click()
+                        clicked = True
+                    except Exception:
+                        try:
+                            driver.execute_script("arguments[0].click();", trigger)
+                            clicked = True
+                        except Exception:
+                            clicked = False
+                    if not clicked:
+                        return False
+
+                    _drain_upload_intercepts(max_rounds=3, gap_sec=0.25)
+                    time.sleep(0.5)
+
+                    upload_btn = None
+                    upload_btn_xpaths = [
+                        "//*[contains(@class, 'mdc-list-item') and .//div[contains(text(), '上传文件')]]",
+                        "//*[contains(@class, 'list-item') and .//*[contains(text(), '上传文件')]]",
+                        "//div[contains(@class, 'menu-text') and contains(text(), '上传文件')]",
+                        "//span[contains(text(), '上传文件')]",
+                        "//*[self::button or @role='button'][contains(., '上传文件') or contains(., 'Upload files') or contains(., 'Upload file')]",
+                    ]
+                    for xp in upload_btn_xpaths:
+                        try:
+                            upload_btn = WebDriverWait(driver, 2).until(
+                                EC.presence_of_element_located((By.XPATH, xp))
+                            )
+                            if upload_btn:
+                                print("  [INFO] 重新展开后找到“上传文件”菜单项")
+                                break
+                        except Exception:
+                            continue
+                    if not upload_btn:
+                        return False
+
+                    try:
+                        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", upload_btn)
+                    except Exception:
+                        pass
+                    try:
+                        upload_btn.click()
+                    except Exception:
+                        try:
+                            driver.execute_script("arguments[0].click();", upload_btn)
+                        except Exception:
+                            return False
+                    _drain_upload_intercepts(max_rounds=3, gap_sec=0.25)
+                    time.sleep(0.8)
+                    return True
+
+                max_reopen_retries = 3
+                for i in range(1, max_reopen_retries + 1):
+                    print(f"  [INFO] 上传入口重试({i}/{max_reopen_retries})：重新展开 file-uploader")
+                    ok = _reopen_uploader_and_click_upload_once()
+                    if not ok:
+                        print("  [WARNING] 重新展开或点击“上传文件”失败")
+                        continue
+                    file_input = _locate_file_input_after_click(wait_sec=2)
+                    if file_input:
+                        print("  [OK] 重试后拿到文件输入框")
+                        break
+                    print("  [WARNING] 重试后仍未拿到文件输入框，将继续下一轮")
+
+            # 方法6: 点击链路失败时，直接走剪贴板上传兜底（更贴近 Gemini 网页真实交互）
+            if not file_input and not pasted_upload:
+                try:
+                    print("  [INFO] 未拿到文件输入框，尝试剪贴板粘贴上传兜底...")
+                    pasted_upload = _try_paste_image_via_clipboard(image_path)
+                    if pasted_upload:
+                        print("  [OK] 剪贴板上传兜底成功")
+                except Exception as e:
+                    print(f"  [WARNING] 剪贴板上传兜底失败: {e}")
             
             if pasted_upload:
                 print("  ✓ 已通过剪贴板粘贴完成图片上传")
