@@ -1,6 +1,6 @@
 {
   "overview_url": "https://www.binance.com/zh-CN/markets/overview",
-  "scraped_at": "2026-04-15 22:10:14 北京时间",
+  "scraped_at": "2026-04-16 14:48:53 北京时间",
   "watchlist": {
     "section": "watchlist_following",
     "page_url": "https://www.binance.com/zh-CN/square?tab=Following",
@@ -12,7 +12,7 @@
     "note": "",
     "count_follow_profiles": 2,
     "count_lives": 2,
-    "count_latest_posts": 12,
+    "count_latest_posts": 10,
     "follow_profiles_sample": [
       {
         "name": "yanchibit",
@@ -425,19 +425,71 @@
       {
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "href": "https://www.binance.com/zh-CN/square/post/312792013283025",
-        "raw": "Rave要归零了今天我们在17.2U逃顶了，三马哥11点公开发布要归零当时价格是17.2U，发布视频说要归零后直接应声下跌到12U。 这个币暂时还没出做空的策略，等三马哥摔杯喂饭，有仓位与进场带点位止盈止损，至于你说要不要买点现货？好像没有现货吧？主要是我怕在走个故意假新高后继续暴跌，等待喂饭。 我打算在0.15U抄底，人家0.15U吃了100倍，凭啥我要高位接盘？#Rave。👉[马前炮了看标题](https://app.binance.com/uni-qr/cvid/312653483060626?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "href": "https://www.binance.com/zh-CN/square/post/313031095129170",
+        "raw": "BTC与ETH二次测试前高附近并未与延续上涨走势，当心高位衰竭后回调。#BTC #ETH 👉[永久返佣已发](https://app.binance.com/uni-qr/cpos/312736432894801?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
         "time": "1小时",
-        "title": "Rave要归零了今天我们在17.2U逃顶了，三马哥11点公开发布要归零当时价格是17.2U，发布视频说要归零后直接应声下跌到12U。 这个币暂时还没出做空的策略，等三马哥摔杯喂饭，有仓位与进场带点位止盈止损，至于你说要不要买点现货？好像没有现货吧？主要是我怕在走个故意假新高后继续暴跌，等待喂饭。 我打算在0.15U抄底，人家0.15U吃了100倍，凭啥我要高位接盘？#Rave。👉[马前炮了看标题](https://app.binance.com/uni-qr/cvid/312653483060626?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
-        "published_at": "2026-04-15 21:10:14 北京时间",
+        "title": "BTC与ETH二次测试前高附近并未与延续上涨走势，当心高位衰竭后回调。#BTC #ETH 👉[永久返佣已发](https://app.binance.com/uni-qr/cpos/312736432894801?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "published_at": "2026-04-16 13:48:53 北京时间",
         "published_iso": "",
         "time_label": "1小时",
         "is_pinned": false,
+        "image_urls": [],
+        "saved_image_paths": [],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/313002369969906",
+        "raw": "慌个勾八，ETH第三单严格执行策略，一个是长线一个是现实单，梦想与现实而已。#ETH",
+        "time": "3小时",
+        "title": "慌个勾八，ETH第三单严格执行策略，一个是长线一个是现实单，梦想与现实而已。#ETH",
+        "published_at": "2026-04-16 11:48:53 北京时间",
+        "published_iso": "",
+        "time_label": "3小时",
+        "is_pinned": false,
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2E3NGFkOGRmMmYwZjQ4NWI4MmI0ZWIwODY4MTE1NGEwLnBuZw==&level=lg"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzNkMWMxYzJmOTRhZDFmZjc0MzI4NzA5MWJiMWY4MzBjLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0L2ZmZjdkZjhmZDA3ZDJkZDc2MDE2OTQ3Y2Y2M2I2MDNlLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0L2QyNTAzYWU3NTI3ZmQ4YmMzYmEwNzcwZGVhY2EzNDUxLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0L2Y4MTI0NzhhODY5MjM5YmI5YzlhNTY0ZWUyYjVmMDM2LmpwZw==&level=md"
         ],
         "saved_image_paths": [
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312792013283025/img_0.png"
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\313002369969906\\img_0.jpg",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\313002369969906\\img_1.jpg",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\313002369969906\\img_2.jpg",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\313002369969906\\img_3.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/313001360079105",
+        "raw": "不能提前跌到69000，否则你失效。 BTC 中长线做空 仓位思路强平控制9万U及以上 挂单77288 100倍 2%保证金 再挂80888（心慌吃上后可以逃命） 100倍 3%保证金 第一止盈69000 第二止盈60888 第三止盈58888 止损85000。 #BTC",
+        "time": "3小时",
+        "title": "不能提前跌到69000，否则你失效。 BTC 中长线做空 仓位思路强平控制9万U及以上 挂单77288 100倍 2%保证金 再挂80888（心慌吃上后可以逃命） 100倍 3%保证金 第一止盈69000 第二止盈60888 第三止盈58888 止损85000。 #BTC",
+        "published_at": "2026-04-16 11:48:53 北京时间",
+        "published_iso": "",
+        "time_label": "3小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzU3ODUxM2UzYTc4YTRkMWIwNDZlYzcxZmRmMmExZDViLnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0L2E2MTlkNjU3OWYyZGU4ODE1ZDY2OWMyNWJhZGY5NmEwLnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0L2IzOTNmYzI3NWNiOTEzZjc1NGU5MDA5MWQ0NjZlOTcyLnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzVkOGU4MTJhZGRmYzUzOGI3M2NiYzg5NWE4NWQ1NjJmLnBuZw==&level=md"
+        ],
+        "saved_image_paths": [
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\313001360079105\\img_0.png",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\313001360079105\\img_1.png",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\313001360079105\\img_2.png",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\313001360079105\\img_3.png"
         ],
         "gemini_direction": "unclear",
         "gemini_bias_zh": "不明",
@@ -505,41 +557,19 @@
       {
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "href": "https://www.binance.com/zh-CN/square/post/312743287273362",
-        "raw": "[https://app.binance.com/uni-qr/cspa/39092820842633?l=zh-CN&r=SDR9QGU2&source=host_share&uc=web_square_share_link&us=telegram](https://app.binance.com/uni-qr/cspa/39092820842633?l=zh-CN&r=SDR9QGU2&source=host_share&uc=web_square_share_link&us=telegram) 三马哥 的 “华语第一策略交易大师，还要继续暴跌，反弹还能空？今天早上rave在18U的时候三马哥说要归零波段就跌到了12U？” 直播将于 2026-04-15 20:00 开播。精彩不容错过，点击添加提醒！",
+        "href": "https://www.binance.com/zh-CN/square/post/312986766687633",
+        "raw": "过了三个月胖了20斤，我愿意少吃一点美食，换来1月份的巅峰体重与身材。",
         "time": "4小时",
-        "title": "[https://app.binance.com/uni-qr/cspa/39092820842633?l=zh-CN&r=SDR9QGU2&source=host_share&uc=web_square_share_link&us=telegram](https://app.binance.com/uni-qr/cspa/39092820842633?l=zh-CN&r=SDR9QGU2&source=host_share&uc=web_square_share_link&us=telegram) 三马哥 的 “华语第一策略交易大师，还要继续暴跌，反弹还能空？今天早上rave在18U的时候三马哥说要归零波段就跌到了12U？” 直播将于 2026-04-15 20:00 开播。精彩不容错过，点击添加提醒！",
-        "published_at": "2026-04-15 18:10:14 北京时间",
+        "title": "过了三个月胖了20斤，我愿意少吃一点美食，换来1月份的巅峰体重与身材。",
+        "published_at": "2026-04-16 10:48:53 北京时间",
         "published_iso": "",
         "time_label": "4小时",
         "is_pinned": false,
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzVkMjIyNmZhOTM0MjRkYTVhYmMwZmY4MDZhYjM5MzUzLnBuZw==&level=lg"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2EyY2U3YzIwN2ZlMDQ2ZTBiMDc3NGYzOWZjMmVkMDY5LmpwZw==&level=lg"
         ],
         "saved_image_paths": [
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312743287273362/img_0.png"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_bias_zh": "不明",
-        "gemini_confidence": null,
-        "gemini_reason": null
-      },
-      {
-        "author": "yanchibit",
-        "author_slug": "yanchibit",
-        "href": "https://www.binance.com/zh-CN/square/post/312737930911618",
-        "raw": "4.15 #BTC 日内行情分析，资费问题，空单先做大幅止盈，主观认为还会上测，或破位再追！",
-        "time": "5小时",
-        "title": "4.15 #BTC 日内行情分析，资费问题，空单先做大幅止盈，主观认为还会上测，或破位再追！",
-        "published_at": "2026-04-15 17:10:14 北京时间",
-        "published_iso": "",
-        "time_label": "5小时",
-        "is_pinned": false,
-        "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzVmOTI5OThhZWRlZDRkMDI4MDY4ODM4ZTFmZDhhMmI1LnBuZw==&level=lg"
-        ],
-        "saved_image_paths": [
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312737930911618/img_0.png"
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312986766687633\\img_0.jpg"
         ],
         "gemini_direction": "unclear",
         "gemini_bias_zh": "不明",
@@ -575,26 +605,16 @@
       {
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "href": "https://www.binance.com/zh-CN/square/post/312736432894801",
-        "raw": "今天是4月15日，永久返佣已发注意查收！ 很多朋友觉得自己几百u几千u没必要开通，那是因为你不了解手续费的计算标准，手续费从来不是按照你的本金计算的，而是按照杠杆后的仓位计算的，举例2000u你开100x，此时计算手续费时的仓位就是30w油，而开仓又一定会平仓，所以这一单起码20w油的手续费。主要是咱们这还是15万粉丝的永久返，很多朋友找三马哥说之前他的返佣人跑路了。#返佣 使用邀请码：MGMGMG（大小写都可以），只要图4的提示显示了就代表注册成功了！ 一个月能2～3次给大家发工资，三马哥思路公开大家都看到吃大肉了，福利+服务拉满！👉[历史返佣](https://app.binance.com/uni-qr/cpos/304914827841538?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink) 三马哥永久返佣邀请链接更新： 华语区🔗(打开率最高）：https://www.bmwweb.online/zh-CN/join?ref=MGMGMG 华语区🔗(打开率最高-备用）：https://www.bsmkweb.cc/zh-CN/join?ref=MGMGMG 海外：https://www.binance.com/zh-CN/join?ref=MGMGMG 苹果手机用香港ID下载繁体中文版本（不是US版本），安卓手机APK安装包链接👇 https://download.bmwweb.solutions/pack/BNApp_F0001084.apk?utm_medium=web_share_copy",
+        "href": "https://www.binance.com/zh-CN/square/post/312974710294290",
+        "raw": "反弹就是做空的机会，比特币已经测试75588附近压力，没有测试77888极端压力，以太坊已经测试2358附近压力，没有测试2388压力。#BTC #ETH",
         "time": "5小时",
-        "title": "今天是4月15日，永久返佣已发注意查收！ 很多朋友觉得自己几百u几千u没必要开通，那是因为你不了解手续费的计算标准，手续费从来不是按照你的本金计算的，而是按照杠杆后的仓位计算的，举例2000u你开100x，此时计算手续费时的仓位就是30w油，而开仓又一定会平仓，所以这一单起码20w油的手续费。主要是咱们这还是15万粉丝的永久返，很多朋友找三马哥说之前他的返佣人跑路了。#返佣 使用邀请码：MGMGMG（大小写都可以），只要图4的提示显示了就代表注册成功了！ 一个月能2～3次给大家发工资，三马哥思路公开大家都看到吃大肉了，福利+服务拉满！👉[历史返佣](https://app.binance.com/uni-qr/cpos/304914827841538?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink) 三马哥永久返佣邀请链接更新： 华语区🔗(打开率最高）：https://www.bmwweb.online/zh-CN/join?ref=MGMGMG 华语区🔗(打开率最高-备用）：https://www.bsmkweb.cc/zh-CN/join?ref=MGMGMG 海外：https://www.binance.com/zh-CN/join?ref=MGMGMG 苹果手机用香港ID下载繁体中文版本（不是US版本），安卓手机APK安装包链接👇 https://download.bmwweb.solutions/pack/BNApp_F0001084.apk?utm_medium=web_share_copy",
-        "published_at": "2026-04-15 17:10:14 北京时间",
+        "title": "反弹就是做空的机会，比特币已经测试75588附近压力，没有测试77888极端压力，以太坊已经测试2358附近压力，没有测试2388压力。#BTC #ETH",
+        "published_at": "2026-04-16 09:48:53 北京时间",
         "published_iso": "",
         "time_label": "5小时",
         "is_pinned": false,
-        "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzY4NTM3MzI5OGVhMjQyZDE5YjE2YjExYmFhNTI1MjYwLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0L2M4NmNkMjliNWVhNzEwMTgyNzc1NzNmNGI3MTE1OTcxLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzBmOWY4NzIzYmMyYTY2Zjk3NWFlZGE3NjQxZTdmNzc0LnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzFiZDFmNmQzODg4NDcwYWYwZGRmZTc4NGRlYzU1MTU4LmpwZw==&level=md"
-        ],
-        "saved_image_paths": [
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312736432894801/img_0.jpg",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312736432894801/img_1.jpg",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312736432894801/img_2.png",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312736432894801/img_3.jpg"
-        ],
+        "image_urls": [],
+        "saved_image_paths": [],
         "gemini_direction": "unclear",
         "gemini_bias_zh": "不明",
         "gemini_confidence": null,
@@ -659,34 +679,6 @@
         "gemini_reason": null
       },
       {
-        "author": "sanmageshuai",
-        "author_slug": "sanmageshuai",
-        "href": "https://www.binance.com/zh-CN/square/post/312724726937682",
-        "raw": "被针对了差了3U自动止盈！ETH跌破2310！我们今天第二次浮盈加仓在2140附近做空的持仓，可以止盈50%仓位利润！移动保本损！ 太舒服了！昨天睡觉前告诉你们卖掉2388现货和多单，反手做空2388做空、2340加仓空，跌破2300我们的利润翻了好几倍！恭喜跟上的朋友！#ETH 👉[都告诉你继续下跌了](https://app.binance.com/uni-qr/cpos/312630106161186?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
-        "time": "6小时",
-        "title": "被针对了差了3U自动止盈！ETH跌破2310！我们今天第二次浮盈加仓在2140附近做空的持仓，可以止盈50%仓位利润！移动保本损！ 太舒服了！昨天睡觉前告诉你们卖掉2388现货和多单，反手做空2388做空、2340加仓空，跌破2300我们的利润翻了好几倍！恭喜跟上的朋友！#ETH 👉[都告诉你继续下跌了](https://app.binance.com/uni-qr/cpos/312630106161186?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
-        "published_at": "2026-04-15 16:10:14 北京时间",
-        "published_iso": "",
-        "time_label": "6小时",
-        "is_pinned": false,
-        "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2YwZDZkN2MxODJiMjRiYWY4ZDMwODQ3OTY4NTcxZjQ5LmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzI1NTI1NzhjMTVmNjQ4YzFhMjU0MGViMDY5ZWQyYjc2LmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzE4YWUxZjg5ZjgxODQzMjNhZmViYTVlMjFkYWMzMjc4LmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2JmNWI3YzQ1ZDE4NzQ1YjNiMjExODg1MGE5ODdlNTNiLmpwZw==&level=md"
-        ],
-        "saved_image_paths": [
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312724726937682/img_0.jpg",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312724726937682/img_1.jpg",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312724726937682/img_2.jpg",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312724726937682/img_3.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_bias_zh": "不明",
-        "gemini_confidence": null,
-        "gemini_reason": null
-      },
-      {
         "author": "square-creator-857dc547d",
         "author_slug": "square-creator-857dc547d",
         "href": "https://www.binance.com/zh-CN/square/post/312002029576257",
@@ -728,28 +720,6 @@
           "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312352769541170/img_2.png",
           "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312352769541170/img_3.png",
           "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312352769541170/img_4.png"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_bias_zh": "不明",
-        "gemini_confidence": null,
-        "gemini_reason": null
-      },
-      {
-        "author": "yanchibit",
-        "author_slug": "yanchibit",
-        "href": "https://www.binance.com/zh-CN/square/post/312690671071409",
-        "raw": "君子断交不出恶言 小人交恶全是脏水 有没有发现，品行好的人就算闹矛盾，人家也只是就事论事，处不来就不处，好聚好散，不会做任何伤害别人的事。甚至连一句多余的话都懒得讲… 小人呢，占不到便宜立马翻脸，翻脸还不够，还得倒打一耙，给你扣个帽子，扭头在别人面前把自己塑造成受害者 最擅长的三板斧 先搞个道德绑架，再颠倒黑白，最后发动身边人，发动舆论围剿… 有句话叫阳谋无解：你满腹城府胜我一筹，我胸怀坦荡天宽地广！ 🎈深度的认知和强大的执行力可以轻而易举的击穿那些弯弯绕绕和阴谋诡计~",
-        "time": "8小时",
-        "title": "君子断交不出恶言 小人交恶全是脏水 有没有发现，品行好的人就算闹矛盾，人家也只是就事论事，处不来就不处，好聚好散，不会做任何伤害别人的事。甚至连一句多余的话都懒得讲… 小人呢，占不到便宜立马翻脸，翻脸还不够，还得倒打一耙，给你扣个帽子，扭头在别人面前把自己塑造成受害者 最擅长的三板斧 先搞个道德绑架，再颠倒黑白，最后发动身边人，发动舆论围剿… 有句话叫阳谋无解：你满腹城府胜我一筹，我胸怀坦荡天宽地广！ 🎈深度的认知和强大的执行力可以轻而易举的击穿那些弯弯绕绕和阴谋诡计~",
-        "published_at": "2026-04-15 14:10:14 北京时间",
-        "published_iso": "",
-        "time_label": "8小时",
-        "is_pinned": false,
-        "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Y3NjYxNTkwN2NiMDQ3OGFhODYwNjY0MzgyOTBjNjI1LnBuZw==&level=lg"
-        ],
-        "saved_image_paths": [
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312690671071409/img_0.png"
         ],
         "gemini_direction": "unclear",
         "gemini_bias_zh": "不明",
@@ -836,24 +806,6 @@
         "time": "10小时",
         "title": "这里是支撑所以不要被反向拉升最后还亏钱了，一定要落袋利润！ BTC跌破71000了，空单利润再次超过100%！ 止盈70%仓位利润，移动保本损！ 今天周日也吃肉了！不要让你的盈利变成亏损，恭喜跟上的朋友！#BTC",
         "published_at": "2026-04-12 22:05:38 北京时间",
-        "published_iso": "",
-        "time_label": "10小时",
-        "is_pinned": false,
-        "image_urls": [],
-        "saved_image_paths": [],
-        "gemini_direction": "unclear",
-        "gemini_bias_zh": "不明",
-        "gemini_confidence": null,
-        "gemini_reason": null
-      },
-      {
-        "author": "sanmageshuai",
-        "author_slug": "sanmageshuai",
-        "href": "https://www.binance.com/zh-CN/square/post/312653483060626",
-        "raw": "BTC和ETH空单吃大肉后，还能浮盈加仓空吗？策略能出吗？ Rave快归零了进来看。#BTC #ETH #Rave",
-        "time": "10小时",
-        "title": "BTC和ETH空单吃大肉后，还能浮盈加仓空吗？策略能出吗？ Rave快归零了进来看。#BTC #ETH #Rave",
-        "published_at": "2026-04-15 12:10:14 北京时间",
         "published_iso": "",
         "time_label": "10小时",
         "is_pinned": false,
@@ -1057,59 +1009,6 @@
         "saved_image_paths": [
           "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312297420752450/img_0.png",
           "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312297420752450/img_1.png"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_bias_zh": "不明",
-        "gemini_confidence": null,
-        "gemini_reason": null
-      },
-      {
-        "author": "sanmageshuai",
-        "author_slug": "sanmageshuai",
-        "href": "https://www.binance.com/zh-CN/square/post/312636805826754",
-        "raw": "今日BTC第一个压力是74888、比较强大的压力是75588、极端压力77888。 压力山大呀！#BTC BTC第一个支撑是72888、比较牛B的支撑是71088。 ETH第一个压力是2358左右、比较牛B的压力还是2388。#ETH",
-        "time": "12小时",
-        "title": "今日BTC第一个压力是74888、比较强大的压力是75588、极端压力77888。 压力山大呀！#BTC BTC第一个支撑是72888、比较牛B的支撑是71088。 ETH第一个压力是2358左右、比较牛B的压力还是2388。#ETH",
-        "published_at": "2026-04-15 10:10:14 北京时间",
-        "published_iso": "",
-        "time_label": "12小时",
-        "is_pinned": false,
-        "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2ZiY2FkODRjZDUxMjQ4MDk5Y2UzN2NhZjk2MzkwNzc4LnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzcyZWQwOWQ3MzRkZDRlNDZhZDFhYzg3YjA3Zjk1MTNmLnBuZw==&level=md"
-        ],
-        "saved_image_paths": [
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312636805826754/img_0.png",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312636805826754/img_1.png"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_bias_zh": "不明",
-        "gemini_confidence": null,
-        "gemini_reason": null
-      },
-      {
-        "author": "sanmageshuai",
-        "author_slug": "sanmageshuai",
-        "href": "https://www.binance.com/zh-CN/square/post/312630106161186",
-        "raw": "警惕继续暴跌！睡醒以太坊2388的空单仓位没了！要不要继续空？ 昨天多次输出坚定2388做空信念，直播中给的2308短线止盈目标也到了！利润超过300%！ 一切的上涨都是纸老虎，2300的现货在2388昨天也出掉了，最后的逃命机会！昨天很多粉丝说以太坊空单赚钱了直接安排VIp！恭喜跟上的朋友！#ETH 👉🏻[马前炮喂饭记录](https://app.binance.com/uni-qr/cpos/312121619065937?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink)",
-        "time": "12小时",
-        "title": "警惕继续暴跌！睡醒以太坊2388的空单仓位没了！要不要继续空？ 昨天多次输出坚定2388做空信念，直播中给的2308短线止盈目标也到了！利润超过300%！ 一切的上涨都是纸老虎，2300的现货在2388昨天也出掉了，最后的逃命机会！昨天很多粉丝说以太坊空单赚钱了直接安排VIp！恭喜跟上的朋友！#ETH 👉🏻[马前炮喂饭记录](https://app.binance.com/uni-qr/cpos/312121619065937?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink)",
-        "published_at": "2026-04-15 10:10:14 北京时间",
-        "published_iso": "",
-        "time_label": "12小时",
-        "is_pinned": false,
-        "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzgxMGRkYTMxMGU5YTRlYTFiM2RiNDY2NTUyMTg2MDQ2LnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2E1ZTVlZGUzNzA4OTQ1MGVhYmQ0NzUyZGQ4OGRlY2YzLnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzdlMzBmMzczODExMTQ1MzlhZTg1Njk4ZjRlOTA2ZTZlLnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzIzMTg4NjBkMjkwZDRhZTY4YjRhN2I0ZWExNDcyMzI3LnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzkyMjg1OTA2Yjc0NDQwN2I4NDNmZGYxNjZiNDRmNDgxLnBuZw==&level=lg"
-        ],
-        "saved_image_paths": [
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312630106161186/img_0.png",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312630106161186/img_1.png",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312630106161186/img_2.png",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312630106161186/img_3.png"
         ],
         "gemini_direction": "unclear",
         "gemini_bias_zh": "不明",
@@ -1559,6 +1458,28 @@
         "gemini_reason": null
       },
       {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/312792013283025",
+        "raw": "Rave要归零了今天我们在17.2U逃顶了，三马哥11点公开发布要归零当时价格是17.2U，发布视频说要归零后直接应声下跌到12U。 这个币暂时还没出做空的策略，等三马哥摔杯喂饭，有仓位与进场带点位止盈止损，至于你说要不要买点现货？好像没有现货吧？主要是我怕在走个故意假新高后继续暴跌，等待喂饭。 我打算在0.15U抄底，人家0.15U吃了100倍，凭啥我要高位接盘？#Rave。👉[马前炮了看标题](https://app.binance.com/uni-qr/cvid/312653483060626?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "time": "18小时",
+        "title": "Rave要归零了今天我们在17.2U逃顶了，三马哥11点公开发布要归零当时价格是17.2U，发布视频说要归零后直接应声下跌到12U。 这个币暂时还没出做空的策略，等三马哥摔杯喂饭，有仓位与进场带点位止盈止损，至于你说要不要买点现货？好像没有现货吧？主要是我怕在走个故意假新高后继续暴跌，等待喂饭。 我打算在0.15U抄底，人家0.15U吃了100倍，凭啥我要高位接盘？#Rave。👉[马前炮了看标题](https://app.binance.com/uni-qr/cvid/312653483060626?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "published_at": "2026-04-15 20:48:53 北京时间",
+        "published_iso": "",
+        "time_label": "18小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2E3NGFkOGRmMmYwZjQ4NWI4MmI0ZWIwODY4MTE1NGEwLnBuZw==&level=lg"
+        ],
+        "saved_image_paths": [
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312792013283025\\img_0.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null
+      },
+      {
         "author": "yanchibit",
         "author_slug": "yanchibit",
         "href": "https://www.binance.com/zh-CN/square/post/310684981377426",
@@ -1761,32 +1682,6 @@
         "gemini_reason": null
       },
       {
-        "author": "yanchibit",
-        "author_slug": "yanchibit",
-        "href": "https://www.binance.com/zh-CN/square/post/312513557237074",
-        "raw": "言简意赅，突破跌回你能做空 跌破2353你也能做空，每次止损30点，止盈大于30点以上推防守… 🎈交易路漫漫，策略只从盘面看，现在还有谁要个策略去花钱的吗？🤷🏻‍♂️ #ETH",
-        "time": "20小时",
-        "title": "言简意赅，突破跌回你能做空 跌破2353你也能做空，每次止损30点，止盈大于30点以上推防守… 🎈交易路漫漫，策略只从盘面看，现在还有谁要个策略去花钱的吗？🤷🏻‍♂️ #ETH",
-        "published_at": "2026-04-15 02:10:14 北京时间",
-        "published_iso": "",
-        "time_label": "20小时",
-        "is_pinned": false,
-        "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzU3YzY1Yzc0ZTBiODQ2N2JhYWY0NTk3NTBkMWZlMjA3LnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzA3N2M5YTNlY2YwZDQyYjBhNDIzNzAzNDQ3NmI3NjU2LnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzgwZDlmZTIyNTIzMjRlOTViNTYyZjA1NWI4MzRkMmVjLnBuZw==&level=md"
-        ],
-        "saved_image_paths": [
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312513557237074/img_0.png",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312513557237074/img_1.png",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312513557237074/img_2.png"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_bias_zh": "不明",
-        "gemini_confidence": null,
-        "gemini_reason": null
-      },
-      {
         "author": "KITE",
         "author_slug": "carrywang55688",
         "href": "https://www.binance.com/zh-CN/square/post/311591971736946",
@@ -1919,6 +1814,28 @@
         "gemini_reason": null
       },
       {
+        "author": "yanchibit",
+        "author_slug": "yanchibit",
+        "href": "https://www.binance.com/zh-CN/square/post/312737930911618",
+        "raw": "4.15 #BTC 日内行情分析，资费问题，空单先做大幅止盈，主观认为还会上测，或破位再追！",
+        "time": "21小时",
+        "title": "4.15 #BTC 日内行情分析，资费问题，空单先做大幅止盈，主观认为还会上测，或破位再追！",
+        "published_at": "2026-04-15 17:48:53 北京时间",
+        "published_iso": "",
+        "time_label": "21小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzVmOTI5OThhZWRlZDRkMDI4MDY4ODM4ZTFmZDhhMmI1LnBuZw==&level=lg"
+        ],
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312737930911618/img_0.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null
+      },
+      {
         "author": "aleng888888",
         "author_slug": "aleng888888",
         "href": "https://www.binance.com/zh-CN/square/post/311584100870354",
@@ -1985,6 +1902,55 @@
         "is_pinned": false,
         "image_urls": [],
         "saved_image_paths": [],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/312736432894801",
+        "raw": "今天是4月15日，永久返佣已发注意查收！ 很多朋友觉得自己几百u几千u没必要开通，那是因为你不了解手续费的计算标准，手续费从来不是按照你的本金计算的，而是按照杠杆后的仓位计算的，举例2000u你开100x，此时计算手续费时的仓位就是30w油，而开仓又一定会平仓，所以这一单起码20w油的手续费。主要是咱们这还是15万粉丝的永久返，很多朋友找三马哥说之前他的返佣人跑路了。#返佣 使用邀请码：MGMGMG（大小写都可以），只要图4的提示显示了就代表注册成功了！ 一个月能2～3次给大家发工资，三马哥思路公开大家都看到吃大肉了，福利+服务拉满！👉[历史返佣](https://app.binance.com/uni-qr/cpos/304914827841538?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink) 三马哥永久返佣邀请链接更新： 华语区🔗(打开率最高）：https://www.bmwweb.online/zh-CN/join?ref=MGMGMG 华语区🔗(打开率最高-备用）：https://www.bsmkweb.cc/zh-CN/join?ref=MGMGMG 海外：https://www.binance.com/zh-CN/join?ref=MGMGMG 苹果手机用香港ID下载繁体中文版本（不是US版本），安卓手机APK安装包链接👇 https://download.bmwweb.solutions/pack/BNApp_F0001084.apk?utm_medium=web_share_copy",
+        "time": "21小时",
+        "title": "今天是4月15日，永久返佣已发注意查收！ 很多朋友觉得自己几百u几千u没必要开通，那是因为你不了解手续费的计算标准，手续费从来不是按照你的本金计算的，而是按照杠杆后的仓位计算的，举例2000u你开100x，此时计算手续费时的仓位就是30w油，而开仓又一定会平仓，所以这一单起码20w油的手续费。主要是咱们这还是15万粉丝的永久返，很多朋友找三马哥说之前他的返佣人跑路了。#返佣 使用邀请码：MGMGMG（大小写都可以），只要图4的提示显示了就代表注册成功了！ 一个月能2～3次给大家发工资，三马哥思路公开大家都看到吃大肉了，福利+服务拉满！👉[历史返佣](https://app.binance.com/uni-qr/cpos/304914827841538?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink) 三马哥永久返佣邀请链接更新： 华语区🔗(打开率最高）：https://www.bmwweb.online/zh-CN/join?ref=MGMGMG 华语区🔗(打开率最高-备用）：https://www.bsmkweb.cc/zh-CN/join?ref=MGMGMG 海外：https://www.binance.com/zh-CN/join?ref=MGMGMG 苹果手机用香港ID下载繁体中文版本（不是US版本），安卓手机APK安装包链接👇 https://download.bmwweb.solutions/pack/BNApp_F0001084.apk?utm_medium=web_share_copy",
+        "published_at": "2026-04-15 17:48:53 北京时间",
+        "published_iso": "",
+        "time_label": "21小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzY4NTM3MzI5OGVhMjQyZDE5YjE2YjExYmFhNTI1MjYwLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0L2M4NmNkMjliNWVhNzEwMTgyNzc1NzNmNGI3MTE1OTcxLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzBmOWY4NzIzYmMyYTY2Zjk3NWFlZGE3NjQxZTdmNzc0LnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzFiZDFmNmQzODg4NDcwYWYwZGRmZTc4NGRlYzU1MTU4LmpwZw==&level=md"
+        ],
+        "saved_image_paths": [
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312736432894801\\img_1.jpg",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312736432894801\\img_2.png",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312736432894801\\img_3.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/312743287273362",
+        "raw": "[https://app.binance.com/uni-qr/cspa/39092820842633?l=zh-CN&r=SDR9QGU2&source=host_share&uc=web_square_share_link&us=telegram](https://app.binance.com/uni-qr/cspa/39092820842633?l=zh-CN&r=SDR9QGU2&source=host_share&uc=web_square_share_link&us=telegram) 三马哥 的 “华语第一策略交易大师，还要继续暴跌，反弹还能空？今天早上rave在18U的时候三马哥说要归零波段就跌到了12U？” 直播将于 2026-04-15 20:00 开播。精彩不容错过，点击添加提醒！",
+        "time": "21小时",
+        "title": "[https://app.binance.com/uni-qr/cspa/39092820842633?l=zh-CN&r=SDR9QGU2&source=host_share&uc=web_square_share_link&us=telegram](https://app.binance.com/uni-qr/cspa/39092820842633?l=zh-CN&r=SDR9QGU2&source=host_share&uc=web_square_share_link&us=telegram) 三马哥 的 “华语第一策略交易大师，还要继续暴跌，反弹还能空？今天早上rave在18U的时候三马哥说要归零波段就跌到了12U？” 直播将于 2026-04-15 20:00 开播。精彩不容错过，点击添加提醒！",
+        "published_at": "2026-04-15 17:48:53 北京时间",
+        "published_iso": "",
+        "time_label": "21小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzVkMjIyNmZhOTM0MjRkYTVhYmMwZmY4MDZhYjM5MzUzLnBuZw==&level=lg"
+        ],
+        "saved_image_paths": [
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312743287273362\\img_0.png"
+        ],
         "gemini_direction": "unclear",
         "gemini_bias_zh": "不明",
         "gemini_confidence": null,
@@ -2151,6 +2117,52 @@
         "gemini_reason": null
       },
       {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/312724726937682",
+        "raw": "被针对了差了3U自动止盈！ETH跌破2310！我们今天第二次浮盈加仓在2140附近做空的持仓，可以止盈50%仓位利润！移动保本损！ 太舒服了！昨天睡觉前告诉你们卖掉2388现货和多单，反手做空2388做空、2340加仓空，跌破2300我们的利润翻了好几倍！恭喜跟上的朋友！#ETH 👉[都告诉你继续下跌了](https://app.binance.com/uni-qr/cpos/312630106161186?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "time": "22小时",
+        "title": "被针对了差了3U自动止盈！ETH跌破2310！我们今天第二次浮盈加仓在2140附近做空的持仓，可以止盈50%仓位利润！移动保本损！ 太舒服了！昨天睡觉前告诉你们卖掉2388现货和多单，反手做空2388做空、2340加仓空，跌破2300我们的利润翻了好几倍！恭喜跟上的朋友！#ETH 👉[都告诉你继续下跌了](https://app.binance.com/uni-qr/cpos/312630106161186?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "published_at": "2026-04-15 16:48:53 北京时间",
+        "published_iso": "",
+        "time_label": "22小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2YwZDZkN2MxODJiMjRiYWY4ZDMwODQ3OTY4NTcxZjQ5LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzI1NTI1NzhjMTVmNjQ4YzFhMjU0MGViMDY5ZWQyYjc2LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzE4YWUxZjg5ZjgxODQzMjNhZmViYTVlMjFkYWMzMjc4LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2JmNWI3YzQ1ZDE4NzQ1YjNiMjExODg1MGE5ODdlNTNiLmpwZw==&level=md"
+        ],
+        "saved_image_paths": [
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312724726937682\\img_0.jpg",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312724726937682\\img_1.jpg",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312724726937682\\img_2.jpg",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312724726937682\\img_3.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/312653483060626",
+        "raw": "BTC和ETH空单吃大肉后，还能浮盈加仓空吗？策略能出吗？ Rave快归零了进来看。#BTC #ETH #Rave",
+        "time": "22小时",
+        "title": "BTC和ETH空单吃大肉后，还能浮盈加仓空吗？策略能出吗？ Rave快归零了进来看。#BTC #ETH #Rave",
+        "published_at": "2026-04-15 11:46:17 北京时间",
+        "published_iso": "",
+        "time_label": "22小时",
+        "is_pinned": false,
+        "image_urls": [],
+        "saved_image_paths": [],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null
+      },
+      {
         "author": "yanchibit",
         "author_slug": "yanchibit",
         "href": "https://www.binance.com/zh-CN/square/post/312122710572450",
@@ -2166,6 +2178,28 @@
         ],
         "saved_image_paths": [
           "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312122710572450/img_0.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null
+      },
+      {
+        "author": "yanchibit",
+        "author_slug": "yanchibit",
+        "href": "https://www.binance.com/zh-CN/square/post/312690671071409",
+        "raw": "君子断交不出恶言 小人交恶全是脏水 有没有发现，品行好的人就算闹矛盾，人家也只是就事论事，处不来就不处，好聚好散，不会做任何伤害别人的事。甚至连一句多余的话都懒得讲… 小人呢，占不到便宜立马翻脸，翻脸还不够，还得倒打一耙，给你扣个帽子，扭头在别人面前把自己塑造成受害者 最擅长的三板斧 先搞个道德绑架，再颠倒黑白，最后发动身边人，发动舆论围剿… 有句话叫阳谋无解：你满腹城府胜我一筹，我胸怀坦荡天宽地广！ 🎈深度的认知和强大的执行力可以轻而易举的击穿那些弯弯绕绕和阴谋诡计~",
+        "time": "23小时",
+        "title": "君子断交不出恶言 小人交恶全是脏水 有没有发现，品行好的人就算闹矛盾，人家也只是就事论事，处不来就不处，好聚好散，不会做任何伤害别人的事。甚至连一句多余的话都懒得讲… 小人呢，占不到便宜立马翻脸，翻脸还不够，还得倒打一耙，给你扣个帽子，扭头在别人面前把自己塑造成受害者 最擅长的三板斧 先搞个道德绑架，再颠倒黑白，最后发动身边人，发动舆论围剿… 有句话叫阳谋无解：你满腹城府胜我一筹，我胸怀坦荡天宽地广！ 🎈深度的认知和强大的执行力可以轻而易举的击穿那些弯弯绕绕和阴谋诡计~",
+        "published_at": "2026-04-15 14:41:03 北京时间",
+        "published_iso": "",
+        "time_label": "23小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Y3NjYxNTkwN2NiMDQ3OGFhODYwNjY0MzgyOTBjNjI1LnBuZw==&level=lg"
+        ],
+        "saved_image_paths": [
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312690671071409\\img_0.png"
         ],
         "gemini_direction": "unclear",
         "gemini_bias_zh": "不明",
@@ -2456,10 +2490,34 @@
         "gemini_bias_zh": "不明",
         "gemini_confidence": null,
         "gemini_reason": null
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/312636805826754",
+        "raw": "今日BTC第一个压力是74888、比较强大的压力是75588、极端压力77888。 压力山大呀！#BTC BTC第一个支撑是72888、比较牛B的支撑是71088。 ETH第一个压力是2358左右、比较牛B的压力还是2388。#ETH",
+        "time": "23小时",
+        "title": "今日BTC第一个压力是74888、比较强大的压力是75588、极端压力77888。 压力山大呀！#BTC BTC第一个支撑是72888、比较牛B的支撑是71088。 ETH第一个压力是2358左右、比较牛B的压力还是2388。#ETH",
+        "published_at": "2026-04-15 10:46:17 北京时间",
+        "published_iso": "",
+        "time_label": "23小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2ZiY2FkODRjZDUxMjQ4MDk5Y2UzN2NhZjk2MzkwNzc4LnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzcyZWQwOWQ3MzRkZDRlNDZhZDFhYzg3YjA3Zjk1MTNmLnBuZw==&level=md"
+        ],
+        "saved_image_paths": [
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312636805826754\\img_0.png",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\312636805826754\\img_1.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null
       }
     ],
     "post_alerts": [],
-    "posts_state_file": "/Users/mac/frontend/code/1.operations/auto-deal-eth/binance_posts_state.json",
+    "posts_state_file": "D:\\frontend\\main\\python\\auto-deal-eth\\binance_posts_state.json",
     "posts_retention_hours": 24,
     "posts_pruned_count": 0
   },
@@ -2473,81 +2531,10 @@
       "Top Gainers",
       "涨跌幅"
     ],
-    "extraction_source": "api_24h",
-    "note": "页面未解析到足够表格行（常见于虚拟列表/反爬/类名变更），已改用官方 GET /api/v3/ticker/24hr 排序结果",
-    "count": 10,
-    "items": [
-      {
-        "symbol": "CREAMUSDT",
-        "price": "2.10000000",
-        "change": "65.354%",
-        "quoteVolume": "276098.07379000",
-        "raw": "CREAMUSDT 2.10000000 65.354%"
-      },
-      {
-        "symbol": "ENJUSDT",
-        "price": "0.07714000",
-        "change": "63.884%",
-        "quoteVolume": "76369955.76954400",
-        "raw": "ENJUSDT 0.07714000 63.884%"
-      },
-      {
-        "symbol": "PNTUSDT",
-        "price": "0.03500000",
-        "change": "45.228%",
-        "quoteVolume": "261845.06210000",
-        "raw": "PNTUSDT 0.03500000 45.228%"
-      },
-      {
-        "symbol": "BIOUSDT",
-        "price": "0.02570000",
-        "change": "33.161%",
-        "quoteVolume": "31122320.65450000",
-        "raw": "BIOUSDT 0.02570000 33.161%"
-      },
-      {
-        "symbol": "DUSDT",
-        "price": "0.01154000",
-        "change": "26.535%",
-        "quoteVolume": "11779302.31697000",
-        "raw": "DUSDT 0.01154000 26.535%"
-      },
-      {
-        "symbol": "DEXEUSDT",
-        "price": "12.01800000",
-        "change": "19.856%",
-        "quoteVolume": "6283054.57925000",
-        "raw": "DEXEUSDT 12.01800000 19.856%"
-      },
-      {
-        "symbol": "RIFUSDT",
-        "price": "0.04780000",
-        "change": "18.025%",
-        "quoteVolume": "3552301.69600000",
-        "raw": "RIFUSDT 0.04780000 18.025%"
-      },
-      {
-        "symbol": "KDAUSDT",
-        "price": "0.00600000",
-        "change": "17.647%",
-        "quoteVolume": "343775.05241600",
-        "raw": "KDAUSDT 0.00600000 17.647%"
-      },
-      {
-        "symbol": "UTKUSDT",
-        "price": "0.00795000",
-        "change": "16.912%",
-        "quoteVolume": "10207453.25334000",
-        "raw": "UTKUSDT 0.00795000 16.912%"
-      },
-      {
-        "symbol": "OGUSDT",
-        "price": "3.16200000",
-        "change": "15.570%",
-        "quoteVolume": "20809722.17060000",
-        "raw": "OGUSDT 3.16200000 15.570%"
-      }
-    ]
+    "extraction_source": "dom",
+    "note": "",
+    "count": 0,
+    "items": []
   },
   "losers": {
     "section": "losers",
@@ -2558,80 +2545,9 @@
       "Losers",
       "Top Losers"
     ],
-    "extraction_source": "api_24h",
-    "note": "页面未解析到足够表格行（常见于虚拟列表/反爬/类名变更），已改用官方 GET /api/v3/ticker/24hr 排序结果",
-    "count": 10,
-    "items": [
-      {
-        "symbol": "BETAUSDT",
-        "price": "0.00036000",
-        "change": "-64.000%",
-        "quoteVolume": "296136.47499000",
-        "raw": "BETAUSDT 0.00036000 -64.000%"
-      },
-      {
-        "symbol": "VIBUSDT",
-        "price": "0.00223000",
-        "change": "-63.262%",
-        "quoteVolume": "380611.67365000",
-        "raw": "VIBUSDT 0.00223000 -63.262%"
-      },
-      {
-        "symbol": "WTCUSDT",
-        "price": "0.01030000",
-        "change": "-56.540%",
-        "quoteVolume": "485356.12470000",
-        "raw": "WTCUSDT 0.01030000 -56.540%"
-      },
-      {
-        "symbol": "A2ZUSDT",
-        "price": "0.00008400",
-        "change": "-53.333%",
-        "quoteVolume": "1142328.71652300",
-        "raw": "A2ZUSDT 0.00008400 -53.333%"
-      },
-      {
-        "symbol": "ACAUSDT",
-        "price": "0.00180000",
-        "change": "-51.351%",
-        "quoteVolume": "371370.82661500",
-        "raw": "ACAUSDT 0.00180000 -51.351%"
-      },
-      {
-        "symbol": "SXPUSDT",
-        "price": "0.00220000",
-        "change": "-46.341%",
-        "quoteVolume": "828214.37003000",
-        "raw": "SXPUSDT 0.00220000 -46.341%"
-      },
-      {
-        "symbol": "HARDUSDT",
-        "price": "0.00950000",
-        "change": "-40.252%",
-        "quoteVolume": "138020.67770000",
-        "raw": "HARDUSDT 0.00950000 -40.252%"
-      },
-      {
-        "symbol": "FORTHUSDT",
-        "price": "0.23700000",
-        "change": "-33.427%",
-        "quoteVolume": "435094.89468000",
-        "raw": "FORTHUSDT 0.23700000 -33.427%"
-      },
-      {
-        "symbol": "NTRNUSDT",
-        "price": "0.00160000",
-        "change": "-33.333%",
-        "quoteVolume": "400933.16687000",
-        "raw": "NTRNUSDT 0.00160000 -33.333%"
-      },
-      {
-        "symbol": "DATAUSDT",
-        "price": "0.00088000",
-        "change": "-31.250%",
-        "quoteVolume": "111558.29681000",
-        "raw": "DATAUSDT 0.00088000 -31.250%"
-      }
-    ]
+    "extraction_source": "dom",
+    "note": "",
+    "count": 0,
+    "items": []
   }
 }
