@@ -1221,18 +1221,26 @@ def scrape_binance_lists(
         _scrape_log(
             "PRIORITY_FOLLOW_PROFILES 为空：文章/直播将按 Following 页收集到的全部主页处理"
         )
-    # 热榜/涨跌幅 DOM 抓不到时才用 API 回退；你本地缺 requests 也不影响 Square Following 的解析
-    _scrape_log("预取 Binance 24h ticker（作涨跌榜 DOM 失败时的回退）…")
-    try:
-        api_rankings = fetch_rankings_from_binance_api(top_n)
-        _scrape_log("24h ticker 回退数据已就绪")
-    except Exception:
+    # 仅在 include_hot_rank 时处理行情榜单（热榜/涨幅/跌幅）
+    if include_hot_rank:
+        _scrape_log("预取 Binance 24h ticker（作榜单 DOM 失败时的回退）…")
+        try:
+            api_rankings = fetch_rankings_from_binance_api(top_n)
+            _scrape_log("24h ticker 回退数据已就绪")
+        except Exception:
+            api_rankings = {
+                "hot_rank": [],
+                "gainers": [],
+                "losers": [],
+            }
+            _scrape_log("警告：24h ticker 预取失败，榜单将仅依赖页面 DOM")
+    else:
         api_rankings = {
             "hot_rank": [],
             "gainers": [],
             "losers": [],
         }
-        _scrape_log("警告：24h ticker 预取失败，涨跌榜将仅依赖页面 DOM")
+        _scrape_log("未加 --include-hot-rank：已跳过热榜/涨幅榜/跌幅榜全部处理")
     _scrape_log("正在连接浏览器（远程调试 Chrome）…")
     driver = init_browser(use_remote_debugging=True)
     try:
@@ -1352,42 +1360,46 @@ def scrape_binance_lists(
             "latest_posts": posts,
         }
 
-        # 热榜 / 涨幅 / 跌幅：overview 上尝试 DOM，失败则用 24h API
-        _scrape_log(f"打开行情总览页（涨跌榜）: {url}")
-        driver.get(url)
-        WebDriverWait(driver, 25).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
-        _human_pause_after_nav(1.7, 3.5)
-
-        _scrape_log(f"处理涨幅榜（取前 {top_n}）…")
-        sec_gainers = _collect_section(
-            driver,
-            "gainers",
-            ["涨幅榜", "涨幅", "Gainers", "Top Gainers", "涨跌幅"],
-            top_n,
-            api_fallback=api_rankings["gainers"],
-        )
-        _scrape_log(f"涨幅榜完成（{sec_gainers.get('count', 0)} 条，来源 {sec_gainers.get('extraction_source', '')}）")
-
-        _scrape_log(f"处理跌幅榜（取前 {top_n}）…")
-        sec_losers = _collect_section(
-            driver,
-            "losers",
-            ["跌幅榜", "跌幅", "Losers", "Top Losers"],
-            top_n,
-            api_fallback=api_rankings["losers"],
-        )
-        _scrape_log(f"跌幅榜完成（{sec_losers.get('count', 0)} 条，来源 {sec_losers.get('extraction_source', '')}）")
-
         data: Dict[str, object] = {
             "overview_url": url,
             "scraped_at": beijing_time_str(),
             "watchlist": watchlist,
-            "gainers": sec_gainers,
-            "losers": sec_losers,
         }
         if include_hot_rank:
+            # 热榜 / 涨幅 / 跌幅：overview 上尝试 DOM，失败则用 24h API
+            _scrape_log(f"打开行情总览页（榜单）: {url}")
+            driver.get(url)
+            WebDriverWait(driver, 25).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+            _human_pause_after_nav(1.7, 3.5)
+
+            _scrape_log(f"处理涨幅榜（取前 {top_n}）…")
+            sec_gainers = _collect_section(
+                driver,
+                "gainers",
+                ["涨幅榜", "涨幅", "Gainers", "Top Gainers", "涨跌幅"],
+                top_n,
+                api_fallback=api_rankings["gainers"],
+            )
+            _scrape_log(
+                f"涨幅榜完成（{sec_gainers.get('count', 0)} 条，来源 {sec_gainers.get('extraction_source', '')}）"
+            )
+
+            _scrape_log(f"处理跌幅榜（取前 {top_n}）…")
+            sec_losers = _collect_section(
+                driver,
+                "losers",
+                ["跌幅榜", "跌幅", "Losers", "Top Losers"],
+                top_n,
+                api_fallback=api_rankings["losers"],
+            )
+            _scrape_log(
+                f"跌幅榜完成（{sec_losers.get('count', 0)} 条，来源 {sec_losers.get('extraction_source', '')}）"
+            )
+            data["gainers"] = sec_gainers
+            data["losers"] = sec_losers
+
             _scrape_log(f"处理全局热榜（取前 {top_n}）…")
             data["hot_rank"] = _collect_section(
                 driver,
@@ -1401,7 +1413,7 @@ def scrape_binance_lists(
                 f"热榜完成（{hr.get('count', 0)} 条，来源 {hr.get('extraction_source', '')}）"
             )
         else:
-            _scrape_log("已跳过全局热榜（未加 --include-hot-rank）")
+            _scrape_log("已跳过热榜/涨幅榜/跌幅榜（未加 --include-hot-rank）")
 
         # 只清洗榜单 items 的 raw 字段（watchlist 结构不同）
         for key in ("hot_rank", "gainers", "losers"):
@@ -1547,13 +1559,12 @@ def main():
         "--market-top",
         type=int,
         default=DEFAULT_MARKET_RANK_TOP_N,
-        help=f"涨幅榜/跌幅榜各取前 N 名（默认 {DEFAULT_MARKET_RANK_TOP_N}）；"
-        f"加 --include-hot-rank 时热榜也取前 N",
+        help=f"启用 --include-hot-rank 时，热榜/涨幅榜/跌幅榜各取前 N（默认 {DEFAULT_MARKET_RANK_TOP_N}）",
     )
     parser.add_argument(
         "--include-hot-rank",
         action="store_true",
-        help="额外抓取并输出全局成交额热榜（默认仅涨幅/跌幅榜）",
+        help="启用行情榜单抓取（热榜+涨幅榜+跌幅榜）；默认不处理任何行情榜单",
     )
     parser.add_argument(
         "--out",

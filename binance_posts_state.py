@@ -9,15 +9,32 @@ from __future__ import annotations
 import json
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from zoneinfo import ZoneInfo
 
+try:
+    import requests
+except ModuleNotFoundError:
+    requests = None
+
 TZ_BEIJING = ZoneInfo("Asia/Shanghai")
 
 POST_RETENTION_HOURS = 24
 DEFAULT_STATE_BASENAME = "binance_posts_state.json"
+LOCAL_CHAT_ANALYZE_URL = "http://127.0.0.1:3860/chat"
+LOCAL_CHAT_ANALYZE_ROLE = "binance_square"
+LOCAL_CHAT_ANALYZE_TIMEOUT_SEC = 45
+# 默认不并发；后续切本地模型时可开启并发
+LOCAL_CHAT_ANALYZE_CONCURRENT = (
+    os.getenv("LOCAL_CHAT_ANALYZE_CONCURRENT", "false").strip().lower() == "true"
+)
+# 并发开启时的 worker 数（建议小值）
+LOCAL_CHAT_ANALYZE_WORKERS = int(
+    os.getenv("LOCAL_CHAT_ANALYZE_WORKERS", "3").strip() or "3"
+)
 
 # 发帖时间不得晚于「当前」超过该容差（避免时钟误差误判）
 _PUBLISHED_MAX_FUTURE_SKEW = timedelta(minutes=2)
@@ -368,6 +385,62 @@ def _save_state(path: str, state: Dict[str, Any]) -> None:
         json.dump(state, f, ensure_ascii=False, indent=2)
 
 
+def _pick_first_existing_file(paths: List[str]) -> str:
+    for p in paths:
+        pp = (p or "").strip()
+        if pp and os.path.isfile(pp):
+            return pp
+    return ""
+
+
+def _analyze_post_via_local_api(
+    href: str, title: str, raw: str, image_path: str
+) -> Dict[str, Any]:
+    """
+    调本地接口分析帖子（用于交易信号）。
+    返回结构始终包含 ok 字段，成功时含 data。
+    """
+    if requests is None:
+        return {"ok": False, "error": "missing_requests"}
+    if not image_path or not os.path.isfile(image_path):
+        return {"ok": False, "error": "missing_image_file"}
+
+    msg = (
+        "给出建议\n"
+        f"标题: {(title or '')[:500]}\n"
+        f"正文: {(raw or '')[:8000]}\n"
+        f"链接: {href}"
+    )
+    print(
+        f"[posts_state][signal_api] 请求开始 role={LOCAL_CHAT_ANALYZE_ROLE} "
+        f"url={LOCAL_CHAT_ANALYZE_URL} timeout={LOCAL_CHAT_ANALYZE_TIMEOUT_SEC}s href={href}"
+    )
+    print(f"[posts_state][signal_api] 使用图片: {image_path}")
+    try:
+        with open(image_path, "rb") as f:
+            files = {"files": (os.path.basename(image_path), f, "image/jpeg")}
+            data = {"role": LOCAL_CHAT_ANALYZE_ROLE, "message": msg}
+            r = requests.post(
+                LOCAL_CHAT_ANALYZE_URL,
+                data=data,
+                files=files,
+                timeout=LOCAL_CHAT_ANALYZE_TIMEOUT_SEC,
+            )
+        r.raise_for_status()
+        obj = r.json() if r.content else {}
+        if not isinstance(obj, dict):
+            print("[posts_state][signal_api] 返回不是 JSON 对象")
+            return {"ok": False, "error": "invalid_json"}
+        print(
+            "[posts_state][signal_api] 请求成功 "
+            f"isSign={obj.get('isSign')} star={obj.get('star')}"
+        )
+        return {"ok": True, "data": obj}
+    except Exception as e:
+        print(f"[posts_state][signal_api] 请求失败 href={href} error={e}")
+        return {"ok": False, "error": str(e)}
+
+
 def process_watchlist_posts(
     result: Dict[str, Any],
     out_json_path: str,
@@ -459,6 +532,7 @@ def process_watchlist_posts(
             rec["image_urls"] = list(dict.fromkeys(imgs))[:24]
             if p.get("saved_image_paths"):
                 rec["saved_image_paths"] = p.get("saved_image_paths")
+            # 保留既有的接口分析字段（后续会统一异步刷新）
             if old_slug != bucket:
                 del posts_map[old_slug][href]
                 if not posts_map[old_slug]:
@@ -483,6 +557,13 @@ def process_watchlist_posts(
                 "gemini_confidence": None,
                 "gemini_reason": None,
                 "gemini_bias_zh": None,
+                "signal_is_sign": None,
+                "signal_star": None,
+                "signal_content": None,
+                "signal_raw_data": None,
+                "signal_error": None,
+                "signal_analyzed_at": None,
+                "signal_image_used": None,
             }
             posts_map.setdefault(bucket, {})[href] = rec
             href_index[href] = bucket
@@ -535,13 +616,119 @@ def process_watchlist_posts(
                 + "\n"
             )
 
+    # 文章抓取归档后：异步调用本地接口分析（每篇文章一条任务）
+    analyze_jobs: List[Tuple[str, str, Dict[str, Any]]] = []
+    for slug_key, inner in posts_map.items():
+        if not isinstance(inner, dict):
+            continue
+        for href, rec in inner.items():
+            if not isinstance(rec, dict):
+                continue
+            image_used = _pick_first_existing_file(list(rec.get("saved_image_paths") or []))
+            analyze_jobs.append((slug_key, href, {"rec": rec, "image": image_used}))
+
+    analyzed_ok = 0
+    analyzed_fail = 0
+    if analyze_jobs:
+        def _apply_signal_result(slug_key: str, href: str, image_used: str, out: Dict[str, Any]) -> None:
+            nonlocal analyzed_ok, analyzed_fail
+            rec = posts_map.get(slug_key, {}).get(href)
+            if not isinstance(rec, dict):
+                return
+            rec["signal_analyzed_at"] = beijing_time_str(_utc_now())
+            rec["signal_image_used"] = image_used
+
+            if not out.get("ok"):
+                rec["signal_error"] = str(out.get("error") or "unknown")
+                analyzed_fail += 1
+                print(
+                    f"[posts_state][signal_api] 任务失败 href={href} "
+                    f"error={rec['signal_error']}"
+                )
+                return
+
+            data = out.get("data") or {}
+            if not isinstance(data, dict):
+                rec["signal_error"] = "invalid_response_data"
+                analyzed_fail += 1
+                print(
+                    f"[posts_state][signal_api] 任务失败 href={href} invalid_response_data"
+                )
+                return
+            rec["signal_error"] = None
+            rec["signal_is_sign"] = bool(data.get("isSign"))
+            star_raw = data.get("star")
+            try:
+                rec["signal_star"] = int(star_raw)
+            except Exception:
+                rec["signal_star"] = 0 if star_raw is None else None
+            rec["signal_content"] = data.get("content")
+            rec["signal_raw_data"] = data.get("raw_data")
+            analyzed_ok += 1
+            print(
+                f"[posts_state][signal_api] 任务成功 href={href} "
+                f"isSign={rec.get('signal_is_sign')} star={rec.get('signal_star')}"
+            )
+
+        if LOCAL_CHAT_ANALYZE_CONCURRENT:
+            workers = max(1, min(8, LOCAL_CHAT_ANALYZE_WORKERS))
+            print(
+                f"[posts_state][signal_api] 开始并发分析：jobs={len(analyze_jobs)} "
+                f"mode=concurrent workers={workers}"
+            )
+            with ThreadPoolExecutor(max_workers=workers) as ex:
+                fut_map = {}
+                for slug_key, href, payload in analyze_jobs:
+                    rec = payload["rec"]
+                    image_used = payload["image"]
+                    print(
+                        f"[posts_state][signal_api] 提交任务 href={href} "
+                        f"image={'Y' if image_used else 'N'} title={str(rec.get('title') or '')[:50]}"
+                    )
+                    fut = ex.submit(
+                        _analyze_post_via_local_api,
+                        href,
+                        str(rec.get("title") or ""),
+                        str(rec.get("raw") or ""),
+                        image_used,
+                    )
+                    fut_map[fut] = (slug_key, href, image_used)
+                for fut in as_completed(fut_map):
+                    slug_key, href, image_used = fut_map[fut]
+                    out = fut.result()
+                    _apply_signal_result(slug_key, href, image_used, out)
+        else:
+            print(
+                f"[posts_state][signal_api] 开始串行分析：jobs={len(analyze_jobs)} "
+                "mode=sequential"
+            )
+            for slug_key, href, payload in analyze_jobs:
+                rec = payload["rec"]
+                image_used = payload["image"]
+                print(
+                    f"[posts_state][signal_api] 串行执行 href={href} "
+                    f"image={'Y' if image_used else 'N'} title={str(rec.get('title') or '')[:50]}"
+                )
+                out = _analyze_post_via_local_api(
+                    href,
+                    str(rec.get("title") or ""),
+                    str(rec.get("raw") or ""),
+                    image_used,
+                )
+                _apply_signal_result(slug_key, href, image_used, out)
+
     # 输出列表：按发帖时间新到旧
     merged: List[Dict[str, Any]] = []
+    filtered_star0 = 0
     for _slug, inner in posts_map.items():
         if not isinstance(inner, dict):
             continue
         for href, rec in inner.items():
             if not isinstance(rec, dict):
+                continue
+            star_v = rec.get("signal_star")
+            if isinstance(star_v, int) and star_v == 0:
+                filtered_star0 += 1
                 continue
             merged.append(
                 {
@@ -561,6 +748,13 @@ def process_watchlist_posts(
                     "gemini_bias_zh": rec.get("gemini_bias_zh"),
                     "gemini_confidence": rec.get("gemini_confidence"),
                     "gemini_reason": rec.get("gemini_reason"),
+                    "signal_is_sign": rec.get("signal_is_sign"),
+                    "signal_star": rec.get("signal_star"),
+                    "signal_content": rec.get("signal_content"),
+                    "signal_raw_data": rec.get("signal_raw_data"),
+                    "signal_error": rec.get("signal_error"),
+                    "signal_analyzed_at": rec.get("signal_analyzed_at"),
+                    "signal_image_used": rec.get("signal_image_used"),
                 }
             )
     merged.sort(
@@ -575,6 +769,9 @@ def process_watchlist_posts(
     wl["posts_state_file"] = spath
     wl["posts_retention_hours"] = POST_RETENTION_HOURS
     wl["posts_pruned_count"] = removed
+    wl["posts_signal_analyzed_ok"] = analyzed_ok
+    wl["posts_signal_analyzed_fail"] = analyzed_fail
+    wl["posts_signal_filtered_star0"] = filtered_star0
 
     state["posts"] = posts_map
     state["updated_at"] = _format_beijing(now)
