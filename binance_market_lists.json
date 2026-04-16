@@ -1,6 +1,6 @@
 {
   "overview_url": "https://www.binance.com/zh-CN/markets/overview",
-  "scraped_at": "2026-04-16 18:31:57 北京时间",
+  "scraped_at": "2026-04-17 00:19:29 北京时间",
   "watchlist": {
     "section": "watchlist_following",
     "page_url": "https://www.binance.com/zh-CN/square?tab=Following",
@@ -12,7 +12,7 @@
     "note": "",
     "count_follow_profiles": 2,
     "count_lives": 2,
-    "count_latest_posts": 9,
+    "count_latest_posts": 13,
     "follow_profiles_sample": [
       {
         "name": "yanchibit",
@@ -62,7 +62,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -87,7 +87,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -112,32 +112,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
-        "signal_image_used": ""
-      },
-      {
-        "author": "yanchibit",
-        "author_slug": "yanchibit",
-        "href": "https://www.binance.com/zh-CN/square/post/313102093018162",
-        "raw": "4.16 #BTC 日内行情分析，依旧资费问题，非常严重~ 爆空上冲76-79K？",
-        "time": "55分钟",
-        "title": "4.16 #BTC 日内行情分析，依旧资费问题，非常严重~ 爆空上冲76-79K？",
-        "published_at": "2026-04-16 17:36:57 北京时间",
-        "published_iso": "",
-        "time_label": "55分钟",
-        "is_pinned": false,
-        "image_urls": [],
-        "saved_image_paths": [],
-        "gemini_direction": "unclear",
-        "gemini_bias_zh": "不明",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "signal_is_sign": null,
-        "signal_star": null,
-        "signal_content": null,
-        "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:01 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -162,7 +137,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -190,9 +165,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:09 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312084381253233/img_0.jpg"
       },
       {
         "author": "BTC此刻立即怼一手执行起来",
@@ -216,7 +191,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:20 北京时间",
         "signal_image_used": ""
       },
       {
@@ -241,7 +216,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -266,7 +241,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -291,7 +266,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -316,7 +291,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -341,7 +316,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -366,7 +341,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -391,7 +366,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -416,7 +391,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -441,7 +416,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -466,7 +441,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -491,7 +466,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -516,7 +491,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -541,7 +516,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -566,7 +541,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -591,8 +566,134 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/313171979358386",
+        "raw": "今天睡醒就特意通知你们死拿手里空单+坚定高位做空，晚上直播还让们直接闭着眼睛干，现在吃大肉了，不能做白眼狼光白嫖，有舍才有得。#BTC #ETH",
+        "time": "1小时",
+        "title": "今天睡醒就特意通知你们死拿手里空单+坚定高位做空，晚上直播还让们直接闭着眼睛干，现在吃大肉了，不能做白眼狼光白嫖，有舍才有得。#BTC #ETH",
+        "published_at": "2026-04-16 23:19:29 北京时间",
+        "published_iso": "",
+        "time_label": "1小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzljOTNhMWJjZTYxNzQyNDI5YjcwMmE1ZjdhNzZlNDRiLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzk1NzMwY2EzZjliMTQ0ZTdhZDk3YTYzYmM4ZWVlYTFhLnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2UwN2NhYTllNTU3MjRkODJhZWUxYzIyOGUxY2M1NWU2LmpwZw==&level=md"
+        ],
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313171979358386/img_0.jpg",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313171979358386/img_1.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313171979358386/img_2.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "signal_is_sign": null,
+        "signal_star": null,
+        "signal_content": null,
+        "signal_raw_data": null,
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:21:24 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313171979358386/img_0.jpg"
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/313167634964290",
+        "raw": "ETH暴跌破2300！自动止盈70%仓位利润！ 我们提前24小时布局+多次坚定让你拿住，吃肉了续费+进VIP！恭喜跟上的朋友！汇报持仓利润情况！#BTC #ETH 👉[提前12小时告诉你高位做空睡觉前吃肉](https://app.binance.com/uni-qr/cpos/312974710294290?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "time": "2小时",
+        "title": "ETH暴跌破2300！自动止盈70%仓位利润！ 我们提前24小时布局+多次坚定让你拿住，吃肉了续费+进VIP！恭喜跟上的朋友！汇报持仓利润情况！#BTC #ETH 👉[提前12小时告诉你高位做空睡觉前吃肉](https://app.binance.com/uni-qr/cpos/312974710294290?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "published_at": "2026-04-16 22:19:29 北京时间",
+        "published_iso": "",
+        "time_label": "2小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzYwZDNjMzQwYTM4ZjQzMWJhYjk1YzI1Y2M4ODQ4Y2ZhLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzhiMDliODMzMjZlNTRiZDI5YmJmM2UzMWM1MDA2Njc2LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzhjYjM2NWI0YjQwYTRmYjM4YzBmZDZiZGY1YmMwYjVjLmpwZw==&level=md"
+        ],
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313167634964290/img_0.jpg",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313167634964290/img_1.jpg",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313167634964290/img_2.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "signal_is_sign": null,
+        "signal_star": null,
+        "signal_content": null,
+        "signal_raw_data": null,
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:21:22 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313167634964290/img_0.jpg"
+      },
+      {
+        "author": "yanchibit",
+        "author_slug": "yanchibit",
+        "href": "https://www.binance.com/zh-CN/square/post/313154279338754",
+        "raw": "WLFI 提案对早期投资者有所利空，对参与 #USD1 的来讲毫无关系，甚至可以说可能潜在利好。 原本挖提卖的，可能部分选择格局下也说不定🤷🏻‍♂️ 明天又要发利息了，上一次加仓了500个，期间取了250去参与别的，不知道明天给多少~",
+        "time": "3小时",
+        "title": "WLFI 提案对早期投资者有所利空，对参与 #USD1 的来讲毫无关系，甚至可以说可能潜在利好。 原本挖提卖的，可能部分选择格局下也说不定🤷🏻‍♂️ 明天又要发利息了，上一次加仓了500个，期间取了250去参与别的，不知道明天给多少~",
+        "published_at": "2026-04-16 21:19:29 北京时间",
+        "published_iso": "",
+        "time_label": "3小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzJiNWYwN2NkNTI1NzRlZDY4OGYyYWM4MDA2Yzk4NzI3LnBuZw==&level=lg"
+        ],
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313154279338754/img_0.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "signal_is_sign": null,
+        "signal_star": null,
+        "signal_content": null,
+        "signal_raw_data": null,
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:19:50 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313154279338754/img_0.png"
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/313143729181554",
+        "raw": "BTC空单提前谁在73688作为第一止盈位，移动保本，自己选择走50%还是70%仓位。#BTC ETH空单提前挂在2308止盈70%，移动保本损。 复盘：昨天公开预判的BTC压力75588差了188U，ETH的2388最可惜差了3U+.#ETH",
+        "time": "3小时",
+        "title": "BTC空单提前谁在73688作为第一止盈位，移动保本，自己选择走50%还是70%仓位。#BTC ETH空单提前挂在2308止盈70%，移动保本损。 复盘：昨天公开预判的BTC压力75588差了188U，ETH的2388最可惜差了3U+.#ETH",
+        "published_at": "2026-04-16 21:19:29 北京时间",
+        "published_iso": "",
+        "time_label": "3小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2JiZTVlN2QzZWQ3NjQ4NjNhMzFjMWJhODcyMGUwYzM4LnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2VlOTk4MjE4MTMxYzQ5OWFhN2M4ZThiNDA3YzY2ZGYyLnBuZw==&level=md"
+        ],
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313143729181554/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313143729181554/img_1.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "signal_is_sign": null,
+        "signal_star": null,
+        "signal_content": null,
+        "signal_raw_data": null,
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:21:15 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313143729181554/img_0.png"
       },
       {
         "author": "1000u挑战10wu！",
@@ -619,9 +720,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:18 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312046403150673/img_0.jpg"
       },
       {
         "author": "square-creator-857dc547d",
@@ -645,7 +746,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:18 北京时间",
         "signal_image_used": ""
       },
       {
@@ -670,8 +771,37 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:22 北京时间",
         "signal_image_used": ""
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/313138851457010",
+        "raw": "今天晚上23点整将会有非常剧烈的波动，准备多空双吃。#BTC",
+        "time": "4小时",
+        "title": "今天晚上23点整将会有非常剧烈的波动，准备多空双吃。#BTC",
+        "published_at": "2026-04-16 20:19:29 北京时间",
+        "published_iso": "",
+        "time_label": "4小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzBjZGEyNDQwNmE3NTQwOTg4ZTE0ZTI5MWE1ZGE3MzczLnBuZw==&level=lg"
+        ],
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313138851457010/img_0.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "signal_is_sign": null,
+        "signal_star": null,
+        "signal_content": null,
+        "signal_raw_data": null,
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:21:18 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/313138851457010/img_0.png"
       },
       {
         "author": "$RAVE",
@@ -702,34 +832,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
-        "signal_image_used": ""
-      },
-      {
-        "author": "sanmageshuai",
-        "author_slug": "sanmageshuai",
-        "href": "https://www.binance.com/zh-CN/square/post/313031095129170",
-        "raw": "BTC与ETH二次测试前高附近并未与延续上涨走势，当心高位衰竭后回调。#BTC #ETH 👉[永久返佣已发](https://app.binance.com/uni-qr/cpos/312736432894801?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
-        "time": "5小时",
-        "title": "BTC与ETH二次测试前高附近并未与延续上涨走势，当心高位衰竭后回调。#BTC #ETH 👉[永久返佣已发](https://app.binance.com/uni-qr/cpos/312736432894801?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
-        "published_at": "2026-04-16 13:31:57 北京时间",
-        "published_iso": "",
-        "time_label": "5小时",
-        "is_pinned": false,
-        "image_urls": [],
-        "saved_image_paths": [],
-        "gemini_direction": "unclear",
-        "gemini_bias_zh": "不明",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "signal_is_sign": null,
-        "signal_star": null,
-        "signal_content": null,
-        "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:34:24 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:22 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312023035223442/img_0.png"
       },
       {
         "author": "yanchibit",
@@ -753,7 +858,32 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:32:42 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:19:41 北京时间",
+        "signal_image_used": ""
+      },
+      {
+        "author": "yanchibit",
+        "author_slug": "yanchibit",
+        "href": "https://www.binance.com/zh-CN/square/post/313102093018162",
+        "raw": "4.16 #BTC 日内行情分析，依旧资费问题，非常严重~ 爆空上冲76-79K？",
+        "time": "6小时",
+        "title": "4.16 #BTC 日内行情分析，依旧资费问题，非常严重~ 爆空上冲76-79K？",
+        "published_at": "2026-04-16 18:19:29 北京时间",
+        "published_iso": "",
+        "time_label": "6小时",
+        "is_pinned": false,
+        "image_urls": [],
+        "saved_image_paths": [],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "signal_is_sign": null,
+        "signal_star": null,
+        "signal_content": null,
+        "signal_raw_data": null,
+        "signal_error": "missing_image_file",
+        "signal_analyzed_at": "2026-04-17 00:19:47 北京时间",
         "signal_image_used": ""
       },
       {
@@ -778,7 +908,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:18 北京时间",
         "signal_image_used": ""
       },
       {
@@ -806,9 +936,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:29 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:54 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312387434800578/img_0.png"
       },
       {
         "author": "square-creator-857dc547d",
@@ -832,7 +962,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:18 北京时间",
         "signal_image_used": ""
       },
       {
@@ -868,9 +998,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:32:42 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:19:41 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312352769541170/img_0.png"
       },
       {
         "author": "carrywang55688",
@@ -894,7 +1024,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:22 北京时间",
         "signal_image_used": ""
       },
       {
@@ -919,32 +1049,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
-        "signal_image_used": ""
-      },
-      {
-        "author": "sanmageshuai",
-        "author_slug": "sanmageshuai",
-        "href": "https://www.binance.com/zh-CN/square/post/312974710294290",
-        "raw": "反弹就是做空的机会，比特币已经测试75588附近压力，没有测试77888极端压力，以太坊已经测试2358附近压力，没有测试2388压力。#BTC #ETH",
-        "time": "9小时",
-        "title": "反弹就是做空的机会，比特币已经测试75588附近压力，没有测试77888极端压力，以太坊已经测试2358附近压力，没有测试2388压力。#BTC #ETH",
-        "published_at": "2026-04-16 09:31:57 北京时间",
-        "published_iso": "",
-        "time_label": "9小时",
-        "is_pinned": false,
-        "image_urls": [],
-        "saved_image_paths": [],
-        "gemini_direction": "unclear",
-        "gemini_bias_zh": "不明",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "signal_is_sign": null,
-        "signal_star": null,
-        "signal_content": null,
-        "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:34:07 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:34 北京时间",
         "signal_image_used": ""
       },
       {
@@ -969,7 +1074,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -994,7 +1099,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1019,7 +1124,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1049,9 +1154,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:17 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:20 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311930922044258/img_0.png"
       },
       {
         "author": "square-creator-4bd102843",
@@ -1075,7 +1180,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:28 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1105,9 +1210,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:30 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311941161650385/img_0.png"
       },
       {
         "author": "sanmageshuai",
@@ -1131,7 +1236,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1156,7 +1261,32 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:29 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:50 北京时间",
+        "signal_image_used": ""
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/313031095129170",
+        "raw": "BTC与ETH二次测试前高附近并未与延续上涨走势，当心高位衰竭后回调。#BTC #ETH 👉[永久返佣已发](https://app.binance.com/uni-qr/cpos/312736432894801?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "time": "11小时",
+        "title": "BTC与ETH二次测试前高附近并未与延续上涨走势，当心高位衰竭后回调。#BTC #ETH 👉[永久返佣已发](https://app.binance.com/uni-qr/cpos/312736432894801?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "published_at": "2026-04-16 13:19:29 北京时间",
+        "published_iso": "",
+        "time_label": "11小时",
+        "is_pinned": false,
+        "image_urls": [],
+        "saved_image_paths": [],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "signal_is_sign": null,
+        "signal_star": null,
+        "signal_content": null,
+        "signal_raw_data": null,
+        "signal_error": "missing_image_file",
+        "signal_analyzed_at": "2026-04-17 00:21:09 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1181,7 +1311,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1212,9 +1342,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:29 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:50 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312297420752450/img_0.png"
       },
       {
         "author": "yanchibit",
@@ -1244,9 +1374,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:32:34 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:19:32 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312248381503586/img_0.png"
       },
       {
         "author": "$RAVE",
@@ -1273,9 +1403,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:06 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311901848988257/img_0.jpg"
       },
       {
         "author": "square-creator-857dc547d",
@@ -1299,7 +1429,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:14 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1329,9 +1459,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:37 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311696696162801/img_0.png"
       },
       {
         "author": "square-creator-f69ded460",
@@ -1355,7 +1485,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1380,7 +1510,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1405,7 +1535,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1434,9 +1564,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:29 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:47 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312282663384050/img_0.png"
       },
       {
         "author": "$RAVE",
@@ -1467,9 +1597,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:01 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:19:53 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311886008871106/img_0.jpg"
       },
       {
         "author": "哥都被",
@@ -1496,9 +1626,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311692630755218/img_0.png"
       },
       {
         "author": "square-creator-f69ded460",
@@ -1522,7 +1652,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1547,7 +1677,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1572,7 +1702,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1600,8 +1730,33 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:19:57 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311880029324642/img_0.jpg"
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/312974710294290",
+        "raw": "反弹就是做空的机会，比特币已经测试75588附近压力，没有测试77888极端压力，以太坊已经测试2358附近压力，没有测试2388压力。#BTC #ETH",
+        "time": "15小时",
+        "title": "反弹就是做空的机会，比特币已经测试75588附近压力，没有测试77888极端压力，以太坊已经测试2358附近压力，没有测试2388压力。#BTC #ETH",
+        "published_at": "2026-04-16 09:19:29 北京时间",
+        "published_iso": "",
+        "time_label": "15小时",
+        "is_pinned": false,
+        "image_urls": [],
+        "saved_image_paths": [],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "signal_is_sign": null,
+        "signal_star": null,
+        "signal_content": null,
+        "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:01 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:21:01 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1629,9 +1784,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:34 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311712978686994/img_0.png"
       },
       {
         "author": "yanchibit",
@@ -1655,7 +1810,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:32:27 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:19:29 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1683,9 +1838,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:01 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:00 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311829390566369/img_0.jpg"
       },
       {
         "author": "sanmageshuai",
@@ -1709,7 +1864,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1734,7 +1889,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:32:27 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:19:29 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1762,9 +1917,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:01 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:03 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311812059370289/img_0.jpg"
       },
       {
         "author": "square-creator-4bd102843",
@@ -1788,7 +1943,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:28 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1813,7 +1968,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1838,7 +1993,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1863,7 +2018,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:18 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1888,7 +2043,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:12 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:18 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1918,9 +2073,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:28 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311600640271394/img_0.png"
       },
       {
         "author": "square-creator-4bd102843",
@@ -1944,7 +2099,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:28 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1969,7 +2124,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -1994,7 +2149,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2019,7 +2174,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2044,7 +2199,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:03 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2069,7 +2224,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:14 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2094,7 +2249,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2119,7 +2274,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2147,9 +2302,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:32:34 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:19:35 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312144561438593/img_0.png"
       },
       {
         "author": "square-creator-857dc547d",
@@ -2176,9 +2331,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:14 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311631338753506/img_0.jpg"
       },
       {
         "author": "square-creator-857dc547d",
@@ -2202,7 +2357,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:14 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2227,7 +2382,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:12 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:18 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2261,9 +2416,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:29 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:21:01 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312478153538337/img_0.jpg"
       },
       {
         "author": "sanmageshuai",
@@ -2287,7 +2442,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:51 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:21:01 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2315,9 +2470,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:32:34 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:19:39 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312122710572450/img_0.png"
       },
       {
         "author": "yanchibit",
@@ -2344,9 +2499,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:32:47 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:19:44 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312737930911618/img_0.png"
       },
       {
         "author": "square-creator-857dc547d",
@@ -2373,9 +2528,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:09 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:12 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311765488187201/img_0.jpg"
       },
       {
         "author": "carrywang55688",
@@ -2399,7 +2554,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:12 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:18 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2431,9 +2586,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:25 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311759375813490/img_0.png"
       },
       {
         "author": "haoge666",
@@ -2457,7 +2612,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:34 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2482,7 +2637,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:34 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2507,7 +2662,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2532,7 +2687,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2557,7 +2712,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2582,7 +2737,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:40 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2610,9 +2765,9 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:22 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:43 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/311974134348945/img_0.png"
       },
       {
         "author": "sanmageshuai",
@@ -2636,7 +2791,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:29 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:47 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2661,7 +2816,7 @@
         "signal_content": null,
         "signal_raw_data": null,
         "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:29 北京时间",
+        "signal_analyzed_at": "2026-04-17 00:20:47 北京时间",
         "signal_image_used": ""
       },
       {
@@ -2691,42 +2846,17 @@
         "signal_star": null,
         "signal_content": null,
         "signal_raw_data": null,
-        "signal_error": "missing_image_file",
-        "signal_analyzed_at": "2026-04-16 18:33:29 北京时间",
-        "signal_image_used": ""
+        "signal_error": "502 Server Error: Bad Gateway for url: http://127.0.0.1:3860/chat",
+        "signal_analyzed_at": "2026-04-17 00:20:58 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/312463997584450/img_0.png"
       }
     ],
-    "post_alerts": [
-      {
-        "type": "new_post",
-        "href": "https://www.binance.com/zh-CN/square/post/313102093018162",
-        "published_at": "2026-04-16 17:36:57 北京时间",
-        "title": "4.16 #BTC 日内行情分析，依旧资费问题，非常严重~ 爆空上冲76-79K？",
-        "gemini": {
-          "direction": "unclear",
-          "bias_zh": "不明",
-          "confidence": null,
-          "reason": null
-        }
-      },
-      {
-        "type": "new_post",
-        "href": "https://www.binance.com/zh-CN/square/post/313113195258993",
-        "published_at": "2026-04-16 18:21:57 北京时间",
-        "title": "[https://app.binance.com/uni-qr/cspa/39139107059017?l=zh-CN&r=SDR9QGU2&source=host_share&uc=web_square_share_link&us=telegram](https://app.binance.com/uni-qr/cspa/39139107059017?l=zh-CN&r=SDR9QGU2&source=host_share&uc=web_square_share_link&us=telegram) 三马哥 的 “睡醒75000和2358遇到阻力回调了，晚上能跌到哪里？73588和2308依旧是一个波段止盈点。” 直播将于 2026-04-16 20:00 开播。精彩不容错过，点击添加提醒！",
-        "gemini": {
-          "direction": "unclear",
-          "bias_zh": "不明",
-          "confidence": null,
-          "reason": null
-        }
-      }
-    ],
-    "posts_state_file": "D:\\frontend\\main\\python\\auto-deal-eth\\binance_posts_state.json",
+    "post_alerts": [],
+    "posts_state_file": "/Users/mac/frontend/code/1.operations/auto-deal-eth/binance_posts_state.json",
     "posts_retention_hours": 24,
     "posts_pruned_count": 0,
-    "posts_signal_analyzed_ok": 23,
-    "posts_signal_analyzed_fail": 100,
+    "posts_signal_analyzed_ok": 0,
+    "posts_signal_analyzed_fail": 128,
     "posts_signal_filtered_star0": 23
   }
 }
