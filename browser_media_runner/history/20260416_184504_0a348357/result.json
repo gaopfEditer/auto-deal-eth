@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "domain_tag": "image",
+  "prompt_name": "<inline>",
+  "run_id": "20260416_184504_0a348357",
+  "history_dir": "D:\\frontend\\main\\python\\auto-deal-eth\\browser_media_runner\\history\\20260416_184504_0a348357",
+  "resources": [
+    "D:\\frontend\\main\\python\\auto-deal-eth\\screenshots\\tophub_page.png"
+  ],
+  "resource_meta": [],
+  "web_result": {
+    "ok": true,
+    "count": 1,
+    "results": [
+      {
+        "symbol": "image",
+        "analysis": "Gemini 说\n抱歉，我无法直接“看到”或分析你提到的图片，因为你当前的输入中并未包含图片文件或链接。\n如果你上传一张图片，我可以为你提供如下格式的 JSON 分析：\nJSON\n{\n  \"status\": \"success\",\n  \"analysis\": {\n    \"core_content\": \"描述图片的主体对象或场景\",\n    \"key_elements\": [\"元素1\", \"元素2\", \"元素3\"],\n    \"theme\": \"图片表达的核心主题或氛围\",\n    \"details\": {\n      \"color_palette\": \"主色调描述\",\n      \"composition\": \"构图方式\"\n    }\n  }\n}\n请上传图片或提供图片 URL，我会立即为你生成分析。",
+        "status": "success",
+        "method": "web",
+        "resource": "D:\\frontend\\main\\python\\auto-deal-eth\\screenshots\\tophub_page.png"
+      }
+    ]
+  }
+}
