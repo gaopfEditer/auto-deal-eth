@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "count": 1,
+  "results": [
+    {
+      "symbol": "image",
+      "analysis": "Gemini 说\n请上传您想要分析的图片。由于我目前没有看到任何图像，无法为您生成分析。\n一旦您上传图片，我将按照您的要求，以 JSON 格式 输出对其核心内容的分析，包含以下维度：\n场景描述 (Scene Description)\n主体对象 (Main Objects)\n动作/状态 (Actions/States)\n色彩与氛围 (Colors & Atmosphere)\n核心文本 (If any text is present)",
+      "status": "success",
+      "method": "web",
+      "resource": "D:\\frontend\\main\\python\\auto-deal-eth\\screenshots\\tophub_page.png"
+    }
+  ]
+}

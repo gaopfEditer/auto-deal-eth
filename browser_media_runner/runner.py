@@ -49,11 +49,6 @@ def _sanitize_resource(raw: str) -> str:
     return s
 
 
-def _is_http(s: str) -> bool:
-    t = (s or "").strip().lower()
-    return t.startswith("http://") or t.startswith("https://")
-
-
 def load_prompt(prompt_name: str, prompts_dir: Optional[Path] = None) -> str:
     """prompt_name 为文件名（可含子路径如 domain/foo.txt，需真实存在）。"""
     base = Path(prompts_dir or DEFAULT_PROMPTS_DIR).resolve()
@@ -129,7 +124,11 @@ def analyze_resources(
         return out
 
     web_result = analyze_resources_with_gemini_web(
-        files, prompt_text, symbol=domain_tag or "resource_batch", keep_browser_open=False
+        files,
+        prompt_text,
+        symbol=domain_tag or "resource_batch",
+        keep_browser_open=False,
+        prefer_clipboard_upload=False,
     )
     out: Dict[str, Any] = {
         "ok": bool(web_result.get("ok")),

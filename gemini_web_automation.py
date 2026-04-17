@@ -7,6 +7,7 @@ or ``browser_automation.analyze_with_gemini_web`` (thin wrapper).
 """
 from __future__ import annotations
 
+import base64
 import os
 import random
 import sys
@@ -14,7 +15,7 @@ import tempfile
 import time
 import uuid
 from io import BytesIO
-from typing import Optional
+from typing import Any, Dict, Optional, Union
 
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
@@ -30,8 +31,13 @@ def analyze_with_gemini_web(
     prompt: Optional[str] = None,
     *,
     keep_browser_open: bool = True,
+    clipboard_only: bool = False,
+    use_clipboard_upload: bool = False,
 ):
-    """Gemini web: open session, upload image, inject prompt, send, scrape reply."""
+    """Gemini web: open session, upload image, inject prompt, send, scrape reply.
+
+    clipboard_only: 仅通过剪贴板粘贴图片，不查找 ``input[type=file]`` /「上传文件」等 UI。
+    """
     from browser_automation import init_browser
 
     driver = init_browser()
@@ -297,8 +303,25 @@ def analyze_with_gemini_web(
                     print(f"  [DEBUG] 剪贴板粘贴上传失败: {e}")
                     return False
 
-            # 优先：剪贴板粘贴上传，成功则跳过“添加文件按钮”流程
-            pasted_upload = _try_paste_image_via_clipboard(os.path.abspath(image_path))
+            abs_img = os.path.abspath(image_path)
+            # 默认关闭剪贴板上传，按用户要求走“上传按钮->上传文件”流程
+            if use_clipboard_upload:
+                pasted_upload = _try_paste_image_via_clipboard(abs_img)
+            if clipboard_only:
+                if not use_clipboard_upload:
+                    raise RuntimeError(
+                        "clipboard_only=True 但 use_clipboard_upload=False，配置冲突"
+                    )
+                if not pasted_upload:
+                    time.sleep(1.2)
+                    pasted_upload = _try_paste_image_via_clipboard(abs_img)
+                if not pasted_upload:
+                    raise RuntimeError(
+                        "clipboard_only: 剪贴板粘贴上传失败（未检测到附件），"
+                        "已跳过文件选择/上传按钮流程"
+                    )
+                file_input = None
+                print("  [INFO] clipboard_only=True：仅剪贴板贴图，不探测上传文件按钮")
 
             def _dismiss_upload_intercept_confirm() -> bool:
                 """
@@ -319,13 +342,19 @@ def analyze_with_gemini_web(
                 clicked = False
                 for t in texts:
                     xpath = (
-                        "//*[self::button or @role='button' or self::div]"
+                        # 仅在弹层/对话框上下文中查找确认按钮，避免误点页面普通“ok”
+                        "//*[self::div or @role='dialog' or contains(@class,'dialog') or contains(@class,'modal')"
+                        " or contains(@class,'popover') or contains(@class,'menu')]"
+                        "//*[self::button or @role='button']"
                         f"[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{t.lower()}')]"
                     )
                     try:
-                        btn = WebDriverWait(driver, 1).until(
+                        btn = WebDriverWait(driver, 0.8).until(
                             EC.element_to_be_clickable((By.XPATH, xpath))
                         )
+                        label = (btn.text or btn.get_attribute("aria-label") or "").strip()
+                        if not label:
+                            continue
                         driver.execute_script(
                             "arguments[0].scrollIntoView({block:'center'});", btn
                         )
@@ -334,7 +363,7 @@ def analyze_with_gemini_web(
                             btn.click()
                         except Exception:
                             driver.execute_script("arguments[0].click();", btn)
-                        print(f"  [INFO] 已处理上传拦截确认：{t}")
+                        print(f"  [INFO] 已处理上传拦截确认：query={t} label={label}")
                         clicked = True
                         time.sleep(0.4)
                         break
@@ -358,16 +387,17 @@ def analyze_with_gemini_web(
                 return clicks
             
             # 方法1: 直接查找文件输入框（可能隐藏）
-            try:
-                file_inputs = driver.find_elements(By.CSS_SELECTOR, "input[type='file']")
-                if file_inputs:
-                    file_input = file_inputs[0]
-                    print(f"  [INFO] 找到隐藏的文件输入框")
-            except:
-                pass
+            if not pasted_upload:
+                try:
+                    file_inputs = driver.find_elements(By.CSS_SELECTOR, "input[type='file']")
+                    if file_inputs:
+                        file_input = file_inputs[0]
+                        print(f"  [INFO] 找到隐藏的文件输入框")
+                except Exception:
+                    pass
             
             # 方法2: 先点击"添加文件"按钮，然后在浮窗中点击"上传文件"
-            if not file_input and not pasted_upload:
+            if not clipboard_only and not file_input and not pasted_upload:
                 try:
                     # 步骤1: 查找并点击"添加文件"按钮（或类似的按钮）
                     add_file_button = None
@@ -425,29 +455,90 @@ def analyze_with_gemini_web(
                     if not add_file_button:
                         print(f"  [WARNING] 未找到添加文件按钮，尝试直接查找上传文件按钮")
                     
-                    # 步骤2: 等待浮窗出现，然后查找"上传文件"按钮并使用 pyautogui 点击
-                    # 必须先点“添加文件/+”，否则菜单未展开，后续会稳定找不到“上传文件/文件输入框”
+                    def _is_upload_menu_open() -> bool:
+                        try:
+                            menu_els = driver.find_elements(
+                                By.CSS_SELECTOR,
+                                "#upload-file-menu, [id='upload-file-menu'], .mdc-menu-surface--open",
+                            )
+                            if menu_els:
+                                return True
+                        except Exception:
+                            pass
+                        try:
+                            items = driver.find_elements(
+                                By.XPATH,
+                                "//*[contains(@class, 'mdc-list-item') and .//div[contains(text(), '上传文件')]]"
+                                " | //div[contains(@class, 'menu-text') and contains(text(), '上传文件')]",
+                            )
+                            return len(items) > 0
+                        except Exception:
+                            return False
+
+                    def _ensure_upload_menu_open() -> bool:
+                        if _is_upload_menu_open():
+                            return True
+                        if not add_file_button:
+                            return False
+                        try:
+                            print("  [INFO] 检测到下拉已消失，重新点击添加文件按钮展开菜单")
+                            driver.execute_script(
+                                "arguments[0].scrollIntoView({block: 'center'});",
+                                add_file_button,
+                            )
+                            time.sleep(0.2)
+                            try:
+                                add_file_button.click()
+                            except Exception:
+                                driver.execute_script("arguments[0].click();", add_file_button)
+                            _drain_upload_intercepts(max_rounds=2, gap_sec=0.2)
+                            WebDriverWait(driver, 4).until(lambda d: _is_upload_menu_open())
+                            return True
+                        except Exception:
+                            return False
+
+                    def _find_upload_menu_item():
+                        # 仅在菜单容器内找“上传文件”项，避免全局误匹配
+                        xps = [
+                            "//*[@id='upload-file-menu']//*[self::button or @role='button' or contains(@class,'mdc-list-item')]"
+                            "[.//text()[contains(.,'上传文件')] or contains(.,'上传文件') or contains(.,'Upload file') or contains(.,'Upload files')]",
+                            "//*[contains(@class,'mdc-menu-surface--open')]//*[self::button or @role='button' or contains(@class,'mdc-list-item')]"
+                            "[.//text()[contains(.,'上传文件')] or contains(.,'上传文件') or contains(.,'Upload file') or contains(.,'Upload files')]",
+                        ]
+                        for xp in xps:
+                            try:
+                                candidates = driver.find_elements(By.XPATH, xp)
+                                for el in candidates:
+                                    if not el.is_displayed():
+                                        continue
+                                    text = (el.text or el.get_attribute("aria-label") or "").strip()
+                                    if "上传文件" in text or "Upload file" in text or "Upload files" in text:
+                                        return el
+                            except Exception:
+                                continue
+                        return None
+
+                    # 步骤2: 菜单保持打开状态下，立即查找并点击“上传文件”
                     if add_file_button:
-                        # 给菜单展开一个小缓冲，主等待交给 WebDriverWait
-                        time.sleep(0.8)
+                        if not _ensure_upload_menu_open():
+                            print("  [WARNING] 添加文件下拉菜单未保持打开")
                         
                         # 查找"上传文件"按钮
                         upload_button = None
                         try:
-                            # 查找包含"上传文件"文本的可点击父元素（浮窗中的）
-                            upload_button = WebDriverWait(driver, 10).until(
-                                EC.presence_of_element_located((By.XPATH, "//*[contains(@class, 'mdc-list-item') and .//div[contains(text(), '上传文件')]] | //*[contains(@class, 'list-item') and .//*[contains(text(), '上传文件')]]"))
-                            )
-                            print(f"  [INFO] 找到上传文件按钮（浮窗中）")
-                        except:
-                            try:
-                                upload_button = WebDriverWait(driver, 10).until(
-                                    EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'menu-text') and contains(text(), '上传文件')] | //div[contains(text(), '上传文件')] | //span[contains(text(), '上传文件')] | //*[contains(text(), '上传文件')]"))
-                                )
-                                print(f"  [INFO] 找到上传文件按钮（文本元素）")
-                            except:
-                                pass
+                            WebDriverWait(driver, 3).until(lambda d: _is_upload_menu_open())
+                            upload_button = _find_upload_menu_item()
+                            if upload_button:
+                                u_text = (upload_button.text or upload_button.get_attribute("aria-label") or "").strip()
+                                print(f"  [OK] 菜单内定位到上传文件项: text={u_text}")
+                        except Exception:
+                            pass
                         
+                        if upload_button:
+                            # 点击前再次确认菜单没消失，避免拿到陈旧元素
+                            if not _ensure_upload_menu_open():
+                                print("  [WARNING] 点击上传文件前菜单已关闭，放弃本轮点击")
+                                upload_button = None
                         if upload_button:
                             # 使用 pyautogui 点击"上传文件"按钮（浮窗中的）
                             try:
@@ -496,9 +587,9 @@ def analyze_with_gemini_web(
                                 file_inputs = driver.find_elements(By.CSS_SELECTOR, "input[type='file']")
                                 if file_inputs:
                                     file_input = file_inputs[0]
-                                    print(f"  [OK] 点击成功，找到文件输入框")
+                                    print(f"  [OK] 上传文件项点击成功，已出现文件输入框")
                                 else:
-                                    print(f"  [WARNING] 点击后未找到文件输入框")
+                                    print(f"  [WARNING] 上传文件项已点击，但未出现文件输入框")
                             except ImportError:
                                 print(f"  [WARNING] pyautogui 未安装，尝试其他方法")
                                 # 回退到普通点击
@@ -511,13 +602,13 @@ def analyze_with_gemini_web(
                             except Exception as e:
                                 print(f"  [DEBUG] pyautogui 点击失败: {e}")
                         else:
-                            print(f"  [WARNING] 未找到上传文件按钮（浮窗中）")
+                            print(f"  [WARNING] 菜单已开但未定位到“上传文件”项（本轮不做后续上传）")
                             
                 except Exception as e:
                     print(f"  [DEBUG] 通过添加文件按钮流程失败: {e}")
             
             # 方法3: 直接通过文本内容查找"上传文件"按钮（如果浮窗已经打开）
-            if not file_input:
+            if not file_input and not pasted_upload:
                 try:
                     # 首先尝试查找可点击的父容器（更可靠）
                     upload_button = None
@@ -951,6 +1042,27 @@ def analyze_with_gemini_web(
                 file_input.send_keys(abs_image_path)
                 time.sleep(5)  # 等待图片上传和处理
                 print(f"  ✓ 图片上传成功")
+                # 上传后主动关闭可能残留的上传下拉/浮层，避免遮挡后续输入
+                try:
+                    ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+                except Exception:
+                    pass
+                try:
+                    body = driver.find_element(By.TAG_NAME, "body")
+                    body.click()
+                except Exception:
+                    pass
+                try:
+                    still_open = driver.find_elements(
+                        By.CSS_SELECTOR,
+                        "#upload-file-menu, [id='upload-file-menu'], .mdc-menu-surface--open",
+                    )
+                    if still_open:
+                        print("  [WARNING] 上传后菜单仍可见，已尝试 ESC/点击空白关闭")
+                    else:
+                        print("  [INFO] 上传后已关闭文件选择相关浮层")
+                except Exception:
+                    pass
             else:
                 # 如果找不到上传按钮，提示用户手动操作
                 print(f"  [INFO] 未找到自动上传按钮")
@@ -1255,22 +1367,57 @@ def analyze_with_gemini_web(
                 pass
 
 
+def _write_base64_image_to_temp(b64: str, filename_hint: str = "") -> Optional[str]:
+    """将 base64（可含 data URL 前缀）解码为临时图片文件路径。"""
+    raw = (b64 or "").strip()
+    if raw.startswith("data:") and "base64," in raw:
+        raw = raw.split("base64,", 1)[1]
+    try:
+        data = base64.b64decode(raw, validate=False)
+    except Exception:
+        return None
+    if not data or len(data) < 8:
+        return None
+    hint = (filename_hint or "").lower()
+    ext = ".png"
+    for cand in (".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".png"):
+        if hint.endswith(cand):
+            ext = ".jpg" if cand in (".jpg", ".jpeg") else cand
+            break
+    fd, path = tempfile.mkstemp(prefix="gemini_b64_", suffix=ext)
+    try:
+        os.write(fd, data)
+    finally:
+        os.close(fd)
+    return path
+
+
 def analyze_resources_with_gemini_web(
-    resources: list[str],
+    resources: list[Union[str, Dict[str, Any]]],
     prompt: str,
     *,
     symbol: str = "resource_batch",
     keep_browser_open: bool = False,
+    prefer_clipboard_upload: bool = False,
 ) -> dict:
     """
-    批量文件上传分析：resources 与 prompt 均由外部传入。
-    - 不做截图/下载/REST，仅将本地文件逐个上传到 Gemini 网页版分析。
+    批量分析：resources 与 prompt 均由外部传入。
+
+    - 每项可为 ``http(s)`` 字符串、本地文件路径字符串，或 ``{"base64": "...", "filename": "a.png"}``。
+    - ``prefer_clipboard_upload`` 为 True 时，对本地路径/URL 截图结果优先走剪贴板贴图。
+    - ``base64`` 项始终解码为临时文件后，以 ``clipboard_only`` 方式粘贴。
     """
     p = (prompt or "").strip()
     if not p:
         return {"ok": False, "error": "prompt 不能为空", "results": []}
-    items = [str(x).strip() for x in (resources or []) if str(x).strip()]
-    if not items:
+
+    raw_items: list[Union[str, Dict[str, Any]]] = []
+    for x in resources or []:
+        if isinstance(x, dict):
+            raw_items.append(x)
+        elif isinstance(x, str) and str(x).strip():
+            raw_items.append(str(x).strip())
+    if not raw_items:
         return {"ok": False, "error": "resources 为空", "results": []}
 
     def _is_http(s: str) -> bool:
@@ -1303,34 +1450,26 @@ def analyze_resources_with_gemini_web(
                 except Exception:
                     pass
 
-    results = []
-    for i, fp in enumerate(items, 1):
-        upload_path = fp
-        if _is_http(fp):
-            shot = _screenshot_url_to_temp_image(fp)
-            if not shot:
-                results.append(
-                    {
-                        "status": "error",
-                        "method": "web",
-                        "resource": fp,
-                        "error": "URL 打开或截图失败",
-                    }
-                )
-                continue
-            upload_path = shot
-        elif not os.path.isfile(fp):
-            results.append(
-                {"status": "error", "method": "web", "resource": fp, "error": "文件不存在"}
-            )
-            continue
+    results: list[dict] = []
+    temp_cleanup: list[str] = []
+
+    def _run_one(
+        upload_path: str,
+        *,
+        clip: bool,
+        resource_label: str,
+        index: int,
+        total: int,
+    ) -> dict:
+        last_item = keep_browser_open and index == total
         r = analyze_with_gemini_web(
             upload_path,
             symbol=symbol,
             prompt=p,
-            keep_browser_open=keep_browser_open and i == len(items),
+            keep_browser_open=last_item,
+            clipboard_only=clip,
+            use_clipboard_upload=clip,
         )
-        # 失败自动重试：等待 3~8 秒，最多再试 2 次
         retries = 0
         while isinstance(r, dict) and r.get("status") == "error" and retries < 2:
             retries += 1
@@ -1344,12 +1483,96 @@ def analyze_resources_with_gemini_web(
                 upload_path,
                 symbol=symbol,
                 prompt=p,
-                keep_browser_open=keep_browser_open and i == len(items),
+                keep_browser_open=last_item,
+                clipboard_only=clip,
+                use_clipboard_upload=clip,
             )
         if isinstance(r, dict):
-            r["resource"] = fp
-            if upload_path != fp:
+            r["resource"] = resource_label
+            if upload_path != resource_label:
                 r["resource_snapshot"] = upload_path
-        results.append(r)
+        return r if isinstance(r, dict) else {"status": "error", "error": str(r)}
+
+    try:
+        for i, raw in enumerate(raw_items, 1):
+            resource_label = ""
+            upload_path = ""
+            clip = prefer_clipboard_upload
+
+            if isinstance(raw, dict):
+                b64 = raw.get("base64")
+                if not isinstance(b64, str) or not b64.strip():
+                    b64 = raw.get("b64")
+                if not isinstance(b64, str) or not b64.strip():
+                    results.append(
+                        {
+                            "status": "error",
+                            "method": "web",
+                            "resource": str(raw)[:200],
+                            "error": "dict 资源缺少 base64/b64 字段",
+                        }
+                    )
+                    continue
+                hint = str(raw.get("filename") or raw.get("name") or "")
+                decoded = _write_base64_image_to_temp(b64, hint)
+                if not decoded:
+                    results.append(
+                        {
+                            "status": "error",
+                            "method": "web",
+                            "resource": hint or "<base64>",
+                            "error": "base64 解码失败或数据过短",
+                        }
+                    )
+                    continue
+                temp_cleanup.append(decoded)
+                upload_path = decoded
+                resource_label = hint or "<base64>"
+                clip = True
+            else:
+                fp = raw
+                resource_label = fp
+                upload_path = fp
+                if _is_http(fp):
+                    shot = _screenshot_url_to_temp_image(fp)
+                    if not shot:
+                        results.append(
+                            {
+                                "status": "error",
+                                "method": "web",
+                                "resource": fp,
+                                "error": "URL 打开或截图失败",
+                            }
+                        )
+                        continue
+                    temp_cleanup.append(shot)
+                    upload_path = shot
+                elif not os.path.isfile(fp):
+                    results.append(
+                        {
+                            "status": "error",
+                            "method": "web",
+                            "resource": fp,
+                            "error": "文件不存在",
+                        }
+                    )
+                    continue
+
+            results.append(
+                _run_one(
+                    upload_path,
+                    clip=clip,
+                    resource_label=resource_label,
+                    index=i,
+                    total=len(raw_items),
+                )
+            )
+    finally:
+        for pth in temp_cleanup:
+            try:
+                os.remove(pth)
+            except OSError:
+                pass
+
     ok = any(isinstance(x, dict) and x.get("status") == "success" for x in results)
     return {"ok": ok, "count": len(results), "results": results}

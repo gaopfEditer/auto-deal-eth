@@ -15,6 +15,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from zoneinfo import ZoneInfo
 
+from gemini_analyzer import extract_json_from_gemini_text
+
 try:
     import requests
 except ModuleNotFoundError:
@@ -22,10 +24,11 @@ except ModuleNotFoundError:
 
 TZ_BEIJING = ZoneInfo("Asia/Shanghai")
 
-POST_RETENTION_HOURS = 24
+# 默认保留最近 24 小时（可通过环境变量覆盖）
+POST_RETENTION_HOURS = int(os.getenv("POST_RETENTION_HOURS", "24").strip() or "24")
 DEFAULT_STATE_BASENAME = "binance_posts_state.json"
 LOCAL_CHAT_ANALYZE_URL = "http://127.0.0.1:3860/chat"
-LOCAL_CHAT_ANALYZE_ROLE = "binance_square"
+LOCAL_CHAT_ANALYZE_ROLE = os.getenv("LOCAL_CHAT_ANALYZE_ROLE", "binance_square").strip() or "binance_square"
 LOCAL_CHAT_ANALYZE_TIMEOUT_SEC = 45
 # 默认不并发；后续切本地模型时可开启并发
 LOCAL_CHAT_ANALYZE_CONCURRENT = (
@@ -247,10 +250,19 @@ def filter_posts_by_published_age(
 
 
 def _published_dt_for_record(rec: Dict[str, Any], ref_now: datetime) -> Optional[datetime]:
-    """状态条目中取发帖时刻（published_iso / time_label / published_at 字符串）。"""
-    dt = parse_published_to_dt(rec, ref_now)
-    if dt is not None:
-        return dt
+    """状态条目中取发帖时刻（优先绝对时间：published_iso/published_at，再回退 time_label）。"""
+    iso = (rec.get("published_iso") or "").strip()
+    if iso:
+        try:
+            t = iso.replace("Z", "+00:00")
+            dt = datetime.fromisoformat(t)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            out = _reject_future_published_dt(_dt_utc(dt), ref_now)
+            if out is not None:
+                return out
+        except ValueError:
+            pass
     pa = (rec.get("published_at") or "").strip()
     if pa and "北京时间" in pa:
         t2 = re.sub(r"\s*北京时间\s*$", "", pa).strip()
@@ -261,6 +273,10 @@ def _published_dt_for_record(rec: Dict[str, Any], ref_now: datetime) -> Optional
             )
         except ValueError:
             pass
+    # 绝对时间不可用时，再回退相对时间标签
+    dt = parse_published_to_dt(rec, ref_now)
+    if dt is not None:
+        return dt
     return None
 
 
@@ -393,6 +409,82 @@ def _pick_first_existing_file(paths: List[str]) -> str:
     return ""
 
 
+def _signal_analysis_done(rec: Dict[str, Any]) -> bool:
+    """是否已完成且成功分析（用于下次跳过重复请求）。"""
+    if bool(rec.get("signal_analyzed_ok")):
+        return True
+    # 兼容旧数据：没有标志位时，按已有成功结果字段推断
+    if rec.get("signal_error") is None and rec.get("signal_star") is not None:
+        return True
+    return False
+
+
+def _collect_record_image_paths(rec: Dict[str, Any]) -> List[str]:
+    out: List[str] = []
+    for p in list(rec.get("saved_image_paths") or []):
+        pp = str(p or "").strip()
+        if pp:
+            out.append(pp)
+    s = str(rec.get("signal_image_used") or "").strip()
+    if s:
+        out.append(s)
+    return out
+
+
+def _iter_all_record_image_paths(posts_map: Dict[str, Dict[str, Any]]) -> List[str]:
+    out: List[str] = []
+    for inner in posts_map.values():
+        if not isinstance(inner, dict):
+            continue
+        for rec in inner.values():
+            if not isinstance(rec, dict):
+                continue
+            out.extend(_collect_record_image_paths(rec))
+    return out
+
+
+def _cleanup_removed_post_images(candidate_paths: List[str], remaining_paths: List[str]) -> int:
+    """
+    删除已被剔除帖子关联的本地截图文件：
+    - 只处理路径里包含 square_post_images 的文件
+    - 若文件仍被其他帖子引用，则不删
+    """
+    if not candidate_paths:
+        return 0
+    remaining = {os.path.abspath(p) for p in remaining_paths if p}
+    deleted = 0
+    for p in candidate_paths:
+        pp = str(p or "").strip()
+        if not pp:
+            continue
+        ap = os.path.abspath(pp)
+        low = ap.replace("\\", "/").lower()
+        if "/square_post_images/" not in low:
+            continue
+        if ap in remaining:
+            continue
+        try:
+            if os.path.isfile(ap):
+                os.remove(ap)
+                deleted += 1
+                # 顺带清理空目录（最多向上 3 层，避免误删更高层）
+                parent = os.path.dirname(ap)
+                for _ in range(3):
+                    if not parent:
+                        break
+                    name = os.path.basename(parent).lower()
+                    if name == "square_post_images":
+                        break
+                    if os.path.isdir(parent) and not os.listdir(parent):
+                        os.rmdir(parent)
+                        parent = os.path.dirname(parent)
+                    else:
+                        break
+        except Exception:
+            continue
+    return deleted
+
+
 def _analyze_post_via_local_api(
     href: str, title: str, raw: str, image_path: str
 ) -> Dict[str, Any]:
@@ -402,9 +494,6 @@ def _analyze_post_via_local_api(
     """
     if requests is None:
         return {"ok": False, "error": "missing_requests"}
-    if not image_path or not os.path.isfile(image_path):
-        return {"ok": False, "error": "missing_image_file"}
-
     msg = (
         "给出建议\n"
         f"标题: {(title or '')[:500]}\n"
@@ -415,17 +504,15 @@ def _analyze_post_via_local_api(
         f"[posts_state][signal_api] 请求开始 role={LOCAL_CHAT_ANALYZE_ROLE} "
         f"url={LOCAL_CHAT_ANALYZE_URL} timeout={LOCAL_CHAT_ANALYZE_TIMEOUT_SEC}s href={href}"
     )
-    print(f"[posts_state][signal_api] 使用图片: {image_path}")
+    print("[posts_state][signal_api] 请求模式: text_only（不上传文件）")
     try:
-        with open(image_path, "rb") as f:
-            files = {"files": (os.path.basename(image_path), f, "image/jpeg")}
-            data = {"role": LOCAL_CHAT_ANALYZE_ROLE, "message": msg}
-            r = requests.post(
-                LOCAL_CHAT_ANALYZE_URL,
-                data=data,
-                files=files,
-                timeout=LOCAL_CHAT_ANALYZE_TIMEOUT_SEC,
-            )
+        payload = {"role": LOCAL_CHAT_ANALYZE_ROLE, "message": msg}
+        r = requests.post(
+            LOCAL_CHAT_ANALYZE_URL,
+            json=payload,
+            headers={"Content-Type": "application/json"},
+            timeout=LOCAL_CHAT_ANALYZE_TIMEOUT_SEC,
+        )
         r.raise_for_status()
         obj = r.json() if r.content else {}
         if not isinstance(obj, dict):
@@ -439,6 +526,33 @@ def _analyze_post_via_local_api(
     except Exception as e:
         print(f"[posts_state][signal_api] 请求失败 href={href} error={e}")
         return {"ok": False, "error": str(e)}
+
+
+def _normalize_signal_payload(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    适配接口返回：
+    1) 直接结构：{"isSign": bool, "content": str, "star": int}
+    2) 包裹结构：{"text": "```json ...```"} / {"raw_data":{"text":"..."}}
+    返回统一 dict（至少尽量含 isSign/content/star）。
+    """
+    if not isinstance(data, dict):
+        return {}
+    if any(k in data for k in ("isSign", "content", "star")):
+        return data
+    text_candidates: List[str] = []
+    t = data.get("text")
+    if isinstance(t, str) and t.strip():
+        text_candidates.append(t)
+    rd = data.get("raw_data")
+    if isinstance(rd, dict):
+        t2 = rd.get("text")
+        if isinstance(t2, str) and t2.strip():
+            text_candidates.append(t2)
+    for s in text_candidates:
+        parsed = extract_json_from_gemini_text(s)
+        if isinstance(parsed, dict):
+            return parsed
+    return data
 
 
 def process_watchlist_posts(
@@ -467,6 +581,7 @@ def process_watchlist_posts(
     removed = 0
     href_index = _href_slug_index(posts_map)
     to_del: List[Tuple[str, str]] = []
+    removed_image_candidates: List[str] = []
     for slug, inner in list(posts_map.items()):
         if not isinstance(inner, dict):
             to_del.append((slug, "__drop_bucket__"))
@@ -484,11 +599,17 @@ def process_watchlist_posts(
             posts_map.pop(slug, None)
             continue
         if isinstance(inner, dict) and href in inner:
+            rec_to_drop = inner.get(href)
+            if isinstance(rec_to_drop, dict):
+                removed_image_candidates.extend(_collect_record_image_paths(rec_to_drop))
             del inner[href]
             href_index.pop(href, None)
             removed += 1
         if isinstance(inner, dict) and not inner:
             posts_map.pop(slug, None)
+    removed_images = _cleanup_removed_post_images(
+        removed_image_candidates, _iter_all_record_image_paths(posts_map)
+    )
 
     incoming: List[Dict[str, Any]] = list(
         (result.get("watchlist") or {}).get("latest_posts") or []
@@ -564,6 +685,7 @@ def process_watchlist_posts(
                 "signal_error": None,
                 "signal_analyzed_at": None,
                 "signal_image_used": None,
+                "signal_analyzed_ok": False,
             }
             posts_map.setdefault(bucket, {})[href] = rec
             href_index[href] = bucket
@@ -618,11 +740,15 @@ def process_watchlist_posts(
 
     # 文章抓取归档后：异步调用本地接口分析（每篇文章一条任务）
     analyze_jobs: List[Tuple[str, str, Dict[str, Any]]] = []
+    analyzed_skip = 0
     for slug_key, inner in posts_map.items():
         if not isinstance(inner, dict):
             continue
         for href, rec in inner.items():
             if not isinstance(rec, dict):
+                continue
+            if _signal_analysis_done(rec):
+                analyzed_skip += 1
                 continue
             image_used = _pick_first_existing_file(list(rec.get("saved_image_paths") or []))
             analyze_jobs.append((slug_key, href, {"rec": rec, "image": image_used}))
@@ -640,6 +766,7 @@ def process_watchlist_posts(
 
             if not out.get("ok"):
                 rec["signal_error"] = str(out.get("error") or "unknown")
+                rec["signal_analyzed_ok"] = False
                 analyzed_fail += 1
                 print(
                     f"[posts_state][signal_api] 任务失败 href={href} "
@@ -647,23 +774,28 @@ def process_watchlist_posts(
                 )
                 return
 
-            data = out.get("data") or {}
-            if not isinstance(data, dict):
+            data_raw = out.get("data") or {}
+            if not isinstance(data_raw, dict):
                 rec["signal_error"] = "invalid_response_data"
+                rec["signal_analyzed_ok"] = False
                 analyzed_fail += 1
                 print(
                     f"[posts_state][signal_api] 任务失败 href={href} invalid_response_data"
                 )
                 return
+            data = _normalize_signal_payload(data_raw)
             rec["signal_error"] = None
+            rec["signal_analyzed_ok"] = True
             rec["signal_is_sign"] = bool(data.get("isSign"))
             star_raw = data.get("star")
             try:
                 rec["signal_star"] = int(star_raw)
             except Exception:
                 rec["signal_star"] = 0 if star_raw is None else None
+            # 适配实际接口返回：{"isSign": bool, "content": str, "star": int}
             rec["signal_content"] = data.get("content")
-            rec["signal_raw_data"] = data.get("raw_data")
+            # 若接口未返回 raw_data，保留完整返回对象，便于排查/回放
+            rec["signal_raw_data"] = data_raw
             analyzed_ok += 1
             print(
                 f"[posts_state][signal_api] 任务成功 href={href} "
@@ -755,6 +887,7 @@ def process_watchlist_posts(
                     "signal_error": rec.get("signal_error"),
                     "signal_analyzed_at": rec.get("signal_analyzed_at"),
                     "signal_image_used": rec.get("signal_image_used"),
+                    "signal_analyzed_ok": rec.get("signal_analyzed_ok"),
                 }
             )
     merged.sort(
@@ -769,8 +902,10 @@ def process_watchlist_posts(
     wl["posts_state_file"] = spath
     wl["posts_retention_hours"] = POST_RETENTION_HOURS
     wl["posts_pruned_count"] = removed
+    wl["posts_pruned_image_files"] = removed_images
     wl["posts_signal_analyzed_ok"] = analyzed_ok
     wl["posts_signal_analyzed_fail"] = analyzed_fail
+    wl["posts_signal_analyzed_skip"] = analyzed_skip
     wl["posts_signal_filtered_star0"] = filtered_star0
 
     state["posts"] = posts_map
@@ -781,6 +916,8 @@ def process_watchlist_posts(
         print(
             f"[posts_state] 已按发帖时间剔除超过 {POST_RETENTION_HOURS} 小时的记录: {removed} 条"
         )
+    if removed_images:
+        print(f"[posts_state] 已删除超期帖子关联截图: {removed_images} 个文件")
     print(
         f"[posts_state] 窗口内帖子 {len(merged)} 条，新帖信号 {len(alerts)} 条，状态已写入 {spath}"
     )

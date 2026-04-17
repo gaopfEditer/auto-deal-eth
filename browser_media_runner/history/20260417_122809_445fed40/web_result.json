@@ -1,0 +1,14 @@
+{
+  "ok": false,
+  "count": 1,
+  "results": [
+    {
+      "symbol": "image",
+      "status": "error",
+      "error": "clipboard_only: 剪贴板粘贴上传失败（未检测到附件），已跳过文件选择/上传按钮流程",
+      "method": "web",
+      "resource": "tophub_page.png",
+      "resource_snapshot": "C:\\Users\\eason\\AppData\\Local\\Temp\\gemini_b64_owi07479.png"
+    }
+  ]
+}
