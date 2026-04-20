@@ -1,6 +1,6 @@
 {
   "overview_url": "https://www.binance.com/zh-CN/markets/overview",
-  "scraped_at": "2026-04-20 00:09:11 北京时间",
+  "scraped_at": "2026-04-20 17:10:39 北京时间",
   "watchlist": {
     "section": "watchlist_following",
     "page_url": "https://www.binance.com/zh-CN/square?tab=Following",
@@ -13,7 +13,7 @@
     "note": "",
     "count_follow_profiles": 3,
     "count_lives": 3,
-    "count_latest_posts": 6,
+    "count_latest_posts": 10,
     "follow_profiles_sample": [
       {
         "name": "yanchibit",
@@ -53,15 +53,109 @@
     ],
     "latest_posts": [
       {
+        "author": "aleng888888",
+        "author_slug": "aleng888888",
+        "href": "https://www.binance.com/zh-CN/square/post/314446025405762",
+        "raw": "$ETH 精准开空2347一分不差！从顶部到2313第一止盈，严格执行的均价还更高！",
+        "time": "4小时",
+        "title": "$ETH 精准开空2347一分不差！从顶部到2313第一止盈，严格执行的均价还更高！",
+        "published_at": "2026-04-20 13:10:39 北京时间",
+        "published_iso": "",
+        "time_label": "4小时",
+        "is_pinned": false,
+        "image_urls": [],
+        "saved_image_paths": [],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "signal_is_sign": true,
+        "signal_star": 5,
+        "signal_content": "帖子明确指出了ETH的入场价2347，第一止盈价2313，并表示是以开空（做空）操作。这构成了一个完整的交易策略。",
+        "signal_raw_data": {
+          "text": "```json\n{\n\"isSign\": true,\n\"content\": \"帖子明确指出了ETH的入场价2347，第一止盈价2313，并表示是以开空（做空）操作。这构成了一个完整的交易策略。\",\n\"star\": 5\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-20 13:51:05 北京时间",
+        "signal_image_used": "",
+        "signal_analyzed_ok": true
+      },
+      {
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "href": "https://www.binance.com/zh-CN/square/post/314273869755457",
+        "raw": "三马哥再次封神，本周ETH7连胜，没啥说的。#ETH",
+        "time": "16小时",
+        "title": "三马哥再次封神，本周ETH7连胜，没啥说的。#ETH",
+        "published_at": "2026-04-20 01:10:39 北京时间",
+        "published_iso": "",
+        "time_label": "16小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzExY2Q2NWUxMDZkMTRmNzQ5MDVlY2U1Y2Y5Yjk3ZTliLnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzIwN2NlZmJhMzM2MTRjNWE4MDFmZjkxNGI3YzJhMDA4LnBuZw==&level=md"
+        ],
+        "saved_image_paths": [
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\314273869755457\\img_0.png",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\314273869755457\\img_1.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "signal_is_sign": false,
+        "signal_star": 1,
+        "signal_content": "该帖子为情绪性帖子，仅提及“ETH7连胜”和“三马哥封神”，缺乏具体的技术分析、支撑/阻力位、入场/止盈/止损点等交易信号要素。虽然提到了“7连胜”，但无实际交易策略或数据支撑。",
+        "signal_raw_data": {
+          "text": "```json\n{\n\"isSign\": false,\n\"content\": \"该帖子为情绪性帖子，仅提及“ETH7连胜”和“三马哥封神”，缺乏具体的技术分析、支撑/阻力位、入场/止盈/止损点等交易信号要素。虽然提到了“7连胜”，但无实际交易策略或数据支撑。\",\n\"star\": 1\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-20 09:41:07 北京时间",
+        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\314273869755457\\img_0.png",
+        "signal_analyzed_ok": true
+      },
+      {
+        "author": "aleng888888",
+        "author_slug": "aleng888888",
+        "href": "https://www.binance.com/zh-CN/square/post/314271713041490",
+        "raw": "$ETH 今晚周日不休息 加班带大家拿下 2345 空单，2313 止盈，跟上的兄弟们点个赞！！",
+        "time": "16小时",
+        "title": "$ETH 今晚周日不休息 加班带大家拿下 2345 空单，2313 止盈，跟上的兄弟们点个赞！！",
+        "published_at": "2026-04-20 01:10:39 北京时间",
+        "published_iso": "",
+        "time_label": "16小时",
+        "is_pinned": false,
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2U3OTJlNzI1ZTI1ZTRjYjlhZjA3NWIwNzY3MjVjOTkwLmpwZw==&level=lg"
+        ],
+        "saved_image_paths": [
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\314271713041490\\img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_bias_zh": "不明",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "帖子提供了明确的空单入场位（2345）和止盈位（2313），但未提供止损位。根据现有技术分析显示，ETH在近期面临关键阻力位（2380-2400），并且部分技术指标（如14日RSI）显示为卖出信号，50日均线也指示卖出。虽然帖子给出了具体的交易计划，但缺少止损位降低了信号的完整性。",
+        "signal_raw_data": {
+          "text": "{\"isSign\": true, \"content\": \"帖子提供了明确的空单入场位（2345）和止盈位（2313），但未提供止损位。根据现有技术分析显示，ETH在近期面临关键阻力位（2380-2400），并且部分技术指标（如14日RSI）显示为卖出信号，50日均线也指示卖出。虽然帖子给出了具体的交易计划，但缺少止损位降低了信号的完整性。\", \"star\": 4}"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-20 09:41:11 北京时间",
+        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\314271713041490\\img_0.jpg",
+        "signal_analyzed_ok": true
+      },
+      {
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
         "href": "https://www.binance.com/zh-CN/square/post/314225766518177",
         "raw": "BTC空单在73588作为第一止盈止盈目标，72288有点赌的成分。#BTC ETH空单在2308作为第一止盈目标，2218有点想做多的想法但没发策略。ETH这个资金费率都变成了-0.02%了，最近5年也没出现这种情况啊，全世界都在做空？#ETH",
-        "time": "2小时",
+        "time": "18小时",
         "title": "BTC空单在73588作为第一止盈止盈目标，72288有点赌的成分。#BTC ETH空单在2308作为第一止盈目标，2218有点想做多的想法但没发策略。ETH这个资金费率都变成了-0.02%了，最近5年也没出现这种情况啊，全世界都在做空？#ETH",
-        "published_at": "2026-04-19 22:09:11 北京时间",
+        "published_at": "2026-04-19 22:04:37 北京时间",
         "published_iso": "",
-        "time_label": "2小时",
+        "time_label": "18小时",
         "is_pinned": false,
         "image_urls": [
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2U0NjhlZGNmODM0ZjQ5YzY5NGZmMGY5OGZlODA1YWU2LnBuZw==&level=md",
@@ -69,9 +163,9 @@
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2NhNWM3YjlhMmJlNzRiODRhYmViZDIxM2UzODAyOGI4LnBuZw==&level=md"
         ],
         "saved_image_paths": [
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/314225766518177/img_0.png",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/314225766518177/img_1.png",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/314225766518177/img_2.png"
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\314225766518177\\img_0.png",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\314225766518177\\img_1.png",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\314225766518177\\img_2.png"
         ],
         "gemini_direction": "unclear",
         "gemini_bias_zh": "不明",
@@ -87,95 +181,16 @@
         "signal_analyzed_at": "2026-04-19 22:08:57 北京时间",
         "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/314225766518177/img_0.png",
         "signal_analyzed_ok": true
-      },
-      {
-        "author": "sanmageshuai",
-        "author_slug": "sanmageshuai",
-        "href": "https://www.binance.com/zh-CN/square/post/314113523184385",
-        "raw": "逢大会警惕BTC连续下跌，因为参加会议的韭菜和大户机构都卖BTC来自费机票酒店和仙人跳（这是梗？）。 72000可以做个短线多吗？能跌破7万吗？👉三马哥唯一永久返佣邀请MGMGMG",
-        "time": "9小时",
-        "title": "逢大会警惕BTC连续下跌，因为参加会议的韭菜和大户机构都卖BTC来自费机票酒店和仙人跳（这是梗？）。 72000可以做个短线多吗？能跌破7万吗？👉三马哥唯一永久返佣邀请MGMGMG",
-        "published_at": "2026-04-19 14:39:11 北京时间",
-        "published_iso": "",
-        "time_label": "9小时",
-        "is_pinned": false,
-        "image_urls": [],
-        "saved_image_paths": [],
-        "gemini_direction": "unclear",
-        "gemini_bias_zh": "不明",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "帖子提出了在大会期间警惕BTC下跌的观点，并询问在72000是否可以做短线多以及是否会跌破7万。这是一个典型的对市场情绪和潜在价格波动的探讨，但并未提供具体的技术分析或明确的交易策略。因此，信号强度较低，更多的是一种市场观察和提问。",
-        "signal_raw_data": {
-          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子提出了在大会期间警惕BTC下跌的观点，并询问在72000是否可以做短线多以及是否会跌破7万。这是一个典型的对市场情绪和潜在价格波动的探讨，但并未提供具体的技术分析或明确的交易策略。因此，信号强度较低，更多的是一种市场观察和提问。\",\n  \"star\": 2\n}\n```"
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-04-19 15:39:12 北京时间",
-        "signal_image_used": "",
-        "signal_analyzed_ok": true
-      },
-      {
-        "author": "sanmageshuai",
-        "author_slug": "sanmageshuai",
-        "href": "https://www.binance.com/zh-CN/square/post/314097857075570",
-        "raw": "周日睡醒仓位没了，原来是昨天晚上我们继续加仓空的以太坊吃大肉了，因为三马哥昨天都告诉你了，逢会必跌。 本周真的太完美了，我们以太坊6个单子连胜，比本周以太坊的胜率是100%，再次恭喜跟上的朋友！#ETH 👉🏻 [都告诉你逢会必跌了](https://app.binance.com/uni-qr/cpos/313845424074657?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink)",
-        "time": "10小时",
-        "title": "周日睡醒仓位没了，原来是昨天晚上我们继续加仓空的以太坊吃大肉了，因为三马哥昨天都告诉你了，逢会必跌。 本周真的太完美了，我们以太坊6个单子连胜，比本周以太坊的胜率是100%，再次恭喜跟上的朋友！#ETH 👉🏻 [都告诉你逢会必跌了](https://app.binance.com/uni-qr/cpos/313845424074657?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink)",
-        "published_at": "2026-04-19 13:39:11 北京时间",
-        "published_iso": "",
-        "time_label": "10小时",
-        "is_pinned": false,
-        "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzc1YjhiNjI4Y2Q3ZDQ0MTc4NmU1ZTU3YmRjMDgxNzQxLnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2YyYmE0MTI4YTcxOTQ5MmJhNjI3ZTFmMDJjYzZlOGYyLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Q3Y2I2NGIwNmYwYjQ4Mjc4ZDhmZjhhOWU4NWFjNjdhLnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2JhZGJhZDljYmQ4MTQ2YTJiMmJiMzI1NmIzNTQ3MTNjLnBuZw==&level=md"
-        ],
-        "saved_image_paths": [
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/314097857075570/img_0.png",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/314097857075570/img_1.jpg",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/314097857075570/img_2.png",
-          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/314097857075570/img_3.png"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_bias_zh": "不明",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "signal_is_sign": false,
-        "signal_star": 1,
-        "signal_content": "帖子仅表达了对以太坊空头趋势的乐观情绪，并声称有连续的盈利交易，但未提供任何技术分析依据、明确的交易点位（入场、止盈、止损）或K线图分析，因此不构成明确的交易信号。",
-        "signal_raw_data": {
-          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"帖子仅表达了对以太坊空头趋势的乐观情绪，并声称有连续的盈利交易，但未提供任何技术分析依据、明确的交易点位（入场、止盈、止损）或K线图分析，因此不构成明确的交易信号。\",\n  \"star\": 1\n}\n```"
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-04-19 15:39:15 北京时间",
-        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/314097857075570/img_0.png",
-        "signal_analyzed_ok": true
       }
     ],
-    "post_alerts": [
-      {
-        "type": "new_post",
-        "href": "https://www.binance.com/zh-CN/square/post/314254325411537",
-        "published_at": "2026-04-19 23:45:11 北京时间",
-        "title": "走一半利润ETH，周日也吃肉，恭喜各位。#ETH",
-        "gemini": {
-          "direction": "unclear",
-          "bias_zh": "不明",
-          "confidence": null,
-          "reason": null
-        }
-      }
-    ],
-    "posts_state_file": "/Users/mac/frontend/code/1.operations/auto-deal-eth/binance_posts_state.json",
+    "post_alerts": [],
+    "posts_state_file": "D:\\frontend\\main\\python\\auto-deal-eth\\binance_posts_state.json",
     "posts_retention_hours": 24,
     "posts_pruned_count": 0,
     "posts_pruned_image_files": 0,
-    "posts_signal_analyzed_ok": 1,
+    "posts_signal_analyzed_ok": 0,
     "posts_signal_analyzed_fail": 0,
-    "posts_signal_analyzed_skip": 8,
-    "posts_signal_filtered_star0": 6
+    "posts_signal_analyzed_skip": 13,
+    "posts_signal_filtered_star0": 9
   }
 }
