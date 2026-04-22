@@ -651,6 +651,8 @@ def process_watchlist_posts(
             rec["is_pinned"] = is_pin
             imgs = (rec.get("image_urls") or []) + (p.get("image_urls") or [])
             rec["image_urls"] = list(dict.fromkeys(imgs))[:24]
+            rec["video_url"] = str(p.get("video_url") or rec.get("video_url") or "")
+            rec["audio_m3u8_url"] = str(p.get("audio_m3u8_url") or rec.get("audio_m3u8_url") or "")
             if p.get("saved_image_paths"):
                 rec["saved_image_paths"] = p.get("saved_image_paths")
             # 保留既有的接口分析字段（后续会统一异步刷新）
@@ -673,6 +675,8 @@ def process_watchlist_posts(
                 "author_slug": slug,
                 "time": tm,
                 "image_urls": list(dict.fromkeys(p.get("image_urls") or []))[:24],
+                "video_url": str(p.get("video_url") or ""),
+                "audio_m3u8_url": str(p.get("audio_m3u8_url") or ""),
                 "saved_image_paths": p.get("saved_image_paths") or [],
                 "gemini_direction": None,
                 "gemini_confidence": None,
@@ -875,6 +879,8 @@ def process_watchlist_posts(
                     "time_label": rec.get("time_label", ""),
                     "is_pinned": rec.get("is_pinned", False),
                     "image_urls": rec.get("image_urls") or [],
+                    "video_url": rec.get("video_url") or "",
+                    "audio_m3u8_url": rec.get("audio_m3u8_url") or "",
                     "saved_image_paths": rec.get("saved_image_paths") or [],
                     "gemini_direction": rec.get("gemini_direction"),
                     "gemini_bias_zh": rec.get("gemini_bias_zh"),

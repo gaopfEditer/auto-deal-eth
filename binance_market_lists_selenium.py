@@ -160,6 +160,28 @@ function _bnCollectArticleImagesRelaxed(a) {
   return [...new Set(urls)].slice(0, 16);
 }
 
+function _bnCollectVideoUrlFromCard(a) {
+  const card = a.closest('article')
+    || a.closest('[class*="article"]')
+    || a.closest('[class*="Article"]')
+    || a.closest('[class*="PostCard"]')
+    || a.closest('[class*="post-card"]')
+    || a.parentElement;
+  if (!card) return '';
+  const vids = Array.from(card.querySelectorAll('video, source'));
+  for (const v of vids) {
+    const src =
+      (v.currentSrc || v.src
+      || (v.getAttribute && (v.getAttribute('src') || v.getAttribute('data-src'))) || '').trim();
+    if (!src) continue;
+    const s = src.toLowerCase();
+    if (s.startsWith('blob:') || s.startsWith('data:')) continue;
+    if (s.includes('avatar') || s.includes('emoji') || s.includes('icon')) continue;
+    return src;
+  }
+  return '';
+}
+
 function _bnReadCreateTimeFromNickContainer(root) {
   if (!root || !root.querySelector) return { publishedIso: '', timeLabel: '' };
   const nick = root.querySelector('[class*="avatar-nick-container"]');
@@ -267,6 +289,29 @@ function _bnDetailArticleImages() {
     });
   }
   return urls.slice(0, 20);
+}
+
+function _bnDetailVideoUrl() {
+  const roots = [];
+  const m = document.querySelector('main');
+  if (m) roots.push(m);
+  document.querySelectorAll('[class*="article"], [class*="Article"], [class*="detail"], [class*="Detail"], [class*="content"]').forEach((el) => {
+    if (roots.length < 8) roots.push(el);
+  });
+  if (!roots.length) roots.push(document.body);
+  for (const root of roots) {
+    const els = root.querySelectorAll('video, source');
+    for (const el of els) {
+      const src = (el.currentSrc || el.src
+        || (el.getAttribute && (el.getAttribute('src') || el.getAttribute('data-src'))) || '').trim();
+      if (!src) continue;
+      const s = src.toLowerCase();
+      if (s.startsWith('blob:') || s.startsWith('data:')) continue;
+      if (s.includes('avatar') || s.includes('emoji') || s.includes('icon')) continue;
+      return src;
+    }
+  }
+  return '';
 }
 """
 
@@ -472,7 +517,7 @@ return false;
 
 
 def _merge_posts_by_href(*lists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """按 href 去重合并；正文取更长者，image_urls 合并去重。"""
+    """按 href 去重合并；正文取更长者，image_urls 合并去重，并保留 video_url。"""
     by_href: Dict[str, Dict[str, Any]] = {}
     for lst in lists:
         for p in lst:
@@ -495,6 +540,7 @@ def _merge_posts_by_href(*lists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             o["published_iso"] = (p.get("published_iso") or o.get("published_iso") or "")
             o["time_label"] = (p.get("time_label") or o.get("time_label") or "")
             o["is_pinned"] = bool(o.get("is_pinned") or p.get("is_pinned"))
+            o["video_url"] = (p.get("video_url") or o.get("video_url") or "")
     return list(by_href.values())
 
 
@@ -617,11 +663,14 @@ def _enrich_post_images_from_detail_pages(
             extra = driver.execute_script(
                 _SQUARE_ATTACHMENT_IMG_JS + "\nreturn _bnDetailArticleImages();"
             )
-            if not extra:
-                continue
+            video_url = driver.execute_script(
+                _SQUARE_ATTACHMENT_IMG_JS + "\nreturn _bnDetailVideoUrl();"
+            )
             cur = [x for x in (p.get("image_urls") or []) if x]
-            merged = list(dict.fromkeys(cur + list(extra)))[:24]
+            merged = list(dict.fromkeys(cur + list(extra or [])))[:24]
             p["image_urls"] = merged
+            if video_url and not str(p.get("video_url") or "").strip():
+                p["video_url"] = str(video_url).strip()
         except Exception:
             continue
 
@@ -834,6 +883,7 @@ for (const a of anchors) {
 
   const meta = _bnPostTimeFromCard(a);
   const imageUrls = _bnCollectArticleImagesRelaxed(a);
+  const videoUrl = _bnCollectVideoUrlFromCard(a);
   const item = {
     href,
     title,
@@ -842,6 +892,7 @@ for (const a of anchors) {
     time: meta.time_label || findTime(clean),
     raw: clean,
     image_urls: imageUrls,
+    video_url: videoUrl,
     published_iso: meta.published_iso,
     time_label: meta.time_label,
     is_pinned: meta.is_pinned,
@@ -927,6 +978,7 @@ for (const a of anchors) {
 
   const meta = _bnPostTimeFromCard(a);
   const imageUrls = _bnCollectArticleImagesRelaxed(a);
+  const videoUrl = _bnCollectVideoUrlFromCard(a);
   out.push({
     href,
     title,
@@ -935,6 +987,7 @@ for (const a of anchors) {
     time: meta.time_label || findTime(clean),
     raw: clean,
     image_urls: imageUrls,
+    video_url: videoUrl,
     published_iso: meta.published_iso,
     time_label: meta.time_label,
     is_pinned: meta.is_pinned,
