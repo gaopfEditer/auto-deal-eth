@@ -309,7 +309,12 @@ def _fetch_single_month_data(
                 price_df = ak.stock_zh_index_daily(symbol=symbol_with_prefix)
                 if not price_df.empty:
                     # 过滤出该月的数据
-                    price_df['日期'] = pd.to_datetime(price_df.get('date', price_df.get('日期', price_df.index)))
+                    if '日期' in price_df.columns:
+                        price_df['日期'] = pd.to_datetime(price_df['日期'], errors='coerce')
+                    elif 'date' in price_df.columns:
+                        price_df['日期'] = pd.to_datetime(price_df['date'], errors='coerce')
+                    else:
+                        price_df['日期'] = pd.to_datetime(price_df.index, errors='coerce')
                     price_df = price_df[
                         (price_df['日期'].dt.year == year) & 
                         (price_df['日期'].dt.month == month)
@@ -322,6 +327,12 @@ def _fetch_single_month_data(
         if price_df is None or price_df.empty:
             result['error'] = '无法获取数据'
             return result
+
+        # 某些接口会返回重复列名（如多个“日期”），这里先去重避免后续 sort_values 报错
+        if price_df.columns.duplicated().any():
+            dup_cols = [str(c) for c in price_df.columns[price_df.columns.duplicated()].tolist()]
+            print(f"[WARNING] 检测到重复列名，已自动去重: {dup_cols}")
+            price_df = price_df.loc[:, ~price_df.columns.duplicated(keep='first')].copy()
         
         # 处理日期列
         date_col = None
@@ -334,10 +345,24 @@ def _fetch_single_month_data(
         if date_col:
             price_df[date_col] = pd.to_datetime(price_df[date_col], errors='coerce')
             if date_col != '日期':
-                price_df.rename(columns={date_col: '日期'}, inplace=True)
+                # 若已存在“日期”，不要再重命名制造重复列；直接用现有“日期”并删除别名列
+                if '日期' in price_df.columns:
+                    price_df['日期'] = pd.to_datetime(price_df['日期'], errors='coerce')
+                    try:
+                        price_df.drop(columns=[date_col], inplace=True)
+                    except Exception:
+                        pass
+                else:
+                    price_df.rename(columns={date_col: '日期'}, inplace=True)
         else:
             result['error'] = '无法识别日期列'
             return result
+
+        # 二次兜底：日期规范化后若仍有重名列，再去重一次
+        if price_df.columns.duplicated().any():
+            dup_cols = [str(c) for c in price_df.columns[price_df.columns.duplicated()].tolist()]
+            print(f"[WARNING] 日期列规范化后仍有重复列，已自动去重: {dup_cols}")
+            price_df = price_df.loc[:, ~price_df.columns.duplicated(keep='first')].copy()
         
         price_df = price_df.dropna(subset=['日期'])
         price_df = price_df.sort_values('日期')

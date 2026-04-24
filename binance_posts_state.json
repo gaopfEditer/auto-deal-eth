@@ -4,15 +4,15 @@
     "yanchibit": {
       "https://www.binance.com/zh-CN/square/post/315657989023777": {
         "href": "https://www.binance.com/zh-CN/square/post/315657989023777",
-        "published_at": "2026-04-23 23:31:07 北京时间",
+        "published_at": "2026-04-23 23:37:44 北京时间",
         "published_iso": "",
-        "time_label": "18小时",
+        "time_label": "19小时",
         "is_pinned": false,
         "title": "开搞，进入微醺状态",
         "raw": "开搞，进入微醺状态",
         "author": "yanchibit",
         "author_slug": "yanchibit",
-        "time": "18小时",
+        "time": "19小时",
         "image_urls": [
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzM0MGZiMWU3MDE3OTQwYzBiZmIwNjNjZTMzZTQ1NjY0LmpwZw==&level=md",
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2MwZDg1YTk5MzZiMjQ2YWNhZjU2YjBhZmUwNWE0YjlkLnBuZw==&level=md"
@@ -38,79 +38,53 @@
         "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315657989023777\\img_0.jpg",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/315586188059986": {
-        "href": "https://www.binance.com/zh-CN/square/post/315586188059986",
-        "published_at": "2026-04-23 18:31:07 北京时间",
+      "https://www.binance.com/zh-CN/square/post/315931934761746": {
+        "href": "https://www.binance.com/zh-CN/square/post/315931934761746",
+        "published_at": "2026-04-24 17:37:44 北京时间",
         "published_iso": "",
-        "time_label": "23小时",
+        "time_label": "1小时",
         "is_pinned": false,
-        "title": "精准点位，只能用来忽悠会员费~ 哪天大哥大姐们要支持我的时候，我开口说，哥，跟我做单要交xxxU，大哥看我是不是看沙雕一样🙄",
-        "raw": "精准点位，只能用来忽悠会员费~ 哪天大哥大姐们要支持我的时候，我开口说，哥，跟我做单要交xxxU，大哥看我是不是看沙雕一样🙄",
+        "title": "#USD1 利息又到账了，每周啥也不干多赚3万块~ wlfi上次提案之后，我要格局一下利息了，万一6%年化变成10%呢 熊市就该稳稳的幸福🥰",
+        "raw": "#USD1 利息又到账了，每周啥也不干多赚3万块~ wlfi上次提案之后，我要格局一下利息了，万一6%年化变成10%呢 熊市就该稳稳的幸福🥰",
         "author": "yanchibit",
         "author_slug": "yanchibit",
-        "time": "23小时",
-        "image_urls": [],
+        "time": "1小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2QxZjk0ZGNmMzBjNDRkZmRiZmE0NmQyYjBjMTg5NTFlLmpwZw==&level=lg"
+        ],
         "video_url": "",
         "audio_m3u8_url": "",
-        "saved_image_paths": [],
+        "saved_image_paths": [
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315931934761746\\img_0.jpg"
+        ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
         "gemini_reason": null,
         "gemini_bias_zh": "不明",
         "signal_is_sign": false,
         "signal_star": 0,
-        "signal_content": "该帖子仅包含主观性表达，没有任何技术分析或明确的交易点位，属于情绪表达，因此不构成交易信号。",
+        "signal_content": "该帖子主要讨论了 USD1 的利息收入和 wlfi 的提案，表达了在熊市中寻求稳定收益的意愿，但未提供任何关于加密货币交易的具体技术分析或交易策略。",
         "signal_raw_data": {
-          "text": "{\"isSign\": false, \"content\": \"该帖子仅包含主观性表达，没有任何技术分析或明确的交易点位，属于情绪表达，因此不构成交易信号。\", \"star\": 0}\n"
+          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"该帖子主要讨论了 USD1 的利息收入和 wlfi 的提案，表达了在熊市中寻求稳定收益的意愿，但未提供任何关于加密货币交易的具体技术分析或交易策略。\",\n  \"star\": 0\n}\n```"
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:05:26 北京时间",
-        "signal_image_used": "",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/315585197855217": {
-        "href": "https://www.binance.com/zh-CN/square/post/315585197855217",
-        "published_at": "2026-04-23 18:31:07 北京时间",
-        "published_iso": "",
-        "time_label": "23小时",
-        "is_pinned": false,
-        "title": "4.23 #BTC 日内行情分析，做兄弟在心中，你不信我，我说一万句也没用。 空单小幅获利中~",
-        "raw": "4.23 #BTC 日内行情分析，做兄弟在心中，你不信我，我说一万句也没用。 空单小幅获利中~",
-        "author": "yanchibit",
-        "author_slug": "yanchibit",
-        "time": "23小时",
-        "image_urls": [],
-        "video_url": "https://public.bnbstatic.com/video/pgc/ArticleContent/780a26ac-9af5-4d00-9cf6-81ef77a5c480.mp4",
-        "audio_m3u8_url": "",
-        "saved_image_paths": [],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "帖子提到“空单小幅获利中”，结合4月23日的行情分析，BTC在77500-77086区间存在做多机会，但跌破76500则趋势可能结束，甚至跌破73500则多头确认结束。帖子本身仅表达了空单获利，并未给出明确的交易策略，但引用信息显示存在潜在的日内交易机会，特别是回踩做多的策略，但点位模糊，故信号强度一般。",
-        "signal_raw_data": {
-          "text": "{\"isSign\": true, \"content\": \"帖子提到“空单小幅获利中”，结合4月23日的行情分析，BTC在77500-77086区间存在做多机会，但跌破76500则趋势可能结束，甚至跌破73500则多头确认结束。帖子本身仅表达了空单获利，并未给出明确的交易策略，但引用信息显示存在潜在的日内交易机会，特别是回踩做多的策略，但点位模糊，故信号强度一般。\", \"star\": 3}\n"
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:05:30 北京时间",
-        "signal_image_used": "",
+        "signal_analyzed_at": "2026-04-24 18:37:59 北京时间",
+        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315931934761746\\img_0.jpg",
         "signal_analyzed_ok": true
       }
     },
     "aleng888888": {
       "https://www.binance.com/zh-CN/square/post/315824701359649": {
         "href": "https://www.binance.com/zh-CN/square/post/315824701359649",
-        "published_at": "2026-04-24 10:31:07 北京时间",
+        "published_at": "2026-04-24 10:37:44 北京时间",
         "published_iso": "",
-        "time_label": "7小时",
+        "time_label": "8小时",
         "is_pinned": false,
         "title": "$ETH 在这个市场，做的十次交易，可能有九次都是没达到预期的。要么是止损，要么是保本，要么是没达到最终目标位。但我们要做到的是拿住成功的那一次，这就是交易最反人性的地方，磨人心智且需要你锲而不舍 {future}(ETHUSDT)",
         "raw": "$ETH 在这个市场，做的十次交易，可能有九次都是没达到预期的。要么是止损，要么是保本，要么是没达到最终目标位。但我们要做到的是拿住成功的那一次，这就是交易最反人性的地方，磨人心智且需要你锲而不舍 {future}(ETHUSDT)",
         "author": "aleng888888",
         "author_slug": "aleng888888",
-        "time": "7小时",
+        "time": "8小时",
         "image_urls": [
           "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/3a8c9fe6-2a76-4ace-aa07-415d994de6f0.png",
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzVjYTU1OTcwNGM1ZDQ0ZTBiODRjMDdiNTgwNGRmMWYyLmpwZw==&level=lg"
@@ -138,15 +112,15 @@
       },
       "https://www.binance.com/zh-CN/square/post/315766372004274": {
         "href": "https://www.binance.com/zh-CN/square/post/315766372004274",
-        "published_at": "2026-04-24 06:31:07 北京时间",
+        "published_at": "2026-04-24 06:37:44 北京时间",
         "published_iso": "",
-        "time_label": "11小时",
+        "time_label": "12小时",
         "is_pinned": false,
         "title": "beyond 是我最喜欢的一个乐队，在我考研时期最低迷的时候，他陪着我走过了一整个夏天。在 1986 年之前 beyond 是一个纯摇滚的乐队，不被世人所认可。后来再写出这首歌之后转型，迎合了世人的眼光，再被世界所认识，也才被我认识。我自己也抱有对交易与币圈的幻想，以为自己就是那个拯救所有散户的救星。可惜事与愿违，不温不火是我的常态，就像以前的 beyond 一样。我也深知在这个市场，需要做单需要交易量才有流量。扛单有流量，频繁交易有流量。用户进来做到单就会留下，而不是傻傻的陪我在等待点位的到来。给我的铁粉们留下一段话，可能我会转型，变成你们不喜欢的样子，但是是世人喜欢的样子。感谢各位一直以来的陪伴，祝大家都在这个市场能发到财💪",
         "raw": "beyond 是我最喜欢的一个乐队，在我考研时期最低迷的时候，他陪着我走过了一整个夏天。在 1986 年之前 beyond 是一个纯摇滚的乐队，不被世人所认可。后来再写出这首歌之后转型，迎合了世人的眼光，再被世界所认识，也才被我认识。我自己也抱有对交易与币圈的幻想，以为自己就是那个拯救所有散户的救星。可惜事与愿违，不温不火是我的常态，就像以前的 beyond 一样。我也深知在这个市场，需要做单需要交易量才有流量。扛单有流量，频繁交易有流量。用户进来做到单就会留下，而不是傻傻的陪我在等待点位的到来。给我的铁粉们留下一段话，可能我会转型，变成你们不喜欢的样子，但是是世人喜欢的样子。感谢各位一直以来的陪伴，祝大家都在这个市场能发到财💪",
         "author": "aleng888888",
         "author_slug": "aleng888888",
-        "time": "11小时",
+        "time": "12小时",
         "image_urls": [
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzY3NzhjMmFmMzk1MTRiZjliZjliMmYzM2JiOTEwZWI4LmpwZw==&level=md",
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzhhZjI1OGM2M2JjZjQ4NDZhZWY1MTk2NzdlYWUzMjA1LmpwZw==&level=md"
@@ -174,15 +148,15 @@
       },
       "https://www.binance.com/zh-CN/square/post/315723908305282": {
         "href": "https://www.binance.com/zh-CN/square/post/315723908305282",
-        "published_at": "2026-04-24 03:31:07 北京时间",
+        "published_at": "2026-04-24 03:37:44 北京时间",
         "published_iso": "",
-        "time_label": "14小时",
+        "time_label": "15小时",
         "is_pinned": false,
         "title": "看 k 和做单是两码事，做单和带单是两码事，带单和直播又是两码事。兄弟们我黑化一段时间尝试一下，看看效果，这段时间不要在我直播间梭哈了",
         "raw": "看 k 和做单是两码事，做单和带单是两码事，带单和直播又是两码事。兄弟们我黑化一段时间尝试一下，看看效果，这段时间不要在我直播间梭哈了",
         "author": "aleng888888",
         "author_slug": "aleng888888",
-        "time": "14小时",
+        "time": "15小时",
         "image_urls": [],
         "video_url": "",
         "audio_m3u8_url": "",
@@ -204,15 +178,15 @@
       },
       "https://www.binance.com/zh-CN/square/post/315685904268562": {
         "href": "https://www.binance.com/zh-CN/square/post/315685904268562",
-        "published_at": "2026-04-24 01:31:07 北京时间",
+        "published_at": "2026-04-24 01:37:44 北京时间",
         "published_iso": "",
-        "time_label": "16小时",
+        "time_label": "17小时",
         "is_pinned": false,
         "title": "$BTC 今日直播分赃结束，恭喜中奖的关注，祝我们冷家军再创新高！ {future}(BTCUSDT)",
         "raw": "$BTC 今日直播分赃结束，恭喜中奖的关注，祝我们冷家军再创新高！ {future}(BTCUSDT)",
         "author": "aleng888888",
         "author_slug": "aleng888888",
-        "time": "16小时",
+        "time": "17小时",
         "image_urls": [
           "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/87496d50-2408-43e1-ad4c-78b47b448a6a.png",
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzhkMmU5MTUwMDNhMzRmY2Q4YTgyMDllMDI1YmVjZDc2LmpwZw==&level=md",
@@ -242,15 +216,15 @@
       },
       "https://www.binance.com/zh-CN/square/post/315632228568545": {
         "href": "https://www.binance.com/zh-CN/square/post/315632228568545",
-        "published_at": "2026-04-23 21:31:07 北京时间",
+        "published_at": "2026-04-23 21:37:44 北京时间",
         "published_iso": "",
-        "time_label": "20小时",
+        "time_label": "21小时",
         "is_pinned": false,
         "title": "比特币还会冲刺8w！即将转入空头趋势。如何把握这次暴富机会？#BTC $BTC 点击此处购买",
         "raw": "比特币还会冲刺8w！即将转入空头趋势。如何把握这次暴富机会？#BTC $BTC 点击此处购买",
         "author": "aleng888888",
         "author_slug": "aleng888888",
-        "time": "20小时",
+        "time": "21小时",
         "image_urls": [],
         "video_url": "https://public.bnbstatic.com/video/pgc/ArticleContent/748e1013-5085-4063-80be-6e5db3fa8c31.mp4",
         "audio_m3u8_url": "",
@@ -272,15 +246,15 @@
       },
       "https://www.binance.com/zh-CN/square/post/315915185540593": {
         "href": "https://www.binance.com/zh-CN/square/post/315915185540593",
-        "published_at": "2026-04-24 16:31:07 北京时间",
+        "published_at": "2026-04-24 16:37:44 北京时间",
         "published_iso": "",
-        "time_label": "1小时",
+        "time_label": "2小时",
         "is_pinned": false,
         "title": "孙割也给割了！下手的人是川普！4500万美元打水漂了孙宇晨，江湖人称\"孙割\"，割韭菜的花样比谁都多，终于遇到比他更狠的人了，川普。#孙宇晨被割 4500万美元砸进去，代币被冻、投票权被拿走、还威胁要把他的币全烧掉。 回顾孙割的割韭菜名场面 花620万美元和巴菲特吃饭炒作，吃完饭没多久TRX就开始跌，韭菜们直呼好家伙特朗普$TRUMP 币晚宴，孙割作为最大持仓者之一出席，花了将近2000万美元囤TRUMP币拿到晚宴门票。结果呢？有人爆料他在晚宴期间跑去厕所的时候，关联钱包就在抛售。晚宴一结束TRUMP币直接开跌（不是🐶🐶）各种站台、各种喊单、各种割，TRX、BTT、SUN、JST……割了一茬又一茬 就这么一个人，在币圈横行霸道这么多年，这次终于被割了。 4500万美元入局$WLFI 2024年底到2025年1月，孙宇晨一共砸了4500万美元，入股了特朗普家族的加密货币项目——World Liberty Financial（WLFI）。 以**$0.015的价格，买入了30亿枚WLFI代币**。 同时，孙宇晨顺势成为WLFI的顾问。看起来是双赢：特朗普家族拿到了真金白银，孙宇晨拿到了\"美国总统家族合伙人\"的光环。 牛市巅峰，账面浮盈2亿美元 2025年9月，WLFI代币在上线交易后迎来牛市巅峰。 孙宇晨持有的30亿枚代币，账面浮盈一度达到2亿美元。 4500万变2亿，翻了4倍多。 孙宇晨想在最高点套现。 然后，川普家族直接冻结了他所有的WLFI代币。 智能合约黑名单，一键冻结 World",
         "raw": "孙割也给割了！下手的人是川普！4500万美元打水漂了孙宇晨，江湖人称\"孙割\"，割韭菜的花样比谁都多，终于遇到比他更狠的人了，川普。#孙宇晨被割 4500万美元砸进去，代币被冻、投票权被拿走、还威胁要把他的币全烧掉。 回顾孙割的割韭菜名场面 花620万美元和巴菲特吃饭炒作，吃完饭没多久TRX就开始跌，韭菜们直呼好家伙特朗普$TRUMP 币晚宴，孙割作为最大持仓者之一出席，花了将近2000万美元囤TRUMP币拿到晚宴门票。结果呢？有人爆料他在晚宴期间跑去厕所的时候，关联钱包就在抛售。晚宴一结束TRUMP币直接开跌（不是🐶🐶）各种站台、各种喊单、各种割，TRX、BTT、SUN、JST……割了一茬又一茬 就这么一个人，在币圈横行霸道这么多年，这次终于被割了。 4500万美元入局$WLFI 2024年底到2025年1月，孙宇晨一共砸了4500万美元，入股了特朗普家族的加密货币项目——World Liberty Financial（WLFI）。 以**$0.015的价格，买入了30亿枚WLFI代币**。 同时，孙宇晨顺势成为WLFI的顾问。看起来是双赢：特朗普家族拿到了真金白银，孙宇晨拿到了\"美国总统家族合伙人\"的光环。 牛市巅峰，账面浮盈2亿美元 2025年9月，WLFI代币在上线交易后迎来牛市巅峰。 孙宇晨持有的30亿枚代币，账面浮盈一度达到2亿美元。 4500万变2亿，翻了4倍多。 孙宇晨想在最高点套现。 然后，川普家族直接冻结了他所有的WLFI代币。 智能合约黑名单，一键冻结 World Liberty Financial官方通过智能合约里的黑名单功能，直接把孙宇晨的钱包地址拉黑了。 31亿枚WLFI代币，一夜之间动不了了。 不仅如此： 投票权被剥夺——孙宇晨作为最大股东，无法参与公司治理投票，无法阻止对他不利的议案威胁销毁代币——WLFI团队直接提出治理方案，要销毁10%的顾问代币（就是孙宇晨那部分），并且开启投票：不同意？那就无限期锁定你的代币代币持续暴跌——WLFI从最高点跌了77%，目前在$0.079左右 就算跌了77%，孙宇晨理论上还有5.2倍的浮盈。但问题是，看得见摸不着，一枚都卖不掉，甚至有可能归零。 WLFI的骚操作：拿投资者的币去借钱 事情还没完。 WLFI团队直接把代币拿去抵押，在DeFi平台上借出了7500万美元的稳定币。 如果WLFI代币价格继续下跌，就会触发清算，项目的流动性直接枯竭。到时候别说孙宇晨了，所有持币人都得陪葬。 所谓的\"世界自由金融\"，说白了就是特朗普家族一个人说了算。 WLFI的回应：法庭见 面对孙宇晨的指控，WLFI官方在X上直接开怼： \"还有人相信孙宇晨吗？孙宇晨最拿手的就是装受害者，编造毫无根据的指控来掩盖自己的不端行为。同样的套路，换了个目标而已。WLFI不是第一个。我们有合同，我们有证据，我们有真相。法庭见，伙计。\" 正式起诉：加州联邦法院 2026年4月22日，孙宇晨正式在加州联邦法院起诉World Liberty Financial。 这个消息直接上了全球主流媒体头条：CBS、Forbes、纽约时报、卫报、NBC、BBC…… 孙宇晨在起诉声明里说了一段很有意思的话： \"我一直是特朗普总统的支持者，这场诉讼不会改变我的立场。但World Liberty团队中的某些人，在以违背特朗普总统价值观的方式运营这个项目。我不相信特朗普总统如果知道这些事情会容忍它们。\" 翻译成人话：我不是在告川普，我是在告川普手下的人。 但大家心里都清楚，WLFI就是特朗普家族的项目，川普的儿子们都在里面。 孙宇晨现在想要什么？ 很简单：在WLFI彻底崩掉之前，拿到自己的现金。 代币被冻着，价格在跌，团队还在抵押借钱，清算风险越来越大。 如果不通过法律手段强制要求解冻和赎回，孙宇晨那4500万美元大概率就是打水漂了。",
         "author": "aleng888888",
         "author_slug": "aleng888888",
-        "time": "1小时",
+        "time": "2小时",
         "image_urls": [
           "https://public.bnbstatic.com/image/pgc/202604/028404c862f693bb3bd39c7b85715c2d.png",
           "https://public.bnbstatic.com/image/pgc/202604/84b8c6f6b5eb939832be88cf45bac2cb.png",
@@ -314,15 +288,15 @@
     "sanmageshuai": {
       "https://www.binance.com/zh-CN/square/post/315861881837282": {
         "href": "https://www.binance.com/zh-CN/square/post/315861881837282",
-        "published_at": "2026-04-24 13:31:07 北京时间",
+        "published_at": "2026-04-24 13:37:44 北京时间",
         "published_iso": "",
-        "time_label": "4小时",
+        "time_label": "5小时",
         "is_pinned": false,
         "title": "不会今天就要瀑布吧，前天预判要跌结果以太坊从2400点位跌破2300，而且白天也没有要涨的迹象。 但是比特币78000也没下去啊，76000这么硬的吗，能不能继续回调一波。#BTC",
         "raw": "不会今天就要瀑布吧，前天预判要跌结果以太坊从2400点位跌破2300，而且白天也没有要涨的迹象。 但是比特币78000也没下去啊，76000这么硬的吗，能不能继续回调一波。#BTC",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "time": "4小时",
+        "time": "5小时",
         "image_urls": [],
         "video_url": "",
         "audio_m3u8_url": "",
@@ -344,15 +318,15 @@
       },
       "https://www.binance.com/zh-CN/square/post/315732747884161": {
         "href": "https://www.binance.com/zh-CN/square/post/315732747884161",
-        "published_at": "2026-04-24 04:31:07 北京时间",
+        "published_at": "2026-04-24 04:37:44 北京时间",
         "published_iso": "",
-        "time_label": "13小时",
+        "time_label": "14小时",
         "is_pinned": false,
         "title": "佛在灵山莫远求，灵山只在汝心头",
         "raw": "佛在灵山莫远求，灵山只在汝心头",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "time": "13小时",
+        "time": "14小时",
         "image_urls": [
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzFhZWYzZTQ1OGZkNDRkYzZiZTY4NGI4N2MxODQ5M2NiLnBuZw==&level=lg"
         ],
@@ -378,15 +352,15 @@
       },
       "https://www.binance.com/zh-CN/square/post/315890241302001": {
         "href": "https://www.binance.com/zh-CN/square/post/315890241302001",
-        "published_at": "2026-04-24 15:31:07 北京时间",
+        "published_at": "2026-04-24 15:37:44 北京时间",
         "published_iso": "",
-        "time_label": "2小时",
+        "time_label": "3小时",
         "is_pinned": false,
         "title": "沉睡了15年的比特币冷钱包启动了，里面约有388万枚比特币，按照现在78000U的价格换算价值3000亿美元。 这到底是要砸盘呀还是要砸盘呢？这是诱空吗？是直接下跌，还是说晚上快速拉涨诱多一波，然后再暴力下跌，复刻去年1011黑天鹅的行情？#BTC",
         "raw": "沉睡了15年的比特币冷钱包启动了，里面约有388万枚比特币，按照现在78000U的价格换算价值3000亿美元。 这到底是要砸盘呀还是要砸盘呢？这是诱空吗？是直接下跌，还是说晚上快速拉涨诱多一波，然后再暴力下跌，复刻去年1011黑天鹅的行情？#BTC",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "time": "2小时",
+        "time": "3小时",
         "image_urls": [
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0L2I4MDQ0MjcwODlkNmU5MTAwMjdlYTkzYTY1OGUzNjgxLnBuZw==&level=lg"
         ],
@@ -409,20 +383,60 @@
         "signal_analyzed_at": "2026-04-24 17:31:31 北京时间",
         "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315890241302001\\img_0.jpg",
         "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/315943929606001": {
+        "href": "https://www.binance.com/zh-CN/square/post/315943929606001",
+        "published_at": "2026-04-24 18:20:44 北京时间",
+        "published_iso": "",
+        "time_label": "17分钟",
+        "is_pinned": false,
+        "title": "比特币74000那个单子你一开始就跑掉，后面以太坊十连胜早就赚回来了，要回算账。 做合约不怕没有本金，就怕你不执行止损止盈和逃命，狗庄每次都会给一次机会，但凡犹豫就会跟别人差一大截。 所以你为啥总能看到有的人每次赚钱翻仓，而且从来没有一句乱八七糟的想法，做交易要纯粹，赚钱了到目标不跑，逃命每次都给机会解套不跑，最后又赚大钱交易介入机会你根本没有仓位做了。#BTC",
+        "raw": "比特币74000那个单子你一开始就跑掉，后面以太坊十连胜早就赚回来了，要回算账。 做合约不怕没有本金，就怕你不执行止损止盈和逃命，狗庄每次都会给一次机会，但凡犹豫就会跟别人差一大截。 所以你为啥总能看到有的人每次赚钱翻仓，而且从来没有一句乱八七糟的想法，做交易要纯粹，赚钱了到目标不跑，逃命每次都给机会解套不跑，最后又赚大钱交易介入机会你根本没有仓位做了。#BTC",
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "time": "17分钟",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzNlYmU4OGM1ZDBiODM4OGJkZDJjMjRjZWEyNGYzM2U2LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzgxMGQ4Y2MyZDZiMjFjZWY0YWU3NzNhYWQyM2FjMzRhLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzQ0MDA4MTMzMDY2NTYzNTFiNTA5NzFmZTFkNDI1MDhiLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0L2U0MmQ3ZGUxY2QwZjVlNTgyYzEwYTlhZmMyYzc3NTgxLmpwZw==&level=md"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315943929606001\\img_0.jpg",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315943929606001\\img_1.jpg",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315943929606001\\img_2.jpg",
+          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315943929606001\\img_3.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": false,
+        "signal_star": 0,
+        "signal_content": "该帖子主要讨论了比特币和以太坊的近期交易表现，并强调了执行止损止盈的重要性，但未提供具体的交易信号、入场位、止盈位或止损位。因此，这是一个关于交易理念的帖子，而非具体的交易信号。",
+        "signal_raw_data": {
+          "text": "```json\n{\n\"isSign\": false,\n\"content\": \"该帖子主要讨论了比特币和以太坊的近期交易表现，并强调了执行止损止盈的重要性，但未提供具体的交易信号、入场位、止盈位或止损位。因此，这是一个关于交易理念的帖子，而非具体的交易信号。\",\n\"star\": 0\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-24 18:38:03 北京时间",
+        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315943929606001\\img_0.jpg",
+        "signal_analyzed_ok": true
       }
     },
     "square-creator-446e63a9fd9ef": {
       "https://www.binance.com/zh-CN/square/post/315703302608194": {
         "href": "https://www.binance.com/zh-CN/square/post/315703302608194",
-        "published_at": "2026-04-24 02:31:07 北京时间",
+        "published_at": "2026-04-24 02:37:44 北京时间",
         "published_iso": "",
-        "time_label": "15小时",
+        "time_label": "16小时",
         "is_pinned": false,
         "title": "$ETH 到底还打不打一回熊来一回牛回的反复横跳逗我呢",
         "raw": "$ETH 到底还打不打一回熊来一回牛回的反复横跳逗我呢",
         "author": "square-creator-446e63a9fd9ef",
         "author_slug": "square-creator-446e63a9fd9ef",
-        "time": "15小时",
+        "time": "16小时",
         "image_urls": [
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzkxYWUwNjg2ODM4YjQ5YTZhNTM5ZGFhZGRhN2Q4MTk0LmpwZw==&level=lg"
         ],
@@ -448,15 +462,15 @@
       },
       "https://www.binance.com/zh-CN/square/post/315696326285170": {
         "href": "https://www.binance.com/zh-CN/square/post/315696326285170",
-        "published_at": "2026-04-24 02:31:07 北京时间",
+        "published_at": "2026-04-24 01:37:44 北京时间",
         "published_iso": "",
-        "time_label": "15小时",
+        "time_label": "17小时",
         "is_pinned": false,
         "title": "$RAVE 这个浪浪是真的假的啊看着有点怪怪的",
         "raw": "$RAVE 这个浪浪是真的假的啊看着有点怪怪的",
         "author": "square-creator-446e63a9fd9ef",
         "author_slug": "square-creator-446e63a9fd9ef",
-        "time": "15小时",
+        "time": "17小时",
         "image_urls": [
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzFmMmQ3YTBlN2JlNDQzMWJiOGQ0ODFlMjEwYTM0MDU1LmpwZw==&level=lg"
         ],
@@ -482,15 +496,15 @@
       },
       "https://www.binance.com/zh-CN/square/post/315607577116082": {
         "href": "https://www.binance.com/zh-CN/square/post/315607577116082",
-        "published_at": "2026-04-23 20:31:07 北京时间",
+        "published_at": "2026-04-23 19:37:44 北京时间",
         "published_iso": "",
-        "time_label": "21小时",
+        "time_label": "23小时",
         "is_pinned": false,
         "title": "进来聊聊",
         "raw": "进来聊聊",
         "author": "square-creator-446e63a9fd9ef",
         "author_slug": "square-creator-446e63a9fd9ef",
-        "time": "21小时",
+        "time": "23小时",
         "image_urls": [],
         "video_url": "",
         "audio_m3u8_url": "",
@@ -512,15 +526,15 @@
       },
       "https://www.binance.com/zh-CN/square/post/315878406004578": {
         "href": "https://www.binance.com/zh-CN/square/post/315878406004578",
-        "published_at": "2026-04-24 14:31:07 北京时间",
+        "published_at": "2026-04-24 14:37:44 北京时间",
         "published_iso": "",
-        "time_label": "3小时",
+        "time_label": "4小时",
         "is_pinned": false,
         "title": "$PIPPIN 好离谱啊兄弟们一分钟三万六千多的涨幅不愧是第一妖币",
         "raw": "$PIPPIN 好离谱啊兄弟们一分钟三万六千多的涨幅不愧是第一妖币",
         "author": "square-creator-446e63a9fd9ef",
         "author_slug": "square-creator-446e63a9fd9ef",
-        "time": "3小时",
+        "time": "4小时",
         "image_urls": [
           "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzEyYzk5ZDZmY2UzMzRiZDc5MGEzMWI4NzI3MjhmYTBkLmpwZw==&level=lg"
         ],
@@ -546,5 +560,5 @@
       }
     }
   },
-  "updated_at": "2026-04-24 17:31:07 北京时间"
+  "updated_at": "2026-04-24 18:37:44 北京时间"
 }

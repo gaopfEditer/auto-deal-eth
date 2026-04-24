@@ -4,6 +4,7 @@
 
 ## 1. 环境准备
 
+ssh -L 3308:127.0.0.1:3306 -N -f root@60.205.120.196
 ```bash
 python -m venv venv
 ```
