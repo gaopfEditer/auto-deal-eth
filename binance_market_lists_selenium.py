@@ -72,10 +72,10 @@ DEFAULT_MARKET_RANK_TOP_N = 10
 PRIORITY_PROFILE_BASE = "https://www.binance.com/zh-CN/square/profile/"
 PRIORITY_FOLLOW_PROFILES: List[str] = [
     f"{PRIORITY_PROFILE_BASE}yanchibit",
-    # f"{PRIORITY_PROFILE_BASE}aleng888888",
-    # f"{PRIORITY_PROFILE_BASE}carrywang55688",
+    f"{PRIORITY_PROFILE_BASE}aleng888888",
+    f"{PRIORITY_PROFILE_BASE}sanmageshuai",
+    f"{PRIORITY_PROFILE_BASE}Square-Creator-446e63a9fd9ef",
     # f"{PRIORITY_PROFILE_BASE}square-creator-857dc547d",
-    # f"{PRIORITY_PROFILE_BASE}sanmageshuai",
     # f"{PRIORITY_PROFILE_BASE}haoge666",
     # f"{PRIORITY_PROFILE_BASE}square-creator-4bd102843",
     
