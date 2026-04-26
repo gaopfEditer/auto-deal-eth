@@ -20,7 +20,7 @@
     仅对这些用户巡检「是否直播」与「是否发文章」；列表为空时仍巡检 Following 页收集到的全部主页。
   - 行情：默认只输出涨幅榜、跌幅榜各前 N（--market-top，默认 10）；全局热榜需加 --include-hot-rank。
   - 热榜/涨幅/跌幅若页面 DOM 抓不到，涨幅与跌幅会回退到官方 /api/v3/ticker/24hr（无需 Key）。
-  - 关注流帖子默认合并 binance_posts_state.json：保留 24 小时内文章，新帖终端提示并用 Gemini 判多空；
+  - 关注流帖子默认合并 binance_posts_state.json：保留 48 小时内文章，新帖终端提示并用 Gemini 判多空；
     可用 --skip-posts-state 仅输出本次快照。
   - 重点关注用户会额外打开其主页并深度下滚，合并时间线帖子（条数见 --max-items）；帖子卡片内图片可保存到 --square-images-dir。
 """
@@ -33,8 +33,8 @@ import os
 import random
 import re
 import time
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Set
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 try:
     import requests  # 用于热榜/涨跌幅 API 回退
@@ -46,7 +46,10 @@ try:
 except ModuleNotFoundError:
     pd = None
 
+from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -57,6 +60,7 @@ from binance_posts_state import (
     beijing_time_str,
     enrich_post_published_fields,
     filter_posts_by_published_age,
+    parse_published_to_dt,
     process_watchlist_posts,
 )
 
@@ -76,7 +80,7 @@ PRIORITY_FOLLOW_PROFILES: List[str] = [
     f"{PRIORITY_PROFILE_BASE}sanmageshuai",
     f"{PRIORITY_PROFILE_BASE}Square-Creator-446e63a9fd9ef",
     # f"{PRIORITY_PROFILE_BASE}square-creator-857dc547d",
-    # f"{PRIORITY_PROFILE_BASE}haoge666",
+    f"{PRIORITY_PROFILE_BASE}Square-Creator-1d148bbce7461",
     # f"{PRIORITY_PROFILE_BASE}square-creator-4bd102843",
     
     # f"{PRIORITY_PROFILE_BASE}square-creator-f69ded460", 烦死
@@ -86,8 +90,134 @@ PRIORITY_FOLLOW_PROFILES: List[str] = [
 # 标准输出每个区块最多行数（0 表示全部）；与 getinfo/run_calendar 的 MAX_ROWS 用法类似
 MAX_STDOUT_ROWS = 180
 
-# 进入帖子正文页补充配图时，最多打开的帖子数（避免耗时过长）
-MAX_POST_DETAIL_ENRICH_PAGES = 15
+# 进入帖子正文页补充配图时，默认最多打开的帖子数（实际会受 --max-items 与过滤后条数约束）
+MAX_POST_DETAIL_ENRICH_PAGES = 80
+# 视频中心点击打开详情页后，是否保留新标签页（便于肉眼确认跳转）
+KEEP_VIDEO_DETAIL_TAB = (
+    os.getenv("KEEP_VIDEO_DETAIL_TAB", "false").strip().lower() == "true"
+)
+# 不保留标签页时，关闭前最少停留秒数（避免“看不到有打开过”）
+VIDEO_DETAIL_TAB_VISIBLE_SEC = float(
+    os.getenv("VIDEO_DETAIL_TAB_VISIBLE_SEC", "1.6").strip() or "1.6"
+)
+# 打印 text-PrimaryText 后，对每个 aspect-video 矩形内随机点击并打印打开后的 URL
+ASPECT_VIDEO_PROBE_CLICK_AFTER_TEXT = (
+    os.getenv("ASPECT_VIDEO_PROBE_CLICK_AFTER_TEXT", "true").strip().lower() == "true"
+)
+# 视频回扫 / aspect 探测：卡片发帖时间早于「现在 − N 天」则跳过点击（无法解析时间的卡片仍点击，避免漏抓）
+ASPECT_VIDEO_SCAN_MAX_PUBLISH_AGE_DAYS = float(
+    (os.getenv("ASPECT_VIDEO_SCAN_MAX_PUBLISH_AGE_DAYS", "2") or "2").strip() or "2"
+)
+
+# /square/audio/replay 页：仅从 performance 网络资源筛 m3u8（不再读 DOM 标题 / video.src）
+_AUDIO_REPLAY_M3U8_FROM_NETWORK_JS = r"""
+const m3u8Set = new Set();
+try {
+  const perf = (performance && performance.getEntriesByType)
+    ? performance.getEntriesByType('resource')
+    : [];
+  for (const e of perf || []) {
+    const n = String((e && e.name) || '').trim();
+    if (!n) continue;
+    const low = n.toLowerCase();
+    if (low.includes('.m3u8') || (low.includes('/static/live-ag/') && low.includes('m3u8'))) {
+      m3u8Set.add(n.split('#')[0]);
+    }
+  }
+} catch (_) {}
+const m3u8Urls = Array.from(m3u8Set).slice(0, 8);
+return { m3u8_url: m3u8Urls[0] || '' };
+"""
+
+# 点击 aspect-video 之前：从同卡片 text-PrimaryText 取标题（进入回播页前唯一标题来源）
+_ASPECT_VIDEO_PRE_CLICK_TITLE_JS = r"""
+const i = arguments[0];
+const list = document.querySelectorAll('[class*="aspect-video"]');
+const el = list[i];
+if (!el) return '';
+const root = el.closest('article') || el.closest('[class*="post"]')
+  || el.closest('[class*="card"]') || el.closest('[role="button"]') || el.parentElement;
+if (!root) return '';
+const texts = [];
+for (const e of root.querySelectorAll('[class*="text-PrimaryText"]')) {
+  const t = String((e && (e.innerText || e.textContent)) || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (t && !texts.includes(t)) texts.push(t);
+}
+return texts.join(' | ');
+"""
+
+# 点击前：从 aspect-video 同卡片取 /square/post/ 链接，用于把回播 m3u8 写回该帖（state 键即 post href）
+_ASPECT_VIDEO_CARD_POST_HREF_JS = r"""
+const i = arguments[0];
+const list = document.querySelectorAll('[class*="aspect-video"]');
+const el = list[i];
+if (!el) return '';
+let n = el;
+for (let depth = 0; depth < 28 && n; depth++) {
+  if (n.querySelectorAll) {
+    for (const a of n.querySelectorAll('a[href*="/square/post/"]')) {
+      const h = (a.href || '').split('#')[0];
+      if ((h || '').toLowerCase().includes('/square/post/')) return h;
+    }
+  }
+  n = n.parentElement;
+}
+return '';
+"""
+
+# 已进入 /square/audio/replay 页：用标题与候选 <a> 周围文案对齐，避免误取侧栏/推荐流第一个 post 链
+_SQUARE_AUDIO_REPLAY_PAGE_RESOLVE_POST_HREF_JS = r"""
+const titleHint = String(arguments[0] || '');
+const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+const h = norm(titleHint);
+const needles = [];
+if (h.length >= 4) {
+  if (h.length <= 100) needles.push(h);
+  needles.push(h.slice(0, Math.min(48, h.length)));
+  h.split(/[|｜\s?？!！，,]+/).forEach((p) => {
+    const t = p.trim();
+    if (t.length >= 4 && needles.indexOf(t) < 0) needles.push(t);
+  });
+}
+const uniq = [];
+for (const n of needles) {
+  if (n && uniq.indexOf(n) < 0) uniq.push(n);
+}
+function contextForAnchor(a) {
+  let n = a;
+  let blob = '';
+  for (let d = 0; d < 10 && n; d++) {
+    blob += ' ' + ((n.innerText || n.textContent) || '');
+    if (blob.length > 1000) break;
+    n = n.parentElement;
+  }
+  return norm(blob).slice(0, 1400);
+}
+const list = Array.from(document.querySelectorAll('a[href*="/square/post/"]'));
+let best = '';
+let bestScore = -1;
+for (const a of list) {
+  const href = (a.href || '').split('#')[0];
+  if (!href || href.toLowerCase().indexOf('/square/post/') < 0) continue;
+  if (!h) {
+    best = href;
+    break;
+  }
+  const ctx = contextForAnchor(a);
+  let sc = 0;
+  for (const nd of uniq) {
+    if (nd.length >= 4 && ctx.indexOf(nd) >= 0) sc += nd.length;
+  }
+  if (sc > bestScore) {
+    bestScore = sc;
+    best = href;
+  }
+}
+if (h && bestScore <= 0) return '';
+return best || '';
+"""
 
 # 从表格行文本里抠交易对（兼容 BTCUSDT / btcusdt / BTC/USDT）
 _ROW_SYMBOL_RE = re.compile(
@@ -358,6 +488,110 @@ def _human_pause_after_nav(lo: float = 0.85, hi: float = 2.9) -> None:
     time.sleep(random.uniform(lo, hi))
 
 
+def _wait_driver_execution_context(driver, timeout_sec: float = 18.0) -> bool:
+    """
+    新开页 / 关窗 / history.back 后，Chrome 可能短暂处于「无 JS 执行上下文」状态，
+    此时任何 execute_script 会报 frame does not have execution context。轮询直到可执行。
+    """
+    deadline = time.time() + max(1.0, timeout_sec)
+    while time.time() < deadline:
+        try:
+            try:
+                driver.switch_to.default_content()
+            except WebDriverException:
+                pass
+            driver.execute_script("return document.readyState")
+            return True
+        except WebDriverException:
+            time.sleep(0.35)
+        except Exception:
+            time.sleep(0.35)
+    return False
+
+
+def _recover_profile_tab(driver, profile_href: str, *, log: str = "") -> None:
+    """探测失败后强制回到 profile，避免后续步骤在坏上下文里继续跑。"""
+    base = (profile_href or "").split("#")[0].strip()
+    if not base:
+        return
+    try:
+        driver.switch_to.default_content()
+    except Exception:
+        pass
+    try:
+        driver.get(base)
+        WebDriverWait(driver, 28).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
+        if not _wait_driver_execution_context(driver, 22.0):
+            if log:
+                _scrape_log(f"{log} 恢复后等待执行上下文仍超时")
+        _human_pause_after_nav(0.55, 1.15)
+    except Exception as e:
+        _scrape_log(f"恢复 profile 失败 {base!r}: {e}")
+
+
+def _action_chains_click_in_element_box(
+    driver,
+    el,
+    *,
+    log_prefix: str,
+    use_random_offset: bool = True,
+) -> bool:
+    """
+    用 Selenium ActionChains 发真实指针序列（相对元素中心再随机偏移后 click），
+    避免 JS 里 dispatchEvent(MouseEvent) 被 React 等直接忽略。
+    失败时依次回退 element.click()、arguments[0].click()。
+    """
+    try:
+        driver.execute_script(
+            "arguments[0].scrollIntoView({block:'center',inline:'center'});", el
+        )
+        _human_pause(0.18, 0.42)
+        rect = el.rect
+        w = float((rect or {}).get("width") or 0)
+        h = float((rect or {}).get("height") or 0)
+        if w < 6 or h < 6:
+            _scrape_log(f"{log_prefix} 元素过小 w={w:.0f} h={h:.0f}，跳过点击")
+            return False
+        half_w = int(w // 2)
+        half_h = int(h // 2)
+        mx = max(2, int(w * 0.1))
+        my = max(2, int(h * 0.1))
+        if use_random_offset and half_w > mx and half_h > my:
+            dx = random.randint(-half_w + mx, half_w - mx)
+            dy = random.randint(-half_h + my, half_h - my)
+        else:
+            dx, dy = 0, 0
+        _scrape_log(
+            f"{log_prefix} 实点点击 ActionChains（相对元素中心偏移 dx={dx}, dy={dy}）"
+        )
+        (
+            ActionChains(driver)
+            .move_to_element(el)
+            .move_by_offset(dx, dy)
+            .pause(0.07)
+            .click()
+            .pause(0.05)
+            .perform()
+        )
+        return True
+    except Exception as e:
+        _scrape_log(f"{log_prefix} ActionChains 异常，回退 element.click: {e}")
+        try:
+            el.click()
+            _scrape_log(f"{log_prefix} 已用 element.click()")
+            return True
+        except Exception:
+            try:
+                driver.execute_script("arguments[0].click();", el)
+                _scrape_log(f"{log_prefix} 已用 JS arguments[0].click()")
+                return True
+            except Exception as e2:
+                _scrape_log(f"{log_prefix} 点击全部失败: {e2}")
+                return False
+
+
 def _human_jitter_scroll_pause() -> None:
     """滚动时每一步间隔略随机。"""
     time.sleep(random.uniform(0.16, 0.38))
@@ -387,6 +621,11 @@ def _profile_live_tab_url(profile_href: str) -> str:
         return ""
     sep = "&" if "?" in base else "?"
     return f"{base}{sep}tab=live"
+
+
+def _profile_href_key(href: str) -> str:
+    """用于去重：同一人主页带不带 query 视为同一 profile。"""
+    return (href or "").strip().split("#")[0].strip().rstrip("/")
 
 
 def _merge_priority_profiles(
@@ -461,16 +700,19 @@ def _scroll_page_load_lists(driver, scrolls: int = 14) -> None:
     _human_pause(0.28, 0.62)
 
 
-def _scroll_feed_down_only(driver, scrolls: int) -> None:
+def _scroll_feed_down_only(driver, scrolls: int, *, slow: bool = False) -> None:
     """只向下滚（不回到顶部），用于 profile 时间线加载更多帖子。"""
     for _ in range(scrolls):
         driver.execute_script(
             "window.scrollBy(0, Math.floor(window.innerHeight * 0.88));"
         )
-        _human_jitter_scroll_pause()
+        if slow:
+            time.sleep(random.uniform(0.35, 0.78))
+        else:
+            _human_jitter_scroll_pause()
 
 
-def _scroll_profile_feed_until_stable(driver, max_rounds: int = 32) -> None:
+def _scroll_profile_feed_until_stable(driver, max_rounds: int = 40) -> None:
     """
     主页时间线下滚：若任意 create-time 出现「n月n日」则至少已超约一天，停止继续下滚；
     否则直到帖子链接数不再增长。
@@ -478,7 +720,7 @@ def _scroll_profile_feed_until_stable(driver, max_rounds: int = 32) -> None:
     last = -1
     stable = 0
     for _ in range(max_rounds):
-        _scroll_feed_down_only(driver, scrolls=5)
+        _scroll_feed_down_only(driver, scrolls=5, slow=True)
         try:
             hit_month_day = driver.execute_script(
                 r"""
@@ -500,7 +742,18 @@ return false;
         try:
             n = int(
                 driver.execute_script(
-                    'return document.querySelectorAll(\'a[href*="/square/post/"]\').length'
+                    r"""
+const anchors = Array.from(document.querySelectorAll('a[href*="/square/"]'));
+let cnt = 0;
+for (const a of anchors) {
+  const h = ((a.href || '').split('#')[0] || '').toLowerCase();
+  if (!h) continue;
+  if (h.includes('/square/post/') || h.includes('/square/audio/') || h.includes('/square/article/')) {
+    cnt += 1;
+  }
+}
+return cnt;
+"""
                 )
                 or 0
             )
@@ -508,12 +761,12 @@ return false;
             n = 0
         if n == last:
             stable += 1
-            if stable >= 4 and n > 0:
+            if stable >= 5 and n > 0:
                 break
         else:
             stable = 0
         last = n
-        _human_pause(0.08, 0.32)
+        _human_pause(0.5, 1.15)
 
 
 def _merge_posts_by_href(*lists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -541,7 +794,118 @@ def _merge_posts_by_href(*lists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             o["time_label"] = (p.get("time_label") or o.get("time_label") or "")
             o["is_pinned"] = bool(o.get("is_pinned") or p.get("is_pinned"))
             o["video_url"] = (p.get("video_url") or o.get("video_url") or "")
+            o["audio_m3u8_url"] = (
+                p.get("audio_m3u8_url")
+                or p.get("m3u8_url")
+                or o.get("audio_m3u8_url")
+                or ""
+            )
+            o["square_audio_replay_url"] = (
+                p.get("square_audio_replay_url") or o.get("square_audio_replay_url") or ""
+            )
     return list(by_href.values())
+
+
+def _timeline_post_href_key_for_patch(
+    by_href: Dict[str, Dict[str, Any]], post_ph: str
+) -> str:
+    """时间线里 href 可能与卡片/回播页解析的 URL 不完全一致（域名、locale），用 post id 对齐。"""
+    ph = (post_ph or "").strip().split("#")[0]
+    if not ph or "/square/post/" not in ph.lower():
+        return ""
+    if ph in by_href:
+        return ph
+    m = re.search(r"/square/post/(\d+)", ph, re.I)
+    if not m:
+        return ""
+    pid = m.group(1)
+    for k in by_href:
+        if "/square/post/" not in k.lower():
+            continue
+        m2 = re.search(r"/square/post/(\d+)", k, re.I)
+        if m2 and m2.group(1) == pid:
+            return k
+    return ""
+
+
+def _apply_audio_replay_patches_to_posts(
+    posts: List[Dict[str, Any]],
+    patches: List[Dict[str, Any]],
+    profile_author_slug: str = "",
+) -> None:
+    """
+    把回播页 URL + network m3u8 合并到对应 /square/post/... 帖子（与 binance_posts_state 键一致）。
+    必须有 post_href；不再用 audio/replay 作为独立 state 键。
+    """
+    if not patches:
+        return
+    by_href: Dict[str, Dict[str, Any]] = {}
+    for p in posts:
+        if not isinstance(p, dict):
+            continue
+        h = (p.get("href") or "").strip().split("#")[0]
+        if h:
+            by_href[h] = p
+    slug = (profile_author_slug or "").strip().lower()
+    for patch in patches:
+        if not isinstance(patch, dict):
+            continue
+        post_ph = (patch.get("post_href") or "").strip().split("#")[0]
+        replay = (
+            (patch.get("replay_href") or patch.get("square_audio_replay_url") or "")
+            .strip()
+            .split("#")[0]
+        )
+        pslug = (patch.get("author_slug") or slug or "").strip().lower()
+        t = (patch.get("title") or "").strip()
+        m3 = (patch.get("audio_m3u8_url") or "").strip()
+        rep = (patch.get("square_audio_replay_url") or replay or "").strip().split("#")[0]
+
+        if not post_ph or "/square/post/" not in post_ph.lower():
+            continue
+        if not m3 and not (rep or replay):
+            continue
+
+        key = _timeline_post_href_key_for_patch(by_href, post_ph)
+        if key:
+            tgt = by_href[key]
+            if m3:
+                tgt["audio_m3u8_url"] = m3
+            sq = ""
+            if rep and "/square/audio/replay" in rep.lower():
+                sq = rep
+            elif replay and "/square/audio/replay" in replay.lower():
+                sq = replay
+            if sq:
+                tgt["square_audio_replay_url"] = sq
+            if t and not str(tgt.get("title") or "").strip():
+                tgt["title"] = t
+                tgt["raw"] = t
+            continue
+
+        sq_url = ""
+        if rep and "/square/audio/replay" in rep.lower():
+            sq_url = rep
+        elif replay and "/square/audio/replay" in replay.lower():
+            sq_url = replay
+        stub: Dict[str, Any] = {
+            "href": post_ph,
+            "title": t or "",
+            "raw": t or "",
+            "author": pslug,
+            "author_slug": pslug,
+            "time": "",
+            "published_iso": "",
+            "time_label": "",
+            "published_at": "",
+            "is_pinned": False,
+            "image_urls": [],
+            "video_url": "",
+            "audio_m3u8_url": m3,
+            "square_audio_replay_url": sq_url,
+        }
+        posts.append(stub)
+        by_href[post_ph] = stub
 
 
 def _post_id_from_href(href: str) -> str:
@@ -642,24 +1006,29 @@ def _enrich_post_images_from_detail_pages(
     posts: List[Dict[str, Any]],
     max_pages: int = MAX_POST_DETAIL_ENRICH_PAGES,
 ) -> None:
-    """进入 /square/post/ 正文页抓取正文区域配图（与列表卡片合并去重）。"""
+    """进入 /square/post/ 正文页抓取正文区域配图（与列表卡片合并去重）；逐项略慢打开减少漏载。"""
     if not posts:
         return
-    n = min(MAX_POST_DETAIL_ENRICH_PAGES, max_pages, len(posts))
-    _scrape_log(f"打开帖子正文页补充配图（最多 {n} 篇）…")
+    n = min(max(1, int(max_pages)), len(posts))
+    _scrape_log(f"打开帖子正文页补充配图（本轮逐项打开 {n} 篇）…")
     for p in posts[:n]:
         if not isinstance(p, dict):
             continue
         href = (p.get("href") or "").strip()
-        if not href or "/square/post/" not in href.lower():
+        hl = href.lower()
+        if not href or (
+            "/square/post/" not in hl
+            and "/square/video/" not in hl
+            and "/square/article/" not in hl
+        ):
             continue
         try:
             driver.get(href)
             WebDriverWait(driver, 18).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
-            _human_pause_after_nav(1.0, 2.6)
-            _human_pause(0.12, 0.45)
+            _human_pause_after_nav(1.45, 3.1)
+            _human_pause(0.4, 0.95)
             extra = driver.execute_script(
                 _SQUARE_ATTACHMENT_IMG_JS + "\nreturn _bnDetailArticleImages();"
             )
@@ -673,6 +1042,7 @@ def _enrich_post_images_from_detail_pages(
                 p["video_url"] = str(video_url).strip()
         except Exception:
             continue
+        _human_pause(0.55, 1.35)
 
 
 def _extract_rows_from_table_elements(driver, max_items: int) -> List[Dict[str, str]]:
@@ -806,8 +1176,9 @@ def _extract_square_following(
 
     说明：侧栏「热门话题」等也会出现 /square/ 链接，必须过滤。
     """
-    # 兜底多滚动一下，确保虚拟列表渲染
-    _scroll_page_load_lists(driver, scrolls=28)
+    # 兜底多滚动一下，确保虚拟列表渲染（略慢，减少漏帖）
+    _scroll_page_load_lists(driver, scrolls=40)
+    _human_pause(1.2, 2.5)
 
     priority_arg = (
         sorted(priority_slugs) if priority_slugs else []
@@ -831,8 +1202,11 @@ const isNoise = (href) => {
   return false;
 };
 
-// 只从「帖子」链接抓文章；关注流里帖子一般为 /square/post/{id}
-const anchors = Array.from(document.querySelectorAll('a[href*="/square/post/"]'));
+// 帖子可能是 /square/post/、/square/video/、/square/article/，统一纳入
+const anchors = Array.from(document.querySelectorAll('a[href*="/square/"]')).filter((a) => {
+  const h = ((a.href || '').split('#')[0] || '').toLowerCase();
+  return h.includes('/square/post/') || h.includes('/square/video/') || h.includes('/square/article/');
+});
 
 const norm = (s) => (s || '').replace(/\\s+/g, ' ').trim();
 
@@ -865,7 +1239,9 @@ for (const a of anchors) {
     if (!authorSlug || !prioritySlugs.has(authorSlug)) continue;
   }
   const text = (a.innerText || a.textContent || '').trim();
-  if (!text || text.length < 4) continue;
+  const imageUrls = _bnCollectArticleImagesRelaxed(a);
+  const videoUrl = _bnCollectVideoUrlFromCard(a);
+  if ((!text || text.length < 4) && !videoUrl && imageUrls.length === 0) continue;
 
   const clean = norm(text);
   const parts = clean.split(' ').filter(Boolean);
@@ -882,11 +1258,9 @@ for (const a of anchors) {
   }
 
   const meta = _bnPostTimeFromCard(a);
-  const imageUrls = _bnCollectArticleImagesRelaxed(a);
-  const videoUrl = _bnCollectVideoUrlFromCard(a);
   const item = {
     href,
-    title,
+    title: title || (videoUrl ? '视频帖' : title),
     author,
     author_slug: authorSlug,
     time: meta.time_label || findTime(clean),
@@ -914,25 +1288,34 @@ def _extract_square_profile_posts(
     profile_href: str,
     author_slug: str,
     max_items: int,
-) -> List[Dict[str, str]]:
+    *,
+    probe_live: bool = False,
+    author_display_name: str = "",
+) -> Tuple[List[Dict[str, Any]], Optional[Dict[str, str]], List[Dict[str, Any]]]:
     """
     打开用户 Square 主页，深度下滚加载虚拟列表，抓取该用户帖子（数量通常多于 Following 流首屏）。
+    可选 probe_live：在同一轮访问内顺带做「是否在直播」检测，避免再次打开同一主页。
+    第三项为视频回扫产生的 audio_replay_patches，供写入 watchlist 并由 process_watchlist_posts 合并到 state。
     """
     base = (profile_href or "").split("#")[0].strip()
     if not base:
-        return []
-    _scrape_log(f"打开主页拉取帖子: {base}")
+        return [], None, []
+    if probe_live:
+        _scrape_log(f"打开主页拉取帖子并检测直播: {base}")
+    else:
+        _scrape_log(f"打开主页拉取帖子: {base}")
     driver.get(base)
     WebDriverWait(driver, 25).until(
         EC.presence_of_element_located((By.TAG_NAME, "body"))
     )
-    _human_pause_after_nav(1.5, 3.2)
+    _human_pause_after_nav(2.0, 4.2)
     _scroll_profile_feed_until_stable(driver)
-    _human_pause(0.35, 0.95)
+    _human_pause(0.75, 1.65)
     slug_l = (author_slug or "").lower().strip()
-    return driver.execute_script(
-        _SQUARE_ATTACHMENT_IMG_JS
-        + """
+    posts: List[Dict[str, str]] = (
+        driver.execute_script(
+            _SQUARE_ATTACHMENT_IMG_JS
+            + """
 const maxItems = arguments[0];
 const authorSlug = String(arguments[1] || '').toLowerCase();
 const out = [];
@@ -949,7 +1332,10 @@ const isNoise = (href) => {
   return false;
 };
 
-const anchors = Array.from(document.querySelectorAll('a[href*="/square/post/"]'));
+const anchors = Array.from(document.querySelectorAll('a[href*="/square/"]')).filter((a) => {
+  const h = ((a.href || '').split('#')[0] || '').toLowerCase();
+  return h.includes('/square/post/') || h.includes('/square/video/') || h.includes('/square/article/');
+});
 const norm = (s) => (s || '').replace(/\\s+/g, ' ').trim();
 
 const findTime = (t) => {
@@ -966,7 +1352,9 @@ for (const a of anchors) {
   if (!href || seen.has(href)) continue;
   if (isNoise(href)) continue;
   const text = (a.innerText || a.textContent || '').trim();
-  if (!text || text.length < 4) continue;
+  const imageUrls = _bnCollectArticleImagesRelaxed(a);
+  const videoUrl = _bnCollectVideoUrlFromCard(a);
+  if ((!text || text.length < 4) && !videoUrl && imageUrls.length === 0) continue;
 
   const clean = norm(text);
   const parts = clean.split(' ').filter(Boolean);
@@ -977,11 +1365,9 @@ for (const a of anchors) {
   if (dotIdx > 0 && dotIdx < 80) author = clean.slice(0, dotIdx).trim() || authorSlug;
 
   const meta = _bnPostTimeFromCard(a);
-  const imageUrls = _bnCollectArticleImagesRelaxed(a);
-  const videoUrl = _bnCollectVideoUrlFromCard(a);
   out.push({
     href,
-    title,
+    title: title || (videoUrl ? '视频帖' : title),
     author,
     author_slug: authorSlug,
     time: meta.time_label || findTime(clean),
@@ -996,9 +1382,703 @@ for (const a of anchors) {
 }
 return out;
         """,
-        max_items,
-        slug_l,
-    ) or []
+            max_items,
+            slug_l,
+        )
+        or []
+    )
+    # 视频帖经常需要点中间播放区才会进入详情，补跑一轮中心点点击回扫。
+    existing_hrefs = {(p.get("href") or "").strip() for p in posts if isinstance(p, dict)}
+    # 这里不能再按“剩余额度”扫描，否则普通帖子先占满后视频帖会被跳过。
+    video_scan_quota = min(max(12, max_items), 80)
+    profile_audio_patches: List[Dict[str, Any]] = []
+    if video_scan_quota > 0:
+        extra_video, audio_replay_patches = _extract_profile_video_posts_by_center_click(
+            driver, base, slug_l, existing_hrefs, max_items=video_scan_quota
+        )
+        profile_audio_patches = list(audio_replay_patches or [])
+        if extra_video:
+            # 合并时把视频回扫结果放前面，确保上限裁剪时不会把视频帖全部挤掉。
+            posts = _merge_posts_by_href(extra_video, posts)
+        if audio_replay_patches:
+            _apply_audio_replay_patches_to_posts(posts, audio_replay_patches, slug_l)
+        posts = posts[:max_items]
+    live_hit: Optional[Dict[str, str]] = None
+    if probe_live:
+        _human_pause(0.55, 1.25)
+        hint = (author_display_name or "").strip() or author_slug
+        live_hit = _probe_single_profile_live(
+            driver, base, author_hint=hint, log_visit=False
+        )
+    return posts, live_hit, profile_audio_patches
+
+
+def _aspect_video_probe_random_click_and_log_opened_url(
+    driver,
+    profile_href: str,
+    av_index: int,
+    label_idx: int,
+    patches_out: Optional[List[Dict[str, Any]]] = None,
+    *,
+    author_slug: str = "",
+) -> None:
+    """
+    对页面内第 av_index 个 class 含 aspect-video 的元素，在矩形中部随机区域点击，
+    打印打开后的 URL（新标签或同页跳转），并尽量回到 profile 页。
+    若打开 /square/audio/replay：从卡片解析 /square/post/ 为 post_href；
+    标题取点击前 text-PrimaryText；m3u8 仅从 performance 网络筛出；一并写入 patches 供合并到该帖。
+    label_idx 为日志用 1-based 序号。
+    """
+    base = (profile_href or "").split("#")[0].strip()
+    try:
+        before_handles = list(driver.window_handles)
+        before_url = (driver.current_url or "").split("#")[0]
+    except WebDriverException as e:
+        _scrape_log(f"aspect-video[{label_idx}] 探测: 取窗口状态失败 {e}")
+        return
+    if not _wait_driver_execution_context(driver, 14.0):
+        _scrape_log(
+            f"aspect-video[{label_idx}] 探测: 执行上下文未就绪，跳过（可稍后重试）"
+        )
+        return
+    try:
+        els = driver.find_elements(By.CSS_SELECTOR, '[class*="aspect-video"]')
+    except WebDriverException:
+        els = []
+    except Exception:
+        els = []
+    if av_index >= len(els):
+        _scrape_log(
+            f"aspect-video[{label_idx}] 探测点击: 跳过（当前页仅 {len(els)} 个 aspect-video，索引 {av_index}）"
+        )
+        return
+    el = els[av_index]
+    post_href = ""
+    try:
+        post_href = str(
+            driver.execute_script(_ASPECT_VIDEO_CARD_POST_HREF_JS, av_index) or ""
+        ).strip().split("#")[0]
+    except Exception:
+        post_href = ""
+    pre_click_title = ""
+    try:
+        pre_click_title = str(
+            driver.execute_script(_ASPECT_VIDEO_PRE_CLICK_TITLE_JS, av_index) or ""
+        ).strip()[:2000]
+    except Exception:
+        pre_click_title = ""
+    _scrape_log(
+        f"aspect-video[{label_idx}] 探测点击: 对第 {av_index + 1}/{len(els)} 个节点使用 Selenium 指针（非 JS 合成事件）"
+    )
+    opened_click = _action_chains_click_in_element_box(
+        driver,
+        el,
+        log_prefix=f"aspect-video[{label_idx}]",
+        use_random_offset=True,
+    )
+    if not opened_click:
+        return
+    time.sleep(0.55)
+    _human_pause_after_nav(0.45, 1.0)
+    switched_new_tab = False
+    opened_url = ""
+    for _ in range(32):
+        try:
+            now_handles = list(driver.window_handles)
+            if len(now_handles) > len(before_handles):
+                new_handle = next(
+                    (h for h in now_handles if h not in before_handles), None
+                )
+                if new_handle:
+                    driver.switch_to.window(new_handle)
+                    switched_new_tab = True
+                    time.sleep(0.4)
+                    _wait_driver_execution_context(driver, 12.0)
+                    opened_url = (driver.current_url or "").split("#")[0]
+                    break
+            cur_u = (driver.current_url or "").split("#")[0]
+            if cur_u and cur_u != before_url:
+                opened_url = cur_u
+                break
+        except WebDriverException:
+            time.sleep(0.35)
+        time.sleep(0.22)
+    try:
+        if not opened_url:
+            opened_url = (driver.current_url or "").split("#")[0]
+    except WebDriverException:
+        opened_url = ""
+    if opened_url == before_url and not switched_new_tab:
+        _scrape_log(f"aspect-video[{label_idx}] 打开后 URL: (无跳转)")
+    else:
+        _scrape_log(f"aspect-video[{label_idx}] 打开后 URL: {opened_url}")
+    audio_m3u8 = ""
+    is_audio_replay = bool(
+        opened_url
+        and opened_url != before_url
+        and "/square/audio/replay" in opened_url.lower()
+    )
+    if is_audio_replay:
+        time.sleep(1.0)
+        _wait_driver_execution_context(driver, 18.0)
+        for attempt in range(1, 10):
+            try:
+                snap = driver.execute_script(_AUDIO_REPLAY_M3U8_FROM_NETWORK_JS) or {}
+                audio_m3u8 = str(snap.get("m3u8_url") or "").strip()
+            except Exception as ex:
+                _scrape_log(
+                    f"aspect-video[{label_idx}] 回播页 network 筛 m3u8 失败(第{attempt}次): {ex}"
+                )
+            if audio_m3u8:
+                break
+            time.sleep(0.7)
+        if (not post_href) or "/square/post/" not in (post_href or "").lower():
+            try:
+                ph2 = str(
+                    driver.execute_script(
+                        _SQUARE_AUDIO_REPLAY_PAGE_RESOLVE_POST_HREF_JS,
+                        pre_click_title,
+                    )
+                    or ""
+                ).strip().split("#")[0]
+                if ph2 and "/square/post/" in ph2.lower():
+                    post_href = ph2
+            except Exception:
+                pass
+        replay_canon = opened_url.split("#")[0]
+        if patches_out is not None and post_href and (audio_m3u8 or replay_canon):
+            patches_out.append(
+                {
+                    "post_href": post_href,
+                    "replay_href": replay_canon,
+                    "square_audio_replay_url": replay_canon,
+                    "title": pre_click_title,
+                    "audio_m3u8_url": audio_m3u8,
+                    "author_slug": (author_slug or "").strip().lower(),
+                }
+            )
+            _scrape_log(
+                f"aspect-video[{label_idx}] enrich → post={post_href[:72]}… "
+                f"replay={'Y' if replay_canon else 'n'} m3u8={'Y' if audio_m3u8 else 'n'}"
+            )
+        elif patches_out is not None and not post_href:
+            _scrape_log(
+                f"aspect-video[{label_idx}] 未解析到 /square/post/ 链接，"
+                "跳过写入 state（无合并目标）"
+            )
+    if switched_new_tab:
+        if VIDEO_DETAIL_TAB_VISIBLE_SEC > 0:
+            time.sleep(min(VIDEO_DETAIL_TAB_VISIBLE_SEC, 8.0))
+        if KEEP_VIDEO_DETAIL_TAB:
+            _scrape_log("保留视频详情新标签页（探测，KEEP_VIDEO_DETAIL_TAB=true）")
+        else:
+            try:
+                driver.close()
+            except Exception:
+                pass
+        try:
+            if before_handles:
+                driver.switch_to.window(before_handles[0])
+        except Exception:
+            pass
+        time.sleep(0.55)
+        if not _wait_driver_execution_context(driver, 20.0):
+            _scrape_log(
+                f"aspect-video[{label_idx}] 关窗后执行上下文超时，强制打开 profile"
+            )
+            _recover_profile_tab(driver, base, log=f"aspect-video[{label_idx}]")
+    try:
+        cur = (driver.current_url or "").split("#")[0]
+    except WebDriverException:
+        cur = ""
+    if base and cur and cur != base:
+        try:
+            driver.back()
+            WebDriverWait(driver, 18).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+            _human_pause(0.85, 1.65)
+        except Exception:
+            driver.get(base)
+            WebDriverWait(driver, 24).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+            _human_pause_after_nav(1.1, 2.1)
+        if not _wait_driver_execution_context(driver, 18.0):
+            _recover_profile_tab(driver, base, log=f"aspect-video[{label_idx}]_back")
+    else:
+        if not switched_new_tab:
+            try:
+                body = driver.find_element(By.TAG_NAME, "body")
+                body.send_keys(Keys.ESCAPE)
+                _human_pause(0.25, 0.55)
+            except Exception:
+                pass
+    if not _wait_driver_execution_context(driver, 12.0):
+        _recover_profile_tab(driver, base, log=f"aspect-video[{label_idx}]_收尾")
+
+
+def _fetch_aspect_video_card_time_meta(driver, av_index: int) -> Dict[str, Any]:
+    """当前 profile 页第 av_index 个 aspect-video 所在卡片的发帖时间（与 _bnPostTimeFromCard 一致）。"""
+    try:
+        r = driver.execute_script(
+            _SQUARE_ATTACHMENT_IMG_JS
+            + r"""
+const i = arguments[0];
+const list = document.querySelectorAll('[class*="aspect-video"]');
+const el = list[i];
+if (!el) return { published_iso: '', time_label: '', is_pinned: false };
+return _bnPostTimeFromCard(el);
+""",
+            av_index,
+        )
+        return r if isinstance(r, dict) else {}
+    except Exception:
+        return {}
+
+
+def _aspect_video_publish_time_should_skip(
+    meta: Optional[Dict[str, Any]],
+    ref_now: datetime,
+    *,
+    max_age_days: float,
+) -> bool:
+    """发帖时间早于 ref_now−max_age_days 则跳过；解析不到时间则 false（不跳过）。"""
+    if not isinstance(meta, dict) or max_age_days <= 0:
+        return False
+    stub: Dict[str, Any] = {
+        "published_iso": (meta.get("published_iso") or "").strip(),
+        "time_label": (meta.get("time_label") or "").strip(),
+        "time": (meta.get("time_label") or meta.get("time") or "").strip(),
+    }
+    dt = parse_published_to_dt(stub, ref_now)
+    if dt is None:
+        return False
+    ref_u = ref_now if ref_now.tzinfo else ref_now.replace(tzinfo=timezone.utc)
+    ref_u = ref_u.astimezone(timezone.utc)
+    pub_u = dt.astimezone(timezone.utc)
+    cutoff = ref_u - timedelta(days=float(max_age_days))
+    return pub_u < cutoff
+
+
+def _extract_profile_video_posts_by_center_click(
+    driver,
+    profile_href: str,
+    author_slug: str,
+    existing_hrefs: Set[str],
+    max_items: int,
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """
+    视频帖有时只有中间播放区可点，a[href] 不稳定。
+    这里通过「中心点点击」回扫视频卡片，进入详情后补抓帖子链接与时间信息。
+    返回 (extra_posts, audio_replay_patches)；后者供合并 square/audio/replay 与 m3u8。
+    """
+    if max_items <= 0:
+        return [], []
+    ref_now = datetime.now(timezone.utc)
+    base = (profile_href or "").split("#")[0].strip()
+    slug_l = (author_slug or "").lower().strip()
+    out: List[Dict[str, Any]] = []
+    audio_replay_patches: List[Dict[str, Any]] = []
+    seen = {(_profile_href_key(h) if "/square/" in (h or "") else (h or "")) for h in existing_hrefs}
+    max_scan = min(max(8, max_items * 4), 120)
+    _scrape_log(f"视频卡片中心点击回扫开始（最多扫描 {max_scan} 个候选）")
+    try:
+        aspect_video_count = int(
+            driver.execute_script(
+                "return document.querySelectorAll('[class*=\"aspect-video\"]').length;"
+            )
+            or 0
+        )
+    except Exception:
+        aspect_video_count = 0
+    _scrape_log(f"aspect-video 元素数量：{aspect_video_count}")
+    try:
+        aspect_primary_texts = driver.execute_script(
+            r"""
+const cardRoot = (el) => el && (el.closest('article')
+  || el.closest('[class*="post"]')
+  || el.closest('[class*="card"]')
+  || el.closest('[role="button"]')
+  || el.parentElement);
+const roots = Array.from(document.querySelectorAll('[class*="aspect-video"]'));
+const out = [];
+for (const av of roots) {
+  const root = cardRoot(av);
+  if (!root) {
+    out.push('');
+    continue;
+  }
+  const els = root.querySelectorAll('[class*="text-PrimaryText"]');
+  const texts = [];
+  for (const e of els) {
+    const t = String((e && (e.innerText || e.textContent)) || '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (t && !texts.includes(t)) texts.push(t);
+  }
+  out.push(texts.join(' | '));
+}
+return out;
+"""
+        )
+    except Exception:
+        aspect_primary_texts = None
+    if isinstance(aspect_primary_texts, list):
+        for i, txt in enumerate(aspect_primary_texts):
+            s = (txt or "").strip()
+            if s:
+                _scrape_log(
+                    f"aspect-video[{i + 1}] text-PrimaryText: {s[:500]}"
+                    + ("…" if len(s) > 500 else "")
+                )
+            else:
+                _scrape_log(f"aspect-video[{i + 1}] text-PrimaryText: (无)")
+    if ASPECT_VIDEO_PROBE_CLICK_AFTER_TEXT and aspect_video_count > 0:
+        _scrape_log(
+            f"aspect-video：已打印 text-PrimaryText，随后在元素矩形内随机点击（共 {aspect_video_count} 个）…"
+        )
+        for av_i in range(aspect_video_count):
+            try:
+                tmeta = _fetch_aspect_video_card_time_meta(driver, av_i)
+                if _aspect_video_publish_time_should_skip(
+                    tmeta,
+                    ref_now,
+                    max_age_days=ASPECT_VIDEO_SCAN_MAX_PUBLISH_AGE_DAYS,
+                ):
+                    _scrape_log(
+                        f"aspect-video[{av_i + 1}] 发帖超过 "
+                        f"{ASPECT_VIDEO_SCAN_MAX_PUBLISH_AGE_DAYS:g} 天，跳过探测点击"
+                    )
+                    continue
+                before_n = len(audio_replay_patches)
+                _aspect_video_probe_random_click_and_log_opened_url(
+                    driver,
+                    base,
+                    av_i,
+                    av_i + 1,
+                    audio_replay_patches,
+                    author_slug=slug_l,
+                )
+                # 只保留第一种获取方式：拿到首条回播结果后即停止后续 aspect-video 点击。
+                if len(audio_replay_patches) > before_n:
+                    _scrape_log(
+                        "aspect-video 探测已获取首条回播 URL，停止继续点击其余节点"
+                    )
+                    break
+            except Exception as ex:
+                _scrape_log(f"aspect-video[{av_i + 1}] 探测点击异常: {ex}")
+                _recover_profile_tab(driver, base, log=f"aspect-video[{av_i + 1}]")
+    click_opened = 0
+    detail_with_href = 0
+    clicked_from_aspect = 0
+    detail_urls_seen: List[str] = []
+
+    for idx in range(max_scan):
+        if len(out) >= max_items:
+            break
+        try:
+            candidate = driver.execute_script(
+                _SQUARE_ATTACHMENT_IMG_JS
+                + r"""
+const i = arguments[0];
+const cards = [];
+const pushCard = (el) => {
+  if (!el) return;
+  let c = el.closest('article')
+    || el.closest('[class*="post"]')
+    || el.closest('[class*="card"]')
+    || el.closest('[role="button"]')
+    || el.parentElement;
+  if (!c) return;
+  cards.push(c);
+};
+document.querySelectorAll('[class*="aspect-video"]').forEach(pushCard);
+document.querySelectorAll('video, [class*="video-player"], [class*="VideoPlayer"], [class*="play-btn"], [class*="playButton"]').forEach(pushCard);
+const uniq = [];
+const seen = new Set();
+for (const c of cards) {
+  if (!c) continue;
+  const r = c.getBoundingClientRect();
+  if (r.width < 120 || r.height < 80) continue;
+  const key = [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)].join(':');
+  if (seen.has(key)) continue;
+  seen.add(key);
+  uniq.push(c);
+}
+const picked = uniq[i] || null;
+if (!picked) return null;
+const cls = String(picked.className || '');
+const fromAspect = cls.includes('aspect-video') || !!picked.querySelector('[class*="aspect-video"]');
+let anchorHref = '';
+const a = picked.closest('a[href]') || picked.querySelector('a[href]');
+if (a && a.href) anchorHref = String(a.href).split('#')[0];
+let postHref = '';
+for (const pa of picked.querySelectorAll('a[href*="/square/post/"]')) {
+  const h = (pa.href || '').split('#')[0];
+  if ((h || '').toLowerCase().includes('/square/post/')) { postHref = h; break; }
+}
+let timeMeta = { published_iso: '', time_label: '', is_pinned: false };
+if (fromAspect) {
+  let avEl = null;
+  if (cls.includes('aspect-video')) avEl = picked;
+  if (!avEl) avEl = picked.querySelector('[class*="aspect-video"]');
+  if (avEl) timeMeta = _bnPostTimeFromCard(avEl);
+}
+return { el: picked, from_aspect: fromAspect, anchor_href: anchorHref, post_href: postHref, time_meta: timeMeta };
+""",
+                idx,
+            )
+            if candidate is None:
+                break
+            from_aspect = bool(candidate.get("from_aspect")) if isinstance(candidate, dict) else False
+            card_post_href = ""
+            if isinstance(candidate, dict):
+                card_post_href = (candidate.get("post_href") or "").strip().split("#")[0]
+            if from_aspect and _aspect_video_publish_time_should_skip(
+                candidate.get("time_meta") if isinstance(candidate, dict) else None,
+                ref_now,
+                max_age_days=ASPECT_VIDEO_SCAN_MAX_PUBLISH_AGE_DAYS,
+            ):
+                _scrape_log(
+                    f"视频回扫[i={idx}] aspect 发帖超过 "
+                    f"{ASPECT_VIDEO_SCAN_MAX_PUBLISH_AGE_DAYS:g} 天，跳过点击"
+                )
+                continue
+            before_handles = list(driver.window_handles)
+            before_url = (driver.current_url or "").split("#")[0]
+            target_el = (
+                candidate.get("el") if isinstance(candidate, dict) else candidate
+            )
+            opened = _action_chains_click_in_element_box(
+                driver,
+                target_el,
+                log_prefix=f"视频回扫[i={idx}]",
+                use_random_offset=True,
+            )
+            if not opened:
+                continue
+            click_opened += 1
+            if from_aspect:
+                clicked_from_aspect += 1
+            anchor_href = ""
+            if isinstance(candidate, dict):
+                anchor_href = (candidate.get("anchor_href") or "").strip()
+            _human_pause_after_nav(0.5, 1.1)
+            switched_new_tab = False
+            for _ in range(18):
+                now_handles = list(driver.window_handles)
+                if len(now_handles) > len(before_handles):
+                    new_handle = next((h for h in now_handles if h not in before_handles), None)
+                    if new_handle:
+                        driver.switch_to.window(new_handle)
+                        switched_new_tab = True
+                        break
+                cur_url = (driver.current_url or "").split("#")[0]
+                if cur_url and cur_url != before_url:
+                    break
+                time.sleep(0.2)
+            # 视频页通常在打开后才发起 m3u8 请求，额外等待片刻再读取 performance 资源。
+            time.sleep(0.9)
+            _human_pause_after_nav(0.65, 1.35)
+            detail = driver.execute_script(
+                _SQUARE_ATTACHMENT_IMG_JS
+                + r"""
+const pageUrl = (location.href || '').split('#')[0];
+const isPostUrl = (h) => {
+  const x = (h || '').toLowerCase();
+  return x.includes('/square/post/') || x.includes('/square/video/') || x.includes('/square/article/');
+};
+let href = isPostUrl(pageUrl) ? pageUrl : '';
+if (!href) {
+  const as = Array.from(document.querySelectorAll('a[href*="/square/"]'));
+  for (const a of as) {
+    const h = (a.href || '').split('#')[0];
+    if (isPostUrl(h)) { href = h; break; }
+  }
+}
+const h1 = document.querySelector('h1, h2, [class*="title"], [class*="Title"]');
+const title = ((h1 && (h1.innerText || h1.textContent)) || '').replace(/\s+/g, ' ').trim();
+let publishedIso = '';
+let timeLabel = '';
+const te = document.querySelector('time[datetime]');
+if (te) {
+  publishedIso = te.getAttribute('datetime') || '';
+  timeLabel = (te.innerText || '').trim();
+}
+if (!timeLabel) {
+  const ct = document.querySelector('[class*="create-time"], .create-time');
+  if (ct) timeLabel = (ct.innerText || ct.textContent || '').replace(/\s+/g, ' ').trim();
+}
+const raw = ((document.querySelector('main') || document.body || {}).innerText || '')
+  .replace(/\s+/g, ' ')
+  .trim()
+  .slice(0, 400);
+const m3u8Set = new Set();
+try {
+  const perf = (performance && performance.getEntriesByType)
+    ? performance.getEntriesByType('resource')
+    : [];
+  for (const e of perf || []) {
+    const n = String((e && e.name) || '').trim();
+    if (!n) continue;
+    const low = n.toLowerCase();
+    if (low.includes('.m3u8') || (low.includes('/static/live-ag/') && low.includes('m3u8'))) {
+      m3u8Set.add(n.split('#')[0]);
+    }
+  }
+} catch (_) {}
+for (const m of document.querySelectorAll('video[src], source[src]')) {
+  const s = String(m.getAttribute('src') || m.src || '').trim();
+  if (!s) continue;
+  if (s.toLowerCase().includes('.m3u8')) m3u8Set.add(s.split('#')[0]);
+}
+const m3u8Urls = Array.from(m3u8Set).slice(0, 8);
+return {
+  page_url: pageUrl,
+  href,
+  title,
+  raw,
+  published_iso: publishedIso,
+  time_label: timeLabel,
+  image_urls: _bnDetailArticleImages(),
+  video_url: _bnDetailVideoUrl(),
+  m3u8_urls: m3u8Urls,
+  m3u8_url: m3u8Urls[0] || '',
+};
+""",
+            ) or {}
+            page_url = (detail.get("page_url") or "").strip()
+            href = (detail.get("href") or "").strip() or page_url or anchor_href
+            if "/square/audio/replay" in (page_url or "").lower() and card_post_href:
+                href = card_post_href
+            replay_page = "/square/audio/replay" in (page_url or "").lower()
+            if replay_page and (
+                not card_post_href or "/square/post/" not in (card_post_href or "").lower()
+            ):
+                try:
+                    title_for_match = (detail.get("title") or "").strip()
+                    ph_dom = str(
+                        driver.execute_script(
+                            _SQUARE_AUDIO_REPLAY_PAGE_RESOLVE_POST_HREF_JS,
+                            title_for_match,
+                        )
+                        or ""
+                    ).strip().split("#")[0]
+                    if ph_dom and "/square/post/" in ph_dom.lower():
+                        card_post_href = ph_dom
+                        href = card_post_href
+                except Exception:
+                    pass
+            m3u8_one = (detail.get("m3u8_url") or "").strip()
+            if replay_page and card_post_href and (m3u8_one or page_url):
+                audio_replay_patches.append(
+                    {
+                        "post_href": card_post_href,
+                        "replay_href": page_url.split("#")[0],
+                        "square_audio_replay_url": page_url.split("#")[0],
+                        "title": "",
+                        "audio_m3u8_url": m3u8_one,
+                        "author_slug": slug_l,
+                    }
+                )
+            if href:
+                detail_with_href += 1
+                if href not in detail_urls_seen:
+                    detail_urls_seen.append(href)
+            key = _profile_href_key(href) if "/square/" in href else href
+            hl = (href or "").lower()
+            replay_only_href = "/square/audio/replay" in hl and "/square/post/" not in hl
+            if (
+                href
+                and key
+                and key not in seen
+                and not _square_noise_url(href)
+                and not replay_only_href
+            ):
+                seen.add(key)
+                out.append(
+                    {
+                        "href": href,
+                        "clicked_page_url": page_url or href,
+                        "title": (detail.get("title") or "视频帖").strip(),
+                        "author": slug_l,
+                        "author_slug": slug_l,
+                        "time": (detail.get("time_label") or "").strip(),
+                        "raw": (detail.get("raw") or "").strip(),
+                        "image_urls": detail.get("image_urls") or [],
+                        "video_url": (detail.get("video_url") or "").strip(),
+                        "m3u8_urls": detail.get("m3u8_urls") or [],
+                        "m3u8_url": (detail.get("m3u8_url") or "").strip(),
+                        "audio_m3u8_url": m3u8_one,
+                        "square_audio_replay_url": (
+                            page_url.split("#")[0] if replay_page else ""
+                        ),
+                        "published_iso": (detail.get("published_iso") or "").strip(),
+                        "time_label": (detail.get("time_label") or "").strip(),
+                        "is_pinned": False,
+                    }
+                )
+                m3u8_url = (detail.get("m3u8_url") or "").strip()
+                if m3u8_url:
+                    _scrape_log(f"视频流 m3u8: {m3u8_url}")
+            cur = (driver.current_url or "").split("#")[0]
+            if switched_new_tab:
+                if VIDEO_DETAIL_TAB_VISIBLE_SEC > 0:
+                    time.sleep(min(VIDEO_DETAIL_TAB_VISIBLE_SEC, 8.0))
+                if KEEP_VIDEO_DETAIL_TAB:
+                    _scrape_log("保留视频详情新标签页（KEEP_VIDEO_DETAIL_TAB=true）")
+                else:
+                    try:
+                        driver.close()
+                    except Exception:
+                        pass
+                try:
+                    if before_handles:
+                        driver.switch_to.window(before_handles[0])
+                except Exception:
+                    pass
+                cur = (driver.current_url or "").split("#")[0]
+            if base and cur and cur != base:
+                try:
+                    driver.back()
+                    WebDriverWait(driver, 15).until(
+                        EC.presence_of_element_located((By.TAG_NAME, "body"))
+                    )
+                    _human_pause(0.7, 1.5)
+                except Exception:
+                    driver.get(base)
+                    WebDriverWait(driver, 20).until(
+                        EC.presence_of_element_located((By.TAG_NAME, "body"))
+                    )
+                    _human_pause_after_nav(1.1, 2.1)
+            else:
+                try:
+                    body = driver.find_element(By.TAG_NAME, "body")
+                    body.send_keys(Keys.ESCAPE)
+                    _human_pause(0.2, 0.5)
+                except Exception:
+                    pass
+        except Exception:
+            continue
+    summary = (
+        f"视频回扫统计：aspect-video={aspect_video_count}，其中点击 {clicked_from_aspect} 次；"
+        f"总点击成功 {click_opened} 次，拿到详情链接 {detail_with_href} 次，新增 {len(out)} 条"
+    )
+    _scrape_log(summary)
+    if detail_urls_seen:
+        joined = " | ".join(detail_urls_seen)
+        if len(joined) <= 2400:
+            _scrape_log(f"视频回扫详情链接（共 {len(detail_urls_seen)} 条）：{joined}")
+        else:
+            _scrape_log(f"视频回扫详情链接（共 {len(detail_urls_seen)} 条，分行）：")
+            for i, u in enumerate(detail_urls_seen, start=1):
+                _scrape_log(f"  [{i}] {u}")
+    elif detail_with_href:
+        _scrape_log("视频回扫详情链接：未收集到 URL 列表（与统计不一致，可忽略）")
+    else:
+        _scrape_log("视频回扫详情链接：（无）")
+    return out, audio_replay_patches
 
 
 def _collect_following_profile_links(driver, max_profiles: int = 60) -> List[Dict[str, str]]:
@@ -1097,52 +2177,77 @@ return { is_live: isLive, live_links: links.slice(0, 8) };
     )
 
 
+def _probe_single_profile_live(
+    driver,
+    profile_href: str,
+    *,
+    author_hint: str = "",
+    log_visit: bool = True,
+) -> Optional[Dict[str, str]]:
+    """打开 profile 的直播 tab（必要时回主页）检测一次；命中则返回 lives 条目。"""
+    href = (profile_href or "").strip().split("#")[0].strip()
+    if not href:
+        return None
+    name = _visible_text(author_hint or "")
+    slug = (_profile_slug(href) or "").strip()
+    if log_visit:
+        _scrape_log(f"巡检是否在直播 → {name or slug} ({href})")
+    try:
+        sep = "&" if ("?" in href) else "?"
+        driver.get(f"{href}{sep}tab=live")
+        WebDriverWait(driver, 12).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
+        _human_pause_after_nav(1.15, 2.55)
+        status = _detect_live_on_current_square_page(driver)
+        if not status.get("is_live"):
+            driver.get(href)
+            WebDriverWait(driver, 12).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+            _human_pause_after_nav(0.9, 2.15)
+            status = _detect_live_on_current_square_page(driver)
+        if status.get("is_live"):
+            links = status.get("live_links") or []
+            live_url = _pick_live_url(href, links)
+            return {
+                "author": name
+                or slug
+                or href.rsplit("/", 1)[-1].split("?")[0],
+                "profile": href.split("#")[0],
+                "live_url": live_url,
+                "raw": "profile_live_probe",
+            }
+    except Exception:
+        pass
+    return None
+
+
 def _probe_live_from_profiles(
-    driver, profiles: List[Dict[str, str]], max_lives: int = 20
+    driver,
+    profiles: List[Dict[str, str]],
+    max_lives: int = 20,
+    skip_hrefs: Optional[Set[str]] = None,
 ) -> List[Dict[str, str]]:
     """
     进入关注用户个人页逐个探测是否在直播，返回直播中的用户和链接。
+    skip_hrefs：已在「主页拉帖」同次访问内检测过的 profile，避免重复打开。
     """
     lives: List[Dict[str, str]] = []
+    skip = skip_hrefs or set()
     for p in profiles:
         if len(lives) >= max_lives:
             break
         href = (p.get("href") or "").strip()
-        name = _visible_text(p.get("name") or "")
         if not href:
             continue
-        slug = (p.get("slug") or _profile_slug(href) or "").strip()
-        _scrape_log(f"巡检是否在直播 → {name or slug} ({href})")
-        try:
-            sep = "&" if ("?" in href) else "?"
-            driver.get(f"{href}{sep}tab=live")
-            WebDriverWait(driver, 12).until(
-                EC.presence_of_element_located((By.TAG_NAME, "body"))
-            )
-            _human_pause_after_nav(1.0, 2.3)
-            status = _detect_live_on_current_square_page(driver)
-            if not status.get("is_live"):
-                driver.get(href)
-                WebDriverWait(driver, 12).until(
-                    EC.presence_of_element_located((By.TAG_NAME, "body"))
-                )
-                _human_pause_after_nav(0.75, 1.9)
-                status = _detect_live_on_current_square_page(driver)
-            if status.get("is_live"):
-                links = status.get("live_links") or []
-                live_url = _pick_live_url(href, links)
-                lives.append(
-                    {
-                        "author": name
-                        or _profile_slug(href)
-                        or href.rsplit("/", 1)[-1].split("?")[0],
-                        "profile": href.split("#")[0],
-                        "live_url": live_url,
-                        "raw": "profile_live_probe",
-                    }
-                )
-        except Exception:
+        key = _profile_href_key(href)
+        if key and key in skip:
             continue
+        name = _visible_text(p.get("name") or "")
+        hit = _probe_single_profile_live(driver, href, author_hint=name, log_visit=True)
+        if hit:
+            lives.append(hit)
     return lives
 
 
@@ -1252,6 +2357,29 @@ def _collect_section(
     }
 
 
+def _dedupe_audio_replay_patches(
+    patches: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """同一 post_href + replay URL 只保留一条，供 watchlist 与 state 合并。"""
+    seen: Set[Tuple[str, str]] = set()
+    out: List[Dict[str, Any]] = []
+    for p in patches:
+        if not isinstance(p, dict):
+            continue
+        ph = (p.get("post_href") or "").strip().split("#")[0]
+        rh = (
+            (p.get("square_audio_replay_url") or p.get("replay_href") or "")
+            .strip()
+            .split("#")[0]
+        )
+        key = (ph, rh)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(p)
+    return out
+
+
 def scrape_binance_lists(
     url: str,
     max_items: int = 120,
@@ -1297,60 +2425,75 @@ def scrape_binance_lists(
     _scrape_log("正在连接浏览器（远程调试 Chrome）…")
     driver = init_browser(use_remote_debugging=True)
     try:
-        # 关注：打开 Square Following 页面并抽取“直播/最新文章”
-        _scrape_log(f"打开关注列表（Square Following）: {watchlist_url}")
-        driver.get(watchlist_url)
-        WebDriverWait(driver, 25).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
-        _human_pause_after_nav(2.0, 4.0)
-        _scrape_log(
-            "解析 Following 信息流中的帖子"
-            + ("（仅保留重点关注用户）" if has_priority else "")
-            + "…"
-        )
-        square_data = _extract_square_following(
-            driver,
-            max_items=max_items,
-            priority_slugs=priority_slugs if has_priority else None,
-        )
-        lives_feed = square_data.get("lives") or []
-        posts = [
-            p
-            for p in (square_data.get("latest_posts") or [])
-            if isinstance(p, dict)
-            and "/square/post/" in (p.get("href") or "").lower()
-            and not _square_noise_url(p.get("href") or "")
-        ]
-        _scrape_log(f"Following 帖子解析完成（符合条件 {len(posts)} 条）")
+        # 不再打开 Following 页面：只按 PRIORITY_FOLLOW_PROFILES 逐个主页处理
+        _scrape_log("已按要求跳过 Following 页面，不打开关注列表")
+        lives_feed: List[Dict[str, str]] = []
+        posts: List[Dict[str, Any]] = []
+        watchlist_audio_replay_patches: List[Dict[str, Any]] = []
+        if has_priority:
+            follow_profiles = _merge_priority_profiles([], priority_order)
+            _scrape_log(f"将按重点关注主页逐个抓取（共 {len(follow_profiles)} 个）")
+        else:
+            follow_profiles = []
+            _scrape_log("未配置重点关注用户：本轮不采集关注文章/直播（且不打开 Following）")
 
-        _scrape_log("从 Following 页收集 profile 链接…")
-        collected = _collect_following_profile_links(
-            driver, max_profiles=max(10, max_profiles_to_probe)
-        )
-        follow_profiles = (
-            _merge_priority_profiles(collected, priority_order)
-            if has_priority
-            else collected
-        )
-
+        lives_from_profile_merge: List[Dict[str, str]] = []
+        profile_hrefs_live_done: Set[str] = set()
         if has_priority and follow_profiles:
             _scrape_log(
                 "从各重点关注用户主页深度滚动合并帖子（补齐时间线中更多篇）…"
             )
+            probe_live_with_posts = not skip_profile_live_probe
             for fp in follow_profiles:
                 ph = (fp.get("href") or "").strip()
                 slug = (fp.get("slug") or _profile_slug(ph)).lower()
                 if not ph or not slug:
                     continue
-                extra = _extract_square_profile_posts(
-                    driver, ph, slug, max_items=max_items
+                extra, live_one, prof_audio_patches = _extract_square_profile_posts(
+                    driver,
+                    ph,
+                    slug,
+                    max_items=max_items,
+                    probe_live=probe_live_with_posts,
+                    author_display_name=(fp.get("name") or "").strip(),
                 )
+                if prof_audio_patches:
+                    watchlist_audio_replay_patches.extend(prof_audio_patches)
+                if probe_live_with_posts:
+                    k = _profile_href_key(ph)
+                    if k:
+                        profile_hrefs_live_done.add(k)
+                if live_one:
+                    lives_from_profile_merge.append(live_one)
                 if extra:
                     posts = _merge_posts_by_href(posts, extra)
-            _scrape_log(f"合并 Following + 主页后帖子共 {len(posts)} 条")
+                _human_pause(0.45, 1.05)
+            _scrape_log(f"合并主页帖子后共 {len(posts)} 条")
 
         ref_now = datetime.now(timezone.utc)
+        # 视频帖经常拿不到 create-time；若完全缺时间字段，给一个兜底时间避免被 24h 过滤误杀。
+        video_time_fallback = 0
+        for p in posts:
+            if not isinstance(p, dict):
+                continue
+            has_video = bool(str(p.get("video_url") or "").strip()) or "/square/video/" in str(
+                p.get("href") or ""
+            ).lower()
+            if not has_video:
+                continue
+            has_any_time = bool(
+                str(p.get("published_iso") or "").strip()
+                or str(p.get("time_label") or "").strip()
+                or str(p.get("time") or "").strip()
+                or str(p.get("published_at") or "").strip()
+            )
+            if has_any_time:
+                continue
+            p["published_iso"] = ref_now.isoformat()
+            p["time_label"] = "刚刚"
+            video_time_fallback += 1
+        if video_time_fallback:
+            _scrape_log(f"视频帖时间兜底已应用 {video_time_fallback} 条")
         for p in posts:
             if isinstance(p, dict):
                 enrich_post_published_fields(p, ref_now)
@@ -1362,7 +2505,9 @@ def scrape_binance_lists(
         )
 
         if not skip_square_images and posts and square_images_dir:
-            _enrich_post_images_from_detail_pages(driver, posts)
+            _enrich_post_images_from_detail_pages(
+                driver, posts, max_pages=max_items
+            )
             _scrape_log("下载帖子配图到本地…")
             _download_square_post_images(driver, posts, square_images_dir)
 
@@ -1375,14 +2520,23 @@ def scrape_binance_lists(
                 f"开始逐个 profile 巡检是否在直播（共 {len(follow_profiles)} 个）…"
             )
             lives_probed = _probe_live_from_profiles(
-                driver, follow_profiles, max_lives=max_items
+                driver,
+                follow_profiles,
+                max_lives=max_items,
+                skip_hrefs=profile_hrefs_live_done,
             )
             _scrape_log(f"直播巡检结束（命中 {len(lives_probed)} 条）")
-        # 合并：以 profile 探测为准，再补上 Feed 里命中的直播链（按 href 去重）
-        lives = list(lives_probed)
-        seen_hrefs = {
-            (x.get("live_url") or x.get("href") or "").strip() for x in lives
-        }
+        # 合并：主页拉帖时顺带命中的直播 + 其余 profile 巡检 + Feed（按 live_url 去重）
+        lives = []
+        seen_live_urls: Set[str] = set()
+        for x in lives_from_profile_merge + lives_probed:
+            lu = (x.get("live_url") or x.get("href") or "").strip()
+            if lu and lu in seen_live_urls:
+                continue
+            if lu:
+                seen_live_urls.add(lu)
+            lives.append(x)
+        seen_hrefs = set(seen_live_urls)
         for it in lives_feed:
             h = (it.get("href") or "").strip()
             if h and h not in seen_hrefs:
@@ -1411,6 +2565,9 @@ def scrape_binance_lists(
             "follow_profiles_sample": follow_profiles[:15],
             "lives": lives,
             "latest_posts": posts,
+            "audio_replay_patches": _dedupe_audio_replay_patches(
+                watchlist_audio_replay_patches
+            ),
         }
 
         data: Dict[str, object] = {
@@ -1649,7 +2806,7 @@ def main():
     parser.add_argument(
         "--skip-posts-state",
         action="store_true",
-        help="不合并 24 小时帖子状态与 Gemini（写入的 JSON 仅为本次抓取快照）",
+        help="不合并 48 小时帖子状态与 Gemini（写入的 JSON 仅为本次抓取快照）",
     )
     parser.add_argument(
         "--posts-state",

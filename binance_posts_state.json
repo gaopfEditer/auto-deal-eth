@@ -2,26 +2,24 @@
   "version": 1,
   "posts": {
     "yanchibit": {
-      "https://www.binance.com/zh-CN/square/post/315657989023777": {
-        "href": "https://www.binance.com/zh-CN/square/post/315657989023777",
-        "published_at": "2026-04-23 23:37:44 北京时间",
+      "https://www.binance.com/zh-CN/square/post/316453784096066": {
+        "href": "https://www.binance.com/zh-CN/square/post/316453784096066",
+        "published_at": "2026-04-26 10:53:55 北京时间",
         "published_iso": "",
-        "time_label": "19小时",
+        "time_label": "13小时",
         "is_pinned": false,
-        "title": "开搞，进入微醺状态",
-        "raw": "开搞，进入微醺状态",
+        "title": "因爱生恨是很正常的，或因为嫉妒而恨的人… 多少人想成为我而不能。 又见不得我好…即不甘心别人，自身又无能的，结果只能成为蛆，一大堆~ #BTC",
+        "raw": "因爱生恨是很正常的，或因为嫉妒而恨的人… 多少人想成为我而不能。 又见不得我好…即不甘心别人，自身又无能的，结果只能成为蛆，一大堆~ #BTC",
         "author": "yanchibit",
         "author_slug": "yanchibit",
-        "time": "19小时",
+        "time": "13小时",
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzM0MGZiMWU3MDE3OTQwYzBiZmIwNjNjZTMzZTQ1NjY0LmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2MwZDg1YTk5MzZiMjQ2YWNhZjU2YjBhZmUwNWE0YjlkLnBuZw==&level=md"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzI1NDlmZDM0OTcxYzQ2MzViMjE4MjMyNmY0M2JmODAxLnBuZw==&level=lg"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
         "saved_image_paths": [
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315657989023777\\img_0.jpg",
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315657989023777\\img_1.png"
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316453784096066/img_0.png"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
@@ -29,131 +27,26 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": false,
         "signal_star": 0,
-        "signal_content": null,
+        "signal_content": "该帖子主要表达了作者的情绪和对外界评价的回应，并未提供任何关于比特币的技术分析或交易建议。帖文中没有提及任何支撑位、阻力位、入场、止盈或止损点，因此不构成交易信号。",
         "signal_raw_data": {
-          "text": "The user has provided a Binance post with the title \"开搞，进入微醺状态\" and the text \"开搞，进入微醺状态\". They are asking for an analysis of this post and an accompanying K-line chart (which is not provided) to identify potential trading signals.\n\nThe analysis should follow these steps:\n1.  **Technical Verification:** Correlate the text with the K-line chart, looking for matching support/resistance levels, moving averages, MACD, RSI, or chart patterns.\n2.  **Signal Differentiation:** Categorize the signal based on its clarity and completeness:\n    *   **Emotional Post:** Subjective words like \"bullish\" or \"to the moon\" without logical backing.\n    *   **Low Strength Signal:** Trend prediction without specific price targets.\n    *   **High Strength Signal:** Clear entry, take-profit, and stop-loss points.\n3.  **Output Format:** A strict JSON structure: `{\"isSign\": boolean, \"content\": \"brief analysis\", \"star\": number}`.\n4.  **Star Rating:** 0 (no signal) to 5 (complete strategy).\n\nBased on the provided text, there is no K-line chart or any technical information. The post \"开搞，进入微醺状态\" (roughly translates to \"Let's start, entering a tipsy state\") is purely emotional and lacks any objective analysis, price targets, or trading strategy.\n\nTherefore, the signal strength is 1, as it expresses a positive sentiment but without any supporting evidence or actionable trading information.\n\n"
+          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"该帖子主要表达了作者的情绪和对外界评价的回应，并未提供任何关于比特币的技术分析或交易建议。帖文中没有提及任何支撑位、阻力位、入场、止盈或止损点，因此不构成交易信号。\",\n  \"star\": 0\n}\n```"
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:05:23 北京时间",
-        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315657989023777\\img_0.jpg",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/315931934761746": {
-        "href": "https://www.binance.com/zh-CN/square/post/315931934761746",
-        "published_at": "2026-04-24 17:37:44 北京时间",
-        "published_iso": "",
-        "time_label": "1小时",
-        "is_pinned": false,
-        "title": "#USD1 利息又到账了，每周啥也不干多赚3万块~ wlfi上次提案之后，我要格局一下利息了，万一6%年化变成10%呢 熊市就该稳稳的幸福🥰",
-        "raw": "#USD1 利息又到账了，每周啥也不干多赚3万块~ wlfi上次提案之后，我要格局一下利息了，万一6%年化变成10%呢 熊市就该稳稳的幸福🥰",
-        "author": "yanchibit",
-        "author_slug": "yanchibit",
-        "time": "1小时",
-        "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2QxZjk0ZGNmMzBjNDRkZmRiZmE0NmQyYjBjMTg5NTFlLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "saved_image_paths": [
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315931934761746\\img_0.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": false,
-        "signal_star": 0,
-        "signal_content": "该帖子主要讨论了 USD1 的利息收入和 wlfi 的提案，表达了在熊市中寻求稳定收益的意愿，但未提供任何关于加密货币交易的具体技术分析或交易策略。",
-        "signal_raw_data": {
-          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"该帖子主要讨论了 USD1 的利息收入和 wlfi 的提案，表达了在熊市中寻求稳定收益的意愿，但未提供任何关于加密货币交易的具体技术分析或交易策略。\",\n  \"star\": 0\n}\n```"
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 18:37:59 北京时间",
-        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315931934761746\\img_0.jpg",
-        "signal_analyzed_ok": true
+        "signal_analyzed_at": "2026-04-26 19:50:43 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316453784096066/img_0.png",
+        "signal_analyzed_ok": true,
+        "square_audio_replay_url": ""
       }
     },
     "aleng888888": {
-      "https://www.binance.com/zh-CN/square/post/315824701359649": {
-        "href": "https://www.binance.com/zh-CN/square/post/315824701359649",
-        "published_at": "2026-04-24 10:37:44 北京时间",
-        "published_iso": "",
-        "time_label": "8小时",
-        "is_pinned": false,
-        "title": "$ETH 在这个市场，做的十次交易，可能有九次都是没达到预期的。要么是止损，要么是保本，要么是没达到最终目标位。但我们要做到的是拿住成功的那一次，这就是交易最反人性的地方，磨人心智且需要你锲而不舍 {future}(ETHUSDT)",
-        "raw": "$ETH 在这个市场，做的十次交易，可能有九次都是没达到预期的。要么是止损，要么是保本，要么是没达到最终目标位。但我们要做到的是拿住成功的那一次，这就是交易最反人性的地方，磨人心智且需要你锲而不舍 {future}(ETHUSDT)",
-        "author": "aleng888888",
-        "author_slug": "aleng888888",
-        "time": "8小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/3a8c9fe6-2a76-4ace-aa07-415d994de6f0.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzVjYTU1OTcwNGM1ZDQ0ZTBiODRjMDdiNTgwNGRmMWYyLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "saved_image_paths": [
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315824701359649\\img_0.png",
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315824701359649\\img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": false,
-        "signal_star": 0,
-        "signal_content": "该帖子主要表达了交易中的不确定性和心理挑战，强调了坚持的重要性，但没有提供具体的交易信号、入场点、止盈止损位或明确的技术分析。",
-        "signal_raw_data": {
-          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"该帖子主要表达了交易中的不确定性和心理挑战，强调了坚持的重要性，但没有提供具体的交易信号、入场点、止盈止损位或明确的技术分析。\",\n  \"star\": 0\n}\n```"
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:13:12 北京时间",
-        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315824701359649\\img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/315766372004274": {
-        "href": "https://www.binance.com/zh-CN/square/post/315766372004274",
-        "published_at": "2026-04-24 06:37:44 北京时间",
-        "published_iso": "",
-        "time_label": "12小时",
-        "is_pinned": false,
-        "title": "beyond 是我最喜欢的一个乐队，在我考研时期最低迷的时候，他陪着我走过了一整个夏天。在 1986 年之前 beyond 是一个纯摇滚的乐队，不被世人所认可。后来再写出这首歌之后转型，迎合了世人的眼光，再被世界所认识，也才被我认识。我自己也抱有对交易与币圈的幻想，以为自己就是那个拯救所有散户的救星。可惜事与愿违，不温不火是我的常态，就像以前的 beyond 一样。我也深知在这个市场，需要做单需要交易量才有流量。扛单有流量，频繁交易有流量。用户进来做到单就会留下，而不是傻傻的陪我在等待点位的到来。给我的铁粉们留下一段话，可能我会转型，变成你们不喜欢的样子，但是是世人喜欢的样子。感谢各位一直以来的陪伴，祝大家都在这个市场能发到财💪",
-        "raw": "beyond 是我最喜欢的一个乐队，在我考研时期最低迷的时候，他陪着我走过了一整个夏天。在 1986 年之前 beyond 是一个纯摇滚的乐队，不被世人所认可。后来再写出这首歌之后转型，迎合了世人的眼光，再被世界所认识，也才被我认识。我自己也抱有对交易与币圈的幻想，以为自己就是那个拯救所有散户的救星。可惜事与愿违，不温不火是我的常态，就像以前的 beyond 一样。我也深知在这个市场，需要做单需要交易量才有流量。扛单有流量，频繁交易有流量。用户进来做到单就会留下，而不是傻傻的陪我在等待点位的到来。给我的铁粉们留下一段话，可能我会转型，变成你们不喜欢的样子，但是是世人喜欢的样子。感谢各位一直以来的陪伴，祝大家都在这个市场能发到财💪",
-        "author": "aleng888888",
-        "author_slug": "aleng888888",
-        "time": "12小时",
-        "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzY3NzhjMmFmMzk1MTRiZjliZjliMmYzM2JiOTEwZWI4LmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzhhZjI1OGM2M2JjZjQ4NDZhZWY1MTk2NzdlYWUzMjA1LmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "saved_image_paths": [
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315766372004274\\img_0.jpg",
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315766372004274\\img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": false,
-        "signal_star": 0,
-        "signal_content": "该帖子主要分享了作者对Beyond乐队的个人情感和对交易市场的思考，以及可能转型交易策略的意愿，但未提供任何关于加密货币的技术分析、交易信号或明确的交易策略。因此，无法从中提取有效的交易信号。",
-        "signal_raw_data": {
-          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"该帖子主要分享了作者对Beyond乐队的个人情感和对交易市场的思考，以及可能转型交易策略的意愿，但未提供任何关于加密货币的技术分析、交易信号或明确的交易策略。因此，无法从中提取有效的交易信号。\",\n  \"star\": 0\n}\n```"
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:13:13 北京时间",
-        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315766372004274\\img_0.jpg",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/315723908305282": {
-        "href": "https://www.binance.com/zh-CN/square/post/315723908305282",
-        "published_at": "2026-04-24 03:37:44 北京时间",
+      "https://www.binance.com/zh-CN/square/post/316495902089714": {
+        "href": "https://www.binance.com/zh-CN/square/post/316495902089714",
+        "published_at": "2026-04-26 08:53:55 北京时间",
         "published_iso": "",
         "time_label": "15小时",
         "is_pinned": false,
-        "title": "看 k 和做单是两码事，做单和带单是两码事，带单和直播又是两码事。兄弟们我黑化一段时间尝试一下，看看效果，这段时间不要在我直播间梭哈了",
-        "raw": "看 k 和做单是两码事，做单和带单是两码事，带单和直播又是两码事。兄弟们我黑化一段时间尝试一下，看看效果，这段时间不要在我直播间梭哈了",
+        "title": "$HYPER 今天，你也追 hyper 了吗？",
+        "raw": "$HYPER 今天，你也追 hyper 了吗？",
         "author": "aleng888888",
         "author_slug": "aleng888888",
         "time": "15小时",
@@ -167,37 +60,34 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": false,
         "signal_star": 0,
-        "signal_content": "帖子内容仅为交易者个人心态调整和对交易相关行为的思考，未提供任何技术分析或交易策略，不构成交易信号。",
+        "signal_content": "该帖子仅包含对 $HYPER 的追问，没有提供任何技术分析、价格预测或交易建议。内容缺乏具体信息，无法判断是否存在交易信号。",
         "signal_raw_data": {
-          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"帖子内容仅为交易者个人心态调整和对交易相关行为的思考，未提供任何技术分析或交易策略，不构成交易信号。\",\n  \"star\": 0\n}\n```"
+          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"该帖子仅包含对 $HYPER 的追问，没有提供任何技术分析、价格预测或交易建议。内容缺乏具体信息，无法判断是否存在交易信号。\",\n  \"star\": 0\n}\n```"
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:13:15 北京时间",
+        "signal_analyzed_at": "2026-04-26 19:50:46 北京时间",
         "signal_image_used": "",
-        "signal_analyzed_ok": true
+        "signal_analyzed_ok": true,
+        "square_audio_replay_url": ""
       },
-      "https://www.binance.com/zh-CN/square/post/315685904268562": {
-        "href": "https://www.binance.com/zh-CN/square/post/315685904268562",
-        "published_at": "2026-04-24 01:37:44 北京时间",
+      "https://www.binance.com/zh-CN/square/post/316433833681553": {
+        "href": "https://www.binance.com/zh-CN/square/post/316433833681553",
+        "published_at": "2026-04-26 03:53:55 北京时间",
         "published_iso": "",
-        "time_label": "17小时",
+        "time_label": "20小时",
         "is_pinned": false,
-        "title": "$BTC 今日直播分赃结束，恭喜中奖的关注，祝我们冷家军再创新高！ {future}(BTCUSDT)",
-        "raw": "$BTC 今日直播分赃结束，恭喜中奖的关注，祝我们冷家军再创新高！ {future}(BTCUSDT)",
+        "title": "忙了一整周，今天终于去放松了一下。",
+        "raw": "忙了一整周，今天终于去放松了一下。",
         "author": "aleng888888",
         "author_slug": "aleng888888",
-        "time": "17小时",
+        "time": "20小时",
         "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/87496d50-2408-43e1-ad4c-78b47b448a6a.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzhkMmU5MTUwMDNhMzRmY2Q4YTgyMDllMDI1YmVjZDc2LmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Y1YmU4ZDUwNjM2NTQ2NWZiMTQxMTE0Zjc4YmI2OTFmLmpwZw==&level=md"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2ZmNGNiOWFlNDAwYTQxNTFiODcyOWNmNGE4NGNjOTkyLmpwZw==&level=lg"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
         "saved_image_paths": [
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315685904268562\\img_0.png",
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315685904268562\\img_1.jpg",
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315685904268562\\img_2.jpg"
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316433833681553/img_0.jpg"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
@@ -205,69 +95,36 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": false,
         "signal_star": 0,
-        "signal_content": "该帖子仅包含情绪化的表达，如“恭喜中奖的关注，祝我们冷家军再创新高！”，没有提供任何技术分析、价格点位或交易策略，因此不构成交易信号。",
+        "signal_content": null,
         "signal_raw_data": {
-          "text": "```json\n{\n\"isSign\": false,\n\"content\": \"该帖子仅包含情绪化的表达，如“恭喜中奖的关注，祝我们冷家军再创新高！”，没有提供任何技术分析、价格点位或交易策略，因此不构成交易信号。\",\n\"star\": 0\n}\n```"
+          "text": ""
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:13:18 北京时间",
-        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315685904268562\\img_0.png",
-        "signal_analyzed_ok": true
+        "signal_analyzed_at": "2026-04-26 19:50:48 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316433833681553/img_0.jpg",
+        "signal_analyzed_ok": true,
+        "square_audio_replay_url": ""
       },
-      "https://www.binance.com/zh-CN/square/post/315632228568545": {
-        "href": "https://www.binance.com/zh-CN/square/post/315632228568545",
-        "published_at": "2026-04-23 21:37:44 北京时间",
+      "https://www.binance.com/zh-CN/square/post/316083104083521": {
+        "href": "https://www.binance.com/zh-CN/square/post/316083104083521",
+        "published_at": "2026-04-25 12:00:00 北京时间",
         "published_iso": "",
-        "time_label": "21小时",
+        "time_label": "4月25日",
         "is_pinned": false,
-        "title": "比特币还会冲刺8w！即将转入空头趋势。如何把握这次暴富机会？#BTC $BTC 点击此处购买",
-        "raw": "比特币还会冲刺8w！即将转入空头趋势。如何把握这次暴富机会？#BTC $BTC 点击此处购买",
+        "title": "$ETH 这吊行情走的还不如我去打麻将赚的多 {future}(ETHUSDT)",
+        "raw": "$ETH 这吊行情走的还不如我去打麻将赚的多 {future}(ETHUSDT)",
         "author": "aleng888888",
         "author_slug": "aleng888888",
-        "time": "21小时",
-        "image_urls": [],
-        "video_url": "https://public.bnbstatic.com/video/pgc/ArticleContent/748e1013-5085-4063-80be-6e5db3fa8c31.mp4",
-        "audio_m3u8_url": "",
-        "saved_image_paths": [],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": false,
-        "signal_star": 0,
-        "signal_content": "用户提供的帖子包含“比特币还会冲刺8w！即将转入空头趋势。”的说法，但“8w”和“空头趋势”之间存在矛盾，且未提供任何具体的技术分析、入场位、止盈位或止损位，因此无法形成明确的交易信号。",
-        "signal_raw_data": {
-          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"用户提供的帖子包含“比特币还会冲刺8w！即将转入空头趋势。”的说法，但“8w”和“空头趋势”之间存在矛盾，且未提供任何具体的技术分析、入场位、止盈位或止损位，因此无法形成明确的交易信号。\",\n  \"star\": 0\n}\n```"
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:13:21 北京时间",
-        "signal_image_used": "",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/315915185540593": {
-        "href": "https://www.binance.com/zh-CN/square/post/315915185540593",
-        "published_at": "2026-04-24 16:37:44 北京时间",
-        "published_iso": "",
-        "time_label": "2小时",
-        "is_pinned": false,
-        "title": "孙割也给割了！下手的人是川普！4500万美元打水漂了孙宇晨，江湖人称\"孙割\"，割韭菜的花样比谁都多，终于遇到比他更狠的人了，川普。#孙宇晨被割 4500万美元砸进去，代币被冻、投票权被拿走、还威胁要把他的币全烧掉。 回顾孙割的割韭菜名场面 花620万美元和巴菲特吃饭炒作，吃完饭没多久TRX就开始跌，韭菜们直呼好家伙特朗普$TRUMP 币晚宴，孙割作为最大持仓者之一出席，花了将近2000万美元囤TRUMP币拿到晚宴门票。结果呢？有人爆料他在晚宴期间跑去厕所的时候，关联钱包就在抛售。晚宴一结束TRUMP币直接开跌（不是🐶🐶）各种站台、各种喊单、各种割，TRX、BTT、SUN、JST……割了一茬又一茬 就这么一个人，在币圈横行霸道这么多年，这次终于被割了。 4500万美元入局$WLFI 2024年底到2025年1月，孙宇晨一共砸了4500万美元，入股了特朗普家族的加密货币项目——World Liberty Financial（WLFI）。 以**$0.015的价格，买入了30亿枚WLFI代币**。 同时，孙宇晨顺势成为WLFI的顾问。看起来是双赢：特朗普家族拿到了真金白银，孙宇晨拿到了\"美国总统家族合伙人\"的光环。 牛市巅峰，账面浮盈2亿美元 2025年9月，WLFI代币在上线交易后迎来牛市巅峰。 孙宇晨持有的30亿枚代币，账面浮盈一度达到2亿美元。 4500万变2亿，翻了4倍多。 孙宇晨想在最高点套现。 然后，川普家族直接冻结了他所有的WLFI代币。 智能合约黑名单，一键冻结 World",
-        "raw": "孙割也给割了！下手的人是川普！4500万美元打水漂了孙宇晨，江湖人称\"孙割\"，割韭菜的花样比谁都多，终于遇到比他更狠的人了，川普。#孙宇晨被割 4500万美元砸进去，代币被冻、投票权被拿走、还威胁要把他的币全烧掉。 回顾孙割的割韭菜名场面 花620万美元和巴菲特吃饭炒作，吃完饭没多久TRX就开始跌，韭菜们直呼好家伙特朗普$TRUMP 币晚宴，孙割作为最大持仓者之一出席，花了将近2000万美元囤TRUMP币拿到晚宴门票。结果呢？有人爆料他在晚宴期间跑去厕所的时候，关联钱包就在抛售。晚宴一结束TRUMP币直接开跌（不是🐶🐶）各种站台、各种喊单、各种割，TRX、BTT、SUN、JST……割了一茬又一茬 就这么一个人，在币圈横行霸道这么多年，这次终于被割了。 4500万美元入局$WLFI 2024年底到2025年1月，孙宇晨一共砸了4500万美元，入股了特朗普家族的加密货币项目——World Liberty Financial（WLFI）。 以**$0.015的价格，买入了30亿枚WLFI代币**。 同时，孙宇晨顺势成为WLFI的顾问。看起来是双赢：特朗普家族拿到了真金白银，孙宇晨拿到了\"美国总统家族合伙人\"的光环。 牛市巅峰，账面浮盈2亿美元 2025年9月，WLFI代币在上线交易后迎来牛市巅峰。 孙宇晨持有的30亿枚代币，账面浮盈一度达到2亿美元。 4500万变2亿，翻了4倍多。 孙宇晨想在最高点套现。 然后，川普家族直接冻结了他所有的WLFI代币。 智能合约黑名单，一键冻结 World Liberty Financial官方通过智能合约里的黑名单功能，直接把孙宇晨的钱包地址拉黑了。 31亿枚WLFI代币，一夜之间动不了了。 不仅如此： 投票权被剥夺——孙宇晨作为最大股东，无法参与公司治理投票，无法阻止对他不利的议案威胁销毁代币——WLFI团队直接提出治理方案，要销毁10%的顾问代币（就是孙宇晨那部分），并且开启投票：不同意？那就无限期锁定你的代币代币持续暴跌——WLFI从最高点跌了77%，目前在$0.079左右 就算跌了77%，孙宇晨理论上还有5.2倍的浮盈。但问题是，看得见摸不着，一枚都卖不掉，甚至有可能归零。 WLFI的骚操作：拿投资者的币去借钱 事情还没完。 WLFI团队直接把代币拿去抵押，在DeFi平台上借出了7500万美元的稳定币。 如果WLFI代币价格继续下跌，就会触发清算，项目的流动性直接枯竭。到时候别说孙宇晨了，所有持币人都得陪葬。 所谓的\"世界自由金融\"，说白了就是特朗普家族一个人说了算。 WLFI的回应：法庭见 面对孙宇晨的指控，WLFI官方在X上直接开怼： \"还有人相信孙宇晨吗？孙宇晨最拿手的就是装受害者，编造毫无根据的指控来掩盖自己的不端行为。同样的套路，换了个目标而已。WLFI不是第一个。我们有合同，我们有证据，我们有真相。法庭见，伙计。\" 正式起诉：加州联邦法院 2026年4月22日，孙宇晨正式在加州联邦法院起诉World Liberty Financial。 这个消息直接上了全球主流媒体头条：CBS、Forbes、纽约时报、卫报、NBC、BBC…… 孙宇晨在起诉声明里说了一段很有意思的话： \"我一直是特朗普总统的支持者，这场诉讼不会改变我的立场。但World Liberty团队中的某些人，在以违背特朗普总统价值观的方式运营这个项目。我不相信特朗普总统如果知道这些事情会容忍它们。\" 翻译成人话：我不是在告川普，我是在告川普手下的人。 但大家心里都清楚，WLFI就是特朗普家族的项目，川普的儿子们都在里面。 孙宇晨现在想要什么？ 很简单：在WLFI彻底崩掉之前，拿到自己的现金。 代币被冻着，价格在跌，团队还在抵押借钱，清算风险越来越大。 如果不通过法律手段强制要求解冻和赎回，孙宇晨那4500万美元大概率就是打水漂了。",
-        "author": "aleng888888",
-        "author_slug": "aleng888888",
-        "time": "2小时",
+        "time": "4月25日",
         "image_urls": [
-          "https://public.bnbstatic.com/image/pgc/202604/028404c862f693bb3bd39c7b85715c2d.png",
-          "https://public.bnbstatic.com/image/pgc/202604/84b8c6f6b5eb939832be88cf45bac2cb.png",
-          "https://public.bnbstatic.com/image/pgc/202604/3d7029d2428e040e6c89ffd1ac2313b9.png",
-          "https://public.bnbstatic.com/image/pgc/202604/27d771c7f78a81da5b8f43ce66334f97.png"
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/3a8c9fe6-2a76-4ace-aa07-415d994de6f0.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2MxMWMwYjZhZjBhYTQ2YjU5MTJjZmVkMzc3ZGEyM2Y4LmpwZw==&level=lg"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
         "saved_image_paths": [
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315915185540593\\img_0.png",
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315915185540593\\img_1.png",
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315915185540593\\img_2.png",
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315915185540593\\img_3.png"
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316083104083521/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316083104083521/img_1.jpg"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
@@ -275,65 +132,182 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": false,
         "signal_star": 0,
-        "signal_content": "该帖子主要讲述了孙宇晨在特朗普家族加密货币项目 WLFI 上的投资经历，涉及被冻结代币、法律诉讼等事件。文中虽然提到了具体的投资价格 ($0.015) 和数量 (30亿枚 WLFI 代币)，以及项目的高点浮盈（2亿美元），但整体内容偏向于事件复述和人物评论，并未提供任何关于该币种的未来价格走势分析或交易建议，不构成交易信号。",
+        "signal_content": "帖子中仅表达了对ETH行情的不满，并无任何技术分析或交易建议，因此不构成交易信号。",
         "signal_raw_data": {
-          "text": "```json\n{\n\"isSign\": false,\n\"content\": \"该帖子主要讲述了孙宇晨在特朗普家族加密货币项目 WLFI 上的投资经历，涉及被冻结代币、法律诉讼等事件。文中虽然提到了具体的投资价格 ($0.015) 和数量 (30亿枚 WLFI 代币)，以及项目的高点浮盈（2亿美元），但整体内容偏向于事件复述和人物评论，并未提供任何关于该币种的未来价格走势分析或交易建议，不构成交易信号。\",\n\"star\": 0\n}\n```"
+          "text": "{\"isSign\": false, \"content\": \"帖子中仅表达了对ETH行情的不满，并无任何技术分析或交易建议，因此不构成交易信号。\", \"star\": 0}\n"
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 17:31:27 北京时间",
-        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315915185540593\\img_0.png",
+        "signal_analyzed_at": "2026-04-26 19:50:50 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316083104083521/img_0.png",
+        "signal_analyzed_ok": true,
+        "square_audio_replay_url": ""
+      },
+      "https://www.binance.com/zh-CN/square/post/316673156658257": {
+        "href": "https://www.binance.com/zh-CN/square/post/316673156658257",
+        "published_at": "2026-04-26 20:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "3小时",
+        "is_pinned": false,
+        "title": "本周佣金发放完毕！各位家人们请查收！ ⚠️有任何关于返佣或者跟单的问题都可以在币安找阿冷私聊！ ①点击币安APP-首页左上角“三个横线” ②点击右上角扫一扫 ③扫描二维码图1添加好友 ⚠️关于返佣： 返佣永久有效，如果需要补返，或者存在疑议的话可以联系助理 。 如果你还没有返手续费的话，可以用阿冷的币安邀请码注册币安，阿冷会为你返还 20%+20%的手续费。 另外有暴富红包🧧（5% 的比例），专属周边发放，简介联系助理办理即可 ⚠️阿冷专属邀请链接 华语区：https://www.bsmkweb.cc/zh-CN/join?ref=LENG888 海外：https://www.binance.com/zh-CN/join?ref=LENG888 专属邀请码：LENG888",
+        "raw": "本周佣金发放完毕！各位家人们请查收！ ⚠️有任何关于返佣或者跟单的问题都可以在币安找阿冷私聊！ ①点击币安APP-首页左上角“三个横线” ②点击右上角扫一扫 ③扫描二维码图1添加好友 ⚠️关于返佣： 返佣永久有效，如果需要补返，或者存在疑议的话可以联系助理 。 如果你还没有返手续费的话，可以用阿冷的币安邀请码注册币安，阿冷会为你返还 20%+20%的手续费。 另外有暴富红包🧧（5% 的比例），专属周边发放，简介联系助理办理即可 ⚠️阿冷专属邀请链接 华语区：https://www.bsmkweb.cc/zh-CN/join?ref=LENG888 海外：https://www.binance.com/zh-CN/join?ref=LENG888 专属邀请码：LENG888",
+        "author": "aleng888888",
+        "author_slug": "aleng888888",
+        "time": "3小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2VlMTJhNjYwY2VhNDQ4Y2U4MjNmMmZmMDFlNzhmZDBiLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Y3NTE2ZGQ5YjY5YjQwNzc5NGVkOTg2ZTJlNDBkZjE4LmpwZw==&level=md"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316673156658257/img_0.jpg",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316673156658257/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": false,
+        "signal_star": 0,
+        "signal_content": "该帖子主要内容为邀请用户通过提供的链接注册币安账户以获取返佣和红包，并提供了联系方式，不包含任何交易信号或技术分析。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"该帖子主要内容为邀请用户通过提供的链接注册币安账户以获取返佣和红包，并提供了联系方式，不包含任何交易信号或技术分析。\",\n  \"star\": 0\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:55:59 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316673156658257/img_0.jpg",
         "signal_analyzed_ok": true
       }
     },
     "sanmageshuai": {
-      "https://www.binance.com/zh-CN/square/post/315861881837282": {
-        "href": "https://www.binance.com/zh-CN/square/post/315861881837282",
-        "published_at": "2026-04-24 13:37:44 北京时间",
+      "https://www.binance.com/zh-CN/square/post/316560422416481": {
+        "href": "https://www.binance.com/zh-CN/square/post/316560422416481",
+        "published_at": "2026-04-26 12:53:55 北京时间",
         "published_iso": "",
-        "time_label": "5小时",
+        "time_label": "11小时",
         "is_pinned": false,
-        "title": "不会今天就要瀑布吧，前天预判要跌结果以太坊从2400点位跌破2300，而且白天也没有要涨的迹象。 但是比特币78000也没下去啊，76000这么硬的吗，能不能继续回调一波。#BTC",
-        "raw": "不会今天就要瀑布吧，前天预判要跌结果以太坊从2400点位跌破2300，而且白天也没有要涨的迹象。 但是比特币78000也没下去啊，76000这么硬的吗，能不能继续回调一波。#BTC",
+        "title": "卧槽这两天我还在为退飞机票票3万 u损失，惋惜，后悔，内疚。但是今天睡醒看到这个晚宴出现了枪击案心情好多了，为自己没去的选择正确而欣慰。 三马哥还是很庆幸的，因为这个特朗普给我发了邀请函之后吧，我还特意坐飞机约了武汉美领事的这个面签，然后直接30秒就给我过了，美国的机票我给退了，损失3万美金，不过现在想想捡回来一条命还可以。#BTC",
+        "raw": "卧槽这两天我还在为退飞机票票3万 u损失，惋惜，后悔，内疚。但是今天睡醒看到这个晚宴出现了枪击案心情好多了，为自己没去的选择正确而欣慰。 三马哥还是很庆幸的，因为这个特朗普给我发了邀请函之后吧，我还特意坐飞机约了武汉美领事的这个面签，然后直接30秒就给我过了，美国的机票我给退了，损失3万美金，不过现在想想捡回来一条命还可以。#BTC",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "time": "5小时",
-        "image_urls": [],
+        "time": "11小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzUzNWViMWE3MjU4MWFkZjAzYmVkMTRhZGQ3ZTUyZjhkLnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2UzODRlYTNiZDY5ZTQ0NDZhNjBlYzczOTgwMTI5ZDY2LnBuZw==&level=md"
+        ],
         "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316560422416481/img_0.jpg",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316560422416481/img_1.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": false,
+        "signal_star": 0,
+        "signal_content": "用户发布的帖子主要内容是关于个人经历的分享，表达了对因未前往某地而避免危险事件的庆幸，以及之前因退机票造成的经济损失。帖子中提到了BTC，但没有提供任何与加密货币交易相关的技术分析、价格预测或交易策略。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"用户发布的帖子主要内容是关于个人经历的分享，表达了对因未前往某地而避免危险事件的庆幸，以及之前因退机票造成的经济损失。帖子中提到了BTC，但没有提供任何与加密货币交易相关的技术分析、价格预测或交易策略。\",\n  \"star\": 0\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:50:52 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316560422416481/img_0.jpg",
+        "signal_analyzed_ok": true,
+        "square_audio_replay_url": ""
+      },
+      "https://www.binance.com/zh-CN/square/post/316229605903713": {
+        "href": "https://www.binance.com/zh-CN/square/post/316229605903713",
+        "published_at": "2026-04-25 12:00:00 北京时间",
+        "published_iso": "",
+        "time_label": "4月25日",
+        "is_pinned": false,
+        "title": "2388就是个万年点位啊！2个月前过年的时候我们一直分析2388做空，3和4月更是频繁出了2388无脑喂饭策略，前两天你睡醒ETH在2388加仓空好多伙伴居然汇报又赚钱了。👉[提前喂饭吃肉2388多少次了](https://app.binance.com/uni-qr/cpos/312121619065937?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink) 这个2388只要一到ETH连1个晚上都站不住，硬不了一点。#ETH",
+        "raw": "2388就是个万年点位啊！2个月前过年的时候我们一直分析2388做空，3和4月更是频繁出了2388无脑喂饭策略，前两天你睡醒ETH在2388加仓空好多伙伴居然汇报又赚钱了。👉[提前喂饭吃肉2388多少次了](https://app.binance.com/uni-qr/cpos/312121619065937?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink) 这个2388只要一到ETH连1个晚上都站不住，硬不了一点。#ETH",
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "time": "4月25日",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzI3ZDcyNzQzZGZjOTRiNDA5MWZmMzEzNTc0M2NhZDY4LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2JlY2NlYjA0MWZjODQ0ZDFiN2U2MTM4NGUzNzRiNGQyLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzJhMzIyNTdkOTNjZTRhZDZiNDE1MDczYjg5MzBmNWYzLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzc5N2I0Mzg0NDJhYjQ1OTI5ZmRlZTZhYzVjZmUzOTFkLmpwZw==&level=md"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316229605903713/img_0.jpg",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316229605903713/img_1.jpg",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316229605903713/img_2.jpg",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316229605903713/img_3.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "帖子指出 2388 是 ETH 的一个重要阻力位，并声称该点位多次被用作做空策略的入场点，且每次 ETH 都无法在此位置站稳。这表明该分析师认为 2388 是一个强阻力位，逢高做空可能是有效的策略。然而，帖子并未提供具体的止盈止损位，因此信号强度为 4。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子指出 2388 是 ETH 的一个重要阻力位，并声称该点位多次被用作做空策略的入场点，且每次 ETH 都无法在此位置站稳。这表明该分析师认为 2388 是一个强阻力位，逢高做空可能是有效的策略。然而，帖子并未提供具体的止盈止损位，因此信号强度为 4。\",\n  \"star\": 4\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:50:54 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316229605903713/img_0.jpg",
+        "signal_analyzed_ok": true,
+        "square_audio_replay_url": ""
+      },
+      "https://www.binance.com/zh-CN/square/post/316205118331201": {
+        "href": "https://www.binance.com/zh-CN/square/post/316205118331201",
+        "published_at": "2026-04-25 12:00:00 北京时间",
+        "published_iso": "",
+        "time_label": "4月25日",
+        "is_pinned": false,
+        "title": "BTC最强分析思路来了，如果先上去没跌才可以加仓，提前跌到76000冒头附近就可以止盈了，然后再拉才能更高空，这就是流动性翻仓玩法。#BTC",
+        "raw": "BTC最强分析思路来了，如果先上去没跌才可以加仓，提前跌到76000冒头附近就可以止盈了，然后再拉才能更高空，这就是流动性翻仓玩法。#BTC",
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "time": "4月25日",
+        "image_urls": [],
+        "video_url": "https://public.bnbstatic.com/video/pgc/ArticleContent/f0966192-e171-49c6-838e-eccf7ceeaac2.mp4",
         "audio_m3u8_url": "",
         "saved_image_paths": [],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
         "gemini_reason": null,
         "gemini_bias_zh": "不明",
-        "signal_is_sign": false,
-        "signal_star": 0,
-        "signal_content": "帖子表达了对市场下跌的担忧，并提及了以太坊和比特币的近期价格走势，但未提供具体的交易策略或信号。",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "帖子的核心观点是利用流动性进行交易，并提出了一个相对明确的交易策略：若BTC先上涨后下跌，则可加仓；若跌至76000附近，则止盈；随后再拉高时卖出（做空）。帖中提到了76000作为关键价位，结合搜索结果，76000美元确实是BTC近期重要的阻力位和交易区间的分水岭。该策略包含入场（加仓、拉高卖出）和止盈（跌至76000附近）的参考点，但未明确止损位，信号强度为4。",
         "signal_raw_data": {
-          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"帖子表达了对市场下跌的担忧，并提及了以太坊和比特币的近期价格走势，但未提供具体的交易策略或信号。\",\n  \"star\": 0\n}\n```"
+          "text": "{\"isSign\": true, \"content\": \"帖子的核心观点是利用流动性进行交易，并提出了一个相对明确的交易策略：若BTC先上涨后下跌，则可加仓；若跌至76000附近，则止盈；随后再拉高时卖出（做空）。帖中提到了76000作为关键价位，结合搜索结果，76000美元确实是BTC近期重要的阻力位和交易区间的分水岭。该策略包含入场（加仓、拉高卖出）和止盈（跌至76000附近）的参考点，但未明确止损位，信号强度为4。\", \"star\": 4}"
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:13:23 北京时间",
+        "signal_analyzed_at": "2026-04-26 19:50:56 北京时间",
         "signal_image_used": "",
-        "signal_analyzed_ok": true
+        "signal_analyzed_ok": true,
+        "square_audio_replay_url": ""
       },
-      "https://www.binance.com/zh-CN/square/post/315732747884161": {
-        "href": "https://www.binance.com/zh-CN/square/post/315732747884161",
-        "published_at": "2026-04-24 04:37:44 北京时间",
+      "https://www.binance.com/zh-CN/square/post/316180548014018": {
+        "href": "https://www.binance.com/zh-CN/square/post/316180548014018",
+        "published_at": "2026-04-25 12:00:00 北京时间",
         "published_iso": "",
-        "time_label": "14小时",
+        "time_label": "4月25日",
         "is_pinned": false,
-        "title": "佛在灵山莫远求，灵山只在汝心头",
-        "raw": "佛在灵山莫远求，灵山只在汝心头",
+        "title": "快点雪崩吧，早晚都要跌的你就不能买个加速包吗？#BTC",
+        "raw": "快点雪崩吧，早晚都要跌的你就不能买个加速包吗？#BTC",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "time": "14小时",
+        "time": "4月25日",
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzFhZWYzZTQ1OGZkNDRkYzZiZTY4NGI4N2MxODQ5M2NiLnBuZw==&level=lg"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2RlNTY4YTRlNjViMzRlMTU5NWRjN2NhYzQ5NjAxZWQzLnBuZw==&level=lg"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
         "saved_image_paths": [
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315732747884161\\img_0.png"
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316180548014018/img_0.png"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
@@ -341,33 +315,37 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": false,
         "signal_star": 0,
-        "signal_content": "该帖子内容为一句禅语，并无任何关于加密货币交易的技术分析、价格预测或交易策略。因此，无法从中提取有效的交易信号。",
+        "signal_content": "该帖子表达了对BTC价格下跌的强烈主观愿望，并使用了“雪崩”、“加速包”等情绪化词汇，没有提供任何技术分析、价格点位或交易策略。因此，不构成交易信号。",
         "signal_raw_data": {
-          "text": "{\"isSign\": false, \"content\": \"该帖子内容为一句禅语，并无任何关于加密货币交易的技术分析、价格预测或交易策略。因此，无法从中提取有效的交易信号。\", \"star\": 0}"
+          "text": "```json\n{\n\"isSign\": false,\n\"content\": \"该帖子表达了对BTC价格下跌的强烈主观愿望，并使用了“雪崩”、“加速包”等情绪化词汇，没有提供任何技术分析、价格点位或交易策略。因此，不构成交易信号。\",\n\"star\": 0\n}\n```"
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:13:26 北京时间",
-        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315732747884161\\img_0.png",
-        "signal_analyzed_ok": true
+        "signal_analyzed_at": "2026-04-26 19:50:59 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316180548014018/img_0.png",
+        "signal_analyzed_ok": true,
+        "square_audio_replay_url": ""
       },
-      "https://www.binance.com/zh-CN/square/post/315890241302001": {
-        "href": "https://www.binance.com/zh-CN/square/post/315890241302001",
-        "published_at": "2026-04-24 15:37:44 北京时间",
+      "https://www.binance.com/zh-CN/square/post/316682220670306": {
+        "href": "https://www.binance.com/zh-CN/square/post/316682220670306",
+        "published_at": "2026-04-26 20:53:55 北京时间",
         "published_iso": "",
         "time_label": "3小时",
         "is_pinned": false,
-        "title": "沉睡了15年的比特币冷钱包启动了，里面约有388万枚比特币，按照现在78000U的价格换算价值3000亿美元。 这到底是要砸盘呀还是要砸盘呢？这是诱空吗？是直接下跌，还是说晚上快速拉涨诱多一波，然后再暴力下跌，复刻去年1011黑天鹅的行情？#BTC",
-        "raw": "沉睡了15年的比特币冷钱包启动了，里面约有388万枚比特币，按照现在78000U的价格换算价值3000亿美元。 这到底是要砸盘呀还是要砸盘呢？这是诱空吗？是直接下跌，还是说晚上快速拉涨诱多一波，然后再暴力下跌，复刻去年1011黑天鹅的行情？#BTC",
+        "title": "我发现每次格局都没饭吃。。。昨天周六也做单了晚上睡觉前最高利润90%，迅速周日睡醒再说。 然后今天睡醒又是90%利润，寻思晚上睡觉前再说，这怎么又涨回来了，非得让三马哥85000梭哈做空吗？#BTC",
+        "raw": "我发现每次格局都没饭吃。。。昨天周六也做单了晚上睡觉前最高利润90%，迅速周日睡醒再说。 然后今天睡醒又是90%利润，寻思晚上睡觉前再说，这怎么又涨回来了，非得让三马哥85000梭哈做空吗？#BTC",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
         "time": "3小时",
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0L2I4MDQ0MjcwODlkNmU5MTAwMjdlYTkzYTY1OGUzNjgxLnBuZw==&level=lg"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzU0OTA2MGE3OGNlODQ3ZDY4MzU2OWJkZjY4NGZkMzU0LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2VlZDU3NTc4Yjk4OTQ2ZmU5NDc4MmRkNzYzYjI5NGQwLmpwZw==&level=md"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
         "saved_image_paths": [
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315890241302001\\img_0.jpg"
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316682220670306/img_0.jpg",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316682220670306/img_1.jpg"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
@@ -375,39 +353,34 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": false,
         "signal_star": 0,
-        "signal_content": "该帖子主要是在讨论一个沉睡了15年的比特币冷钱包突然启动，里面含有大量比特币（约388万枚，价值约3000亿美元），并对市场可能产生的冲击提出了多种猜测，包括“砸盘”、诱空、快速拉涨诱多后再暴跌等。然而，帖子中没有提供任何具体的交易信号，例如入场点、止盈点或止损点，也没有结合K线图进行技术分析。因此，这只能被视为一个市场讨论或新闻传播性质的帖子，不包含明确的交易信号。",
+        "signal_content": "用户分享了个人交易的利润情况，但未提供具体的交易策略、入场点、止盈点或止损点，仅表达了对当前市场走势的疑问和情绪。",
         "signal_raw_data": {
-          "text": "{\"isSign\": false, \"content\": \"该帖子主要是在讨论一个沉睡了15年的比特币冷钱包突然启动，里面含有大量比特币（约388万枚，价值约3000亿美元），并对市场可能产生的冲击提出了多种猜测，包括“砸盘”、诱空、快速拉涨诱多后再暴跌等。然而，帖子中没有提供任何具体的交易信号，例如入场点、止盈点或止损点，也没有结合K线图进行技术分析。因此，这只能被视为一个市场讨论或新闻传播性质的帖子，不包含明确的交易信号。\", \"star\": 0}\n"
+          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"用户分享了个人交易的利润情况，但未提供具体的交易策略、入场点、止盈点或止损点，仅表达了对当前市场走势的疑问和情绪。\",\n  \"star\": 0\n}\n```"
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 17:31:31 北京时间",
-        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315890241302001\\img_0.jpg",
+        "signal_analyzed_at": "2026-04-26 22:29:19 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316682220670306/img_0.jpg",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/315943929606001": {
-        "href": "https://www.binance.com/zh-CN/square/post/315943929606001",
-        "published_at": "2026-04-24 18:20:44 北京时间",
+      "https://www.binance.com/zh-CN/square/post/316643277630098": {
+        "href": "https://www.binance.com/zh-CN/square/post/316643277630098",
+        "published_at": "2026-04-26 17:53:55 北京时间",
         "published_iso": "",
-        "time_label": "17分钟",
+        "time_label": "6小时",
         "is_pinned": false,
-        "title": "比特币74000那个单子你一开始就跑掉，后面以太坊十连胜早就赚回来了，要回算账。 做合约不怕没有本金，就怕你不执行止损止盈和逃命，狗庄每次都会给一次机会，但凡犹豫就会跟别人差一大截。 所以你为啥总能看到有的人每次赚钱翻仓，而且从来没有一句乱八七糟的想法，做交易要纯粹，赚钱了到目标不跑，逃命每次都给机会解套不跑，最后又赚大钱交易介入机会你根本没有仓位做了。#BTC",
-        "raw": "比特币74000那个单子你一开始就跑掉，后面以太坊十连胜早就赚回来了，要回算账。 做合约不怕没有本金，就怕你不执行止损止盈和逃命，狗庄每次都会给一次机会，但凡犹豫就会跟别人差一大截。 所以你为啥总能看到有的人每次赚钱翻仓，而且从来没有一句乱八七糟的想法，做交易要纯粹，赚钱了到目标不跑，逃命每次都给机会解套不跑，最后又赚大钱交易介入机会你根本没有仓位做了。#BTC",
+        "title": "带你赚钱的人，教你进步的人，这才是你的贵人。 限制你发展的不是学历，也不是智商，而是你身边的圈子。 驴拉一辈子磨，以为走了几万里的路，但其实它一直在原地画圈。 所谓贵人，并不是直接把钱给你的人，而是能打破你原来的思维，纠正你的格局，提升你的认知和境界，给你新人生的人。带你赚钱的人，教你进步的人，这才是你的贵人。 所以做人要有点良心，不是你穷不是你付不起，为了贪图便宜侵害别人的原创产权，然后你贪图小利被人冒充的骗了又找我诉苦，正常人心里都很鄙视的，不要在走弯路了。#BTC",
+        "raw": "带你赚钱的人，教你进步的人，这才是你的贵人。 限制你发展的不是学历，也不是智商，而是你身边的圈子。 驴拉一辈子磨，以为走了几万里的路，但其实它一直在原地画圈。 所谓贵人，并不是直接把钱给你的人，而是能打破你原来的思维，纠正你的格局，提升你的认知和境界，给你新人生的人。带你赚钱的人，教你进步的人，这才是你的贵人。 所以做人要有点良心，不是你穷不是你付不起，为了贪图便宜侵害别人的原创产权，然后你贪图小利被人冒充的骗了又找我诉苦，正常人心里都很鄙视的，不要在走弯路了。#BTC",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "time": "17分钟",
+        "time": "6小时",
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzNlYmU4OGM1ZDBiODM4OGJkZDJjMjRjZWEyNGYzM2U2LmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzgxMGQ4Y2MyZDZiMjFjZWY0YWU3NzNhYWQyM2FjMzRhLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0LzQ0MDA4MTMzMDY2NTYzNTFiNTA5NzFmZTFkNDI1MDhiLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA0L2U0MmQ3ZGUxY2QwZjVlNTgyYzEwYTlhZmMyYzc3NTgxLmpwZw==&level=md"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2IwZTYyMzJmZGQ1MzQ5NDZiNjMxMDgxNTg2Yjg5NmZjLmpwZw==&level=lg"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
         "saved_image_paths": [
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315943929606001\\img_0.jpg",
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315943929606001\\img_1.jpg",
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315943929606001\\img_2.jpg",
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315943929606001\\img_3.jpg"
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316643277630098/img_0.jpg"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
@@ -415,35 +388,834 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": false,
         "signal_star": 0,
-        "signal_content": "该帖子主要讨论了比特币和以太坊的近期交易表现，并强调了执行止损止盈的重要性，但未提供具体的交易信号、入场位、止盈位或止损位。因此，这是一个关于交易理念的帖子，而非具体的交易信号。",
+        "signal_content": "帖子内容为人生哲理分享，与加密货币交易信号无关。",
         "signal_raw_data": {
-          "text": "```json\n{\n\"isSign\": false,\n\"content\": \"该帖子主要讨论了比特币和以太坊的近期交易表现，并强调了执行止损止盈的重要性，但未提供具体的交易信号、入场位、止盈位或止损位。因此，这是一个关于交易理念的帖子，而非具体的交易信号。\",\n\"star\": 0\n}\n```"
+          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"帖子内容为人生哲理分享，与加密货币交易信号无关。\",\n  \"star\": 0\n}\n```"
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 18:38:03 北京时间",
-        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315943929606001\\img_0.jpg",
+        "signal_analyzed_at": "2026-04-26 22:29:20 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316643277630098/img_0.jpg",
         "signal_analyzed_ok": true
       }
     },
     "square-creator-446e63a9fd9ef": {
-      "https://www.binance.com/zh-CN/square/post/315703302608194": {
-        "href": "https://www.binance.com/zh-CN/square/post/315703302608194",
-        "published_at": "2026-04-24 02:37:44 北京时间",
+      "https://www.binance.com/zh-CN/square/post/316427997942737": {
+        "href": "https://www.binance.com/zh-CN/square/post/316427997942737",
+        "published_at": "2026-04-26 03:53:55 北京时间",
         "published_iso": "",
-        "time_label": "16小时",
+        "time_label": "20小时",
         "is_pinned": false,
-        "title": "$ETH 到底还打不打一回熊来一回牛回的反复横跳逗我呢",
-        "raw": "$ETH 到底还打不打一回熊来一回牛回的反复横跳逗我呢",
+        "title": "$KAT 兄弟们我川普币亏的已经赚回来了多亏了这个机器人提醒了我好几次",
+        "raw": "$KAT 兄弟们我川普币亏的已经赚回来了多亏了这个机器人提醒了我好几次",
         "author": "square-creator-446e63a9fd9ef",
         "author_slug": "square-creator-446e63a9fd9ef",
-        "time": "16小时",
+        "time": "20小时",
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzkxYWUwNjg2ODM4YjQ5YTZhNTM5ZGFhZGRhN2Q4MTk0LmpwZw==&level=lg"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2RiNjAzMWM2ODdmNjRmMzU4NjliNDkwNmMzMDE1ZjY2LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2RjZmI3Y2MzNjBkZjRlYzBhMzAzNjliOWE1ODY3MDAzLmpwZw==&level=md"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
         "saved_image_paths": [
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315703302608194\\img_0.jpg"
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316427997942737/img_0.jpg",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316427997942737/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": false,
+        "signal_star": 0,
+        "signal_content": "该帖子提到“川普币亏的已经赚回来了”，这是对过去交易的回顾，而非对未来走势的预测。帖子的核心内容是“多亏了这个机器人提醒了我好几次”，暗示了对一个辅助工具的依赖，而不是基于对KAT币本身的技术或基本面分析。因此，该帖子不构成交易信号。",
+        "signal_raw_data": {
+          "text": "{\"isSign\": false, \"content\": \"该帖子提到“川普币亏的已经赚回来了”，这是对过去交易的回顾，而非对未来走势的预测。帖子的核心内容是“多亏了这个机器人提醒了我好几次”，暗示了对一个辅助工具的依赖，而不是基于对KAT币本身的技术或基本面分析。因此，该帖子不构成交易信号。\", \"star\": 0}\n"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:03 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316427997942737/img_0.jpg",
+        "signal_analyzed_ok": true,
+        "square_audio_replay_url": ""
+      },
+      "https://www.binance.com/zh-CN/square/post/316339093533282": {
+        "href": "https://www.binance.com/zh-CN/square/post/316339093533282",
+        "published_at": "2026-04-25 12:00:00 北京时间",
+        "published_iso": "",
+        "time_label": "4月25日",
+        "is_pinned": false,
+        "title": "$TRUMP 唉我知道他会暴跌但是我在赌晚宴前还会拉一波没想到这就是极限了吗😮‍💨",
+        "raw": "$TRUMP 唉我知道他会暴跌但是我在赌晚宴前还会拉一波没想到这就是极限了吗😮‍💨",
+        "author": "square-creator-446e63a9fd9ef",
+        "author_slug": "square-creator-446e63a9fd9ef",
+        "time": "4月25日",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzZiZjYwMGM0OWJjMTQwNmNhMTZhN2Y3OWRkOTA3NTljLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316339093533282/img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": false,
+        "signal_star": 0,
+        "signal_content": "该帖子仅表达了对 TRUMP 代币价格下跌的担忧和对可能反弹的赌博心理，但没有提供任何具体的技术分析、支撑/阻力位、入场/止盈/止损点，因此不构成交易信号。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"该帖子仅表达了对 TRUMP 代币价格下跌的担忧和对可能反弹的赌博心理，但没有提供任何具体的技术分析、支撑/阻力位、入场/止盈/止损点，因此不构成交易信号。\",\n  \"star\": 0\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:05 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316339093533282/img_0.jpg",
+        "signal_analyzed_ok": true,
+        "square_audio_replay_url": ""
+      },
+      "https://www.binance.com/zh-CN/square/post/316318499513378": {
+        "href": "https://www.binance.com/zh-CN/square/post/316318499513378",
+        "published_at": "2026-04-25 12:00:00 北京时间",
+        "published_iso": "",
+        "time_label": "4月25日",
+        "is_pinned": false,
+        "title": "$TRUMP 天天来回插😅晚上到底能不能拉啊晚上午宴不拉我直接重仓做空了",
+        "raw": "$TRUMP 天天来回插😅晚上到底能不能拉啊晚上午宴不拉我直接重仓做空了",
+        "author": "square-creator-446e63a9fd9ef",
+        "author_slug": "square-creator-446e63a9fd9ef",
+        "time": "4月25日",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzg3MzUwNTIyMjM4MDQ0Zjk4NDhmODExMDM5OTcxOTJkLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316318499513378/img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 2,
+        "signal_content": "帖子表达了强烈的看空情绪，作者表示如果晚上午宴不拉盘，将直接重仓做空。这表明作者认为 $TRUMP 存在下跌风险，并准备在价格下跌时进行做空操作。由于帖子中没有明确的入场、止盈、止损点位，以及具体的分析依据，信号强度为2。",
+        "signal_raw_data": {
+          "text": "```json\n{\n\"isSign\": true,\n\"content\": \"帖子表达了强烈的看空情绪，作者表示如果晚上午宴不拉盘，将直接重仓做空。这表明作者认为 $TRUMP 存在下跌风险，并准备在价格下跌时进行做空操作。由于帖子中没有明确的入场、止盈、止损点位，以及具体的分析依据，信号强度为2。\",\n\"star\": 2\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:08 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316318499513378/img_0.jpg",
+        "signal_analyzed_ok": true,
+        "square_audio_replay_url": ""
+      },
+      "https://www.binance.com/zh-CN/square/post/316625537917905": {
+        "href": "https://www.binance.com/zh-CN/square/post/316625537917905",
+        "published_at": "2026-04-26 16:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "7小时",
+        "is_pinned": false,
+        "title": "$ENJ 还有救吗兄弟们最近战绩有点惨不忍睹了昨天刚被川普币割了一手",
+        "raw": "$ENJ 还有救吗兄弟们最近战绩有点惨不忍睹了昨天刚被川普币割了一手",
+        "author": "square-creator-446e63a9fd9ef",
+        "author_slug": "square-creator-446e63a9fd9ef",
+        "time": "7小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzY2ODVhYTllMTM1YTQ4OWViNmE2MTk2OTZkOTIzNDUyLnBuZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316625537917905/img_0.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": false,
+        "signal_star": 0,
+        "signal_content": "用户提供的内容为对Enjin Coin (ENJ) 的个人投资困境的抱怨，并提到了被“川普币”割韭菜的经历。帖子中没有包含任何技术分析、价格预测或交易策略，仅表达了对ENJ未来走势的担忧和不确定性。因此，无法从中提取出任何交易信号。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"用户提供的内容为对Enjin Coin (ENJ) 的个人投资困境的抱怨，并提到了被“川普币”割韭菜的经历。帖子中没有包含任何技术分析、价格预测或交易策略，仅表达了对ENJ未来走势的担忧和不确定性。因此，无法从中提取出任何交易信号。\",\n  \"star\": 0\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:03 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316625537917905/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316594024561410": {
+        "href": "https://www.binance.com/zh-CN/square/post/316594024561410",
+        "published_at": "2026-04-26 14:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "9小时",
+        "is_pinned": false,
+        "title": "$AXS 笑死了去杀川子的杀手估计是孙哥派去的WLFI刚被诈骗特朗普币又砸盘逮着他一个人薅",
+        "raw": "$AXS 笑死了去杀川子的杀手估计是孙哥派去的WLFI刚被诈骗特朗普币又砸盘逮着他一个人薅",
+        "author": "square-creator-446e63a9fd9ef",
+        "author_slug": "square-creator-446e63a9fd9ef",
+        "time": "9小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2IxM2UzMmRiNDlhMzQwMjg5OGU2MTZkYmFjMzgxMmM5LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316594024561410/img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": false,
+        "signal_star": 0,
+        "signal_content": "该帖子主要包含对加密货币市场事件和人物的讨论，缺乏明确的技术分析或交易信号。内容涉及“孙哥”、“川子”和“特朗普币”等，属于市场情绪和八卦讨论，而非专业的交易建议。",
+        "signal_raw_data": {
+          "text": "{\"isSign\": false, \"content\": \"该帖子主要包含对加密货币市场事件和人物的讨论，缺乏明确的技术分析或交易信号。内容涉及“孙哥”、“川子”和“特朗普币”等，属于市场情绪和八卦讨论，而非专业的交易建议。\", \"star\": 0}"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:09 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316594024561410/img_0.jpg",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316590069441809": {
+        "href": "https://www.binance.com/zh-CN/square/post/316590069441809",
+        "published_at": "2026-04-26 14:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "9小时",
+        "is_pinned": false,
+        "title": "$AXS 接着多！！之前吃过1000倍！短线已拉高，30%空间，现在空进去！",
+        "raw": "$AXS 接着多！！之前吃过1000倍！短线已拉高，30%空间，现在空进去！",
+        "author": "square-creator-446e63a9fd9ef",
+        "author_slug": "square-creator-446e63a9fd9ef",
+        "time": "9小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzk4ZjI2OTkwMzJlZTRlN2E5N2EyYmQ5YWQ1ZWIyY2FkLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316590069441809/img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 1,
+        "signal_content": "帖子标题和正文均显示“接着多！！...现在空进去！”，但其后半部分“现在空进去！”与前半部分“接着多”自相矛盾，且未提供任何技术分析依据，仅表达了交易情绪，故判定为情绪帖。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子标题和正文均显示“接着多！！...现在空进去！”，但其后半部分“现在空进去！”与前半部分“接着多”自相矛盾，且未提供任何技术分析依据，仅表达了交易情绪，故判定为情绪帖。\",\n  \"star\": 1\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:11 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316590069441809/img_0.jpg",
+        "signal_analyzed_ok": true
+      }
+    },
+    "square-creator-1d148bbce7461": {
+      "https://www.binance.com/zh-CN/square/post/316565764068977": {
+        "href": "https://www.binance.com/zh-CN/square/post/316565764068977",
+        "published_at": "2026-04-26 12:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "11小时",
+        "is_pinned": false,
+        "title": "$BTC 车房已卖梭哈50万U做空BTC，强平价8万9，🐶庄有种你来碰我强平线！ {future}(BTCUSDT)",
+        "raw": "$BTC 车房已卖梭哈50万U做空BTC，强平价8万9，🐶庄有种你来碰我强平线！ {future}(BTCUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "11小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/87496d50-2408-43e1-ad4c-78b47b448a6a.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2M2ZGEyN2IxYzhlYzQ5NDFiM2JkZjRjY2I4MzRjZjI1LnBuZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316565764068977/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316565764068977/img_1.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "用户表达了强烈的做空意愿，并给出了具体的强平价位8.9万美元。该信号强度为4，因为有明确的支撑/压力位（强平价可视为心理支撑位）作为参考，但缺少具体的入场和止盈点。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"用户表达了强烈的做空意愿，并给出了具体的强平价位8.9万美元。该信号强度为4，因为有明确的支撑/压力位（强平价可视为心理支撑位）作为参考，但缺少具体的入场和止盈点。\",\n  \"star\": 4\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:09 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316565764068977/img_0.png",
+        "signal_analyzed_ok": true,
+        "square_audio_replay_url": ""
+      },
+      "https://www.binance.com/zh-CN/square/post/316571827994337": {
+        "href": "https://www.binance.com/zh-CN/square/post/316571827994337",
+        "published_at": "2026-04-26 12:58:26 北京时间",
+        "published_iso": "",
+        "time_label": "48分钟",
+        "is_pinned": false,
+        "title": "$ORCA 120万！120万人民币啊！😱峰哥大佬又双多进去了😂！强平价1.2，他螚活下来吗，大家怎么看？ {future}(ORCAUSDT)",
+        "raw": "$ORCA 120万！120万人民币啊！😱峰哥大佬又双多进去了😂！强平价1.2，他螚活下来吗，大家怎么看？ {future}(ORCAUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "48分钟",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20241206/109144b0-b969-4595-b4ff-b908cb7173a9.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2RmNGZkZTcxNTRjMDQxNDY5ZTM4MGZkZTUwN2VjN2E5LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316571827994337/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316571827994337/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": false,
+        "signal_star": 0,
+        "signal_content": "该帖子主要讨论了用户“峰哥”在 ORCAUSDT 上亏损的情况，并提及了其强平价为 1.2 USDT。帖子中没有提供任何技术分析或交易策略，仅是关于个人亏损的讨论和对该用户情况的询问，因此不构成交易信号。",
+        "signal_raw_data": {
+          "text": "```json\n{\n\"isSign\": false,\n\"content\": \"该帖子主要讨论了用户“峰哥”在 ORCAUSDT 上亏损的情况，并提及了其强平价为 1.2 USDT。帖子中没有提供任何技术分析或交易策略，仅是关于个人亏损的讨论和对该用户情况的询问，因此不构成交易信号。\",\n\"star\": 0\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:17 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316571827994337/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316554745799633": {
+        "href": "https://www.binance.com/zh-CN/square/post/316554745799633",
+        "published_at": "2026-04-26 12:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "1小时",
+        "is_pinned": false,
+        "title": "$HYPER 碎个觉起来，3万块钱入账😝！中午可以吃顿大餐了！ {future}(HYPERUSDT)",
+        "raw": "$HYPER 碎个觉起来，3万块钱入账😝！中午可以吃顿大餐了！ {future}(HYPERUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "1小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250421/fcb4368a-265f-43f8-a234-d17d3e33ec67.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2IwYjYzN2RmNTM4MTQ0YzRhNjQ4ZWRkYzY5ZDM2OTc4LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316554745799633/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316554745799633/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": false,
+        "signal_star": 0,
+        "signal_content": "该帖子仅表达了个人盈利的喜悦，没有提供任何技术分析、价格点位或交易策略，因此不构成交易信号。",
+        "signal_raw_data": {
+          "text": "{\"isSign\": false, \"content\": \"该帖子仅表达了个人盈利的喜悦，没有提供任何技术分析、价格点位或交易策略，因此不构成交易信号。\", \"star\": 0}"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:27 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316554745799633/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316549759731457": {
+        "href": "https://www.binance.com/zh-CN/square/post/316549759731457",
+        "published_at": "2026-04-26 11:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "2小时",
+        "is_pinned": false,
+        "title": "$AXS 下跌才刚刚开始！！我又空进去80000美金，这把要稳了！",
+        "raw": "$AXS 下跌才刚刚开始！！我又空进去80000美金，这把要稳了！",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "2小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzY4MDA3ZjBhZWQ5MTRkNjU4YzRmY2RkNjg2N2RjMGJjLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316549759731457/img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 1,
+        "signal_content": "用户发布的帖子为看跌情绪帖，明确表示\"AXS 下跌才刚刚开始！！我又空进去80000美金，这把要稳了！\"。然而，帖子中未提供任何技术分析依据，如支撑/阻力位、均线、MACD、RSI或形态等，也未给出具体的入场、止盈、止损点。因此，这是一个纯粹的情绪表达，信号强度较低。",
+        "signal_raw_data": {
+          "text": "{\"isSign\": true, \"content\": \"用户发布的帖子为看跌情绪帖，明确表示\\\"AXS 下跌才刚刚开始！！我又空进去80000美金，这把要稳了！\\\"。然而，帖子中未提供任何技术分析依据，如支撑/阻力位、均线、MACD、RSI或形态等，也未给出具体的入场、止盈、止损点。因此，这是一个纯粹的情绪表达，信号强度较低。\", \"star\": 1}\n"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:31 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316549759731457/img_0.jpg",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316545972150450": {
+        "href": "https://www.binance.com/zh-CN/square/post/316545972150450",
+        "published_at": "2026-04-26 11:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "2小时",
+        "is_pinned": false,
+        "title": "$RAVE 接着空！！之前吃过1000倍！短线已拉高，30%空间，现在空进去！ {future}(RAVEUSDT)",
+        "raw": "$RAVE 接着空！！之前吃过1000倍！短线已拉高，30%空间，现在空进去！ {future}(RAVEUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "2小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/symbol/logo/20251215/e1926229-791b-40e7-9e35-463ce3a8a57d.png",
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzk0YWY2MmMzZTg5YzQxYmI5MTYyYzFkZTU5NWVhNTI4LnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzY2MmEyZjk0MjZkODQyYmNhYmVlODU1NTliNWU2OTlmLmpwZw==&level=md"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316545972150450/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316545972150450/img_1.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316545972150450/img_2.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316545972150450/img_3.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "该帖子明确指示做空 RAVEUSDT。分析指出，“短线已拉高，30%空间，现在空进去！” 这表明作者认为该币种价格已被拉升，存在下跌空间。虽然没有给出具体的止盈止损点位，但有明确的入场建议“现在空进去”，信号强度中等偏上。",
+        "signal_raw_data": {
+          "text": "```json\n{\n\"isSign\": true,\n\"content\": \"该帖子明确指示做空 RAVEUSDT。分析指出，“短线已拉高，30%空间，现在空进去！” 这表明作者认为该币种价格已被拉升，存在下跌空间。虽然没有给出具体的止盈止损点位，但有明确的入场建议“现在空进去”，信号强度中等偏上。\",\n\"star\": 4\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:39 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316545972150450/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316544163802433": {
+        "href": "https://www.binance.com/zh-CN/square/post/316544163802433",
+        "published_at": "2026-04-26 11:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "2小时",
+        "is_pinned": false,
+        "title": "$HYPER 速速空！！已经瀑布了，摩托大佬昨晚就空了，兄弟们跟上的吃麻了😅 {future}(HYPERUSDT)",
+        "raw": "$HYPER 速速空！！已经瀑布了，摩托大佬昨晚就空了，兄弟们跟上的吃麻了😅 {future}(HYPERUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "2小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250421/fcb4368a-265f-43f8-a234-d17d3e33ec67.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzU0M2JmNjg2ZDkxMzQ4NmRiZGRjNzlmY2Y0NGI0ODk4LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316544163802433/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316544163802433/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 3,
+        "signal_content": "帖子明确建议做空 HYPERUSDT，并指出“已经瀑布了”，暗示价格下跌趋势。虽然没有给出具体的入场、止盈、止损点位，但“速速空”和“吃麻了”表达了强烈的做空意愿，且提到“摩托大佬昨晚就空了”可能暗示了先行者的成功案例。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子明确建议做空 HYPERUSDT，并指出“已经瀑布了”，暗示价格下跌趋势。虽然没有给出具体的入场、止盈、止损点位，但“速速空”和“吃麻了”表达了强烈的做空意愿，且提到“摩托大佬昨晚就空了”可能暗示了先行者的成功案例。\",\n  \"star\": 3\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:40 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316544163802433/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316541496137538": {
+        "href": "https://www.binance.com/zh-CN/square/post/316541496137538",
+        "published_at": "2026-04-26 11:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "2小时",
+        "is_pinned": false,
+        "title": "$RIVER 可以多了！！“hu圣”大佬罕 见开多了这么大数额，直接40万人民币！那这把肯定是有十足把握。咱们跟上多，就是捡💰",
+        "raw": "$RIVER 可以多了！！“hu圣”大佬罕 见开多了这么大数额，直接40万人民币！那这把肯定是有十足把握。咱们跟上多，就是捡💰",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "2小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzJhNzg0YWI3MmU0MTRhYmY5YzJmMDY0MDlhZTYzN2M1LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316541496137538/img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 2,
+        "signal_content": "帖子声称“hu圣”大佬斥资40万人民币做多RIVER，以此作为看多理由，并暗示“跟上多，就是捡💰”。然而，帖子的分析仅停留在情绪层面，缺乏具体的技术分析依据，如明确的支撑/阻力位、均线、MACD或K线形态等。因此，该信号强度较低。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子声称“hu圣”大佬斥资40万人民币做多RIVER，以此作为看多理由，并暗示“跟上多，就是捡💰”。然而，帖子的分析仅停留在情绪层面，缺乏具体的技术分析依据，如明确的支撑/阻力位、均线、MACD或K线形态等。因此，该信号强度较低。\",\n  \"star\": 2\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:43 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316541496137538/img_0.jpg",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316538321222674": {
+        "href": "https://www.binance.com/zh-CN/square/post/316538321222674",
+        "published_at": "2026-04-26 10:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "3小时",
+        "is_pinned": false,
+        "title": "$LAB 空！！拉高即空，现价进场。hu圣大佬又出手了，那还等什么，我跟上空了！ {future}(LABUSDT)",
+        "raw": "$LAB 空！！拉高即空，现价进场。hu圣大佬又出手了，那还等什么，我跟上空了！ {future}(LABUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "3小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/symbol/logo/20251017/c66a9c4c-177a-4345-b398-6973b7f8b1ae.png",
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzkyNDQ0Y2M5ZjEyNTRjNDVhNTUxMjdhZDQzMDliOTA1LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2MyYWRhOGNiNTZlOTRkY2RhN2NhNmJmNDMwYzFlNDJhLmpwZw==&level=md"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316538321222674/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316538321222674/img_1.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316538321222674/img_2.jpg",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316538321222674/img_3.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "帖子明确指出 $LAB（LABUSDT）的交易信号为空头。建议在价格拉高时进行卖出操作，并已在现价入场。发帖人提及“hu圣大佬”的操作，并表示跟随其进行空单操作，显示出较高的交易信号强度。然而，帖子中未提供具体的止盈位和止损位，仅有现价入场建议，因此信号强度为4星。",
+        "signal_raw_data": {
+          "text": "```json\n{\n\"isSign\": true,\n\"content\": \"帖子明确指出 $LAB（LABUSDT）的交易信号为空头。建议在价格拉高时进行卖出操作，并已在现价入场。发帖人提及“hu圣大佬”的操作，并表示跟随其进行空单操作，显示出较高的交易信号强度。然而，帖子中未提供具体的止盈位和止损位，仅有现价入场建议，因此信号强度为4星。\",\n\"star\": 4\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:45 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316538321222674/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316533414401890": {
+        "href": "https://www.binance.com/zh-CN/square/post/316533414401890",
+        "published_at": "2026-04-26 10:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "3小时",
+        "is_pinned": false,
+        "title": "$TRUMP 速速多！！突发新闻，川普又遭刺杀失败！现利空落地，晚宴将重启，川普币必将触底大幅度拉升，重振trump声势！ {future}(TRUMPUSDT)",
+        "raw": "$TRUMP 速速多！！突发新闻，川普又遭刺杀失败！现利空落地，晚宴将重启，川普币必将触底大幅度拉升，重振trump声势！ {future}(TRUMPUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "3小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250119/c3b580a8-66a1-4887-b464-f25e22ec6650.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzlhZjRmZGEwZjM2ZTQ1YTk5MmU4YWY3MWExMjIzZWM4LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzY0Mjc4NTdlZjAyNDRiNDBiMTYzOWUzMjE4NTRlMTVjLmpwZw==&level=md"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316533414401890/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316533414401890/img_1.jpg",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316533414401890/img_2.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 1,
+        "signal_content": "用户发布了关于 TRUMPUSDT 的看涨情绪，声称由于“川普又遭刺杀失败”的新闻，利空出尽，晚宴将重启，并预测 TRUMPUSDT 将大幅拉升。该分析基于突发新闻和对 TRUMPUSDT 价格的乐观预期，但未提供具体的技术分析依据、入场位、止盈位或止损位。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"用户发布了关于 TRUMPUSDT 的看涨情绪，声称由于“川普又遭刺杀失败”的新闻，利空出尽，晚宴将重启，并预测 TRUMPUSDT 将大幅拉升。该分析基于突发新闻和对 TRUMPUSDT 价格的乐观预期，但未提供具体的技术分析依据、入场位、止盈位或止损位。\",\n  \"star\": 1\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:47 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316533414401890/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316523333682161": {
+        "href": "https://www.binance.com/zh-CN/square/post/316523333682161",
+        "published_at": "2026-04-26 09:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "4小时",
+        "is_pinned": false,
+        "title": "$M 要暴跌了？？hu圣大佬说M团队成被捕？要跟rave一样了吗，那我梭哈30万U空进去了😊，空就是捡钱。",
+        "raw": "$M 要暴跌了？？hu圣大佬说M团队成被捕？要跟rave一样了吗，那我梭哈30万U空进去了😊，空就是捡钱。",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "4小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Q4ZThiNzVmMDNlYTQzZjBhODQxNDI1ZmFlYTkzMTkyLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316523333682161/img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 1,
+        "signal_content": "帖子表达了对 $M 币种的看空情绪，理由是 Hu圣大佬提到 M 团队成员被捕，并与 Rave 币进行类比。用户计划梭哈 30 万 U 资金做空。但帖子缺乏明确的技术分析、入场点、止盈点和止损点，仅为基于传闻的情绪化操作。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子表达了对 $M 币种的看空情绪，理由是 Hu圣大佬提到 M 团队成员被捕，并与 Rave 币进行类比。用户计划梭哈 30 万 U 资金做空。但帖子缺乏明确的技术分析、入场点、止盈点和止损点，仅为基于传闻的情绪化操作。\",\n  \"star\": 1\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:54 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316523333682161/img_0.jpg",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316511617709425": {
+        "href": "https://www.binance.com/zh-CN/square/post/316511617709425",
+        "published_at": "2026-04-26 09:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "4小时",
+        "is_pinned": false,
+        "title": "$AGT 圈内a10大佬又异动了！！大佬又又空了85万人民币😅，整整85万啊！强平价0.02！他螚活下来吗，大家怎么看？ {future}(AGTUSDT)",
+        "raw": "$AGT 圈内a10大佬又异动了！！大佬又又空了85万人民币😅，整整85万啊！强平价0.02！他螚活下来吗，大家怎么看？ {future}(AGTUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "4小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/symbol/logo/20250716/bbc1c174-2977-4ec6-b874-5af782e73e6d.png",
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzg4NDU2MmFlYWNjZTQ0Njc5ZmI1YWQ1NTQyMGUwMWUyLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316511617709425/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316511617709425/img_1.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316511617709425/img_2.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 3,
+        "signal_content": "帖子提到一个大佬在 AGTUSDT 上亏损了85万人民币，强平价为0.02。这暗示了该大佬可能是做空了，并且价格已经接近或跌破了他的强平价，可能面临爆仓风险。这可能导致市场出现空头平仓的买盘，或者由于恐慌性抛售而进一步下跌。目前 AGTUSDT 的价格信息需要通过 K 线图进行确认，以判断0.02是否为关键支撑位或阻力位，以及当前的市场情绪和趋势。",
+        "signal_raw_data": {
+          "text": "```json\n{\n\"isSign\": true,\n\"content\": \"帖子提到一个大佬在 AGTUSDT 上亏损了85万人民币，强平价为0.02。这暗示了该大佬可能是做空了，并且价格已经接近或跌破了他的强平价，可能面临爆仓风险。这可能导致市场出现空头平仓的买盘，或者由于恐慌性抛售而进一步下跌。目前 AGTUSDT 的价格信息需要通过 K 线图进行确认，以判断0.02是否为关键支撑位或阻力位，以及当前的市场情绪和趋势。\",\n\"star\": 3\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:51:57 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316511617709425/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316394980546274": {
+        "href": "https://www.binance.com/zh-CN/square/post/316394980546274",
+        "published_at": "2026-04-26 01:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "12小时",
+        "is_pinned": false,
+        "title": "$ETH 速速空！瀑布要来啊，摩托大佬中午就空了，跟上捡钱😄 {future}(ETHUSDT)",
+        "raw": "$ETH 速速空！瀑布要来啊，摩托大佬中午就空了，跟上捡钱😄 {future}(ETHUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "12小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/3a8c9fe6-2a76-4ace-aa07-415d994de6f0.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2ZhYzg3MTQ1NTQ5ODQ4OTI4NDYyMThmZTg4Njc5MjRlLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316394980546274/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316394980546274/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 1,
+        "signal_content": "帖子发布者明确看空ETH，并提到“速速空！瀑布要来啊”。这是一种强烈的情绪表达，暗示有下跌趋势，但没有提供具体的支撑/阻力位、入场位、止盈位或止损位作为技术分析的依据。因此，这是一个情绪驱动的信号，信号强度较低。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子发布者明确看空ETH，并提到“速速空！瀑布要来啊”。这是一种强烈的情绪表达，暗示有下跌趋势，但没有提供具体的支撑/阻力位、入场位、止盈位或止损位作为技术分析的依据。因此，这是一个情绪驱动的信号，信号强度较低。\",\n  \"star\": 1\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:52:02 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316394980546274/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316380498750113": {
+        "href": "https://www.binance.com/zh-CN/square/post/316380498750113",
+        "published_at": "2026-04-26 00:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "13小时",
+        "is_pinned": false,
+        "title": "$BSB 洗盘结束，上升旗形突破、量能放大，空头被爆完，逢低做多！！ {future}(BSBUSDT)",
+        "raw": "$BSB 洗盘结束，上升旗形突破、量能放大，空头被爆完，逢低做多！！ {future}(BSBUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "13小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/symbol/logo/20260325/b99632cb-c93d-4f7f-883d-9e875d314991.png",
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzVhNjVkNTM1OTdjMjQ4MzI5YWIwNWI5MjE4ZDRiNWI4LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316380498750113/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316380498750113/img_1.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316380498750113/img_2.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 3,
+        "signal_content": "帖子指出 BSB 结束洗盘，出现上升旗形突破，量能放大，并提及空头被爆仓，建议逢低做多。结合 K 线图（未提供，但根据文本描述），若上升旗形突破形态成立且量能配合，则看涨信号强度较高。然而，帖子未提供明确的入场价、止盈价和止损价，信号强度为 3。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子指出 BSB 结束洗盘，出现上升旗形突破，量能放大，并提及空头被爆仓，建议逢低做多。结合 K 线图（未提供，但根据文本描述），若上升旗形突破形态成立且量能配合，则看涨信号强度较高。然而，帖子未提供明确的入场价、止盈价和止损价，信号强度为 3。\",\n  \"star\": 3\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:52:03 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316380498750113/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316373598165665": {
+        "href": "https://www.binance.com/zh-CN/square/post/316373598165665",
+        "published_at": "2026-04-25 23:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "14小时",
+        "is_pinned": false,
+        "title": "$AXS 空！ 链上榜一大佬已兑现1316万跑路😅，我已空进去7万美金，坐等暴跌！ {future}(AXSUSDT)",
+        "raw": "$AXS 空！ 链上榜一大佬已兑现1316万跑路😅，我已空进去7万美金，坐等暴跌！ {future}(AXSUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "14小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20230404/89bdbbca-712d-405a-a093-edeaf374975b.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2U5YWYzZTlmZDFmYTRhMWI5ODFmZmI2NjYzMjBkMzQ5LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316373598165665/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316373598165665/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "帖子明确表示看空 $AXS，并且给出了“包空”的信号。分析师提到“链上榜一大佬已兑现1316万跑路”，这可能暗示有大户在出货，预示着潜在的下跌。同时，分析师也表明自己已投入7万美金做空，并“坐等暴跌”，这提供了明确的交易意图。虽然没有给出具体的入场、止盈、止损点位，但“包空”的表述和提及大户跑路提供了较强的看空理由。信号强度为4星，因为有明确的看空方向和理由，但缺乏具体的策略细节。",
+        "signal_raw_data": {
+          "text": "{\n\"isSign\": true,\n\"content\": \"帖子明确表示看空 $AXS，并且给出了“包空”的信号。分析师提到“链上榜一大佬已兑现1316万跑路”，这可能暗示有大户在出货，预示着潜在的下跌。同时，分析师也表明自己已投入7万美金做空，并“坐等暴跌”，这提供了明确的交易意图。虽然没有给出具体的入场、止盈、止损点位，但“包空”的表述和提及大户跑路提供了较强的看空理由。信号强度为4星，因为有明确的看空方向和理由，但缺乏具体的策略细节。\",\n\"star\": 4\n}\n"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:52:07 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316373598165665/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316359266580306": {
+        "href": "https://www.binance.com/zh-CN/square/post/316359266580306",
+        "published_at": "2026-04-25 22:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "15小时",
+        "is_pinned": false,
+        "title": "$ESPORTS 我的妈呀，这跌的太狠了😅，多一手试试，1万美金多单已进场！",
+        "raw": "$ESPORTS 我的妈呀，这跌的太狠了😅，多一手试试，1万美金多单已进场！",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "15小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2MwYTg1M2U0ZGNkZDQ2NzQ4YmI3YzIyNGI4YTJjMTM3LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316359266580306/img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "帖子提到“多一手试试，1万美金多单已进场！”，这是一个明确的多单入场信号，但未提供止盈止损位，仅有入场信息。",
+        "signal_raw_data": {
+          "text": "```json\n{\n\"isSign\": true,\n\"content\": \"帖子提到“多一手试试，1万美金多单已进场！”，这是一个明确的多单入场信号，但未提供止盈止损位，仅有入场信息。\",\n\"star\": 4\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:52:20 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316359266580306/img_0.jpg",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316351615417618": {
+        "href": "https://www.binance.com/zh-CN/square/post/316351615417618",
+        "published_at": "2026-04-25 22:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "15小时",
+        "is_pinned": false,
+        "title": "$AIOT 逮住妖币了，0.049空了25000美金，吃个短线，胆小别进！ {future}(AIOTUSDT)",
+        "raw": "$AIOT 逮住妖币了，0.049空了25000美金，吃个短线，胆小别进！ {future}(AIOTUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "15小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/symbol/logo/20250717/abe62e8c-01c1-465d-afd3-bf0ab5885307.png",
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzkyYmQ5MmQwMmYxMzQ3Y2VhMDJlMWJlMjBkMzZkMDA5LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316351615417618/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316351615417618/img_1.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316351615417618/img_2.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "用户在 0.049 处建立了一个价值 25000 美元的 AIOTUSDT 空头头寸，并打算进行短期交易。该帖子表达了看空意图，但缺乏明确的止盈和止损位，仅有入场参考点。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"用户在 0.049 处建立了一个价值 25000 美元的 AIOTUSDT 空头头寸，并打算进行短期交易。该帖子表达了看空意图，但缺乏明确的止盈和止损位，仅有入场参考点。\",\n  \"star\": 4\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:52:21 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316351615417618/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316344036105266": {
+        "href": "https://www.binance.com/zh-CN/square/post/316344036105266",
+        "published_at": "2026-04-25 21:46:26 北京时间",
+        "published_iso": "",
+        "time_label": "16小时",
+        "is_pinned": false,
+        "title": "$TRUMP 螚涨到80？？那我这单可不能平了，也没必要平了😭😭",
+        "raw": "$TRUMP 螚涨到80？？那我这单可不能平了，也没必要平了😭😭",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "16小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzRmNDhlNzRiYWFjZTRhZmY4MDEwZGY3YjQ0NGFkZGFiLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316344036105266/img_0.jpg"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
@@ -451,33 +1223,257 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": false,
         "signal_star": 1,
-        "signal_content": "该帖子仅表达了对以太坊价格波动性的困惑和无奈，没有提供任何技术分析、价格点位或交易策略，属于情绪性表达，不构成交易信号。",
+        "signal_content": "用户帖子表达了对 $TRUMP 价格上涨到 80 的期望，并因此不想平仓。然而，帖子中没有提供任何技术分析、入场点、止盈点或止损点，仅为一种主观的情绪表达，不构成明确的交易信号。",
         "signal_raw_data": {
-          "text": "```json\n{\n\"isSign\": false,\n\"content\": \"该帖子仅表达了对以太坊价格波动性的困惑和无奈，没有提供任何技术分析、价格点位或交易策略，属于情绪性表达，不构成交易信号。\",\n\"star\": 1\n}\n```"
+          "text": "```json\n{\n\"isSign\": false,\n\"content\": \"用户帖子表达了对 $TRUMP 价格上涨到 80 的期望，并因此不想平仓。然而，帖子中没有提供任何技术分析、入场点、止盈点或止损点，仅为一种主观的情绪表达，不构成明确的交易信号。\",\n\"star\": 1\n}\n```"
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:13:34 北京时间",
-        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315703302608194\\img_0.jpg",
+        "signal_analyzed_at": "2026-04-26 19:52:24 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316344036105266/img_0.jpg",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/315696326285170": {
-        "href": "https://www.binance.com/zh-CN/square/post/315696326285170",
-        "published_at": "2026-04-24 01:37:44 北京时间",
+      "https://www.binance.com/zh-CN/square/post/316337533870865": {
+        "href": "https://www.binance.com/zh-CN/square/post/316337533870865",
+        "published_at": "2026-04-25 21:46:26 北京时间",
         "published_iso": "",
-        "time_label": "17小时",
+        "time_label": "16小时",
         "is_pinned": false,
-        "title": "$RAVE 这个浪浪是真的假的啊看着有点怪怪的",
-        "raw": "$RAVE 这个浪浪是真的假的啊看着有点怪怪的",
-        "author": "square-creator-446e63a9fd9ef",
-        "author_slug": "square-creator-446e63a9fd9ef",
-        "time": "17小时",
+        "title": "$APE 下跌才刚刚开始！！加速坠落中🛗，我又空进去8万美金，胆小别跟！",
+        "raw": "$APE 下跌才刚刚开始！！加速坠落中🛗，我又空进去8万美金，胆小别跟！",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "16小时",
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzFmMmQ3YTBlN2JlNDQzMWJiOGQ0ODFlMjEwYTM0MDU1LmpwZw==&level=lg"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2ZmZTRlNjc1NDIyYjRkNzY5MDVjNzI2OTk1NGViOWU5LmpwZw==&level=lg"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
         "saved_image_paths": [
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315696326285170\\img_0.jpg"
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316337533870865/img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 1,
+        "signal_content": "用户发布了看空 ApeCoin (APE) 的帖子，并表示已进行 8 万美元的空头头寸。帖子语气强烈，但没有提供具体的入场、止盈或止损点位，也没有提供相应的技术分析截图或图表。因此，这是一个带有强烈情绪的交易观点，但缺乏可执行的交易策略。",
+        "signal_raw_data": {
+          "text": "{\"isSign\": true, \"content\": \"用户发布了看空 ApeCoin (APE) 的帖子，并表示已进行 8 万美元的空头头寸。帖子语气强烈，但没有提供具体的入场、止盈或止损点位，也没有提供相应的技术分析截图或图表。因此，这是一个带有强烈情绪的交易观点，但缺乏可执行的交易策略。\", \"star\": 1}\n"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:52:27 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316337533870865/img_0.jpg",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316334292513201": {
+        "href": "https://www.binance.com/zh-CN/square/post/316334292513201",
+        "published_at": "2026-04-25 21:23:17 北京时间",
+        "published_iso": "",
+        "time_label": "16小时",
+        "is_pinned": false,
+        "title": "$HYPER 狗庄会是大善人？后面还有一大堆解锁呢😏！这币基本面薄弱，上上一轮解锁后阴跌70%，本次拉高为诱多，现在空进去！ {future}(HYPERUSDT)",
+        "raw": "$HYPER 狗庄会是大善人？后面还有一大堆解锁呢😏！这币基本面薄弱，上上一轮解锁后阴跌70%，本次拉高为诱多，现在空进去！ {future}(HYPERUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "16小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250421/fcb4368a-265f-43f8-a234-d17d3e33ec67.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2I2OWYwN2M1ZjcxODRlNjY5ZjkyMTcyNjI2NjY3YjY1LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316334292513201/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316334292513201/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 3,
+        "signal_content": "帖子指出 $HYPER 基本面薄弱，且历史上有解锁后大跌70% 的情况。本次拉高被认为是诱多，建议“现在空进去”。然而，帖子并未提供具体的入场位、止盈位和止损位，仅有趋势判断和操作建议。",
+        "signal_raw_data": {
+          "text": "{\"isSign\": true, \"content\": \"帖子指出 $HYPER 基本面薄弱，且历史上有解锁后大跌70% 的情况。本次拉高被认为是诱多，建议“现在空进去”。然而，帖子并未提供具体的入场位、止盈位和止损位，仅有趋势判断和操作建议。\", \"star\": 3}\n"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:52:30 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316334292513201/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316582766934258": {
+        "href": "https://www.binance.com/zh-CN/square/post/316582766934258",
+        "published_at": "2026-04-26 13:43:26 北京时间",
+        "published_iso": "",
+        "time_label": "3分钟",
+        "is_pinned": false,
+        "title": "$CL 空！！周线级别顶背离了，我已空进去8万美金，等暴跌！ {future}(CLUSDT)",
+        "raw": "$CL 空！！周线级别顶背离了，我已空进去8万美金，等暴跌！ {future}(CLUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "3分钟",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/symbol/logo/20260331/b68bd3dd-adec-4eff-86d5-27ee57277605.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2IyMjE5NmJkZTNmNTQ2ZjI4Yjk3OGQwNWFhOGRkY2U1LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316582766934258/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316582766934258/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 5,
+        "signal_content": "帖子明确提出“周线级别顶背离”，并表示已空入8万美金，等待暴跌。此为明确的看空信号，且包含具体仓位和目标（暴跌）。信号强度为5，因为提供了入场（已空入8万美金）和明确的止盈目标（暴跌），虽然未明确止损位，但“周线级别顶背离”本身是较强的技术分析依据。",
+        "signal_raw_data": {
+          "text": "{\"isSign\": true, \"content\": \"帖子明确提出“周线级别顶背离”，并表示已空入8万美金，等待暴跌。此为明确的看空信号，且包含具体仓位和目标（暴跌）。信号强度为5，因为提供了入场（已空入8万美金）和明确的止盈目标（暴跌），虽然未明确止损位，但“周线级别顶背离”本身是较强的技术分析依据。\", \"star\": 5}"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 19:52:34 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316582766934258/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316715784125442": {
+        "href": "https://www.binance.com/zh-CN/square/post/316715784125442",
+        "published_at": "2026-04-26 22:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "1小时",
+        "is_pinned": false,
+        "title": "$TRADOOR 我来了，60000美元的多单进场了，牛战士已经触底反弹，这波看到1.5🙄 {future}(TRADOORUSDT)",
+        "raw": "$TRADOOR 我来了，60000美元的多单进场了，牛战士已经触底反弹，这波看到1.5🙄 {future}(TRADOORUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "1小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/symbol/logo/20250919/5c23f666-fc30-4a91-ba17-fff612ccdd46.png",
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzk0Yjc1ODNjMjcwYTQ3MmZhNWJjMmMyODM4ZGYzZGM2LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316715784125442/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316715784125442/img_1.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316715784125442/img_2.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 2,
+        "signal_content": "用户在 60000 美元处入场做多 TRADOORUSDT，并预期价格将反弹至 1.5。帖子中提到“触底反弹”，但未提供具体的技术指标或支撑阻力位作为依据，也未给出止损位。信号强度一般。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"用户在 60000 美元处入场做多 TRADOORUSDT，并预期价格将反弹至 1.5。帖子中提到“触底反弹”，但未提供具体的技术指标或支撑阻力位作为依据，也未给出止损位。信号强度一般。\",\n  \"star\": 2\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:14 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316715784125442/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316707700526962": {
+        "href": "https://www.binance.com/zh-CN/square/post/316707700526962",
+        "published_at": "2026-04-26 22:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "1小时",
+        "is_pinned": false,
+        "title": "$H 85万！好家伙，好家伙😂！这位a10大佬直接持仓85万H空单！！这头巨鲸会被狗庄吃掉吗？兄弟们怎么看？ {future}(HUSDT)",
+        "raw": "$H 85万！好家伙，好家伙😂！这位a10大佬直接持仓85万H空单！！这头巨鲸会被狗庄吃掉吗？兄弟们怎么看？ {future}(HUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "1小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/symbol/logo/20250718/ba85be91-80ad-4960-9362-f06f7af7eda4.png",
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzk0ZGE0YmMxMjBkZTQ4NTQ5ZTRlMjBhNTQzOWI1YWZlLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316707700526962/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316707700526962/img_1.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316707700526962/img_2.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 3,
+        "signal_content": "用户提供的信息提及一位交易员持仓85万H空单，这是一个包含具体金额的信号，但缺乏技术分析支撑。搜索结果显示，HUSDT近期处于关键阻力位附近，存在突破或回调的可能。部分分析指出HUSDT可能处于看跌趋势，但价格接近超卖区，存在短期反弹风险。另有分析显示，HUSDT在某些时段表现出强劲的看涨势头，并给出了明确的支撑和阻力位，如0.12美元作为支撑，0.135美元为阻力，突破则上看0.15美元。还有分析提到MACD出现死亡交叉，EMA向下，表明看跌动能增强，建议在EMA7（0.16340）附近加空，目标0.14448。由于信息来源多样且结论不一，且K线截图缺失，无法进行完整技术验证。此信号强度为3，因为有对趋势的预判，但缺乏统一的入场、止盈、止损点。",
+        "signal_raw_data": {
+          "text": "{\"isSign\": true, \"content\": \"用户提供的信息提及一位交易员持仓85万H空单，这是一个包含具体金额的信号，但缺乏技术分析支撑。搜索结果显示，HUSDT近期处于关键阻力位附近，存在突破或回调的可能。部分分析指出HUSDT可能处于看跌趋势，但价格接近超卖区，存在短期反弹风险。另有分析显示，HUSDT在某些时段表现出强劲的看涨势头，并给出了明确的支撑和阻力位，如0.12美元作为支撑，0.135美元为阻力，突破则上看0.15美元。还有分析提到MACD出现死亡交叉，EMA向下，表明看跌动能增强，建议在EMA7（0.16340）附近加空，目标0.14448。由于信息来源多样且结论不一，且K线截图缺失，无法进行完整技术验证。此信号强度为3，因为有对趋势的预判，但缺乏统一的入场、止盈、止损点。\", \"star\": 3}"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:22 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316707700526962/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316701522989233": {
+        "href": "https://www.binance.com/zh-CN/square/post/316701522989233",
+        "published_at": "2026-04-26 21:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "2小时",
+        "is_pinned": false,
+        "title": "$ORCA 不会有第三浪了！多军们别幻想了😁，线已经走坏了，我又加仓了8万空单入场，坐等暴跌！ {future}(ORCAUSDT)",
+        "raw": "$ORCA 不会有第三浪了！多军们别幻想了😁，线已经走坏了，我又加仓了8万空单入场，坐等暴跌！ {future}(ORCAUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "2小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20241206/109144b0-b969-4595-b4ff-b908cb7173a9.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzNlY2ZkMDI4MGU2YTQyYTdhNzk1OTFmZWU0MzkzZWE2LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316701522989233/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316701522989233/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 3,
+        "signal_content": "该帖子明确表达看空 $ORCA 的观点，理由是“线已经走坏了”，并已加仓8万空单，显示出强烈的做空意愿。虽然没有给出明确的止盈止损点位，但通过“坐等暴跌”的表述，表明了对未来价格下跌的预期。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"该帖子明确表达看空 $ORCA 的观点，理由是“线已经走坏了”，并已加仓8万空单，显示出强烈的做空意愿。虽然没有给出明确的止盈止损点位，但通过“坐等暴跌”的表述，表明了对未来价格下跌的预期。\",\n  \"star\": 3\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:25 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316701522989233/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316693690296626": {
+        "href": "https://www.binance.com/zh-CN/square/post/316693690296626",
+        "published_at": "2026-04-26 21:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "2小时",
+        "is_pinned": false,
+        "title": "$HYPER 这大司马怎么天天亏？😅这把又是100万没有了😂，钱真多！家里开银行的呀，他能挺过今晚吗😂？ {future}(HYPERUSDT)",
+        "raw": "$HYPER 这大司马怎么天天亏？😅这把又是100万没有了😂，钱真多！家里开银行的呀，他能挺过今晚吗😂？ {future}(HYPERUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "2小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250421/fcb4368a-265f-43f8-a234-d17d3e33ec67.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzM2MzE0ZmZhNDJiMDQ1MDFiZDdkZDRjNzk3NGExMTIzLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316693690296626/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316693690296626/img_1.jpg"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
@@ -485,63 +1481,445 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": false,
         "signal_star": 0,
-        "signal_content": "该帖子仅表达了对RAVE币的疑惑，并无明确的交易信号，因此isSign为false，star评级为0。",
+        "signal_content": "该帖子仅包含对价格走势的猜测和对某人的财务状况的评论，没有提供任何技术分析、价格预测或交易策略。",
         "signal_raw_data": {
-          "text": "{\"isSign\": false, \"content\": \"该帖子仅表达了对RAVE币的疑惑，并无明确的交易信号，因此isSign为false，star评级为0。\", \"star\": 0}\n"
+          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"该帖子仅包含对价格走势的猜测和对某人的财务状况的评论，没有提供任何技术分析、价格预测或交易策略。\",\n  \"star\": 0\n}\n```"
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:13:37 北京时间",
-        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315696326285170\\img_0.jpg",
+        "signal_analyzed_at": "2026-04-26 23:56:27 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316693690296626/img_0.png",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/315607577116082": {
-        "href": "https://www.binance.com/zh-CN/square/post/315607577116082",
-        "published_at": "2026-04-23 19:37:44 北京时间",
+      "https://www.binance.com/zh-CN/square/post/316686874946690": {
+        "href": "https://www.binance.com/zh-CN/square/post/316686874946690",
+        "published_at": "2026-04-26 20:53:55 北京时间",
         "published_iso": "",
-        "time_label": "23小时",
+        "time_label": "3小时",
         "is_pinned": false,
-        "title": "进来聊聊",
-        "raw": "进来聊聊",
-        "author": "square-creator-446e63a9fd9ef",
-        "author_slug": "square-creator-446e63a9fd9ef",
-        "time": "23小时",
-        "image_urls": [],
+        "title": "$OPG 圈内第一kol户圣大佬又双行动了😅，“庄家已开空，反弹就是空” 我8万U空单已入场，跟着收💰 {future}(OPGUSDT)",
+        "raw": "$OPG 圈内第一kol户圣大佬又双行动了😅，“庄家已开空，反弹就是空” 我8万U空单已入场，跟着收💰 {future}(OPGUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "3小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/symbol/logo/20260422/7037c36c-5fc8-4fae-9870-e247e3d4be86.png",
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzg1OWZkNTZjMTVmMjQ4MjRhNGE2OGMzNzU5OTI0YTgwLmpwZw==&level=lg"
+        ],
         "video_url": "",
         "audio_m3u8_url": "",
-        "saved_image_paths": [],
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316686874946690/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316686874946690/img_1.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316686874946690/img_2.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "帖子内容明确提到“庄家已开空，反弹就是空”，并表示已入场8万U空单。这表明了明确的看空意图，并且有具体的行动（入场空单）。虽然没有提供具体的止盈止损位，但“反弹就是空”的趋势判断和实际入场行为，具有一定的交易信号强度。",
+        "signal_raw_data": {
+          "text": "{\"isSign\": true, \"content\": \"帖子内容明确提到“庄家已开空，反弹就是空”，并表示已入场8万U空单。这表明了明确的看空意图，并且有具体的行动（入场空单）。虽然没有提供具体的止盈止损位，但“反弹就是空”的趋势判断和实际入场行为，具有一定的交易信号强度。\", \"star\": 4}\n"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:32 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316686874946690/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316679837302193": {
+        "href": "https://www.binance.com/zh-CN/square/post/316679837302193",
+        "published_at": "2026-04-26 20:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "3小时",
+        "is_pinned": false,
+        "title": "$ETH 这根针插下来得多深？😂空它，明天财富自由！ {future}(ETHUSDT)",
+        "raw": "$ETH 这根针插下来得多深？😂空它，明天财富自由！ {future}(ETHUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "3小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/3a8c9fe6-2a76-4ace-aa07-415d994de6f0.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzg1Njg2ZjEyOWYzYjRiZTk5M2FjMzAzYWVjNjRmMjUzLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316679837302193/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316679837302193/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 1,
+        "signal_content": "用户发布了看空 $ETH 的帖子，并附带了“空它”的明确指示，但未提供具体的入场、止盈、止损点位，也无技术分析作为支撑。信号强度较低。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"用户发布了看空 $ETH 的帖子，并附带了“空它”的明确指示，但未提供具体的入场、止盈、止损点位，也无技术分析作为支撑。信号强度较低。\",\n  \"star\": 1\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:35 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316679837302193/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316677212376626": {
+        "href": "https://www.binance.com/zh-CN/square/post/316677212376626",
+        "published_at": "2026-04-26 20:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "3小时",
+        "is_pinned": false,
+        "title": "$ORCA 我真的要崩溃了😭，又是2万块钱没了😭 {future}(ORCAUSDT)",
+        "raw": "$ORCA 我真的要崩溃了😭，又是2万块钱没了😭 {future}(ORCAUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "3小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20241206/109144b0-b969-4595-b4ff-b908cb7173a9.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzg0MmY2OTFiY2UyNjRkNDZiZjlhNzdmNjRlODQ2MmQ4LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316677212376626/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316677212376626/img_1.jpg"
+        ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
         "gemini_reason": null,
         "gemini_bias_zh": "不明",
         "signal_is_sign": false,
         "signal_star": 0,
-        "signal_content": "该帖子为用户“进来聊聊”的帖子，正文也仅为“进来聊聊”，没有任何交易建议、技术分析或价格信息，因此不构成交易信号。",
+        "signal_content": "用户表达了巨大的亏损情绪，但未提供任何技术分析或交易建议，不构成交易信号。",
         "signal_raw_data": {
-          "text": "{\"isSign\": false, \"content\": \"该帖子为用户“进来聊聊”的帖子，正文也仅为“进来聊聊”，没有任何交易建议、技术分析或价格信息，因此不构成交易信号。\", \"star\": 0}\n"
+          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"用户表达了巨大的亏损情绪，但未提供任何技术分析或交易建议，不构成交易信号。\",\n  \"star\": 0\n}\n```"
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 13:13:40 北京时间",
-        "signal_image_used": "",
+        "signal_analyzed_at": "2026-04-26 23:56:36 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316677212376626/img_0.png",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/315878406004578": {
-        "href": "https://www.binance.com/zh-CN/square/post/315878406004578",
-        "published_at": "2026-04-24 14:37:44 北京时间",
+      "https://www.binance.com/zh-CN/square/post/316662255678770": {
+        "href": "https://www.binance.com/zh-CN/square/post/316662255678770",
+        "published_at": "2026-04-26 19:53:55 北京时间",
         "published_iso": "",
         "time_label": "4小时",
         "is_pinned": false,
-        "title": "$PIPPIN 好离谱啊兄弟们一分钟三万六千多的涨幅不愧是第一妖币",
-        "raw": "$PIPPIN 好离谱啊兄弟们一分钟三万六千多的涨幅不愧是第一妖币",
-        "author": "square-creator-446e63a9fd9ef",
-        "author_slug": "square-creator-446e63a9fd9ef",
+        "title": "$LAB 390万啊！整整390万人民币啊😅！这位a11大佬又出手了，直接空了390万LAB！强平价1.34，他会被🐶庄狠狠拷打吗，兄弟们怎么看？😅 {future}(LABUSDT)",
+        "raw": "$LAB 390万啊！整整390万人民币啊😅！这位a11大佬又出手了，直接空了390万LAB！强平价1.34，他会被🐶庄狠狠拷打吗，兄弟们怎么看？😅 {future}(LABUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
         "time": "4小时",
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzEyYzk5ZDZmY2UzMzRiZDc5MGEzMWI4NzI3MjhmYTBkLmpwZw==&level=lg"
+          "https://public.bnbstatic.com/image/symbol/logo/20251017/c66a9c4c-177a-4345-b398-6973b7f8b1ae.png",
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzc2NjAyMWMyNTJhNzRlNmM4MWZhODcxN2ZiYjAxMjg0LmpwZw==&level=lg"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
         "saved_image_paths": [
-          "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315878406004578\\img_0.jpg"
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316662255678770/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316662255678770/img_1.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316662255678770/img_2.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 2,
+        "signal_content": "帖子内容描述了一笔巨额的空单交易（390万人民币价值的LABUSDT），并提到了强平价1.34。这是一个关于特定交易行为的讨论，但并未提供明确的交易信号、入场位、止盈位或止损位，也未结合图表进行技术分析。因此，虽然提及了具体交易，但其作为交易信号的明确度较低。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子内容描述了一笔巨额的空单交易（390万人民币价值的LABUSDT），并提到了强平价1.34。这是一个关于特定交易行为的讨论，但并未提供明确的交易信号、入场位、止盈位或止损位，也未结合图表进行技术分析。因此，虽然提及了具体交易，但其作为交易信号的明确度较低。\",\n  \"star\": 2\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:38 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316662255678770/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316654686712657": {
+        "href": "https://www.binance.com/zh-CN/square/post/316654686712657",
+        "published_at": "2026-04-26 18:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "5小时",
+        "is_pinned": false,
+        "title": "$KAT 可以多了？？😂a10大佬大司马又双出手了！直接开多了140万人民币的KAT，看来这把他很有把握，那咱们跟上得了😅！ {future}(KATUSDT)",
+        "raw": "$KAT 可以多了？？😂a10大佬大司马又双出手了！直接开多了140万人民币的KAT，看来这把他很有把握，那咱们跟上得了😅！ {future}(KATUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "5小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20260313/9bd0c4fb-83ee-4592-ac4a-b483ed2637fb.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2MyNTlhNGFiZjRkMzQ2YmY4YTM2NTZmZDEyMDIzYjYxLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316654686712657/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316654686712657/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 1,
+        "signal_content": "用户提供的信息显示，某大佬（a10大佬大司马）投入140万人民币购买KAT，作者表达了跟随的意愿。此为典型的“消息驱动”或“情绪驱动”的交易信号，信号强度较低，因为它缺乏具体的交易点位和技术面分析支撑。根据搜索结果，KAT/USDT近期有看涨信号，如“Ready for the breakout of this bullish pennant”和“Strong upward momentum with higher volume”，但也有看空信号，如“RSI screams exhaustion”和“15m RSI at 30.6 shows oversold momentum, but this is on a tiny timeframe”。鉴于文本内容仅为名人效应和情绪跟风，缺乏明确的技术分析支撑，且存在矛盾的市场信号，不建议进行交易。",
+        "signal_raw_data": {
+          "text": "{\"isSign\": true, \"content\": \"用户提供的信息显示，某大佬（a10大佬大司马）投入140万人民币购买KAT，作者表达了跟随的意愿。此为典型的“消息驱动”或“情绪驱动”的交易信号，信号强度较低，因为它缺乏具体的交易点位和技术面分析支撑。根据搜索结果，KAT/USDT近期有看涨信号，如“Ready for the breakout of this bullish pennant”和“Strong upward momentum with higher volume”，但也有看空信号，如“RSI screams exhaustion”和“15m RSI at 30.6 shows oversold momentum, but this is on a tiny timeframe”。鉴于文本内容仅为名人效应和情绪跟风，缺乏明确的技术分析支撑，且存在矛盾的市场信号，不建议进行交易。\", \"star\": 1}"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:42 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316654686712657/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316649263520114": {
+        "href": "https://www.binance.com/zh-CN/square/post/316649263520114",
+        "published_at": "2026-04-26 18:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "5小时",
+        "is_pinned": false,
+        "title": "$AGT 已经瀑布了，速速空！！开香槟了兄弟们😉",
+        "raw": "$AGT 已经瀑布了，速速空！！开香槟了兄弟们😉",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "5小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzkxZTBiZWRiMTc3ZjQ2MjFhMTVlYmZkODcxZTAyMGE3LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316649263520114/img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 1,
+        "signal_content": "帖子内容为“$AGT 已经瀑布了，速速空！！开香槟了兄弟们😉”，直接表达了强烈的看空情绪，并使用了“瀑布”和“速速空”等词语，暗示价格大幅下跌，且有做空的时机。然而，帖子中并未提供任何技术分析依据，例如支撑/阻力位、均线、MACD、RSI或形态等，也没有给出具体的入场、止盈、止损点位，因此信号强度较低。",
+        "signal_raw_data": {
+          "text": "{\"isSign\": true, \"content\": \"帖子内容为“$AGT 已经瀑布了，速速空！！开香槟了兄弟们😉”，直接表达了强烈的看空情绪，并使用了“瀑布”和“速速空”等词语，暗示价格大幅下跌，且有做空的时机。然而，帖子中并未提供任何技术分析依据，例如支撑/阻力位、均线、MACD、RSI或形态等，也没有给出具体的入场、止盈、止损点位，因此信号强度较低。\", \"star\": 1}"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:48 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316649263520114/img_0.jpg",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316648233603089": {
+        "href": "https://www.binance.com/zh-CN/square/post/316648233603089",
+        "published_at": "2026-04-26 18:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "5小时",
+        "is_pinned": false,
+        "title": "$RIVER 有名的强庄妖币！它要是V起来，上限多高我不敢想象😂，可能是10，也可能是30！12万美金多单已进场，等待起飞🛫！",
+        "raw": "$RIVER 有名的强庄妖币！它要是V起来，上限多高我不敢想象😂，可能是10，也可能是30！12万美金多单已进场，等待起飞🛫！",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "5小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2QyMTQ5NDdiODZlZDQ2ZGJiZDhlY2NmNzExM2VhMzE5LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316648233603089/img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 2,
+        "signal_content": "帖子声称 $RIVER 是“有名的强庄妖币”，并已入场 12 万美金多单，等待起飞。然而，目前的技术分析显示 $RIVER 处于震荡或下跌趋势中，多项技术指标（如 MACD、RSI、短期均线）显示出看跌信号，且存在阻力位在 6.80 美元附近。尽管有“包多”的说法，但缺乏明确的技术支撑和具体的入场、止盈、止损位，信号强度较低。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子声称 $RIVER 是“有名的强庄妖币”，并已入场 12 万美金多单，等待起飞。然而，目前的技术分析显示 $RIVER 处于震荡或下跌趋势中，多项技术指标（如 MACD、RSI、短期均线）显示出看跌信号，且存在阻力位在 6.80 美元附近。尽管有“包多”的说法，但缺乏明确的技术支撑和具体的入场、止盈、止损位，信号强度较低。\",\n  \"star\": 2\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:52 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316648233603089/img_0.jpg",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316641258636402": {
+        "href": "https://www.binance.com/zh-CN/square/post/316641258636402",
+        "published_at": "2026-04-26 17:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "6小时",
+        "is_pinned": false,
+        "title": "$币安人生 貌似已经站稳0.3了，多一手试试！我12万U多单已入场，目标依旧1.5！🛫 {future}(币安人生USDT)",
+        "raw": "$币安人生 貌似已经站稳0.3了，多一手试试！我12万U多单已入场，目标依旧1.5！🛫 {future}(币安人生USDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "6小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20260107/ce994b01-1841-419a-ae2d-101465c3c7b4.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzlhZTk5MTJlODc4OTQ5Zjc5N2QwMjdlYzgwODc1ZjA0LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316641258636402/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316641258636402/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "帖子显示已站稳0.3支撑位，并已入场12万U多单，目标看向1.5。该信号具备明确的入场位（0.3附近）和目标位（1.5），但止损位未提及，信号强度为4。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子显示已站稳0.3支撑位，并已入场12万U多单，目标看向1.5。该信号具备明确的入场位（0.3附近）和目标位（1.5），但止损位未提及，信号强度为4。\",\n  \"star\": 4\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:53 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316641258636402/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316636107052065": {
+        "href": "https://www.binance.com/zh-CN/square/post/316636107052065",
+        "published_at": "2026-04-26 17:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "6小时",
+        "is_pinned": false,
+        "title": "$BTC 我又来了，50万美金空单已进场，又被套住了😭。 {future}(BTCUSDT)",
+        "raw": "$BTC 我又来了，50万美金空单已进场，又被套住了😭。 {future}(BTCUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "6小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/87496d50-2408-43e1-ad4c-78b47b448a6a.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2E3NjYyNTA2NmY1NjQ0NDZhNmY0NTkxMmJjNGE4Mjc0LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316636107052065/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316636107052065/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 1,
+        "signal_content": "用户在帖子中提到“50万美金空单已进场，又被套住了”，表明其持有一个空头仓位，并且该仓位目前处于亏损状态，即价格上涨。这表明用户是看空的，但实际价格走势与其预测相反。帖子内容属于情绪表达，缺乏技术分析和明确的交易点位。根据2024年4月比特币走势来看，整体市场经历了一段艰难时期，市值有所下降，但也有积极发展，如香港ETF获批。近期（截至2024年4月26日）比特币价格在77,000-79,000美元区间震荡，存在关键支撑位和阻力位，但无明确的交易信号。",
+        "signal_raw_data": {
+          "text": "```json\n{\n\"isSign\": true,\n\"content\": \"用户在帖子中提到“50万美金空单已进场，又被套住了”，表明其持有一个空头仓位，并且该仓位目前处于亏损状态，即价格上涨。这表明用户是看空的，但实际价格走势与其预测相反。帖子内容属于情绪表达，缺乏技术分析和明确的交易点位。根据2024年4月比特币走势来看，整体市场经历了一段艰难时期，市值有所下降，但也有积极发展，如香港ETF获批。近期（截至2024年4月26日）比特币价格在77,000-79,000美元区间震荡，存在关键支撑位和阻力位，但无明确的交易信号。\",\n\"star\": 1\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:56:59 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316636107052065/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316626920077506": {
+        "href": "https://www.binance.com/zh-CN/square/post/316626920077506",
+        "published_at": "2026-04-26 16:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "7小时",
+        "is_pinned": false,
+        "title": "$币安人生 又是链上信息😅，大户砸盘跑路，盈利榜套现1.2亿。这价格没人接。梭哈哥都空进去了，那我跟上得了！ {future}(币安人生USDT)",
+        "raw": "$币安人生 又是链上信息😅，大户砸盘跑路，盈利榜套现1.2亿。这价格没人接。梭哈哥都空进去了，那我跟上得了！ {future}(币安人生USDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "7小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20260107/ce994b01-1841-419a-ae2d-101465c3c7b4.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzk4YzMxYjI3MDliYTQ2ZTQ4MjAzNDliMGJlMjJlNzEyLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316626920077506/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316626920077506/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 2,
+        "signal_content": "帖子提到“大户砸盘跑路”、“盈利榜套现1.2亿”、“梭哈哥都空进去了”，结合“这价格没人接”的主观判断，表明作者看空该币种。作者决定“跟上得了”梭哈哥的操作，意图做空。但帖子未提供明确的入场价、止盈价和止损价，仅是跟随他人行为的意向。因此，信号强度较低。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子提到“大户砸盘跑路”、“盈利榜套现1.2亿”、“梭哈哥都空进去了”，结合“这价格没人接”的主观判断，表明作者看空该币种。作者决定“跟上得了”梭哈哥的操作，意图做空。但帖子未提供明确的入场价、止盈价和止损价，仅是跟随他人行为的意向。因此，信号强度较低。\",\n  \"star\": 2\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:57:00 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316626920077506/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316622167175602": {
+        "href": "https://www.binance.com/zh-CN/square/post/316622167175602",
+        "published_at": "2026-04-26 16:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "7小时",
+        "is_pinned": false,
+        "title": "$B 抓住这个妖币，逢高做空！！ 目前价格0.1243处于反弹乏力阶段，上方0.1350-0.1435区间套牢盘较多。市场情绪在急速拉涨后通常会回归冷静，此时博取回调的盈亏比优于追涨。市价空进去，等暴跌！ {future}(BUSDT)",
+        "raw": "$B 抓住这个妖币，逢高做空！！ 目前价格0.1243处于反弹乏力阶段，上方0.1350-0.1435区间套牢盘较多。市场情绪在急速拉涨后通常会回归冷静，此时博取回调的盈亏比优于追涨。市价空进去，等暴跌！ {future}(BUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "7小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/symbol/logo/20250717/e27b3ab0-5488-46d0-aa64-a8d7833fd50f.png",
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzBjMjIwNzViMTAzOTQxMDJhMTZmZmFjMjA1YTMwOGI2LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316622167175602/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316622167175602/img_1.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316622167175602/img_2.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "帖子明确提出逢高做空 $B 的建议。分析指出当前价格 0.1243 反弹乏力，上方 0.1350-0.1435 存在较多套牢盘，认为急速拉涨后市场情绪回归冷静，博取回调的盈亏比优于追涨。建议市价空单入场，等待下跌。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子明确提出逢高做空 $B 的建议。分析指出当前价格 0.1243 反弹乏力，上方 0.1350-0.1435 存在较多套牢盘，认为急速拉涨后市场情绪回归冷静，博取回调的盈亏比优于追涨。建议市价空单入场，等待下跌。\",\n  \"star\": 4\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:57:02 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316622167175602/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316619135312721": {
+        "href": "https://www.binance.com/zh-CN/square/post/316619135312721",
+        "published_at": "2026-04-26 16:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "7小时",
+        "is_pinned": false,
+        "title": "$ORCA 这就是a9大佬的恐怖实力吗？大司马大佬开多ORCA仅资金费一小时就是3400美金😨，空军们要被他吃光了啊，狗庄能把他吃掉吗，大家怎么看？ {future}(ORCAUSDT)",
+        "raw": "$ORCA 这就是a9大佬的恐怖实力吗？大司马大佬开多ORCA仅资金费一小时就是3400美金😨，空军们要被他吃光了啊，狗庄能把他吃掉吗，大家怎么看？ {future}(ORCAUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "7小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20241206/109144b0-b969-4595-b4ff-b908cb7173a9.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2NhZjY4MDRmYTJlZDQ4ZTFhNjQyZmZjZDc5NGEzNGMxLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316619135312721/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316619135312721/img_1.jpg"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
@@ -549,16 +1927,127 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": false,
         "signal_star": 0,
-        "signal_content": "用户提供的帖子仅表达了对PIPPIN价格短期内剧烈波动的惊讶，使用了“好离谱”、“第一妖币”等主观性词汇，但未提供任何技术分析、价格预测、入场点、止盈止损位等交易信号。因此，该帖子不包含明确的交易信号。",
+        "signal_content": "该帖子主要讨论了某位交易员（a9大佬/大司马）在 ORCAUSDT 上的做多行为及其高额资金费收益，并引发了关于“狗庄”是否会“吃掉”该交易员的讨论。帖子中并未提供任何技术分析、明确的交易策略（入场位、止盈位、止损位），也无具体的趋势判断或价格支撑/阻力位。内容仅为对他人交易行为的描述和市场情绪的讨论，不构成交易信号。",
         "signal_raw_data": {
-          "text": "```json\n{\n\"isSign\": false,\n\"content\": \"用户提供的帖子仅表达了对PIPPIN价格短期内剧烈波动的惊讶，使用了“好离谱”、“第一妖币”等主观性词汇，但未提供任何技术分析、价格预测、入场点、止盈止损位等交易信号。因此，该帖子不包含明确的交易信号。\",\n\"star\": 0\n}\n```"
+          "text": "```json\n{\n  \"isSign\": false,\n  \"content\": \"该帖子主要讨论了某位交易员（a9大佬/大司马）在 ORCAUSDT 上的做多行为及其高额资金费收益，并引发了关于“狗庄”是否会“吃掉”该交易员的讨论。帖子中并未提供任何技术分析、明确的交易策略（入场位、止盈位、止损位），也无具体的趋势判断或价格支撑/阻力位。内容仅为对他人交易行为的描述和市场情绪的讨论，不构成交易信号。\",\n  \"star\": 0\n}\n```"
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-04-24 17:31:34 北京时间",
-        "signal_image_used": "D:\\frontend\\main\\python\\auto-deal-eth\\square_post_images\\315878406004578\\img_0.jpg",
+        "signal_analyzed_at": "2026-04-26 23:57:06 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316619135312721/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316616116883122": {
+        "href": "https://www.binance.com/zh-CN/square/post/316616116883122",
+        "published_at": "2026-04-26 16:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "7小时",
+        "is_pinned": false,
+        "title": "$BSB 可以空了！！旭旭宝宝大佬已经出手！！😅bsb上涨为诱多出货，链上持续砸盘，持仓量回落，加仓空，等瀑布！ {future}(BSBUSDT)",
+        "raw": "$BSB 可以空了！！旭旭宝宝大佬已经出手！！😅bsb上涨为诱多出货，链上持续砸盘，持仓量回落，加仓空，等瀑布！ {future}(BSBUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "7小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/symbol/logo/20260325/b99632cb-c93d-4f7f-883d-9e875d314991.png",
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzZiYjE1MzRhNjMzOTRhMzhiNjZmN2M2M2U3NWY0MmI5LmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316616116883122/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316616116883122/img_1.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316616116883122/img_2.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 3,
+        "signal_content": "帖子发布者认为 BSB 上涨是诱多出货，并结合链上持续砸盘、持仓量回落的迹象，判断行情将瀑布式下跌，建议加仓做空。该信号强度较高，但缺乏具体的入场、止盈、止损点位，仅给出趋势预判。",
+        "signal_raw_data": {
+          "text": "```json\n{\n  \"isSign\": true,\n  \"content\": \"帖子发布者认为 BSB 上涨是诱多出货，并结合链上持续砸盘、持仓量回落的迹象，判断行情将瀑布式下跌，建议加仓做空。该信号强度较高，但缺乏具体的入场、止盈、止损点位，仅给出趋势预判。\",\n  \"star\": 3\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:57:09 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316616116883122/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316610997830513": {
+        "href": "https://www.binance.com/zh-CN/square/post/316610997830513",
+        "published_at": "2026-04-26 15:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "8小时",
+        "is_pinned": false,
+        "title": "$ORDI 广场第一kol户圣大佬又又异动了😅，那还说啥呢，我8万u空单已入场，跟着捡💰 {future}(ORDIUSDT)",
+        "raw": "$ORDI 广场第一kol户圣大佬又又异动了😅，那还说啥呢，我8万u空单已入场，跟着捡💰 {future}(ORDIUSDT)",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "8小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20230926/e1520879-9cd8-4259-bb0b-ad1d19f2c4f4.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzJlYmIyY2U3NDBmYjQyYWNhZmExNWEzYTQ3YTEzNGNlLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316610997830513/img_0.png",
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316610997830513/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 3,
+        "signal_content": "帖子明确指出“我8万u空单已入场”，表明了看空ORDIUSDT的意图。虽然没有提供具体的止盈止损位，但这是一个基于个人交易行为的信号。当前ORDIUSDT的支撑位在$4.38，阻力位在$4.95。考虑到“户圣大佬”的异动，如果其行为是看跌信号，结合帖子持仓信息，可视为一个潜在的做空信号。",
+        "signal_raw_data": {
+          "text": "```json\n{\n\"isSign\": true,\n\"content\": \"帖子明确指出“我8万u空单已入场”，表明了看空ORDIUSDT的意图。虽然没有提供具体的止盈止损位，但这是一个基于个人交易行为的信号。当前ORDIUSDT的支撑位在$4.38，阻力位在$4.95。考虑到“户圣大佬”的异动，如果其行为是看跌信号，结合帖子持仓信息，可视为一个潜在的做空信号。\",\n\"star\": 3\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:57:14 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316610997830513/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/316603682975249": {
+        "href": "https://www.binance.com/zh-CN/square/post/316603682975249",
+        "published_at": "2026-04-26 15:53:55 北京时间",
+        "published_iso": "",
+        "time_label": "8小时",
+        "is_pinned": false,
+        "title": "$TRUMP 黄毛还没卸任呢，这次暴涨才刚刚开始！😊",
+        "raw": "$TRUMP 黄毛还没卸任呢，这次暴涨才刚刚开始！😊",
+        "author": "square-creator-1d148bbce7461",
+        "author_slug": "square-creator-1d148bbce7461",
+        "time": "8小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzU4N2MyOTBiMmQ3NzQ1YzdiZDhiMDEzY2ZiMjU2ZjBkLmpwZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316603682975249/img_0.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 1,
+        "signal_content": "帖子内容为“$TRUMP 黄毛还没卸任呢，这次暴涨才刚刚开始！😊”，属于情绪表达，缺乏具体的技术分析和交易策略。虽然提到“暴涨”和“刚刚开始”，但没有提供任何支撑位、阻力位、入场位、止盈位或止损位，因此信号强度较低。",
+        "signal_raw_data": {
+          "text": "```json\n{\n\"isSign\": true,\n\"content\": \"帖子内容为“$TRUMP 黄毛还没卸任呢，这次暴涨才刚刚开始！😊”，属于情绪表达，缺乏具体的技术分析和交易策略。虽然提到“暴涨”和“刚刚开始”，但没有提供任何支撑位、阻力位、入场位、止盈位或止损位，因此信号强度较低。\",\n\"star\": 1\n}\n```"
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-04-26 23:57:20 北京时间",
+        "signal_image_used": "/Users/mac/frontend/code/1.operations/auto-deal-eth/square_post_images/316603682975249/img_0.jpg",
         "signal_analyzed_ok": true
       }
     }
   },
-  "updated_at": "2026-04-24 18:37:44 北京时间"
+  "updated_at": "2026-04-26 23:53:55 北京时间"
 }

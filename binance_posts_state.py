@@ -1,5 +1,5 @@
 """
-Square 关注流帖子：24 小时滚动窗口、状态持久化、新帖提示、Gemini 多空判断。
+Square 关注流帖子：48 小时滚动窗口、状态持久化、新帖提示、Gemini 多空判断。
 
 状态文件默认与 --out 同目录下的 binance_posts_state.json。
 posts 结构为 { 关注者 author_slug: { 帖子 href: 记录 } }；旧版扁平 { href: 记录 } 会在加载时自动迁移。
@@ -9,10 +9,12 @@ from __future__ import annotations
 import json
 import os
 import re
+import socket
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 from gemini_analyzer import extract_json_from_gemini_text
@@ -24,12 +26,13 @@ except ModuleNotFoundError:
 
 TZ_BEIJING = ZoneInfo("Asia/Shanghai")
 
-# 默认保留最近 24 小时（可通过环境变量覆盖）
-POST_RETENTION_HOURS = int(os.getenv("POST_RETENTION_HOURS", "24").strip() or "24")
+# 默认保留最近 48 小时（可通过环境变量覆盖）
+POST_RETENTION_HOURS = int(os.getenv("POST_RETENTION_HOURS", "48").strip() or "48")
 DEFAULT_STATE_BASENAME = "binance_posts_state.json"
 LOCAL_CHAT_ANALYZE_URL = "http://127.0.0.1:3860/chat"
 LOCAL_CHAT_ANALYZE_ROLE = os.getenv("LOCAL_CHAT_ANALYZE_ROLE", "binance_square").strip() or "binance_square"
 LOCAL_CHAT_ANALYZE_TIMEOUT_SEC = 45
+LOCAL_CHAT_PROBE_TIMEOUT_SEC = 1.0
 # 默认不并发；后续切本地模型时可开启并发
 LOCAL_CHAT_ANALYZE_CONCURRENT = (
     os.getenv("LOCAL_CHAT_ANALYZE_CONCURRENT", "false").strip().lower() == "true"
@@ -44,6 +47,34 @@ _PUBLISHED_MAX_FUTURE_SKEW = timedelta(minutes=2)
 
 # 无 author_slug 时的分桶键（便于与真实 slug 区分）
 _POSTS_BUCKET_UNKNOWN = "_unknown"
+_LOCAL_CHAT_SERVICE_AVAILABLE: Optional[bool] = None
+_LOCAL_CHAT_UNAVAILABLE_REPORTED = False
+
+
+def _is_local_chat_service_available() -> bool:
+    """
+    本地 chat 服务探活（仅检查 localhost/127.0.0.1）。
+    为避免每条帖子都探测，结果在单次进程内缓存。
+    """
+    global _LOCAL_CHAT_SERVICE_AVAILABLE
+    if _LOCAL_CHAT_SERVICE_AVAILABLE is not None:
+        return _LOCAL_CHAT_SERVICE_AVAILABLE
+    parsed = urlparse(LOCAL_CHAT_ANALYZE_URL)
+    host = (parsed.hostname or "").strip().lower()
+    port = parsed.port
+    # 非本地地址不做端口探测，保持原请求行为
+    if host not in {"127.0.0.1", "localhost"} or not port:
+        _LOCAL_CHAT_SERVICE_AVAILABLE = True
+        return True
+    try:
+        with socket.create_connection(
+            (host, int(port)), timeout=LOCAL_CHAT_PROBE_TIMEOUT_SEC
+        ):
+            pass
+        _LOCAL_CHAT_SERVICE_AVAILABLE = True
+    except OSError:
+        _LOCAL_CHAT_SERVICE_AVAILABLE = False
+    return _LOCAL_CHAT_SERVICE_AVAILABLE
 
 
 def _dt_utc(dt: datetime) -> datetime:
@@ -65,7 +96,7 @@ def _reject_future_published_dt(
 
 def parse_published_to_dt(post: Dict[str, Any], ref_now: datetime) -> Optional[datetime]:
     """
-    从帖子字段解析「发帖时间」为 UTC，用于 24 小时窗口。
+    从帖子字段解析「发帖时间」为 UTC，用于 48 小时窗口。
     优先 published_iso（time[datetime]），其次 time_label / time 的中文相对时间。
     """
     iso = (post.get("published_iso") or "").strip()
@@ -500,6 +531,15 @@ def _analyze_post_via_local_api(
         f"正文: {(raw or '')[:8000]}\n"
         f"链接: {href}"
     )
+    if not _is_local_chat_service_available():
+        global _LOCAL_CHAT_UNAVAILABLE_REPORTED
+        if not _LOCAL_CHAT_UNAVAILABLE_REPORTED:
+            print(
+                "[posts_state][signal_api] 本地服务不可用，已跳过所有请求 "
+                f"url={LOCAL_CHAT_ANALYZE_URL}"
+            )
+            _LOCAL_CHAT_UNAVAILABLE_REPORTED = True
+        return {"ok": False, "error": "local_chat_service_unavailable", "skipped": True}
     print(
         f"[posts_state][signal_api] 请求开始 role={LOCAL_CHAT_ANALYZE_ROLE} "
         f"url={LOCAL_CHAT_ANALYZE_URL} timeout={LOCAL_CHAT_ANALYZE_TIMEOUT_SEC}s href={href}"
@@ -553,6 +593,129 @@ def _normalize_signal_payload(data: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(parsed, dict):
             return parsed
     return data
+
+
+def _state_bucket_post_href_key(inner: Dict[str, Any], post_ph: str) -> str:
+    """在单个 author bucket 内，将 patch 的 post_href 对齐到实际 state 键（同帖 id、不同域名/locale）。"""
+    ph = (post_ph or "").strip().split("#")[0]
+    if not ph or "/square/post/" not in ph.lower():
+        return ""
+    if ph in inner:
+        return ph
+    m = re.search(r"/square/post/(\d+)", ph, re.I)
+    if not m:
+        return ""
+    pid = m.group(1)
+    for k in inner:
+        if "/square/post/" not in k.lower():
+            continue
+        m2 = re.search(r"/square/post/(\d+)", k, re.I)
+        if m2 and m2.group(1) == pid:
+            return k
+    return ""
+
+
+def _apply_watchlist_audio_replay_patches(
+    posts_map: Dict[str, Dict[str, Any]],
+    patches: List[Dict[str, Any]],
+    href_index: Dict[str, str],
+    ref_now: datetime,
+) -> int:
+    """
+    将抓取结果 watchlist.audio_replay_patches 写入各 bucket 下对应 /square/post/ 记录
+    （square_audio_replay_url、audio_m3u8_url），与 binance_posts_state.json 中结构一致。
+    若状态与时间线中均无该帖（例如已超 48h 被过滤），则按 author_slug 桶新建一条最小记录，避免音频白抓。
+    """
+    applied = 0
+    for patch in patches:
+        if not isinstance(patch, dict):
+            continue
+        post_ph = (patch.get("post_href") or "").strip().split("#")[0]
+        if not post_ph or "/square/post/" not in post_ph.lower():
+            continue
+        m3 = (patch.get("audio_m3u8_url") or "").strip()
+        rep = (
+            (patch.get("square_audio_replay_url") or patch.get("replay_href") or "")
+            .strip()
+            .split("#")[0]
+        )
+        if not m3 and not rep:
+            continue
+        slug_hint = (patch.get("author_slug") or "").strip().lower()
+        buckets_order: List[str] = []
+        if slug_hint and slug_hint in posts_map:
+            buckets_order.append(slug_hint)
+        for sl in posts_map:
+            if sl not in buckets_order:
+                buckets_order.append(sl)
+        placed = False
+        for sl in buckets_order:
+            inner = posts_map.get(sl)
+            if not isinstance(inner, dict):
+                continue
+            mk = _state_bucket_post_href_key(inner, post_ph)
+            if not mk:
+                continue
+            rec = inner[mk]
+            if m3:
+                rec["audio_m3u8_url"] = m3
+            if rep and "/square/audio/replay" in rep.lower():
+                rec["square_audio_replay_url"] = rep
+            applied += 1
+            placed = True
+            break
+        if placed:
+            continue
+        bucket_slug = (
+            slug_hint if slug_hint else _POSTS_BUCKET_UNKNOWN
+        ).strip().lower() or _POSTS_BUCKET_UNKNOWN
+        inner_new = posts_map.setdefault(bucket_slug, {})
+        title_stub = (patch.get("title") or "")[:2000]
+        iso_stub = (
+            _dt_utc(ref_now)
+            .replace(microsecond=0)
+            .isoformat()
+            .replace("+00:00", "Z")
+        )
+        sq_url = rep if (rep and "/square/audio/replay" in rep.lower()) else ""
+        stub_rec: Dict[str, Any] = {
+            "href": post_ph,
+            "published_at": "",
+            "published_iso": iso_stub,
+            "time_label": "音频回扫",
+            "is_pinned": False,
+            "title": title_stub or "（音频帖）",
+            "raw": title_stub or "",
+            "author": bucket_slug
+            if bucket_slug != _POSTS_BUCKET_UNKNOWN
+            else "",
+            "author_slug": bucket_slug
+            if bucket_slug != _POSTS_BUCKET_UNKNOWN
+            else "",
+            "time": "",
+            "image_urls": [],
+            "video_url": "",
+            "audio_m3u8_url": m3,
+            "square_audio_replay_url": sq_url,
+            "saved_image_paths": [],
+            "gemini_direction": None,
+            "gemini_confidence": None,
+            "gemini_reason": None,
+            "gemini_bias_zh": None,
+            "signal_is_sign": None,
+            "signal_star": None,
+            "signal_content": None,
+            "signal_raw_data": None,
+            "signal_error": None,
+            "signal_analyzed_at": None,
+            "signal_image_used": None,
+            "signal_analyzed_ok": False,
+        }
+        enrich_post_published_fields(stub_rec, ref_now)
+        inner_new[post_ph] = stub_rec
+        href_index[post_ph] = bucket_slug
+        applied += 1
+    return applied
 
 
 def process_watchlist_posts(
@@ -623,7 +786,16 @@ def process_watchlist_posts(
         if not isinstance(p, dict):
             continue
         href = (p.get("href") or "").strip()
-        if not href or "/square/post/" not in href.lower():
+        hl = href.lower()
+        if not href or (
+            "/square/post/" not in hl and "/square/audio/replay" not in hl
+        ):
+            continue
+        # 不得以 /square/audio/replay 为主键写入 state；回播与 m3u8 由 audio_replay_patches 并入 post。
+        if "/square/audio/replay" in hl and "/square/post/" not in hl:
+            continue
+        # audio/replay 记录只在首次入库时维护；已存在于状态文件则跳过，避免重复覆盖。
+        if "/square/audio/replay" in hl and href in href_index:
             continue
         enrich_post_published_fields(p, now)
         title = (p.get("title") or "")[:2000]
@@ -653,6 +825,9 @@ def process_watchlist_posts(
             rec["image_urls"] = list(dict.fromkeys(imgs))[:24]
             rec["video_url"] = str(p.get("video_url") or rec.get("video_url") or "")
             rec["audio_m3u8_url"] = str(p.get("audio_m3u8_url") or rec.get("audio_m3u8_url") or "")
+            rec["square_audio_replay_url"] = str(
+                p.get("square_audio_replay_url") or rec.get("square_audio_replay_url") or ""
+            )
             if p.get("saved_image_paths"):
                 rec["saved_image_paths"] = p.get("saved_image_paths")
             # 保留既有的接口分析字段（后续会统一异步刷新）
@@ -677,6 +852,7 @@ def process_watchlist_posts(
                 "image_urls": list(dict.fromkeys(p.get("image_urls") or []))[:24],
                 "video_url": str(p.get("video_url") or ""),
                 "audio_m3u8_url": str(p.get("audio_m3u8_url") or ""),
+                "square_audio_replay_url": str(p.get("square_audio_replay_url") or ""),
                 "saved_image_paths": p.get("saved_image_paths") or [],
                 "gemini_direction": None,
                 "gemini_confidence": None,
@@ -740,6 +916,18 @@ def process_watchlist_posts(
                 )
                 + "=" * 56
                 + "\n"
+            )
+
+    wl_audio_patches = list(
+        (result.get("watchlist") or {}).get("audio_replay_patches") or []
+    )
+    if wl_audio_patches:
+        n_audio = _apply_watchlist_audio_replay_patches(
+            posts_map, wl_audio_patches, href_index, now
+        )
+        if n_audio:
+            print(
+                f"[posts_state] 已将 {n_audio} 条音频回扫结果合并进帖子记录（square_audio_replay_url / audio_m3u8_url）"
             )
 
     # 文章抓取归档后：异步调用本地接口分析（每篇文章一条任务）
@@ -881,6 +1069,7 @@ def process_watchlist_posts(
                     "image_urls": rec.get("image_urls") or [],
                     "video_url": rec.get("video_url") or "",
                     "audio_m3u8_url": rec.get("audio_m3u8_url") or "",
+                    "square_audio_replay_url": rec.get("square_audio_replay_url") or "",
                     "saved_image_paths": rec.get("saved_image_paths") or [],
                     "gemini_direction": rec.get("gemini_direction"),
                     "gemini_bias_zh": rec.get("gemini_bias_zh"),
