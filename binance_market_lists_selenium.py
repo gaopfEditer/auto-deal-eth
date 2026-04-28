@@ -20,7 +20,7 @@
     仅对这些用户巡检「是否直播」与「是否发文章」；列表为空时仍巡检 Following 页收集到的全部主页。
   - 行情：默认只输出涨幅榜、跌幅榜各前 N（--market-top，默认 10）；全局热榜需加 --include-hot-rank。
   - 热榜/涨幅/跌幅若页面 DOM 抓不到，涨幅与跌幅会回退到官方 /api/v3/ticker/24hr（无需 Key）。
-  - 关注流帖子默认合并 binance_posts_state.json：保留 48 小时内文章，新帖终端提示并用 Gemini 判多空；
+  - 关注流帖子默认合并 binance_posts_state.json：按发帖时间保留近 N 小时（默认 24，config.POST_RETENTION_HOURS 或环境变量 POST_RETENTION_HOURS），新帖终端提示并用 Gemini 判多空；
     可用 --skip-posts-state 仅输出本次快照。
   - 重点关注用户会额外打开其主页并深度下滚，合并时间线帖子（条数见 --max-items）；帖子卡片内图片可保存到 --square-images-dir。
 """
@@ -2806,7 +2806,7 @@ def main():
     parser.add_argument(
         "--skip-posts-state",
         action="store_true",
-        help="不合并 48 小时帖子状态与 Gemini（写入的 JSON 仅为本次抓取快照）",
+        help="不合并 binance_posts_state（帖子保留窗口见 POST_RETENTION_HOURS）与 Gemini（写入的 JSON 仅为本次抓取快照）",
     )
     parser.add_argument(
         "--posts-state",

@@ -1,5 +1,5 @@
 """
-Square 关注流帖子：48 小时滚动窗口、状态持久化、新帖提示、Gemini 多空判断。
+Square 关注流帖子：按发帖时间保留窗口（默认 24 小时，见 config.POST_RETENTION_HOURS）、状态持久化、新帖提示、Gemini 多空判断。
 
 状态文件默认与 --out 同目录下的 binance_posts_state.json。
 posts 结构为 { 关注者 author_slug: { 帖子 href: 记录 } }；旧版扁平 { href: 记录 } 会在加载时自动迁移。
@@ -26,8 +26,13 @@ except ModuleNotFoundError:
 
 TZ_BEIJING = ZoneInfo("Asia/Shanghai")
 
-# 默认保留最近 48 小时（可通过环境变量覆盖）
-POST_RETENTION_HOURS = int(os.getenv("POST_RETENTION_HOURS", "48").strip() or "48")
+try:
+    from config import POST_RETENTION_HOURS
+except ImportError:
+    # 独立运行本模块时无 config，仍支持环境变量
+    POST_RETENTION_HOURS = int(
+        os.getenv("POST_RETENTION_HOURS", "24").strip() or "24"
+    )
 DEFAULT_STATE_BASENAME = "binance_posts_state.json"
 LOCAL_CHAT_ANALYZE_URL = "http://127.0.0.1:3860/chat"
 LOCAL_CHAT_ANALYZE_ROLE = os.getenv("LOCAL_CHAT_ANALYZE_ROLE", "binance_square").strip() or "binance_square"
@@ -96,7 +101,7 @@ def _reject_future_published_dt(
 
 def parse_published_to_dt(post: Dict[str, Any], ref_now: datetime) -> Optional[datetime]:
     """
-    从帖子字段解析「发帖时间」为 UTC，用于 48 小时窗口。
+    从帖子字段解析「发帖时间」为 UTC，用于按 POST_RETENTION_HOURS 做保留窗口过滤。
     优先 published_iso（time[datetime]），其次 time_label / time 的中文相对时间。
     """
     iso = (post.get("published_iso") or "").strip()
@@ -624,7 +629,7 @@ def _apply_watchlist_audio_replay_patches(
     """
     将抓取结果 watchlist.audio_replay_patches 写入各 bucket 下对应 /square/post/ 记录
     （square_audio_replay_url、audio_m3u8_url），与 binance_posts_state.json 中结构一致。
-    若状态与时间线中均无该帖（例如已超 48h 被过滤），则按 author_slug 桶新建一条最小记录，避免音频白抓。
+    若状态与时间线中均无该帖（例如已超保留窗口被过滤），则按 author_slug 桶新建一条最小记录，避免音频白抓。
     """
     applied = 0
     for patch in patches:
