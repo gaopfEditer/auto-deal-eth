@@ -3,6 +3,7 @@ Square 关注流帖子：按发帖时间保留窗口（默认 24 小时，见 co
 
 状态文件默认与 --out 同目录下的 binance_posts_state.json。
 posts 结构为 { 关注者 author_slug: { 帖子 href: 记录 } }；旧版扁平 { href: 记录 } 会在加载时自动迁移。
+根级 detail_fetch_cache：记录已抓取过正文的 post_id，供 Selenium 跳过重复打开详情页；与帖子一并按保留窗口清理。
 """
 from __future__ import annotations
 
@@ -45,6 +46,11 @@ LOCAL_CHAT_ANALYZE_CONCURRENT = (
 # 并发开启时的 worker 数（建议小值）
 LOCAL_CHAT_ANALYZE_WORKERS = int(
     os.getenv("LOCAL_CHAT_ANALYZE_WORKERS", "3").strip() or "3"
+)
+
+# 正文详情页（/square/post 等）抓取缓存：post_id -> {"at": ISO8601 UTC, "v": int}；v 与 DETAIL_FETCH_CACHE_VERSION 对齐时可跳过重复抓取
+DETAIL_FETCH_CACHE_VERSION = int(
+    os.getenv("DETAIL_FETCH_CACHE_VERSION", "1").strip() or "1"
 )
 
 # 发帖时间不得晚于「当前」超过该容差（避免时钟误差误判）
@@ -413,22 +419,83 @@ def _href_slug_index(buckets: Dict[str, Dict[str, Any]]) -> Dict[str, str]:
     return idx
 
 
+def _normalize_detail_fetch_cache(raw: Any) -> Dict[str, Any]:
+    if not isinstance(raw, dict):
+        return {}
+    out: Dict[str, Any] = {}
+    for k, v in raw.items():
+        ks = str(k or "").strip()
+        if not ks:
+            continue
+        if isinstance(v, dict):
+            out[ks] = dict(v)
+        else:
+            out[ks] = {"at": str(v), "v": 1}
+    return out
+
+
+def detail_fetch_cache_entry_fresh(entry: Any) -> bool:
+    """缓存项是否仍视为「详情已抓过」可跳过（版本号需 >= DETAIL_FETCH_CACHE_VERSION）。"""
+    if not isinstance(entry, dict):
+        return False
+    try:
+        v = int(entry.get("v", 0))
+    except (TypeError, ValueError):
+        v = 0
+    if v < DETAIL_FETCH_CACHE_VERSION:
+        return False
+    return bool(str(entry.get("at") or "").strip())
+
+
+def _post_id_from_square_href(href: str) -> str:
+    """与 binance_market_lists_selenium._post_id_from_href 对齐，用于缓存键与裁剪。"""
+    m = re.search(r"/square/post/(\d+)", href or "", re.I)
+    if m:
+        return m.group(1)
+    m2 = re.search(r"/square/(?:video|article)/(\d+)", href or "", re.I)
+    if m2:
+        return m2.group(1)
+    tail = re.sub(r"\W+", "_", (href or ""))[-48:]
+    return tail
+
+
 def _load_state(path: str) -> Dict[str, Any]:
+    empty: Dict[str, Any] = {
+        "version": 1,
+        "posts": {},
+        "detail_fetch_cache": {},
+    }
     if not os.path.isfile(path):
-        return {"version": 1, "posts": {}}
+        return dict(empty)
     try:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
         if not isinstance(data, dict):
-            return {"version": 1, "posts": {}}
+            return dict(empty)
         posts_raw = data.get("posts")
         posts = _normalize_posts_to_buckets(posts_raw if isinstance(posts_raw, dict) else {})
-        out: Dict[str, Any] = {"version": int(data.get("version", 1)), "posts": posts}
+        out: Dict[str, Any] = {
+            "version": int(data.get("version", 1)),
+            "posts": posts,
+            "detail_fetch_cache": _normalize_detail_fetch_cache(
+                data.get("detail_fetch_cache")
+            ),
+        }
         if "updated_at" in data:
             out["updated_at"] = data["updated_at"]
         return out
     except Exception:
-        return {"version": 1, "posts": {}}
+        return dict(empty)
+
+
+def load_posts_state(path: str) -> Dict[str, Any]:
+    """加载完整 state（含 detail_fetch_cache），供详情补全等复用。"""
+    return _load_state(path)
+
+
+def save_posts_state(path: str, state: Dict[str, Any]) -> None:
+    """写入完整 state（调用方需保留 posts 等字段，避免覆盖丢失）。"""
+    _save_state(path, state)
 
 
 def _save_state(path: str, state: Dict[str, Any]) -> None:
@@ -738,6 +805,10 @@ def process_watchlist_posts(
     """
     spath = state_path or default_posts_state_path(out_json_path)
     state = _load_state(spath)
+    detail_cache = state.setdefault("detail_fetch_cache", {})
+    if not isinstance(detail_cache, dict):
+        detail_cache = {}
+        state["detail_fetch_cache"] = detail_cache
     posts_map: Dict[str, Dict[str, Any]] = _normalize_posts_to_buckets(
         state.get("posts") or {}
     )
@@ -773,6 +844,9 @@ def process_watchlist_posts(
             del inner[href]
             href_index.pop(href, None)
             removed += 1
+            pid = _post_id_from_square_href(href)
+            if pid:
+                detail_cache.pop(pid, None)
         if isinstance(inner, dict) and not inner:
             posts_map.pop(slug, None)
     removed_images = _cleanup_removed_post_images(
