@@ -32,6 +32,7 @@ import json
 import os
 import random
 import re
+import sys
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -56,12 +57,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 from browser_automation import init_browser
 
 from binance_posts_state import (
+    DETAIL_FETCH_CACHE_VERSION,
     POST_RETENTION_HOURS,
     beijing_time_str,
+    default_posts_state_path,
+    detail_fetch_cache_entry_fresh,
     enrich_post_published_fields,
     filter_posts_by_published_age,
+    load_posts_state,
     parse_published_to_dt,
     process_watchlist_posts,
+    save_posts_state,
 )
 
 
@@ -99,6 +105,10 @@ KEEP_VIDEO_DETAIL_TAB = (
 # 不保留标签页时，关闭前最少停留秒数（避免“看不到有打开过”）
 VIDEO_DETAIL_TAB_VISIBLE_SEC = float(
     os.getenv("VIDEO_DETAIL_TAB_VISIBLE_SEC", "1.6").strip() or "1.6"
+)
+# 视频探测/回扫：用 Cmd/Ctrl+点击尽量在后台打开新标签（减少新页签抢焦点；依赖浏览器默认行为）
+SQUARE_VIDEO_BACKGROUND_TAB_CLICK = (
+    os.getenv("SQUARE_VIDEO_BACKGROUND_TAB_CLICK", "true").strip().lower() != "false"
 )
 # 打印 text-PrimaryText 后，对每个 aspect-video 矩形内随机点击并打印打开后的 URL
 ASPECT_VIDEO_PROBE_CLICK_AFTER_TEXT = (
@@ -531,17 +541,24 @@ def _recover_profile_tab(driver, profile_href: str, *, log: str = "") -> None:
         _scrape_log(f"恢复 profile 失败 {base!r}: {e}")
 
 
+def _modifier_open_new_tab_key():
+    """Chrome：Ctrl+点击（Win/Linux）或 Cmd+点击（macOS）通常后台打开新标签。"""
+    return Keys.COMMAND if sys.platform == "darwin" else Keys.CONTROL
+
+
 def _action_chains_click_in_element_box(
     driver,
     el,
     *,
     log_prefix: str,
     use_random_offset: bool = True,
+    background_tab: bool = False,
 ) -> bool:
     """
     用 Selenium ActionChains 发真实指针序列（相对元素中心再随机偏移后 click），
     避免 JS 里 dispatchEvent(MouseEvent) 被 React 等直接忽略。
     失败时依次回退 element.click()、arguments[0].click()。
+    background_tab=True 时先尝试修饰键+左键（尽量静默新开标签），再回退普通点击。
     """
     try:
         driver.execute_script(
@@ -566,6 +583,26 @@ def _action_chains_click_in_element_box(
         _scrape_log(
             f"{log_prefix} 实点点击 ActionChains（相对元素中心偏移 dx={dx}, dy={dy}）"
         )
+        if background_tab and SQUARE_VIDEO_BACKGROUND_TAB_CLICK:
+            mod = _modifier_open_new_tab_key()
+            try:
+                (
+                    ActionChains(driver)
+                    .move_to_element(el)
+                    .move_by_offset(dx, dy)
+                    .pause(0.07)
+                    .key_down(mod)
+                    .click()
+                    .key_up(mod)
+                    .pause(0.05)
+                    .perform()
+                )
+                _scrape_log(
+                    f"{log_prefix} 已使用修饰键+左键点击（尽量后台新标签，修饰键={mod!r}）"
+                )
+                return True
+            except Exception as e_mod:
+                _scrape_log(f"{log_prefix} 修饰键点击失败，回退普通左键: {e_mod}")
         (
             ActionChains(driver)
             .move_to_element(el)
@@ -912,6 +949,9 @@ def _post_id_from_href(href: str) -> str:
     m = re.search(r"/square/post/(\d+)", href or "", re.I)
     if m:
         return m.group(1)
+    m2 = re.search(r"/square/(?:video|article)/(\d+)", href or "", re.I)
+    if m2:
+        return m2.group(1)
     return re.sub(r"\W+", "_", (href or ""))[-48:]
 
 
@@ -1001,16 +1041,60 @@ def _download_square_post_images(
             _scrape_log(f"已保存 {len(saved)} 张图片 → {sub}")
 
 
+def _find_post_record_in_state_buckets(
+    posts_buckets: Any, href: str
+) -> Optional[Dict[str, Any]]:
+    if not isinstance(posts_buckets, dict) or not href:
+        return None
+    for inner in posts_buckets.values():
+        if isinstance(inner, dict) and href in inner:
+            r = inner.get(href)
+            return r if isinstance(r, dict) else None
+    return None
+
+
+def _merge_square_detail_from_record(p: Dict[str, Any], rec: Dict[str, Any]) -> None:
+    """把 state 里已存的详情字段合并到本次内存帖子（缓存命中时用）。"""
+    imgs = list(p.get("image_urls") or []) + list(rec.get("image_urls") or [])
+    p["image_urls"] = list(dict.fromkeys(imgs))[:24]
+    rv = str(rec.get("video_url") or "").strip()
+    if rv and not str(p.get("video_url") or "").strip():
+        p["video_url"] = rv
+    sp = rec.get("saved_image_paths")
+    if isinstance(sp, list) and sp and not (p.get("saved_image_paths") or []):
+        p["saved_image_paths"] = list(sp)
+
+
 def _enrich_post_images_from_detail_pages(
     driver,
     posts: List[Dict[str, Any]],
     max_pages: int = MAX_POST_DETAIL_ENRICH_PAGES,
+    posts_state_path: Optional[str] = None,
 ) -> None:
-    """进入 /square/post/ 正文页抓取正文区域配图（与列表卡片合并去重）；逐项略慢打开减少漏载。"""
+    """进入 /square/post/ 等正文页抓取正文区域配图（与列表卡片合并去重）；逐项略慢打开减少漏载。
+    若提供 posts_state_path 且其中 detail_fetch_cache 已记录该 post_id，则跳过打开详情页，
+    并从 state.posts 合并已有 image_urls / video_url / saved_image_paths。
+    """
     if not posts:
         return
     n = min(max(1, int(max_pages)), len(posts))
-    _scrape_log(f"打开帖子正文页补充配图（本轮逐项打开 {n} 篇）…")
+    state_for_cache: Optional[Dict[str, Any]] = None
+    cache_mut: Dict[str, Any] = {}
+    cache_dirty = False
+    if posts_state_path and os.path.isfile(posts_state_path):
+        try:
+            state_for_cache = load_posts_state(posts_state_path)
+            c = state_for_cache.setdefault("detail_fetch_cache", {})
+            if isinstance(c, dict):
+                cache_mut = c
+            else:
+                cache_mut = {}
+                state_for_cache["detail_fetch_cache"] = cache_mut
+        except Exception as e:
+            _scrape_log(f"详情缓存：读取 state 失败，将不跳过详情页 — {e}")
+            state_for_cache = None
+            cache_mut = {}
+    _scrape_log(f"打开帖子正文页补充配图（本轮最多 {n} 篇；详情缓存={'开' if state_for_cache else '关'}）…")
     for p in posts[:n]:
         if not isinstance(p, dict):
             continue
@@ -1022,6 +1106,29 @@ def _enrich_post_images_from_detail_pages(
             and "/square/article/" not in hl
         ):
             continue
+        post_id = _post_id_from_href(href)
+        if state_for_cache and post_id and detail_fetch_cache_entry_fresh(
+            cache_mut.get(post_id)
+        ):
+            rec = _find_post_record_in_state_buckets(
+                state_for_cache.get("posts"), href
+            )
+            if isinstance(rec, dict) and (
+                rec.get("image_urls")
+                or str(rec.get("video_url") or "").strip()
+                or rec.get("saved_image_paths")
+            ):
+                _merge_square_detail_from_record(p, rec)
+                _scrape_log(
+                    f"详情缓存命中 post_id={post_id}，跳过打开详情页（合并 state 内已存字段）"
+                )
+                continue
+            if post_id in cache_mut:
+                cache_mut.pop(post_id, None)
+                cache_dirty = True
+                _scrape_log(
+                    f"详情缓存孤儿 post_id={post_id}（state 中无对应帖子），已清除缓存并重新抓取"
+                )
         try:
             driver.get(href)
             WebDriverWait(driver, 18).until(
@@ -1042,7 +1149,19 @@ def _enrich_post_images_from_detail_pages(
                 p["video_url"] = str(video_url).strip()
         except Exception:
             continue
+        if state_for_cache is not None and post_id:
+            cache_mut[post_id] = {
+                "at": datetime.now(timezone.utc).isoformat(),
+                "v": DETAIL_FETCH_CACHE_VERSION,
+            }
+            cache_dirty = True
         _human_pause(0.55, 1.35)
+    if state_for_cache is not None and cache_dirty and posts_state_path:
+        try:
+            save_posts_state(posts_state_path, state_for_cache)
+            _scrape_log("详情缓存已写回 binance_posts_state.json（detail_fetch_cache）")
+        except Exception as e:
+            _scrape_log(f"详情缓存写回失败: {e}")
 
 
 def _extract_rows_from_table_elements(driver, max_items: int) -> List[Dict[str, str]]:
@@ -1475,6 +1594,7 @@ def _aspect_video_probe_random_click_and_log_opened_url(
         el,
         log_prefix=f"aspect-video[{label_idx}]",
         use_random_offset=True,
+        background_tab=True,
     )
     if not opened_click:
         return
@@ -1567,9 +1687,10 @@ def _aspect_video_probe_random_click_and_log_opened_url(
                 "跳过写入 state（无合并目标）"
             )
     if switched_new_tab:
-        if VIDEO_DETAIL_TAB_VISIBLE_SEC > 0:
-            time.sleep(min(VIDEO_DETAIL_TAB_VISIBLE_SEC, 8.0))
+        # 不抢焦点：仅在保留新标签时在「新标签」上停留；否则先关/切回原页再 sleep
         if KEEP_VIDEO_DETAIL_TAB:
+            if VIDEO_DETAIL_TAB_VISIBLE_SEC > 0:
+                time.sleep(min(VIDEO_DETAIL_TAB_VISIBLE_SEC, 8.0))
             _scrape_log("保留视频详情新标签页（探测，KEEP_VIDEO_DETAIL_TAB=true）")
         else:
             try:
@@ -1581,6 +1702,8 @@ def _aspect_video_probe_random_click_and_log_opened_url(
                 driver.switch_to.window(before_handles[0])
         except Exception:
             pass
+        if (not KEEP_VIDEO_DETAIL_TAB) and VIDEO_DETAIL_TAB_VISIBLE_SEC > 0:
+            time.sleep(min(VIDEO_DETAIL_TAB_VISIBLE_SEC, 8.0))
         time.sleep(0.55)
         if not _wait_driver_execution_context(driver, 20.0):
             _scrape_log(
@@ -1855,6 +1978,7 @@ return { el: picked, from_aspect: fromAspect, anchor_href: anchorHref, post_href
                 target_el,
                 log_prefix=f"视频回扫[i={idx}]",
                 use_random_offset=True,
+                background_tab=True,
             )
             if not opened:
                 continue
@@ -2024,9 +2148,9 @@ return {
                     _scrape_log(f"视频流 m3u8: {m3u8_url}")
             cur = (driver.current_url or "").split("#")[0]
             if switched_new_tab:
-                if VIDEO_DETAIL_TAB_VISIBLE_SEC > 0:
-                    time.sleep(min(VIDEO_DETAIL_TAB_VISIBLE_SEC, 8.0))
                 if KEEP_VIDEO_DETAIL_TAB:
+                    if VIDEO_DETAIL_TAB_VISIBLE_SEC > 0:
+                        time.sleep(min(VIDEO_DETAIL_TAB_VISIBLE_SEC, 8.0))
                     _scrape_log("保留视频详情新标签页（KEEP_VIDEO_DETAIL_TAB=true）")
                 else:
                     try:
@@ -2038,6 +2162,8 @@ return {
                         driver.switch_to.window(before_handles[0])
                 except Exception:
                     pass
+                if (not KEEP_VIDEO_DETAIL_TAB) and VIDEO_DETAIL_TAB_VISIBLE_SEC > 0:
+                    time.sleep(min(VIDEO_DETAIL_TAB_VISIBLE_SEC, 8.0))
                 cur = (driver.current_url or "").split("#")[0]
             if base and cur and cur != base:
                 try:
@@ -2390,6 +2516,7 @@ def scrape_binance_lists(
     include_hot_rank: bool = False,
     square_images_dir: Optional[str] = "square_post_images",
     skip_square_images: bool = False,
+    posts_state_path_for_detail_cache: Optional[str] = None,
 ) -> Dict[str, object]:
     priority_order = _priority_slugs_ordered()
     priority_slugs: Set[str] = set(priority_order)
@@ -2506,7 +2633,10 @@ def scrape_binance_lists(
 
         if not skip_square_images and posts and square_images_dir:
             _enrich_post_images_from_detail_pages(
-                driver, posts, max_pages=max_items
+                driver,
+                posts,
+                max_pages=max_items,
+                posts_state_path=posts_state_path_for_detail_cache,
             )
             _scrape_log("下载帖子配图到本地…")
             _download_square_post_images(driver, posts, square_images_dir)
@@ -2830,6 +2960,10 @@ def main():
     )
     args = parser.parse_args()
 
+    out_path = os.path.abspath(args.out)
+    posts_state_for_cache: Optional[str] = None
+    if not args.skip_posts_state:
+        posts_state_for_cache = args.posts_state or default_posts_state_path(out_path)
     result = scrape_binance_lists(
         url=args.url,
         max_items=max(5, args.max_items),
@@ -2840,8 +2974,8 @@ def main():
         include_hot_rank=args.include_hot_rank,
         square_images_dir=None if args.skip_square_images else args.square_images_dir,
         skip_square_images=args.skip_square_images,
+        posts_state_path_for_detail_cache=posts_state_for_cache,
     )
-    out_path = os.path.abspath(args.out)
     if not args.skip_posts_state:
         process_watchlist_posts(
             result,
@@ -2855,7 +2989,7 @@ def main():
     print_result_to_stdout(result, max_rows=args.max_print_rows)
     if args.print_json:
         print("\n" + "=" * 60 + "\n完整 JSON（--print-json）\n" + "=" * 60)
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+    print(json.dumps(result, ensure_ascii=False, indent=2))
     print(f"\n[OK] 已写入: {out_path}")
 
 
