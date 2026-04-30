@@ -47,11 +47,11 @@ alert_on_mtf = input.bool(false, title="多时间框架警报", tooltip="在其�
 // 固定币种配置（不走 input）
 // 等价于：
 // {
-//   "15m": ["ETHUSDT", "SOLUSDT"],
-//   "1h": ["ETHUSDT", "SOLUSDT"]
+//   "15m": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "DOGEUSDT", "ADAUSDT", "TRXUSDT", "LINKUSDT", "AVAXUSDT"],
+//   "1h": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "DOGEUSDT", "ADAUSDT", "TRXUSDT", "LINKUSDT", "AVAXUSDT"]
 // }
-var string symbols_15m_csv = "ETHUSDT,SOLUSDT"
-var string symbols_1h_csv = "ETHUSDT,SOLUSDT"
+var string symbols_15m_csv = "BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT,XRPUSDT,DOGEUSDT,ADAUSDT,TRXUSDT,LINKUSDT,AVAXUSDT"
+var string symbols_1h_csv = "BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT,XRPUSDT,DOGEUSDT,ADAUSDT,TRXUSDT,LINKUSDT,AVAXUSDT,OPUSDT,ARBUSDT,UNIUSDT,AAVEUSDT,MKRUSDT,ZECUSDT,XMRUSDT,ONDOUSDT,PEPEUSDT,WIFUSDT"
 
 // RSI 预警设置
 enable_rsi_alert = input.bool(true, title="启用RSI预警", tooltip="启用RSI超买超卖预警", group="RSI预警设置")
