@@ -5,6 +5,9 @@ indicator("布林带插针标记 - 多时间框架", shorttitle="BB-Wicks", over
 // 布林带参数
 bb_length = input.int(20, title="布林带周期", minval=1)
 bb_mult = input.float(2.0, title="布林带倍数", minval=0.1, step=0.1)
+// 上下轨之间为 0%～100%（自下而上）：仅当 K 线进入上轨侧/下轨侧对应带状区才显示布林插针标签与插针类告警
+bb_wick_upper_zone_pct = input.float(80.0, title="上轨侧插针: 高点≥带间(%)", minval=50.0, maxval=100.0, step=1.0, tooltip="例：带间高100点，80 表示高点至少触及自下而上 80% 线（最上 20% 为「靠近上轨」）", group="布林带参数")
+bb_wick_lower_zone_pct = input.float(20.0, title="下轨侧插针: 低点≤带间(%)", minval=0.0, maxval=50.0, step=1.0, tooltip="例：20 表示低点至多触及自下而上 20% 线（最下 20% 为「靠近下轨」）", group="布林带参数")
 
 // ==================== 时间框架配置（可扩展）====================
 // 配置说明：
@@ -20,17 +23,21 @@ if barstate.isfirst
     // 默认配置：15分钟、1小时、4小时
     array.push(timeframes_code, "15")
     array.push(timeframes_name, "15M")
-    // array.push(timeframes_code, "60")
-    // array.push(timeframes_name, "1H")
-    // array.push(timeframes_code, "240")
-    // array.push(timeframes_name, "4H")
+    array.push(timeframes_code, "60")
+    array.push(timeframes_name, "1H")
+    array.push(timeframes_code, "120")
+    array.push(timeframes_name, "2H")
+    array.push(timeframes_code, "240")
+    array.push(timeframes_name, "4H")
+    array.push(timeframes_code, "480")
+    array.push(timeframes_name, "8H")
     // 要添加新时间框架，取消下面的注释并修改：
-    // array.push(timeframes_code, "30")
-    // array.push(timeframes_name, "30M")  // 30分钟
-    // array.push(timeframes_code, "1D")
-    // array.push(timeframes_name, "1D")   // 1天
-    // array.push(timeframes_code, "1W")
-    // array.push(timeframes_name, "1W")   // 1周
+    array.push(timeframes_code, "30")
+    array.push(timeframes_name, "30M")  // 30分钟
+    array.push(timeframes_code, "1D")
+    array.push(timeframes_name, "1D")   // 1天
+    array.push(timeframes_code, "1W")
+    array.push(timeframes_name, "1W")   // 1周
 
 // 插针检测参数
 wick_ratio = input.float(0.3, title="插针比例（实体/影线）", minval=0.1, maxval=1.0, step=0.1, tooltip="影线长度与实体长度的比例，值越小越严格")
@@ -59,11 +66,25 @@ divergence_lookback = input.int(9, title="历史K线周期", minval=5, maxval=50
 enable_continuous_wick = input.bool(true, title="启用连续插针预警", tooltip="检测上下轨附近连续插针信号", group="连续插针设置")
 continuous_wick_count = input.int(2, title="插针数量", minval=2, maxval=5, tooltip="触发信号所需的连续插针数量", group="连续插针设置")
 
+// 自定义三角形向上突破（收敛 + 吞没窗口内最低K线）
+enable_custom_triangle = input.bool(true, title="启用自定义三角突破", tooltip="回看若干根已收盘K线：高逐步走低、低逐步走高、波幅收敛；当前阳线整根吞没其中最低价所在K线", group="自定义三角突破")
+tri_window = input.int(12, title="回看K线数", minval=8, maxval=15, tooltip="仅统计当前K线之前的 W 根（不含当前）", group="自定义三角突破")
+tri_conv_ratio = input.float(0.92, title="收敛:右侧波幅≤左侧×", minval=0.5, maxval=0.99, step=0.01, tooltip="右侧半窗最高价-最低价 ≤ 左侧×该系数，表示收敛变窄", group="自定义三角突破")
+
 // K线形态设置（射击之星、吞没）
 enable_candle_pattern = input.bool(true, title="启用K线形态预警", tooltip="检测射击之星和吞没形态", group="K线形态设置")
 enable_shooting_star = input.bool(true, title="射击之星", tooltip="上影线长、实体小、下影线短，看跌信号", group="K线形态设置")
 enable_engulfing = input.bool(true, title="吞没形态", tooltip="当前K线实体完全包住前一根K线实体", group="K线形态设置")
 pattern_upper_wick_ratio = input.float(2.0, title="射击之星上影线/实体比", minval=1.5, maxval=5.0, step=0.1, tooltip="上影线至少为实体的倍数", group="K线形态设置")
+
+// 维加斯通道：仅用于判断是否给信号名加「V」前缀（不画线、不改变触发逻辑）
+enable_vegas_v_prefix = input.bool(true, title="仅在维加斯附近加 V 前缀", tooltip="关闭则所有信号名均不加 V", group="维加斯(V前缀)")
+vegas_v_filter = input.int(12, title="过滤线周期(不参与V判定)", minval=1, tooltip="维加斯过滤线；V 前缀仅看 A/B 组四条通道线，与过滤线距离无关", group="维加斯(V前缀)")
+vegas_v_a1 = input.int(144, title="A组1周期", minval=1, group="维加斯(V前缀)")
+vegas_v_a2 = input.int(169, title="A组2周期", minval=1, group="维加斯(V前缀)")
+vegas_v_b1 = input.int(576, title="B组1周期", minval=1, group="维加斯(V前缀)")
+vegas_v_b2 = input.int(676, title="B组2周期", minval=1, group="维加斯(V前缀)")
+vegas_v_tol_bb_pct = input.float(20.0, title="附近容差(占布林带宽%)", minval=1.0, maxval=60.0, step=1.0, tooltip="以布林上下轨间距类比为100：默认20表示 K 线高/低/收与任一维加斯EMA的最小距离 ≤ 带宽×20% 时视为在维加斯通道附近，才加 V", group="维加斯(V前缀)")
 
 // 定时日线推送设置
 enable_daily_line_push = input.bool(true, title="启用定时日线推送", tooltip="按设定时间推送指定交易对的日线数据", group="定时日线推送")
@@ -95,6 +116,76 @@ detect_wick(upper_band, lower_band, high_price, low_price, open_price, close_pri
     // 下插针：下影线突破下轨，且下影线长度满足条件
     lower_wick_condition = low_price < lower_band and lower_wick > 0 and (body_size == 0 or lower_wick / math.max(body_size, 0.0001) >= wick_ratio)
     [upper_wick_condition, lower_wick_condition, upper_wick, lower_wick]
+
+// 布林插针是否同时落在「靠近上下轨」的带间位置（用于显示/插针告警，不改变 detect_wick 本体）
+// 上轨侧：高点至少触及自下而上 upper_pct% 线（与突破上轨的 detect_wick 可同时成立）；下轨侧：低点至多触及自下而上 lower_pct% 线（含刺破下轨）
+bb_wick_rng(upper_band, lower_band) =>
+    upper_band - lower_band
+
+bb_wick_show_upper(upper_wick_raw, high_price, lower_band, upper_band) =>
+    rng = bb_wick_rng(upper_band, lower_band)
+    lo_line = lower_band + rng * bb_wick_upper_zone_pct / 100.0
+    upper_wick_raw and (rng <= syminfo.mintick ? upper_wick_raw : high_price >= lo_line)
+
+bb_wick_show_lower(lower_wick_raw, low_price, lower_band, upper_band) =>
+    rng = bb_wick_rng(upper_band, lower_band)
+    hi_line = lower_band + rng * bb_wick_lower_zone_pct / 100.0
+    lower_wick_raw and (rng <= syminfo.mintick ? lower_wick_raw : low_price <= hi_line)
+
+// K 线高/低/收到 A/B 组四条维加斯通道线的最近距离（不含过滤线）
+min_dist_to_vegas_channel_emas(h, l, c, e2, e3, e4, e5) =>
+    m2 = math.min(math.min(math.abs(h - e2), math.abs(l - e2)), math.abs(c - e2))
+    m3 = math.min(math.min(math.abs(h - e3), math.abs(l - e3)), math.abs(c - e3))
+    m4 = math.min(math.min(math.abs(h - e4), math.abs(l - e4)), math.abs(c - e4))
+    m5 = math.min(math.min(math.abs(h - e5), math.abs(l - e5)), math.abs(c - e5))
+    math.min(math.min(m2, m3), math.min(m4, m5))
+
+// 自定义三角：回看 [1..W] 已收盘K线，左半更旧、右半更新；高均走低、低均走高、右半波幅收窄；当前阳线整根吞没窗口内最低价K线
+custom_triangle_breakout_ok(W, half, conv_ratio) =>
+    ok = false
+    if enable_custom_triangle and bar_index > W + 2 and half >= 1 and W > half
+        sum_hi_L = 0.0
+        sum_hi_R = 0.0
+        sum_lo_L = 0.0
+        sum_lo_R = 0.0
+        cnt_L = 0
+        cnt_R = 0
+        for j = half + 1 to W
+            sum_hi_L += high[j]
+            sum_lo_L += low[j]
+            cnt_L += 1
+        for j = 1 to half
+            sum_hi_R += high[j]
+            sum_lo_R += low[j]
+            cnt_R += 1
+        avg_hi_L = cnt_L > 0 ? sum_hi_L / cnt_L : na
+        avg_hi_R = cnt_R > 0 ? sum_hi_R / cnt_R : na
+        avg_lo_L = cnt_L > 0 ? sum_lo_L / cnt_L : na
+        avg_lo_R = cnt_R > 0 ? sum_lo_R / cnt_R : na
+        hi_desc = not na(avg_hi_L) and not na(avg_hi_R) and avg_hi_L > avg_hi_R
+        lo_asc = not na(avg_lo_L) and not na(avg_lo_R) and avg_lo_R > avg_lo_L
+        hi_L = -1.0e20
+        lo_L = 1.0e20
+        for j = half + 1 to W
+            hi_L := math.max(hi_L, high[j])
+            lo_L := math.min(lo_L, low[j])
+        hi_R = -1.0e20
+        lo_R = 1.0e20
+        for j = 1 to half
+            hi_R := math.max(hi_R, high[j])
+            lo_R := math.min(lo_R, low[j])
+        range_L = hi_L - lo_L
+        range_R = hi_R - lo_R
+        conv = range_L > syminfo.mintick * 2 and range_R <= range_L * conv_ratio
+        min_l = low[1]
+        k_at = 1
+        for j = 2 to W
+            if low[j] < min_l
+                min_l := low[j]
+                k_at := j
+        engulf = close > open and open <= low[k_at] and close >= high[k_at]
+        ok := hi_desc and lo_asc and conv and engulf
+    ok
 
 // ==================== 函数：检测射击之星 ====================
 // 射击之星：上影线长、实体小，下方可有插针但下影线长度 < 上影线1/3
@@ -141,12 +232,19 @@ get_label_size() =>
         "huge" => size.huge
         => size.small
 
+// 配置的周期是否与当前图表周期一致（用秒数比较，避免 1D / D 等字符串差异）
+is_same_timeframe_as_chart(tf_code) =>
+    chart_sec = timeframe.in_seconds(timeframe.period)
+    tf_sec = timeframe.in_seconds(tf_code)
+    not na(chart_sec) and not na(tf_sec) and chart_sec == tf_sec
+
 // ==================== 变量：警报条件（合并后）====================
 wick_alert = false  // 合并的上插针和下插针警报
 rsi_alert = false  // 合并的RSI超买超卖警报
 rsi_divergence_alert = false  // 合并的RSI背离警报
 continuous_wick_alert = false  // 连续插针警报
 candle_pattern_alert = false  // K线形态警报（射击之星、吞没）
+custom_triangle_alert = false  // 自定义三角形向上突破
 
 // 警报消息
 wick_alert_message = ""
@@ -154,6 +252,7 @@ rsi_alert_message = ""
 rsi_divergence_alert_message = ""
 continuous_wick_alert_message = ""
 candle_pattern_alert_message = ""
+custom_triangle_message = ""
 
 // 连续插针计数（用于检测连续插针信号）
 var int continuous_upper_wick_counter = 0  // 连续上插针计数（上下轨附近）
@@ -169,38 +268,30 @@ label_size_value = get_label_size()
 wick_alert := false
 wick_alert_message := ""
 
-// 循环处理所有配置的时间框架 - 忠实记录每个插针，不合并不忽略
-for i = 0 to array.size(timeframes_code) - 1
-    tf_code = array.get(timeframes_code, i)
-    tf_name = array.get(timeframes_name, i)
-    
-    [upper_tf, lower_tf, basis_tf, high_tf, low_tf, close_tf, open_tf] = calc_bb(tf_code)
-    [upper_wick_tf, lower_wick_tf, uw_size_tf, lw_size_tf] = detect_wick(upper_tf, lower_tf, high_tf, low_tf, open_tf, close_tf)
-    
-    // 上插针：直接显示和记录
-    if upper_wick_tf
-        if show_labels
-            label.new(bar_index, high_tf, tf_name + "↑", color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
-        // 合并警报：上插针和下插针合并
-        if enable_alert and alert_on_mtf
-            wick_alert := true
-            if wick_alert_message == ""
-                wick_alert_message := "上插针:" + tf_name + "@" + str.tostring(high_tf)
-            else
-                wick_alert_message := wick_alert_message + ",上插针:" + tf_name + "@" + str.tostring(high_tf)
-    
-    // 下插针：直接显示和记录
-    if lower_wick_tf
-        if show_labels
-            label.new(bar_index, low_tf, tf_name + "↓", color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
-        // 合并警报：上插针和下插针合并
-        if enable_alert and alert_on_mtf
-            wick_alert := true
-            if wick_alert_message == ""
-                wick_alert_message := "下插针:" + tf_name + "@" + str.tostring(low_tf)
-            else
-                wick_alert_message := wick_alert_message + ",下插针:" + tf_name + "@" + str.tostring(low_tf)
+// 当前图表布林带（须在 MTF 循环之前计算，便于与图表 K 线严格同源，避免 security 对齐导致上下轨插针错位）
+basis_current = ta.sma(close, bb_length)
+dev_current = bb_mult * ta.stdev(close, bb_length)
+upper_current = basis_current + dev_current
+lower_current = basis_current - dev_current
 
+// 维加斯 A/B 组 EMA（仅这四条参与 V 前缀「附近」判定；过滤线不参与）
+vegas_v_e2 = ta.ema(close, vegas_v_a1)
+vegas_v_e3 = ta.ema(close, vegas_v_a2)
+vegas_v_e4 = ta.ema(close, vegas_v_b1)
+vegas_v_e5 = ta.ema(close, vegas_v_b2)
+bb_width_for_vegas = upper_current - lower_current
+vegas_min_dist = min_dist_to_vegas_channel_emas(high, low, close, vegas_v_e2, vegas_v_e3, vegas_v_e4, vegas_v_e5)
+vegas_tol_abs = bb_width_for_vegas * vegas_v_tol_bb_pct / 100.0
+near_vegas_channel = enable_vegas_v_prefix and bb_width_for_vegas > syminfo.mintick * 2 and vegas_min_dist <= vegas_tol_abs
+
+// 仅在维加斯通道附近时给标签/告警文案加 V；否则为原名
+sig_prefix(s) =>
+    near_vegas_channel ? "V" + s : s
+
+// 射击之星（与同脚本 K 线形态条件一致）：与其它信号同根 K 线并存时用于优先告警/抑制部分其它标签
+shoot_bar = enable_candle_pattern and enable_shooting_star and high >= basis_current and detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
+
+// 多周期插针循环移至脚本后部（连续插针/RSI/背离/三角/K 线之后），以便与 shoot_bar 及其它告警同根判定一致
 
 // ==================== RSI 计算和预警（合并）====================
 rsi_value = ta.rsi(close, rsi_length)
@@ -216,16 +307,10 @@ if enable_rsi_alert
     
     if rsi_overbought_trigger
         rsi_alert := true
-        rsi_alert_message := "RSI超买:" + str.tostring(rsi_value, "#.##")
+        rsi_alert_message := sig_prefix("RSI超买:" + str.tostring(rsi_value, "#.##"))
     else if rsi_oversold_trigger
         rsi_alert := true
-        rsi_alert_message := "RSI超卖:" + str.tostring(rsi_value, "#.##")
-
-// ==================== 可选：绘制布林带（当前时间框架） ====================
-basis_current = ta.sma(close, bb_length)
-dev_current = bb_mult * ta.stdev(close, bb_length)
-upper_current = basis_current + dev_current
-lower_current = basis_current - dev_current
+        rsi_alert_message := sig_prefix("RSI超卖:" + str.tostring(rsi_value, "#.##"))
 
 // ==================== RSI 背离检测（实时，合并）====================
 // 初始化背离警报
@@ -287,9 +372,9 @@ if enable_rsi_divergence and not na(rsi_value)
         if price_new_high and rsi_not_new_high and current_candle_length > price_threshold
             bearish_divergence := true
             rsi_divergence_alert := true
-            rsi_divergence_alert_message := "看跌背离"
-            if show_labels
-                label.new(bar_index, high, "看跌背离", color=color.new(color.orange, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+            rsi_divergence_alert_message := sig_prefix("看跌背离")
+            if show_labels and not (shoot_bar and rsi_divergence_alert)
+                label.new(bar_index, high, sig_prefix("看跌背离"), color=color.new(color.orange, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
     
     // 实时检测看涨背离：价格创新低但RSI未创新低
     bullish_divergence = false
@@ -302,11 +387,11 @@ if enable_rsi_divergence and not na(rsi_value)
             bullish_divergence := true
             rsi_divergence_alert := true
             if rsi_divergence_alert_message == ""
-                rsi_divergence_alert_message := "看涨背离"
+                rsi_divergence_alert_message := sig_prefix("看涨背离")
             else
-                rsi_divergence_alert_message := rsi_divergence_alert_message + ",看涨背离"
-            if show_labels
-                label.new(bar_index, low, "看涨背离", color=color.new(color.aqua, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+                rsi_divergence_alert_message := rsi_divergence_alert_message + "," + sig_prefix("看涨背离")
+            if show_labels and not (shoot_bar and rsi_divergence_alert)
+                label.new(bar_index, low, sig_prefix("看涨背离"), color=color.new(color.aqua, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
 
 // ==================== 绘制布林带（当前时间框架） ====================
 plot(show_plots ? upper_current : na, "上轨", color=color.new(color.blue, 50), linewidth=1)
@@ -349,11 +434,11 @@ if enable_continuous_wick
         if continuous_upper_wick_counter == continuous_wick_count
             continuous_wick_alert := true
             if continuous_wick_alert_message == ""
-                continuous_wick_alert_message := "连续上插针(" + str.tostring(continuous_upper_wick_counter) + "次)"
+                continuous_wick_alert_message := sig_prefix("连续上插针(" + str.tostring(continuous_upper_wick_counter) + "次)")
             else
-                continuous_wick_alert_message := continuous_wick_alert_message + ",连续上插针(" + str.tostring(continuous_upper_wick_counter) + "次)"
-            if show_labels
-                label.new(bar_index, high, "连续上插针", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+                continuous_wick_alert_message := continuous_wick_alert_message + "," + sig_prefix("连续上插针(" + str.tostring(continuous_upper_wick_counter) + "次)")
+            if show_labels and not (shoot_bar and continuous_wick_alert)
+                label.new(bar_index, high, sig_prefix("连续上插针"), color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
     else
         // 没有检测到上插针，清空计数
         continuous_upper_wick_counter := 0
@@ -391,11 +476,11 @@ if enable_continuous_wick
             if recent_count >= 3
                 continuous_wick_alert := true
                 if continuous_wick_alert_message == ""
-                    continuous_wick_alert_message := "非上轨连续上插针(" + str.tostring(recent_count) + "次)"
+                    continuous_wick_alert_message := sig_prefix("非上轨连续上插针(" + str.tostring(recent_count) + "次)")
                 else
-                    continuous_wick_alert_message := continuous_wick_alert_message + ",非上轨连续上插针(" + str.tostring(recent_count) + "次)"
-                if show_labels
-                    label.new(bar_index, high, "非上轨连续上插针", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+                    continuous_wick_alert_message := continuous_wick_alert_message + "," + sig_prefix("非上轨连续上插针(" + str.tostring(recent_count) + "次)")
+                if show_labels and not (shoot_bar and continuous_wick_alert)
+                    label.new(bar_index, high, sig_prefix("非上轨连续上插针"), color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
     
     // ========== 下轨附近连续插针检测 ==========
     // 计算中轨到下轨的距离
@@ -421,11 +506,11 @@ if enable_continuous_wick
         if continuous_lower_wick_counter == continuous_wick_count
             continuous_wick_alert := true
             if continuous_wick_alert_message == ""
-                continuous_wick_alert_message := "连续下插针(" + str.tostring(continuous_lower_wick_counter) + "次)"
+                continuous_wick_alert_message := sig_prefix("连续下插针(" + str.tostring(continuous_lower_wick_counter) + "次)")
             else
-                continuous_wick_alert_message := continuous_wick_alert_message + ",连续下插针(" + str.tostring(continuous_lower_wick_counter) + "次)"
-            if show_labels
-                label.new(bar_index, low, "连续下插针", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+                continuous_wick_alert_message := continuous_wick_alert_message + "," + sig_prefix("连续下插针(" + str.tostring(continuous_lower_wick_counter) + "次)")
+            if show_labels and not (shoot_bar and continuous_wick_alert)
+                label.new(bar_index, low, sig_prefix("连续下插针"), color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
     else
         // 没有检测到下插针，清空计数
         continuous_lower_wick_counter := 0
@@ -463,11 +548,27 @@ if enable_continuous_wick
             if recent_count >= 3
                 continuous_wick_alert := true
                 if continuous_wick_alert_message == ""
-                    continuous_wick_alert_message := "非下轨连续下插针(" + str.tostring(recent_count) + "次)"
+                    continuous_wick_alert_message := sig_prefix("非下轨连续下插针(" + str.tostring(recent_count) + "次)")
                 else
-                    continuous_wick_alert_message := continuous_wick_alert_message + ",非下轨连续下插针(" + str.tostring(recent_count) + "次)"
-                if show_labels
-                    label.new(bar_index, low, "非下轨连续下插针", color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+                    continuous_wick_alert_message := continuous_wick_alert_message + "," + sig_prefix("非下轨连续下插针(" + str.tostring(recent_count) + "次)")
+                if show_labels and not (shoot_bar and continuous_wick_alert)
+                    label.new(bar_index, low, sig_prefix("非下轨连续下插针"), color=color.new(color.purple, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+
+// ==================== 自定义三角形向上突破（须在 K 线形态之前，供同根射击之星时抑制三角标签）====================
+// 窗口：当前K线为信号K；之前 W 根为 [1..W]（已收盘）。左半窗更「旧」，右半窗更「新」。
+custom_triangle_alert := false
+custom_triangle_message := ""
+W_tri = tri_window
+half_tri = int(W_tri / 2)
+is_custom_triangle_breakout = barstate.isconfirmed and custom_triangle_breakout_ok(W_tri, half_tri, tri_conv_ratio)
+
+if is_custom_triangle_breakout
+    custom_triangle_alert := true
+    custom_triangle_message := sig_prefix("三角突破(吞没最低K)")
+    if show_labels and not shoot_bar
+        label.new(bar_index, low, sig_prefix("三角突破"), color=color.new(color.teal, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+
+plotshape(enable_custom_triangle and is_custom_triangle_breakout and not shoot_bar, title="自定义三角突破", style=shape.triangleup, location=location.belowbar, color=color.new(color.lime, 0), size=size.tiny)
 
 // ==================== K线形态检测（射击之星、吞没，需在布林带上下轨附近）====================
 candle_pattern_alert := false
@@ -487,39 +588,81 @@ if enable_candle_pattern
     // 射击之星：看跌信号，需在中轨之上
     if enable_shooting_star and above_mid_band and detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
         candle_pattern_alert := true
-        candle_pattern_alert_message := "射击之星"
+        candle_pattern_alert_message := sig_prefix("射击之星")
         if show_labels
-            label.new(bar_index, high, "射击之星", color=color.new(color.orange, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+            label.new(bar_index, high, sig_prefix("射击之星"), color=color.new(color.orange, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
 
     // 倒锤子：看涨信号，射击之星倒过来的形态，需在中轨之下，上影线 < 下影线/3
-    if enable_shooting_star and below_mid_band and detect_inverted_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
+    inv_shoot_star = enable_shooting_star and below_mid_band and detect_inverted_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
+    if inv_shoot_star
         candle_pattern_alert := true
         if candle_pattern_alert_message != ""
-            candle_pattern_alert_message := candle_pattern_alert_message + ",倒锤子"
+            candle_pattern_alert_message := candle_pattern_alert_message + "," + sig_prefix("倒锤子")
         else
-            candle_pattern_alert_message := "倒锤子"
-        if show_labels
-            label.new(bar_index, low, "倒锤子", color=color.new(color.aqua, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+            candle_pattern_alert_message := sig_prefix("倒锤子")
+        if show_labels and not (shoot_bar and inv_shoot_star)
+            label.new(bar_index, low, sig_prefix("倒锤子"), color=color.new(color.aqua, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
 
     // 看涨吞没：当前阳线包住前一根阴线，需在布林带下轨附近
-    if enable_engulfing and at_lower_band and detect_bullish_engulfing(open[1], close[1], open, close)
+    bull_engulf = enable_engulfing and at_lower_band and detect_bullish_engulfing(open[1], close[1], open, close)
+    if bull_engulf
         candle_pattern_alert := true
         if candle_pattern_alert_message != ""
-            candle_pattern_alert_message := candle_pattern_alert_message + ",看涨吞没"
+            candle_pattern_alert_message := candle_pattern_alert_message + "," + sig_prefix("看涨吞没")
         else
-            candle_pattern_alert_message := "看涨吞没"
-        if show_labels
-            label.new(bar_index, low, "看涨吞没", color=color.new(color.green, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
+            candle_pattern_alert_message := sig_prefix("看涨吞没")
+        if show_labels and not (shoot_bar and bull_engulf)
+            label.new(bar_index, low, sig_prefix("看涨吞没"), color=color.new(color.green, 0), textcolor=color.white, style=label.style_label_up, size=label_size_value)
 
     // 看跌吞没：当前阴线包住前一根阳线，需在布林带上轨附近
-    if enable_engulfing and at_upper_band and detect_bearish_engulfing(open[1], close[1], open, close)
+    bear_engulf = enable_engulfing and at_upper_band and detect_bearish_engulfing(open[1], close[1], open, close)
+    if bear_engulf
         candle_pattern_alert := true
         if candle_pattern_alert_message != ""
-            candle_pattern_alert_message := candle_pattern_alert_message + ",看跌吞没"
+            candle_pattern_alert_message := candle_pattern_alert_message + "," + sig_prefix("看跌吞没")
         else
-            candle_pattern_alert_message := "看跌吞没"
-        if show_labels
-            label.new(bar_index, high, "看跌吞没", color=color.new(color.red, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+            candle_pattern_alert_message := sig_prefix("看跌吞没")
+        if show_labels and not (shoot_bar and bear_engulf)
+            label.new(bar_index, high, sig_prefix("看跌吞没"), color=color.new(color.red, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+
+// 多周期插针：在其它告警变量就绪后执行；同根有射击之星时，布林插针标签或其它类告警并存则优先射击之星（不画 MTF 插针标签；MTF 告警仍合并）
+other_sig_vs_shoot_star = continuous_wick_alert or rsi_alert or rsi_divergence_alert or custom_triangle_alert or (candle_pattern_alert and candle_pattern_alert_message != sig_prefix("射击之星"))
+
+for i = 0 to array.size(timeframes_code) - 1
+    tf_code = array.get(timeframes_code, i)
+    tf_name = array.get(timeframes_name, i)
+    same_tf = is_same_timeframe_as_chart(tf_code)
+    [upper_tf, lower_tf, basis_tf, high_tf, low_tf, close_tf, open_tf] = calc_bb(tf_code)
+    uB = same_tf ? upper_current : upper_tf
+    lB = same_tf ? lower_current : lower_tf
+    hPx = same_tf ? high : high_tf
+    lPx = same_tf ? low : low_tf
+    oPx = same_tf ? open : open_tf
+    cPx = same_tf ? close : close_tf
+    [upper_wick_tf, lower_wick_tf, uw_size_tf, lw_size_tf] = detect_wick(uB, lB, hPx, lPx, oPx, cPx)
+    show_upper_wick_tf = bb_wick_show_upper(upper_wick_tf, hPx, lB, uB)
+    show_lower_wick_tf = bb_wick_show_lower(lower_wick_tf, lPx, lB, uB)
+    suppress_mtf_wick_label = shoot_bar and (other_sig_vs_shoot_star or show_upper_wick_tf or show_lower_wick_tf)
+
+    if show_upper_wick_tf
+        if show_labels and same_tf and not suppress_mtf_wick_label
+            label.new(bar_index, hPx, sig_prefix(tf_name + "↑"), color=color_upper_wick, textcolor=color.white, style=label.style_label_down, size=label_size_value)
+        if enable_alert and alert_on_mtf
+            wick_alert := true
+            if wick_alert_message == ""
+                wick_alert_message := sig_prefix("上插针:" + tf_name + "@" + str.tostring(hPx))
+            else
+                wick_alert_message := wick_alert_message + "," + sig_prefix("上插针:" + tf_name + "@" + str.tostring(hPx))
+
+    if show_lower_wick_tf
+        if show_labels and same_tf and not suppress_mtf_wick_label
+            label.new(bar_index, lPx, sig_prefix(tf_name + "↓"), color=color_lower_wick, textcolor=color.white, style=label.style_label_up, size=label_size_value)
+        if enable_alert and alert_on_mtf
+            wick_alert := true
+            if wick_alert_message == ""
+                wick_alert_message := sig_prefix("下插针:" + tf_name + "@" + str.tostring(lPx))
+            else
+                wick_alert_message := wick_alert_message + "," + sig_prefix("下插针:" + tf_name + "@" + str.tostring(lPx))
 
 // ==================== 实时检测当前K线的插针 ====================
 if barstate.islast
@@ -529,22 +672,24 @@ if barstate.islast
     upper_realtime = basis_realtime + dev_realtime
     lower_realtime = basis_realtime - dev_realtime
     [upper_wick_realtime, lower_wick_realtime, uw_size_realtime, lw_size_realtime] = detect_wick(upper_realtime, lower_realtime, high, low, open, close)
-    // 实时标记（仅在最后一根K线）
-    if upper_wick_realtime and show_labels
-        label.new(bar_index, high, "实时↑", color=color.new(color.red, 20), textcolor=color.white, style=label.style_label_down, size=size.normal)
-    if lower_wick_realtime and show_labels
-        label.new(bar_index, low, "实时↓", color=color.new(color.green, 20), textcolor=color.white, style=label.style_label_up, size=size.normal)
+    show_upper_rt = bb_wick_show_upper(upper_wick_realtime, high, lower_realtime, upper_realtime)
+    show_lower_rt = bb_wick_show_lower(lower_wick_realtime, low, lower_realtime, upper_realtime)
+    // 实时标记（仅在最后一根K线，且须靠近上下轨带）
+    if show_upper_rt and show_labels and not shoot_bar
+        label.new(bar_index, high, sig_prefix("实时↑"), color=color.new(color.red, 20), textcolor=color.white, style=label.style_label_down, size=size.normal)
+    if show_lower_rt and show_labels and not shoot_bar
+        label.new(bar_index, low, sig_prefix("实时↓"), color=color.new(color.green, 20), textcolor=color.white, style=label.style_label_up, size=size.normal)
     
     // 设置实时警报（合并上插针和下插针）
     if enable_alert and alert_on_realtime
-        if upper_wick_realtime or lower_wick_realtime
+        if show_upper_rt or show_lower_rt
             wick_alert := true
-            if upper_wick_realtime and lower_wick_realtime
-                wick_alert_message := "实时上插针@" + str.tostring(high) + ",下插针@" + str.tostring(low) + " 价格:" + str.tostring(close)
-            else if upper_wick_realtime
-                wick_alert_message := "实时上插针@" + str.tostring(high) + " 价格:" + str.tostring(close)
+            if show_upper_rt and show_lower_rt
+                wick_alert_message := sig_prefix("实时上插针@" + str.tostring(high) + ",下插针@" + str.tostring(low) + " 价格:" + str.tostring(close))
+            else if show_upper_rt
+                wick_alert_message := sig_prefix("实时上插针@" + str.tostring(high) + " 价格:" + str.tostring(close))
             else
-                wick_alert_message := "实时下插针@" + str.tostring(low) + " 价格:" + str.tostring(close)
+                wick_alert_message := sig_prefix("实时下插针@" + str.tostring(low) + " 价格:" + str.tostring(close))
 
 // ==================== 警报：动态消息携带信号类型（合并为单一日志）====================
 // 格式：ticker | 信号中文描述 | time | close | high | low ; 触发信号【周期】
@@ -591,19 +736,26 @@ if enable_daily_line_push and barstate.isconfirmed
         alert(daily_msg, alert.freq_once_per_bar_close)
         last_daily_line_push_day := day_key
 
-all_signals = continuous_wick_alert or rsi_alert or rsi_divergence_alert or candle_pattern_alert
+all_signals = continuous_wick_alert or rsi_alert or rsi_divergence_alert or custom_triangle_alert or candle_pattern_alert
+// 同根 K 线：射击之星与其它任意合并信号并存时，推送文案固定为射击之星
+shoot_star_push_priority = shoot_bar and (continuous_wick_alert or rsi_alert or rsi_divergence_alert or custom_triangle_alert or (candle_pattern_alert and candle_pattern_alert_message != sig_prefix("射击之星")))
+
 if all_signals
     sig_desc = ""
-    if continuous_wick_alert
-        sig_desc := continuous_wick_alert_message != "" ? continuous_wick_alert_message : "连续插针"
+    if shoot_star_push_priority
+        sig_desc := sig_prefix("射击之星")
+    else if continuous_wick_alert
+        sig_desc := continuous_wick_alert_message != "" ? continuous_wick_alert_message : sig_prefix("连续插针")
     else if rsi_alert
-        sig_desc := rsi_alert_message != "" ? rsi_alert_message : "RSI超买超卖"
+        sig_desc := rsi_alert_message != "" ? rsi_alert_message : sig_prefix("RSI超买超卖")
     else if rsi_divergence_alert
-        sig_desc := rsi_divergence_alert_message != "" ? rsi_divergence_alert_message : "RSI背离"
+        sig_desc := rsi_divergence_alert_message != "" ? rsi_divergence_alert_message : sig_prefix("RSI背离")
+    else if custom_triangle_alert
+        sig_desc := custom_triangle_message != "" ? custom_triangle_message : sig_prefix("三角突破")
     else if candle_pattern_alert
-        sig_desc := candle_pattern_alert_message != "" ? candle_pattern_alert_message : "K线形态"
+        sig_desc := candle_pattern_alert_message != "" ? candle_pattern_alert_message : sig_prefix("K线形态")
     else
-        sig_desc := "未知信号"
+        sig_desc := sig_prefix("未知信号")
     t_str = get_alert_time()
     tf_label = get_timeframe_label()
     // 触发信号【15m】/【1h】/【4h】等，与警报所选周期一致
