@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 """
-单独执行 Gemini 分析逻辑
+单独执行本地图分析（OLLAMA_CHAT_IMAGE_URL，与 main 中 analyze_chart 一致）
 
 用法:
-  # 分析单张图片（API 模式，默认）
   python run_gemini_analyzer.py path/to/image.png
   python run_gemini_analyzer.py path/to/image.png ETH
   python run_gemini_analyzer.py path/to/image.png tophub
 
-  # 使用浏览器网页版模式
-  python run_gemini_analyzer.py path/to/image.png --web
-
-  # 使用 screenshots 目录下的图片（默认找 combined.png 或第一张图）
   python run_gemini_analyzer.py
   python run_gemini_analyzer.py --dir ./screenshots
+
+  （已移除 --web：不再使用 Gemini 网页版）
 """
 import os
 import sys
@@ -25,7 +22,7 @@ import json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config import SCREENSHOT_DIR
-from gemini_analyzer import analyze_chart, analyze_all_timeframes, init_gemini, get_analysis_prompt
+from image_llm_analyzer import analyze_chart, analyze_all_timeframes, init_gemini, get_analysis_prompt
 
 
 def find_image_to_analyze(directory: str):
@@ -57,7 +54,6 @@ def find_timeframe_images(directory: str):
 
 
 def main():
-    use_web = "--web" in sys.argv
     args = [a for a in sys.argv[1:] if a != "--web"]
 
     # 解析可选目录
@@ -89,7 +85,7 @@ def main():
                 print(f"[INFO] 找到多周期截图: {list(timeframe_paths.keys())}，使用多周期分析")
                 model = init_gemini()
                 if model is None:
-                    print("[ERROR] 请配置 GEMINI_API_KEY 后重试")
+                    print("[ERROR] 本地图分析不可用（init_gemini 返回 None）")
                     sys.exit(1)
                 result = analyze_all_timeframes(timeframe_paths)
                 for tf, data in result.items():
@@ -103,16 +99,16 @@ def main():
                         print(data.get("error", data))
                 return
         if not image_path:
-            print("用法: python run_gemini_analyzer.py [图片路径] [symbol] [--web] [--dir 目录]")
+            print("用法: python run_gemini_analyzer.py [图片路径] [symbol] [--dir 目录]")
             print("示例: python run_gemini_analyzer.py ./screenshots/combined.png ETH")
             print("      python run_gemini_analyzer.py  # 使用 " + SCREENSHOT_DIR + " 下的图片")
             sys.exit(1)
 
     print(f"[INFO] 分析图片: {image_path}")
     print(f"[INFO] 符号/类型: {symbol}")
-    print(f"[INFO] 模式: {'浏览器网页版' if use_web else 'API'}")
+    print("[INFO] 模式: 本地 OLLAMA_CHAT_IMAGE_URL")
 
-    result = analyze_chart(image_path, symbol, use_api=not use_web)
+    result = analyze_chart(image_path, symbol, use_api=False)
 
     if not result:
         print("[WARNING] 无返回结果")
@@ -131,12 +127,8 @@ def main():
         err = result.get("error", result)
         err_str = str(err)
         print(f"[ERROR] {err}")
-        if err and ("Remote end closed" in err_str or "Connection aborted" in err_str):
-            print("\n  可能原因：代理关闭了连接或网络不稳定。")
-            print("  建议：1) 检查代理软件是否开启并允许 HTTPS  2) 取消代理重试: unset HTTP_PROXY HTTPS_PROXY; 或 .env 中注释 PROXY_PORT")
-        elif err and ("429" in err_str or "quota" in err_str.lower() or "Quota exceeded" in err_str):
-            print("\n  原因：Gemini API 免费额度已用尽或触发限流。")
-            print("  建议：1) 约 1 分钟后再试  2) 到 https://ai.google.dev 查看用量与计费  3) 换新 API Key 或开通付费")
+        if err and ("Connection" in err_str or "refused" in err_str.lower()):
+            print("\n  建议：确认本机 OLLAMA_CHAT_IMAGE_URL 服务已启动且可访问。")
         sys.exit(1)
 
 

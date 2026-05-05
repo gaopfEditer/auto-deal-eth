@@ -980,6 +980,38 @@ def _is_noise_image_url(u: str) -> bool:
     return False
 
 
+def _square_image_dir_has_files(sub_dir: str) -> bool:
+    """post_id 子目录下是否已有常见图片文件（用于详情缓存命中时跳过重复下载）。"""
+    if not sub_dir or not os.path.isdir(sub_dir):
+        return False
+    try:
+        for name in os.listdir(sub_dir):
+            low = name.lower()
+            if low.endswith((".jpg", ".jpeg", ".png", ".webp", ".gif")):
+                if os.path.isfile(os.path.join(sub_dir, name)):
+                    return True
+    except OSError:
+        pass
+    return False
+
+
+def _collect_image_paths_in_dir(sub_dir: str) -> List[str]:
+    """列出子目录内图片文件的绝对路径，按文件名排序。"""
+    out: List[str] = []
+    if not sub_dir or not os.path.isdir(sub_dir):
+        return out
+    try:
+        for name in sorted(os.listdir(sub_dir)):
+            low = name.lower()
+            if low.endswith((".jpg", ".jpeg", ".png", ".webp", ".gif")):
+                fp = os.path.join(sub_dir, name)
+                if os.path.isfile(fp):
+                    out.append(os.path.abspath(fp))
+    except OSError:
+        pass
+    return out
+
+
 def _download_square_post_images(
     driver, posts: List[Dict[str, Any]], base_dir: str
 ) -> None:
@@ -1007,38 +1039,53 @@ def _download_square_post_images(
     for p in posts:
         if not isinstance(p, dict):
             continue
-        urls = [x for x in (p.get("image_urls") or []) if not _is_noise_image_url(str(x))]
-        if not urls:
-            continue
-        href = (p.get("href") or "").strip()
-        pid = _post_id_from_href(href)
-        sub = os.path.join(root, pid)
-        os.makedirs(sub, exist_ok=True)
-        saved: List[str] = []
-        for i, u in enumerate(urls[:12]):
-            u = (u or "").strip()
-            if not u or u.startswith("data:"):
+        try:
+            urls = [
+                x for x in (p.get("image_urls") or []) if not _is_noise_image_url(str(x))
+            ]
+            if not urls:
                 continue
-            try:
-                r = session.get(u, timeout=45)
-                r.raise_for_status()
-                ct = (r.headers.get("Content-Type") or "").lower()
-                ext = ".jpg"
-                if "png" in ct or u.lower().endswith(".png"):
-                    ext = ".png"
-                elif "webp" in ct or u.lower().endswith(".webp"):
-                    ext = ".webp"
-                elif "gif" in ct:
-                    ext = ".gif"
-                fp = os.path.join(sub, f"img_{i}{ext}")
-                with open(fp, "wb") as f:
-                    f.write(r.content)
-                saved.append(fp)
-            except Exception as e:
-                _scrape_log(f"图片下载失败 ({i}): {u[:60]}… — {e}")
-        if saved:
-            p["saved_image_paths"] = saved
-            _scrape_log(f"已保存 {len(saved)} 张图片 → {sub}")
+            href = (p.get("href") or "").strip()
+            pid = _post_id_from_href(href)
+            sub = os.path.join(root, pid) if pid else root
+            if p.get("_square_detail_cache_hit") and pid and _square_image_dir_has_files(
+                sub
+            ):
+                if not (p.get("saved_image_paths") or []):
+                    p["saved_image_paths"] = _collect_image_paths_in_dir(sub)
+                _scrape_log(
+                    f"跳过下载 post_id={pid}（详情缓存命中且本地目录已有配图）→ {sub}"
+                )
+                continue
+            os.makedirs(sub, exist_ok=True)
+            saved: List[str] = []
+            for i, u in enumerate(urls[:12]):
+                u = (u or "").strip()
+                if not u or u.startswith("data:"):
+                    continue
+                try:
+                    r = session.get(u, timeout=45)
+                    r.raise_for_status()
+                    ct = (r.headers.get("Content-Type") or "").lower()
+                    ext = ".jpg"
+                    if "png" in ct or u.lower().endswith(".png"):
+                        ext = ".png"
+                    elif "webp" in ct or u.lower().endswith(".webp"):
+                        ext = ".webp"
+                    elif "gif" in ct:
+                        ext = ".gif"
+                    fp = os.path.join(sub, f"img_{i}{ext}")
+                    with open(fp, "wb") as f:
+                        f.write(r.content)
+                    saved.append(fp)
+                except Exception as e:
+                    _scrape_log(f"图片下载失败 ({i}): {u[:60]}… — {e}")
+            if saved:
+                p["saved_image_paths"] = saved
+                _scrape_log(f"已保存 {len(saved)} 张图片 → {sub}")
+        finally:
+            if isinstance(p, dict):
+                p.pop("_square_detail_cache_hit", None)
 
 
 def _find_post_record_in_state_buckets(
@@ -1119,6 +1166,7 @@ def _enrich_post_images_from_detail_pages(
                 or rec.get("saved_image_paths")
             ):
                 _merge_square_detail_from_record(p, rec)
+                p["_square_detail_cache_hit"] = True
                 _scrape_log(
                     f"详情缓存命中 post_id={post_id}，跳过打开详情页（合并 state 内已存字段）"
                 )

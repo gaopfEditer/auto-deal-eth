@@ -11,11 +11,11 @@ import time
 from datetime import datetime, time as dt_time
 # TradingView相关功能（已注释，暂时不使用）
 # from browser_automation import capture_all_timeframes_for_symbol
-# from gemini_analyzer import analyze_chart
+# from image_llm_analyzer import analyze_chart
 # from config import SYMBOLS
 
 from browser_automation import capture_target_page
-from gemini_analyzer import analyze_chart, extract_json_from_gemini_text
+from image_llm_analyzer import analyze_chart, extract_json_from_gemini_text
 from notifier import format_analysis_message, format_tv_message, send_notification, send_telegram_message
 from config import TARGET_URL
 
@@ -52,25 +52,17 @@ def run_analysis(use_api: bool = False):
         print("[ERROR] 截图失败，终止流程")
         return
     
-    # 步骤2: Gemini分析
-    print(f"\n[步骤2] 开始Gemini分析...")
-    if use_api:
-        print(f"  [模式] 使用 API 模式进行分析")
-    else:
-        print(f"  [模式] 使用浏览器网页版模式进行分析（默认）")
-    
+    # 步骤2: 本地图模型分析（OLLAMA_CHAT_IMAGE_URL）
+    print(f"\n[步骤2] 开始本地图分析...")
+    print(f"  [模式] Ollama chat-image（OLLAMA_CHAT_IMAGE_URL）")
+
     analysis_result = None
     try:
         analysis_result = analyze_chart(screenshot_path, ANALYSIS_SYMBOL, use_api=use_api)
         if analysis_result and analysis_result.get('status') == 'skipped':
-            print("[INFO] AI 分析已跳过（未配置 API key）")
+            print("[INFO] AI 分析已跳过")
         elif analysis_result and analysis_result.get('status') == 'success':
             print("[OK] 分析完成", file=sys.stderr)
-            if analysis_result.get('method') == 'web':
-                print(
-                    "  [提示] 分析结果已在浏览器中显示，请查看 Gemini 网页版",
-                    file=sys.stderr,
-                )
             raw = analysis_result.get("analysis") or ""
             parsed = extract_json_from_gemini_text(raw) if raw else None
             if parsed is not None:
@@ -382,8 +374,7 @@ def main():
             print("选项:")
             print("  --no-ws      不要后台 WebSocket，仅定时任务（爬 tophub 等）")
             print("  --once       只立即执行一次 tophub 分析后退出（不启定时、不启后台 WS）")
-            print("  --api        使用 API 模式进行 Gemini 分析（需 GEMINI_API_KEY）")
-            print("               默认浏览器网页版 Gemini")
+            print("  --api        已废弃：图分析固定走本地 OLLAMA_CHAT_IMAGE_URL，此参数无效果")
             print("  --ws         仅阻塞运行 WebSocket + TradingView 流程（无定时任务）")
             print("  环境变量 MAIN_WS_URL 可覆盖默认 WSS 地址")
             print("  --help       显示此帮助信息")
@@ -391,10 +382,10 @@ def main():
             print("示例:")
             print("  python main.py                       # 默认：定时 + 后台 WS")
             print("  python main.py --no-ws               # 仅定时，无 WS")
-            print("  python main.py --api                 # 定时 + 后台 WS，Gemini 用 API")
+            print("  python main.py --api                 # --api 无效果（兼容旧脚本）")
             print("  python main.py --once                # 单次 tophub 分析后退出")
             print("  python main.py --ws                  # 仅前台 WebSocket（阻塞）")
-            print("  python main.py --ws --api            # 前台 WS + Gemini API")
+            print("  python main.py --ws --api            # 前台 WS（--api 无效果）")
             return
     
     if ws_only:
@@ -414,9 +405,9 @@ def main():
 
     setup_scheduler()
     if use_api:
-        print("[INFO] 定时任务模式：使用 API 模式进行分析")
+        print("[INFO] 定时任务模式：--api 已废弃，图分析使用本地 OLLAMA_CHAT_IMAGE_URL")
     else:
-        print("[INFO] 定时任务模式：使用浏览器网页版模式进行分析（默认）")
+        print("[INFO] 定时任务模式：图分析使用本地 OLLAMA_CHAT_IMAGE_URL（默认）")
     print("程序运行中，按 Ctrl+C 退出...")
     try:
         while True:

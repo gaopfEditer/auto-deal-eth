@@ -2,17 +2,33 @@
 配置文件 - 第1部分：导入和基础配置
 """
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
+
+_REPO_ROOT = Path(__file__).resolve().parent
 
 # 加载环境变量
 load_dotenv()
 
-# Gemini API配置
-# 如果不需要 AI 分析，可以不配置 GEMINI_API_KEY，程序会自动跳过分析步骤
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyCp812BsFgInOxKsHBzlD01gt4lKgQxe88')
-GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
-# API 请求超时（秒），超时后强制结束请求
-GEMINI_REQUEST_TIMEOUT = int(os.getenv('GEMINI_REQUEST_TIMEOUT', '45'))
+# Gemini（仅 getinfo/weight 等旧模块仍可读 GEMINI_API_KEY；主流程图分析已改用本地 Ollama chat-image）
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_REQUEST_TIMEOUT = int(os.getenv("GEMINI_REQUEST_TIMEOUT", "45"))
+
+# 本地图分析 API：curl 示例
+# curl -s http://127.0.0.1:8000/ollama/chat-image -H 'Content-Type: application/json' \
+#   -d '{"role":"binance_k_line","prompt":"根据这张图判断趋势","image_path":"/abs/path.png"}'
+OLLAMA_CHAT_IMAGE_URL = os.getenv(
+    "OLLAMA_CHAT_IMAGE_URL", "http://127.0.0.1:8000/ollama/chat-image"
+).strip()
+OLLAMA_CHAT_IMAGE_ROLE = os.getenv("OLLAMA_CHAT_IMAGE_ROLE", "binance_k_line").strip()
+OLLAMA_CHAT_IMAGE_PROMPT = os.getenv(
+    "OLLAMA_CHAT_IMAGE_PROMPT", "根据这张图判断趋势"
+).strip()
+OLLAMA_CHAT_IMAGE_TIMEOUT = int(os.getenv("OLLAMA_CHAT_IMAGE_TIMEOUT", "120"))
+# 可选：纯文本 JSON 分类接口（帖子多空），未配置则 classify_square_post_direction 返回 None
+OLLAMA_CLASSIFY_CHAT_URL = os.getenv("OLLAMA_CLASSIFY_CHAT_URL", "").strip()
 
 # 代理：不自动设置，避免 Gemini 被不稳定代理影响。需要时手动: source set_proxy_7890.sh
 
@@ -99,6 +115,35 @@ if not SECTOR_ANALYSIS_PERIODS:
 # Square 关注流帖子状态：按发帖时间保留的小时数（binance_posts_state / binance_market_lists_selenium）
 # 可通过环境变量 POST_RETENTION_HOURS 覆盖，例如 POST_RETENTION_HOURS=48
 POST_RETENTION_HOURS = int(os.getenv('POST_RETENTION_HOURS', '24').strip() or '24')
+
+# 帖子交易信号分析（binance_posts_state）：与下列 YAML 等价
+# promat_analysis:
+#   ollama:
+#     enabled: true
+#     base_url: "http://localhost:11434"
+#     model: "gemma-uncensored"
+# 优先走 Ollama POST {base_url}/api/generate；不可用或失败时回退 LOCAL_CHAT（见 binance_posts_state）
+_PROMAT_DEFAULT_PROMPT = _REPO_ROOT / "prompts" / "binance_market_lists_selenium.txt"
+PROMAT_ANALYSIS = {
+    "ollama": {
+        "enabled": os.getenv("PROMAT_ANALYSIS_OLLAMA_ENABLED", "true").strip().lower()
+        == "true",
+        "base_url": os.getenv(
+            "PROMAT_ANALYSIS_OLLAMA_BASE_URL", "http://localhost:11434"
+        ).rstrip("/"),
+        "model": (
+            os.getenv("PROMAT_ANALYSIS_OLLAMA_MODEL", "gemma-uncensored").strip()
+            or "gemma-uncensored"
+        ),
+        "timeout_sec": int(
+            os.getenv("PROMAT_ANALYSIS_OLLAMA_TIMEOUT_SEC", "120").strip() or "120"
+        ),
+    },
+    "prompt_path": os.getenv(
+        "PROMAT_ANALYSIS_PROMPT_PATH", str(_PROMAT_DEFAULT_PROMPT)
+    ).strip()
+    or str(_PROMAT_DEFAULT_PROMPT),
+}
 
 # 数据库配置
 # 生产环境应从 .env.local 读取，这里提供默认值

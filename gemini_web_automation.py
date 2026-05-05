@@ -73,7 +73,7 @@ def analyze_with_gemini_web(
     "summary": "string"
 }"""
         else:
-            from gemini_analyzer import get_kline_analysis_prompt
+            from image_llm_analyzer import get_kline_analysis_prompt
 
             default_prompt = get_kline_analysis_prompt(symbol, multi_timeframe=False)
         
@@ -1263,7 +1263,7 @@ def analyze_with_gemini_web(
 
             if result_text and len(result_text.strip()) >= 20:
                 print(f"  ✓ 成功获取分析结果", file=sys.stderr)
-                from gemini_analyzer import extract_json_from_gemini_text
+                from image_llm_analyzer import extract_json_from_gemini_text
                 import json as _json
 
                 snippet = result_text.strip()
@@ -1299,7 +1299,7 @@ def analyze_with_gemini_web(
                     result_text2 = ""
 
                 if result_text2 and len(result_text2.strip()) >= 20 and ("正在生成" not in result_text2):
-                    from gemini_analyzer import extract_json_from_gemini_text
+                    from image_llm_analyzer import extract_json_from_gemini_text
                     import json as _json
 
                     snippet = result_text2.strip()

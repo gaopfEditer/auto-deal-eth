@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
-from gemini_analyzer import extract_json_from_gemini_text
+from image_llm_analyzer import extract_json_from_gemini_text
 
 try:
     import requests
@@ -28,12 +28,35 @@ except ModuleNotFoundError:
 TZ_BEIJING = ZoneInfo("Asia/Shanghai")
 
 try:
-    from config import POST_RETENTION_HOURS
+    from config import POST_RETENTION_HOURS, PROMAT_ANALYSIS
 except ImportError:
     # 独立运行本模块时无 config，仍支持环境变量
     POST_RETENTION_HOURS = int(
         os.getenv("POST_RETENTION_HOURS", "24").strip() or "24"
     )
+    _repo = Path(__file__).resolve().parent
+    PROMAT_ANALYSIS = {
+        "ollama": {
+            "enabled": os.getenv("PROMAT_ANALYSIS_OLLAMA_ENABLED", "true").strip().lower()
+            == "true",
+            "base_url": os.getenv(
+                "PROMAT_ANALYSIS_OLLAMA_BASE_URL", "http://localhost:11434"
+            ).rstrip("/"),
+            "model": (
+                os.getenv("PROMAT_ANALYSIS_OLLAMA_MODEL", "gemma-uncensored").strip()
+                or "gemma-uncensored"
+            ),
+            "timeout_sec": int(
+                os.getenv("PROMAT_ANALYSIS_OLLAMA_TIMEOUT_SEC", "120").strip()
+                or "120"
+            ),
+        },
+        "prompt_path": os.getenv(
+            "PROMAT_ANALYSIS_PROMPT_PATH",
+            str(_repo / "prompts" / "binance_market_lists_selenium.txt"),
+        ).strip()
+        or str(_repo / "prompts" / "binance_market_lists_selenium.txt"),
+    }
 DEFAULT_STATE_BASENAME = "binance_posts_state.json"
 LOCAL_CHAT_ANALYZE_URL = "http://127.0.0.1:3860/chat"
 LOCAL_CHAT_ANALYZE_ROLE = os.getenv("LOCAL_CHAT_ANALYZE_ROLE", "binance_square").strip() or "binance_square"
@@ -60,6 +83,9 @@ _PUBLISHED_MAX_FUTURE_SKEW = timedelta(minutes=2)
 _POSTS_BUCKET_UNKNOWN = "_unknown"
 _LOCAL_CHAT_SERVICE_AVAILABLE: Optional[bool] = None
 _LOCAL_CHAT_UNAVAILABLE_REPORTED = False
+_OLLAMA_SERVICE_AVAILABLE: Optional[bool] = None
+_OLLAMA_UNAVAILABLE_REPORTED = False
+_PROMAT_SIGNAL_PROMPT_TEXT: Optional[str] = None
 
 
 def _is_local_chat_service_available() -> bool:
@@ -86,6 +112,74 @@ def _is_local_chat_service_available() -> bool:
     except OSError:
         _LOCAL_CHAT_SERVICE_AVAILABLE = False
     return _LOCAL_CHAT_SERVICE_AVAILABLE
+
+
+def _promat_ollama_cfg() -> Dict[str, Any]:
+    root = PROMAT_ANALYSIS if isinstance(PROMAT_ANALYSIS, dict) else {}
+    o = root.get("ollama") if isinstance(root.get("ollama"), dict) else {}
+    return o
+
+
+def _is_ollama_service_available() -> bool:
+    """
+    Ollama 探活（仅检查 localhost/127.0.0.1 与 base_url 端口），进程内缓存。
+    """
+    global _OLLAMA_SERVICE_AVAILABLE
+    if _OLLAMA_SERVICE_AVAILABLE is not None:
+        return _OLLAMA_SERVICE_AVAILABLE
+    o = _promat_ollama_cfg()
+    base = (o.get("base_url") or "").strip().rstrip("/")
+    if not base:
+        _OLLAMA_SERVICE_AVAILABLE = False
+        return False
+    parsed = urlparse(base if "://" in base else f"http://{base}")
+    host = (parsed.hostname or "").strip().lower()
+    port = parsed.port
+    if host not in {"127.0.0.1", "localhost"} or not port:
+        _OLLAMA_SERVICE_AVAILABLE = True
+        return True
+    try:
+        with socket.create_connection(
+            (host, int(port)), timeout=LOCAL_CHAT_PROBE_TIMEOUT_SEC
+        ):
+            pass
+        _OLLAMA_SERVICE_AVAILABLE = True
+    except OSError:
+        _OLLAMA_SERVICE_AVAILABLE = False
+    return _OLLAMA_SERVICE_AVAILABLE
+
+
+def _load_promat_signal_prompt() -> str:
+    """读取 prompts/binance_market_lists_selenium.txt（与 PROMAT_ANALYSIS['prompt_path'] 一致），带缓存。"""
+    global _PROMAT_SIGNAL_PROMPT_TEXT
+    if _PROMAT_SIGNAL_PROMPT_TEXT is not None:
+        return _PROMAT_SIGNAL_PROMPT_TEXT
+    path = (PROMAT_ANALYSIS or {}).get("prompt_path") if isinstance(
+        PROMAT_ANALYSIS, dict
+    ) else None
+    pp = str(path or "").strip()
+    if not pp:
+        pp = str(
+            Path(__file__).resolve().parent
+            / "prompts"
+            / "binance_market_lists_selenium.txt"
+        )
+    try:
+        with open(pp, encoding="utf-8") as f:
+            _PROMAT_SIGNAL_PROMPT_TEXT = f.read().strip()
+    except OSError as e:
+        print(f"[posts_state][signal_api] 无法读取分析提示词文件 {pp}: {e}")
+        _PROMAT_SIGNAL_PROMPT_TEXT = ""
+    return _PROMAT_SIGNAL_PROMPT_TEXT or ""
+
+
+def _build_signal_user_message(href: str, title: str, raw: str) -> str:
+    return (
+        "给出建议\n"
+        f"标题: {(title or '')[:500]}\n"
+        f"正文: {(raw or '')[:8000]}\n"
+        f"链接: {href}"
+    )
 
 
 def _dt_utc(dt: datetime) -> datetime:
@@ -588,6 +682,87 @@ def _cleanup_removed_post_images(candidate_paths: List[str], remaining_paths: Li
     return deleted
 
 
+def _analyze_post_via_ollama(
+    href: str, title: str, raw: str, image_path: str
+) -> Dict[str, Any]:
+    """
+    调 Ollama /api/generate 分析帖子；prompt 前缀为 PROMAT_ANALYSIS 提示词文件全文。
+    """
+    if requests is None:
+        return {"ok": False, "error": "missing_requests"}
+    o = _promat_ollama_cfg()
+    base = (o.get("base_url") or "").strip().rstrip("/")
+    model = (o.get("model") or "").strip()
+    timeout_sec = int(o.get("timeout_sec") or 120)
+    if not base or not model:
+        return {"ok": False, "error": "ollama_config_incomplete"}
+    system = _load_promat_signal_prompt()
+    if not system:
+        return {"ok": False, "error": "promat_prompt_empty"}
+    user_block = _build_signal_user_message(href, title, raw)
+    full_prompt = f"{system}\n\n---\n\n{user_block}"
+    url = f"{base}/api/generate"
+    global _OLLAMA_UNAVAILABLE_REPORTED
+    if not _is_ollama_service_available():
+        if not _OLLAMA_UNAVAILABLE_REPORTED:
+            print(
+                "[posts_state][signal_api] Ollama 不可用，将尝试回退本地 chat "
+                f"base_url={base}"
+            )
+            _OLLAMA_UNAVAILABLE_REPORTED = True
+        return {"ok": False, "error": "ollama_service_unavailable", "skipped": True}
+    print(
+        f"[posts_state][signal_api] Ollama 请求开始 model={model} url={url} "
+        f"timeout={timeout_sec}s href={href} image={'Y' if image_path else 'N'}(text_only)"
+    )
+    try:
+        r = requests.post(
+            url,
+            json={"model": model, "prompt": full_prompt, "stream": False},
+            headers={"Content-Type": "application/json"},
+            timeout=timeout_sec,
+        )
+        r.raise_for_status()
+        body = r.json() if r.content else {}
+        if not isinstance(body, dict):
+            return {"ok": False, "error": "ollama_invalid_json"}
+        resp_text = body.get("response")
+        if not isinstance(resp_text, str) or not resp_text.strip():
+            return {"ok": False, "error": "ollama_empty_response", "raw": body}
+        parsed = extract_json_from_gemini_text(resp_text)
+        if not isinstance(parsed, dict):
+            return {
+                "ok": False,
+                "error": "ollama_response_not_json",
+                "raw": resp_text[:2000],
+            }
+        print(
+            "[posts_state][signal_api] Ollama 请求成功 "
+            f"isSign={parsed.get('isSign')} star={parsed.get('star')}"
+        )
+        return {"ok": True, "data": parsed, "source": "ollama"}
+    except Exception as e:
+        print(f"[posts_state][signal_api] Ollama 请求失败 href={href} error={e}")
+        return {"ok": False, "error": f"ollama:{e}"}
+
+
+def _analyze_post_signal(
+    href: str, title: str, raw: str, image_path: str
+) -> Dict[str, Any]:
+    """
+    交易信号分析：优先 Ollama（promat_analysis / PROMAT_ANALYSIS），否则本地 chat。
+    """
+    o = _promat_ollama_cfg()
+    if bool(o.get("enabled")):
+        out = _analyze_post_via_ollama(href, title, raw, image_path)
+        if out.get("ok"):
+            return out
+        err = str(out.get("error") or "")
+        if err != "ollama_service_unavailable" and not out.get("skipped"):
+            print(f"[posts_state][signal_api] Ollama 未成功，回退本地 chat: {err}")
+    return _analyze_post_via_local_api(href, title, raw, image_path)
+
+
 def _analyze_post_via_local_api(
     href: str, title: str, raw: str, image_path: str
 ) -> Dict[str, Any]:
@@ -597,12 +772,7 @@ def _analyze_post_via_local_api(
     """
     if requests is None:
         return {"ok": False, "error": "missing_requests"}
-    msg = (
-        "给出建议\n"
-        f"标题: {(title or '')[:500]}\n"
-        f"正文: {(raw or '')[:8000]}\n"
-        f"链接: {href}"
-    )
+    msg = _build_signal_user_message(href, title, raw)
     if not _is_local_chat_service_available():
         global _LOCAL_CHAT_UNAVAILABLE_REPORTED
         if not _LOCAL_CHAT_UNAVAILABLE_REPORTED:
@@ -859,7 +1029,7 @@ def process_watchlist_posts(
 
     alerts: List[Dict[str, Any]] = []
 
-    from gemini_analyzer import classify_square_post_direction
+    from image_llm_analyzer import classify_square_post_direction
 
     for p in incoming:
         if not isinstance(p, dict):
@@ -1089,7 +1259,7 @@ def process_watchlist_posts(
                         f"image={'Y' if image_used else 'N'} title={str(rec.get('title') or '')[:50]}"
                     )
                     fut = ex.submit(
-                        _analyze_post_via_local_api,
+                        _analyze_post_signal,
                         href,
                         str(rec.get("title") or ""),
                         str(rec.get("raw") or ""),
@@ -1112,7 +1282,7 @@ def process_watchlist_posts(
                     f"[posts_state][signal_api] 串行执行 href={href} "
                     f"image={'Y' if image_used else 'N'} title={str(rec.get('title') or '')[:50]}"
                 )
-                out = _analyze_post_via_local_api(
+                out = _analyze_post_signal(
                     href,
                     str(rec.get("title") or ""),
                     str(rec.get("raw") or ""),

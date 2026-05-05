@@ -8,7 +8,7 @@ import time
 
 import requests
 
-from gemini_analyzer import extract_json_from_gemini_text
+from image_llm_analyzer import extract_json_from_gemini_text
 from config import DINGTALK_WEBHOOK, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 
 def send_dingtalk_message(content: str):

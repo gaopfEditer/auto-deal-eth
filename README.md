@@ -20,7 +20,7 @@
 auto-deal-eth/
 ├── config.py              # 配置文件（3部分）
 ├── browser_automation.py   # 浏览器自动化（3部分）
-├── gemini_analyzer.py      # Gemini分析模块（3部分）
+├── image_llm_analyzer.py   # 本地 Ollama chat-image 图分析（替代原 gemini_analyzer）
 ├── getinfo/                # 资讯获取模块（宏观日历 + 消息权重）
 │   ├── calendar_akshare.py # 金十 4/5 星经济日历
 │   ├── weight.py           # 传播/NLP/市场联动三维权重
