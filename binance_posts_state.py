@@ -3,6 +3,7 @@ Square 关注流帖子：按发帖时间保留窗口（默认 24 小时，见 co
 
 状态文件默认与 --out 同目录下的 binance_posts_state.json。
 posts 结构为 { 关注者 author_slug: { 帖子 href: 记录 } }；旧版扁平 { href: 记录 } 会在加载时自动迁移。
+根级 square_lives：本轮抓取中「正在直播」的用户（author_slug、profile、live_url 等），来自 watchlist.lives（含主页 LIVE 角标探测 profile_home_probe）；无命中时写 []。
 根级 detail_fetch_cache：记录已抓取过正文的 post_id，供 Selenium 跳过重复打开详情页；与帖子一并按保留窗口清理。
 """
 from __future__ import annotations
@@ -960,6 +961,55 @@ def _apply_watchlist_audio_replay_patches(
     return applied
 
 
+def _square_profile_slug_from_href(profile_href: str) -> str:
+    """从 Square profile URL 解析 author_slug（小写）。"""
+    u = (profile_href or "").strip().split("#")[0]
+    low = u.lower()
+    if "/square/profile/" not in low:
+        return ""
+    try:
+        tail = u.rstrip("/").rsplit("/", 1)[-1]
+        return tail.split("?")[0].strip().lower()
+    except Exception:
+        return ""
+
+
+def _snapshot_watchlist_lives_for_state(
+    lives: Any,
+    *,
+    scraped_at: str = "",
+) -> List[Dict[str, Any]]:
+    """
+    将 binance_market_lists_selenium 输出的 watchlist.lives 规范为状态文件中的 square_lives 数组。
+    """
+    out: List[Dict[str, Any]] = []
+    if not isinstance(lives, list):
+        return out
+    sa = (scraped_at or "").strip()[:120]
+    for x in lives:
+        if not isinstance(x, dict):
+            continue
+        profile = (x.get("profile") or "").strip().split("#")[0]
+        live_url = (x.get("live_url") or "").strip().split("#")[0]
+        author = (x.get("author") or "").strip()
+        slug = _square_profile_slug_from_href(profile)
+        if not slug and author:
+            slug = author.strip().lower()
+        if not slug and not live_url:
+            continue
+        row: Dict[str, Any] = {
+            "author_slug": slug,
+            "author": author,
+            "profile": profile,
+            "live_url": live_url,
+            "probe": (x.get("raw") or "").strip(),
+        }
+        if sa:
+            row["scraped_at"] = sa
+        out.append(row)
+    return out
+
+
 def process_watchlist_posts(
     result: Dict[str, Any],
     out_json_path: str,
@@ -971,6 +1021,7 @@ def process_watchlist_posts(
     合并本次抓取的 latest_posts 与持久化状态：
     - 以**帖子发帖时间**为准保留 POST_RETENTION_HOURS 小时内；剔除无法解析时间及超期帖（含久远置顶）；
     - 新出现的 href 写入 post_alerts 并提示；对**新帖**调用 Gemini；
+    - 将 watchlist.lives 写入根级 square_lives（无则 []），便于与 posts 对照；
     - 不再维护「首次/最后一次发现时间」。
     """
     spath = state_path or default_posts_state_path(out_json_path)
@@ -1353,6 +1404,11 @@ def process_watchlist_posts(
     wl["posts_signal_filtered_star0"] = filtered_star0
 
     state["posts"] = posts_map
+    scraped_s = str(scraped).strip() if scraped else ""
+    state["square_lives"] = _snapshot_watchlist_lives_for_state(
+        (result.get("watchlist") or {}).get("lives"),
+        scraped_at=scraped_s,
+    )
     state["updated_at"] = _format_beijing(now)
     _save_state(spath, state)
 
@@ -1362,8 +1418,10 @@ def process_watchlist_posts(
         )
     if removed_images:
         print(f"[posts_state] 已删除超期帖子关联截图: {removed_images} 个文件")
+    n_sq_live = len(state.get("square_lives") or [])
     print(
-        f"[posts_state] 窗口内帖子 {len(merged)} 条，新帖信号 {len(alerts)} 条，状态已写入 {spath}"
+        f"[posts_state] 窗口内帖子 {len(merged)} 条，新帖信号 {len(alerts)} 条，"
+        f"直播中 {n_sq_live} 人，状态已写入 {spath}"
     )
 
     return result

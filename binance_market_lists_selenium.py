@@ -119,6 +119,9 @@ ASPECT_VIDEO_SCAN_MAX_PUBLISH_AGE_DAYS = float(
     (os.getenv("ASPECT_VIDEO_SCAN_MAX_PUBLISH_AGE_DAYS", "2") or "2").strip() or "2"
 )
 
+# 注入到币安 Square 页内的直播提示条（固定 id，便于下一轮未直播时移除）
+SQUARE_LIVE_TOAST_ID = "auto-deal-eth-square-live-toast"
+
 # /square/audio/replay 页：仅从 performance 网络资源筛 m3u8（不再读 DOM 标题 / video.src）
 _AUDIO_REPLAY_M3U8_FROM_NETWORK_JS = r"""
 const m3u8Set = new Set();
@@ -1458,6 +1461,7 @@ def _extract_square_profile_posts(
     *,
     probe_live: bool = False,
     author_display_name: str = "",
+    view_all_url: str = DEFAULT_WATCHLIST_URL,
 ) -> Tuple[List[Dict[str, Any]], Optional[Dict[str, str]], List[Dict[str, Any]]]:
     """
     打开用户 Square 主页，深度下滚加载虚拟列表，抓取该用户帖子（数量通常多于 Following 流首屏）。
@@ -1574,9 +1578,34 @@ return out;
     if probe_live:
         _human_pause(0.55, 1.25)
         hint = (author_display_name or "").strip() or author_slug
-        live_hit = _probe_single_profile_live(
-            driver, base, author_hint=hint, log_visit=False
-        )
+        vu = (view_all_url or DEFAULT_WATCHLIST_URL).strip() or DEFAULT_WATCHLIST_URL
+        # 当前已在主页：先识别 span.live-tag 等信号，避免再跳转 tab=live 时错过主页角标
+        status_home = _detect_live_on_current_square_page(driver)
+        if status_home.get("is_live"):
+            links = status_home.get("live_links") or []
+            live_url = _pick_live_url(base, links)
+            author_disp = hint or author_slug or slug_l
+            live_hit = {
+                "author": author_disp,
+                "profile": base.split("#")[0],
+                "live_url": live_url,
+                "raw": "profile_home_probe",
+            }
+            _show_square_live_toast(
+                driver,
+                author=author_disp,
+                live_url=live_url,
+                view_all_url=vu,
+            )
+        else:
+            _remove_square_live_toast(driver)
+            live_hit = _probe_single_profile_live(
+                driver,
+                base,
+                author_hint=hint,
+                log_visit=False,
+                view_all_url=vu,
+            )
     return posts, live_hit, profile_audio_patches
 
 
@@ -2305,9 +2334,101 @@ return out;
     return profiles or []
 
 
+def _remove_square_live_toast(driver) -> None:
+    """移除本脚本注入的直播提示条（下一轮巡检未在直播时调用）。"""
+    try:
+        driver.execute_script(
+            """
+const n = document.getElementById(arguments[0]);
+if (n) n.remove();
+            """,
+            SQUARE_LIVE_TOAST_ID,
+        )
+    except Exception:
+        pass
+
+
+def _show_square_live_toast(
+    driver,
+    *,
+    author: str,
+    live_url: str,
+    view_all_url: str,
+) -> None:
+    """
+    在当前 Square 页注入右上角提示条：可关闭；「查看直播」「查看全部」新开标签。
+    """
+    try:
+        ja = json.dumps(author, ensure_ascii=False)
+        jl = json.dumps(live_url, ensure_ascii=False)
+        jv = json.dumps(view_all_url, ensure_ascii=False)
+        jid = json.dumps(SQUARE_LIVE_TOAST_ID)
+        driver.execute_script(
+            f"""
+(function() {{
+  const rid = {jid};
+  const old = document.getElementById(rid);
+  if (old) old.remove();
+  const author = {ja};
+  const liveUrl = {jl};
+  const viewAllUrl = {jv};
+  const root = document.createElement('div');
+  root.id = rid;
+  root.setAttribute('data-auto-deal-live-toast', '1');
+  root.style.cssText = [
+    'position:fixed','top:20px','right:20px','max-width:min(420px,92vw)','z-index:2147483647',
+    'font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif',
+    'background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%)','color:#f8fafc',
+    'border:1px solid rgba(148,163,184,0.35)','border-radius:12px',
+    'box-shadow:0 12px 40px rgba(0,0,0,.45)','padding:14px 16px','font-size:14px',
+    'line-height:1.45','pointer-events:auto'
+  ].join(';');
+  const title = document.createElement('div');
+  title.style.cssText = 'font-weight:600;margin-bottom:8px;font-size:15px';
+  title.textContent = '直播中 · ' + author;
+  const sub = document.createElement('div');
+  sub.style.cssText = 'opacity:0.88;font-size:13px;margin-bottom:12px';
+  sub.textContent = '主页或直播页检测到 LIVE 徽章或直播信号';
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;align-items:center';
+  const btnBase = 'cursor:pointer;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:500';
+  const closeBtn = document.createElement('button');
+  closeBtn.type = 'button';
+  closeBtn.textContent = '关闭';
+  closeBtn.style.cssText = btnBase + ';border:1px solid rgba(148,163,184,0.45);background:transparent;color:#e2e8f0';
+  closeBtn.addEventListener('click', function() {{ root.remove(); }});
+  const openBtn = document.createElement('button');
+  openBtn.type = 'button';
+  openBtn.textContent = '查看直播';
+  openBtn.style.cssText = btnBase + ';border:none;background:#22c55e;color:#052e16;font-weight:600';
+  openBtn.addEventListener('click', function() {{
+    try {{ window.open(liveUrl, '_blank', 'noopener,noreferrer'); }} catch (e) {{}}
+  }});
+  const allBtn = document.createElement('button');
+  allBtn.type = 'button';
+  allBtn.textContent = '查看全部';
+  allBtn.style.cssText = closeBtn.style.cssText;
+  allBtn.addEventListener('click', function() {{
+    try {{ window.open(viewAllUrl, '_blank', 'noopener,noreferrer'); }} catch (e) {{}}
+  }});
+  btnRow.appendChild(closeBtn);
+  btnRow.appendChild(openBtn);
+  btnRow.appendChild(allBtn);
+  root.appendChild(title);
+  root.appendChild(sub);
+  root.appendChild(btnRow);
+  document.body.appendChild(root);
+}})();
+            """
+        )
+    except Exception:
+        pass
+
+
 def _detect_live_on_current_square_page(driver) -> Dict[str, Any]:
     """
     检查当前 Square 页面是否存在直播信号，并提取直播链接。
+    含主页常见 LIVE 角标：span.live-tag（如 <span class="live-tag">LIVE</span>）。
     """
     return driver.execute_script(
         """
@@ -2316,6 +2437,18 @@ const hitCn = raw.includes('正在直播') || raw.includes('直播中');
 const hitEn =
   /\\b(live\\s*now|is\\s+live|live\\s*stream|live\\s*broadcast|going\\s*live)\\b/i.test(raw);
 const hitText = hitCn || hitEn;
+
+let liveTagHit = false;
+for (const el of Array.from(document.querySelectorAll('span.live-tag, .live-tag'))) {
+  const t = String((el && (el.innerText || el.textContent)) || '')
+    .replace(/\\s+/g, ' ')
+    .trim()
+    .toUpperCase();
+  if (t === 'LIVE' || (t && t.includes('LIVE'))) {
+    liveTagHit = true;
+    break;
+  }
+}
 
 const bad = (href) => {
   const h = (href || '').toLowerCase();
@@ -2345,8 +2478,8 @@ for (const a of Array.from(document.querySelectorAll('a[href]'))) {
     }
   }
 }
-const isLive = hitText || links.length > 0;
-return { is_live: isLive, live_links: links.slice(0, 8) };
+const isLive = hitText || links.length > 0 || liveTagHit;
+return { is_live: isLive, live_links: links.slice(0, 8), live_tag_hit: liveTagHit };
         """
     )
 
@@ -2357,6 +2490,7 @@ def _probe_single_profile_live(
     *,
     author_hint: str = "",
     log_visit: bool = True,
+    view_all_url: str = DEFAULT_WATCHLIST_URL,
 ) -> Optional[Dict[str, str]]:
     """打开 profile 的直播 tab（必要时回主页）检测一次；命中则返回 lives 条目。"""
     href = (profile_href or "").strip().split("#")[0].strip()
@@ -2364,6 +2498,7 @@ def _probe_single_profile_live(
         return None
     name = _visible_text(author_hint or "")
     slug = (_profile_slug(href) or "").strip()
+    vu = (view_all_url or DEFAULT_WATCHLIST_URL).strip() or DEFAULT_WATCHLIST_URL
     if log_visit:
         _scrape_log(f"巡检是否在直播 → {name or slug} ({href})")
     try:
@@ -2384,16 +2519,22 @@ def _probe_single_profile_live(
         if status.get("is_live"):
             links = status.get("live_links") or []
             live_url = _pick_live_url(href, links)
+            author_disp = name or slug or href.rsplit("/", 1)[-1].split("?")[0]
+            _show_square_live_toast(
+                driver,
+                author=author_disp,
+                live_url=live_url,
+                view_all_url=vu,
+            )
             return {
-                "author": name
-                or slug
-                or href.rsplit("/", 1)[-1].split("?")[0],
+                "author": author_disp,
                 "profile": href.split("#")[0],
                 "live_url": live_url,
                 "raw": "profile_live_probe",
             }
+        _remove_square_live_toast(driver)
     except Exception:
-        pass
+        _remove_square_live_toast(driver)
     return None
 
 
@@ -2402,6 +2543,8 @@ def _probe_live_from_profiles(
     profiles: List[Dict[str, str]],
     max_lives: int = 20,
     skip_hrefs: Optional[Set[str]] = None,
+    *,
+    view_all_url: str = DEFAULT_WATCHLIST_URL,
 ) -> List[Dict[str, str]]:
     """
     进入关注用户个人页逐个探测是否在直播，返回直播中的用户和链接。
@@ -2419,7 +2562,13 @@ def _probe_live_from_profiles(
         if key and key in skip:
             continue
         name = _visible_text(p.get("name") or "")
-        hit = _probe_single_profile_live(driver, href, author_hint=name, log_visit=True)
+        hit = _probe_single_profile_live(
+            driver,
+            href,
+            author_hint=name,
+            log_visit=True,
+            view_all_url=view_all_url,
+        )
         if hit:
             lives.append(hit)
     return lives
@@ -2631,6 +2780,7 @@ def scrape_binance_lists(
                     max_items=max_items,
                     probe_live=probe_live_with_posts,
                     author_display_name=(fp.get("name") or "").strip(),
+                    view_all_url=watchlist_url,
                 )
                 if prof_audio_patches:
                     watchlist_audio_replay_patches.extend(prof_audio_patches)
@@ -2702,6 +2852,7 @@ def scrape_binance_lists(
                 follow_profiles,
                 max_lives=max_items,
                 skip_hrefs=profile_hrefs_live_done,
+                view_all_url=watchlist_url,
             )
             _scrape_log(f"直播巡检结束（命中 {len(lives_probed)} 条）")
         # 合并：主页拉帖时顺带命中的直播 + 其余 profile 巡检 + Feed（按 live_url 去重）
