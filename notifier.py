@@ -173,6 +173,134 @@ def format_tv_message(data: dict) -> str:
     )
 
 
+def format_tv_signal_plain(data: dict) -> str:
+    """
+    TradingView 告警标准纯文本（用于 publish/signal，无 Markdown 星号）。
+    示例::
+
+        📊 MYXUSDT 看跌吞没
+
+        触发信号
+
+        💰 交易对: MYXUSDT
+        ...
+    """
+    try:
+        if data.get("type") == "message_received" and isinstance(data.get("message"), dict):
+            msg = data["message"]
+            metadata = msg.get("metadata") or {}
+            title = (msg.get("title") or msg.get("type") or "交易信号").strip()
+            lines = [f"📊 {title}", ""]
+            if msg.get("content"):
+                lines.append(str(msg["content"]).strip())
+                lines.append("")
+            if metadata.get("ticker"):
+                lines.append(f"💰 交易对: {metadata['ticker']}")
+            if metadata.get("type"):
+                lines.append(f"📈 类型: {metadata['type']}")
+            if metadata.get("period"):
+                lines.append(f"⏰ 周期: {metadata['period']}")
+            if metadata.get("time"):
+                lines.append(f"⏰ 时间: {metadata['time']}")
+            if metadata.get("close") is not None and metadata.get("close") != "":
+                lines.append(f"💵 价格: {metadata['close']}")
+            if metadata.get("high") is not None and metadata.get("high") != "":
+                lines.append(f"📈 最高: {metadata['high']}")
+            if metadata.get("low") is not None and metadata.get("low") != "":
+                lines.append(f"📉 最低: {metadata['low']}")
+            if msg.get("sender"):
+                lines.append("")
+                lines.append(f"👤 来源: {msg['sender']}")
+            return "\n".join(lines)
+    except Exception as e:
+        print(f"[format_tv_signal_plain] {e}", file=sys.stderr)
+    return f"📨 收到消息\n\n{json.dumps(data, ensure_ascii=False, indent=2)}"
+
+
+def publish_signal_to_hub(
+    signal: str,
+    *,
+    publish_url: str | None = None,
+    style_ids: list | None = None,
+    strategy_id: str | None = None,
+    compose_mode: str | None = None,
+    publish: bool | None = None,
+    timeout_sec: int | None = None,
+) -> bool:
+    """
+    POST /api/publish/signal 派发到内容服务。
+  环境变量:
+    SIGNAL_PUBLISH_URL（默认 http://127.0.0.1:8000/api/publish/signal）
+    SIGNAL_PUBLISH_STYLE_IDS（逗号分隔，默认 style_tianya_classic）
+    SIGNAL_PUBLISH_STRATEGY_ID（默认 strategy_left_ambush）
+    SIGNAL_PUBLISH_COMPOSE_MODE（默认 manual）
+    SIGNAL_PUBLISH_DO_PUBLISH（默认 true）
+    """
+    url = (publish_url or os.getenv(
+        "SIGNAL_PUBLISH_URL", "http://127.0.0.1:8000/api/publish/signal"
+    )).strip()
+    if not url:
+        print("[publish] SIGNAL_PUBLISH_URL 未配置", file=sys.stderr)
+        return False
+
+    raw_styles = os.getenv("SIGNAL_PUBLISH_STYLE_IDS", "style_tianya_classic").strip()
+    styles = style_ids if style_ids is not None else [
+        s.strip() for s in raw_styles.split(",") if s.strip()
+    ]
+    strategy = (
+        strategy_id
+        if strategy_id is not None
+        else os.getenv("SIGNAL_PUBLISH_STRATEGY_ID", "strategy_left_ambush").strip()
+    )
+    mode = (
+        compose_mode
+        if compose_mode is not None
+        else os.getenv("SIGNAL_PUBLISH_COMPOSE_MODE", "manual").strip() or "manual"
+    )
+    if publish is None:
+        publish = os.getenv("SIGNAL_PUBLISH_DO_PUBLISH", "true").strip().lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+    timeout = timeout_sec if timeout_sec is not None else int(
+        os.getenv("SIGNAL_PUBLISH_TIMEOUT_SEC", "60").strip() or "60"
+    )
+
+    payload = {
+        "signal": signal,
+        "style_ids": styles,
+        "strategy_id": strategy,
+        "compose_mode": mode,
+        "publish": publish,
+    }
+    try:
+        session = requests.Session()
+        session.trust_env = False
+        r = session.post(
+            url,
+            json=payload,
+            headers={"Content-Type": "application/json"},
+            timeout=timeout,
+        )
+        if not r.ok:
+            print(
+                f"[publish] HTTP {r.status_code}: {(r.text or '')[:500]}",
+                file=sys.stderr,
+            )
+            return False
+        print(f"[publish] 已派发 strategy={strategy} styles={styles}")
+        try:
+            body = r.json()
+            print(f"[publish] 响应: {json.dumps(body, ensure_ascii=False)[:800]}")
+        except Exception:
+            print(f"[publish] 响应: {(r.text or '')[:500]}")
+        return True
+    except requests.RequestException as e:
+        print(f"[publish] 请求失败: {e}", file=sys.stderr)
+        return False
+
+
 # 第3部分：格式化消息和统一发送接口
 def format_analysis_message(analysis_results: dict):
     """格式化分析结果为消息（支持多币种）"""

@@ -58,16 +58,20 @@ def get_screenshot_dir() -> str:
 
 
 def disable_proxy_env() -> None:
-    """禁用进程内的代理环境变量：确保 WSS/HTTP 直连。"""
+    """禁用进程内的代理环境变量：确保 WSS/HTTP 直连（含 SOCKS）。"""
     for k in (
         "HTTP_PROXY",
         "HTTPS_PROXY",
         "ALL_PROXY",
         "NO_PROXY",
+        "SOCKS_PROXY",
+        "SOCKS5_PROXY",
         "http_proxy",
         "https_proxy",
         "all_proxy",
         "no_proxy",
+        "socks_proxy",
+        "socks5_proxy",
     ):
         os.environ.pop(k, None)
 

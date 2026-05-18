@@ -8,7 +8,7 @@ import sys
 import threading
 import schedule
 import time
-from datetime import datetime, time as dt_time
+from datetime import datetime, time as dt_time, timezone
 # TradingView相关功能（已注释，暂时不使用）
 # from browser_automation import capture_all_timeframes_for_symbol
 # from image_llm_analyzer import analyze_chart
@@ -16,7 +16,8 @@ from datetime import datetime, time as dt_time
 
 from browser_automation import capture_target_page
 from image_llm_analyzer import analyze_chart, extract_json_from_gemini_text
-from notifier import format_analysis_message, format_tv_message, send_notification, send_telegram_message
+from notifier import format_analysis_message, send_notification, send_telegram_message
+from ws_signal_handler import process_tradingview_ws_message
 from config import TARGET_URL
 
 from dealMsg.runner import (
@@ -168,25 +169,24 @@ def handle_ws_tv_message(raw: str, use_api: bool) -> None:
     if source != "tradingview":
         return
 
-    send_telegram_message(format_tv_message(obj))
-
-    ticker, period = parse_ws_payload(obj)
-    if not ticker:
-        print("[WS] tradingview 消息缺少 ticker，跳过截图", file=sys.stderr)
+    ok, note = process_tradingview_ws_message(obj)
+    print(f"[WS] {note}", file=sys.stderr)
+    if not ok:
         return
 
-    symbol_part = _tv_binance_symbol(ticker)
-    interval_key = period_to_tradingview_interval(period or "")
-    out_path = os.path.join(get_screenshot_dir(), f"{symbol_part}_{interval_key}.png")
+    # 可选：截图后再做本地图分析（默认关闭，设 WS_AFTER_SCREENSHOT_ANALYZE=1 开启）
+    if os.getenv("WS_AFTER_SCREENSHOT_ANALYZE", "").strip().lower() not in (
+        "1",
+        "true",
+        "yes",
+    ):
+        return
 
-    print(
-        f"[WS] 截图+分析: {ticker} period={period!r} -> TV interval={interval_key} -> {out_path}",
-        file=sys.stderr,
-    )
-    try:
-        capture_tradingview_chart(ticker=ticker, timeframe=period or "15m", out_path=out_path)
-    except Exception as e:
-        print(f"[WS] TradingView 截图失败: {e}", file=sys.stderr)
+    ticker, period = parse_ws_payload(obj)
+    symbol_part = _tv_binance_symbol(ticker or "")
+    interval_key = period_to_tradingview_interval(period or "1h")
+    out_path = os.path.join(get_screenshot_dir(), f"{symbol_part}_{interval_key}.png")
+    if not os.path.isfile(out_path):
         return
 
     analysis_label = f"{symbol_part}_{interval_key}"
@@ -201,7 +201,7 @@ def handle_ws_tv_message(raw: str, use_api: bool) -> None:
             elif raw_a.strip():
                 print(raw_a.strip())
     except Exception as e:
-        print(f"[WS] Gemini 分析异常: {e}", file=sys.stderr)
+        print(f"[WS] 图分析异常: {e}", file=sys.stderr)
 
     if analysis_result and analysis_result.get("status") not in ("skipped", "error"):
         print("\n[WS] 发送分析通知...", file=sys.stderr)
@@ -245,6 +245,21 @@ def run_websocket_forever(use_api: bool) -> None:
 
     def on_message(ws, message):
         try:
+            raw = message
+            if isinstance(raw, bytes):
+                raw = raw.decode("utf-8", errors="replace")
+            obj = _extract_json(raw)
+            if obj and obj.get("type") == "heartbeat":
+                ws.send(
+                    json.dumps(
+                        {
+                            "type": "pong",
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                        }
+                    )
+                )
+                print("[WS] 心跳 -> pong", file=sys.stderr)
+                return
             signal_queue.put(message)
             # unfinished_tasks = 队列中等待数 + 当前 worker 正在处理的一条
             ut = signal_queue.unfinished_tasks
