@@ -145,6 +145,16 @@ PROMAT_ANALYSIS = {
     or str(_PROMAT_DEFAULT_PROMPT),
 }
 
+# publish/signal 润色（style_tianya_classic + strategy_left_ambush），见 prompts/promat/
+_PROMAT_PUBLISH_DIR = _REPO_ROOT / "prompts" / "promat"
+PROMAT_PUBLISH = {
+    "dir": os.getenv("PROMAT_PUBLISH_DIR", str(_PROMAT_PUBLISH_DIR)).strip()
+    or str(_PROMAT_PUBLISH_DIR),
+    "style_path": str(_PROMAT_PUBLISH_DIR / "style_tianya_classic.txt"),
+    "strategy_path": str(_PROMAT_PUBLISH_DIR / "strategy_left_ambush.txt"),
+    "compose_path": str(_PROMAT_PUBLISH_DIR / "tv_signal_compose.txt"),
+}
+
 # 数据库配置
 # 生产环境应从 .env.local 读取，这里提供默认值
 DB_HOST = os.getenv('DB_HOST', '60.205.120.196')

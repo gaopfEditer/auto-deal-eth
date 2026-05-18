@@ -1,16 +1,8 @@
 #!/usr/bin/env python3
 """
-WebSocket 推送：监听 MAIN_WS_URL，对 tradingview 信号（仅 1h/4h）截图并派发 publish/signal。
+tv_ws_pic_push_public — WebSocket 收 TradingView 信号 → 格式化 → POST 派发 → 可选截图。
 
-用法:
-  python ws_push_demo.py              # 仅打印
-  python ws_push_demo.py --run        # 截图 + 格式化 + POST publish/signal
-  python ws_push_demo.py --print-raw --run
-
-环境变量:
-  WS_ALLOWED_PERIODS=1h,4h
-  SIGNAL_PUBLISH_URL=http://127.0.0.1:8000/api/publish/signal
-  MAIN_WS_URL=wss://bz.a.gaopf.top/api/ws
+详细说明见同目录: tv_ws_pic_push_public.USAGE.md
 """
 from __future__ import annotations
 
@@ -31,6 +23,9 @@ from ws_signal_handler import is_allowed_ws_period, process_tradingview_ws_messa
 
 disable_proxy_env()
 DEFAULT_WS_URI = os.getenv("MAIN_WS_URL", "wss://bz.a.gaopf.top/api/ws")
+DEFAULT_PUBLISH_URL = os.getenv(
+    "SIGNAL_PUBLISH_URL", "http://127.0.0.1:8000/api/publish/signal"
+)
 
 
 def _pong_payload() -> str:
@@ -66,7 +61,12 @@ def _print_message_received(data: dict) -> None:
     print("-" * 56)
 
 
-def _handle_payload(data: dict, *, execute: bool) -> None:
+def _handle_payload(
+    data: dict,
+    *,
+    execute: bool,
+    skip_screenshot: bool,
+) -> None:
     msg = data.get("message")
     if not isinstance(msg, dict):
         return
@@ -78,12 +78,18 @@ def _handle_payload(data: dict, *, execute: bool) -> None:
     if execute:
         ok, note = process_tradingview_ws_message(
             data,
+            skip_screenshot=skip_screenshot,
             skip_telegram=os.getenv("WS_SKIP_TELEGRAM", "").strip().lower()
             in ("1", "true", "yes"),
         )
         print(f"[执行] ok={ok} {note}")
     else:
         _print_message_received(data)
+        print(
+            f"[提示] 当前为 --dry-run，不会 POST {DEFAULT_PUBLISH_URL}\n"
+            "       去掉 --dry-run 后才会按 curl 方式派发 signal",
+            file=sys.stderr,
+        )
 
 
 async def run_listener(
@@ -91,6 +97,7 @@ async def run_listener(
     *,
     print_raw: bool,
     execute: bool,
+    skip_screenshot: bool,
 ) -> None:
     try:
         import websockets
@@ -99,7 +106,15 @@ async def run_listener(
         sys.exit(1)
 
     disable_proxy_env()
-    mode = "执行截图+派发" if execute else "仅打印"
+    if execute:
+        mode = "POST publish/signal"
+        if not skip_screenshot:
+            mode += " + 截图"
+        else:
+            mode += "（跳过截图）"
+        print(f"[WS] 派发地址: {DEFAULT_PUBLISH_URL}", file=sys.stderr)
+    else:
+        mode = "仅打印（--dry-run）"
     print(f"[WS] 连接 {ws_uri} …（直连，{mode}）")
 
     async with websockets.connect(ws_uri, proxy=None) as ws:
@@ -126,7 +141,11 @@ async def run_listener(
                 continue
 
             if msg_type == "message_received" and data.get("message"):
-                _handle_payload(data, execute=execute)
+                _handle_payload(
+                    data,
+                    execute=execute,
+                    skip_screenshot=skip_screenshot,
+                )
                 continue
 
             print("[其它]", json.dumps(data, ensure_ascii=False, indent=2)[:4000])
@@ -134,14 +153,20 @@ async def run_listener(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="WebSocket TradingView 信号：打印或截图+publish"
+        prog="tv_ws_pic_push_public",
+        description="WebSocket TradingView：默认 POST publish/signal（与 curl 相同）",
     )
     parser.add_argument("--url", default=DEFAULT_WS_URI, help="WSS 地址")
     parser.add_argument("--print-raw", action="store_true", help="打印原始 JSON 行")
     parser.add_argument(
-        "--run",
+        "--dry-run",
         action="store_true",
-        help="对 1h/4h 信号执行截图并 POST publish/signal（否则仅打印）",
+        help="仅打印解析结果，不 POST、不截图（旧默认行为）",
+    )
+    parser.add_argument(
+        "--skip-screenshot",
+        action="store_true",
+        help="仍 POST publish/signal，但不打开 TradingView 截图",
     )
     args = parser.parse_args()
 
@@ -150,7 +175,8 @@ def main() -> None:
             run_listener(
                 args.url.strip(),
                 print_raw=args.print_raw,
-                execute=args.run,
+                execute=not args.dry_run,
+                skip_screenshot=args.skip_screenshot,
             )
         )
     except KeyboardInterrupt:

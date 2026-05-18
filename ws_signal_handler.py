@@ -6,6 +6,7 @@ WebSocket TradingView 信号：周期过滤 -> 截图 -> 标准文案 -> publish
 from __future__ import annotations
 
 import os
+import sys
 from typing import FrozenSet, Tuple
 
 from dealMsg.runner import (
@@ -90,7 +91,15 @@ def process_tradingview_ws_message(
         tg = format_tv_message(obj) if use_telegram_markdown else signal_text
         send_telegram_message(tg)
 
+    # 先派发 signal（与 curl 一致）；截图失败也不影响已发出的 publish
+    if not skip_publish:
+        disable_proxy_env()
+        ok = publish_signal_to_hub(signal_text)
+        if not ok:
+            return False, "publish/signal 失败（请确认 127.0.0.1:8000 服务已启动）"
+
     out_path = ""
+    shot_note = ""
     if not skip_screenshot:
         symbol_part = _tv_binance_symbol(ticker)
         interval_key = period_to_tradingview_interval(period or "1h")
@@ -107,13 +116,12 @@ def process_tradingview_ws_message(
             )
             print(f"[WS] 截图完成: {out_path}", file=sys.stderr)
         except Exception as e:
-            print(f"[WS] 截图失败: {e}", file=sys.stderr)
-            return False, f"截图失败: {e}"
+            print(f"[WS] 截图失败（publish 已先发）: {e}", file=sys.stderr)
+            shot_note = f" 截图失败: {e}"
 
-    if not skip_publish:
-        disable_proxy_env()
-        ok = publish_signal_to_hub(signal_text)
-        if not ok:
-            return False, "publish/signal 失败"
-
-    return True, f"已处理 {ticker} {period}" + (f" 图={out_path}" if out_path else "")
+    note = f"已处理 {ticker} {period}，已 POST publish/signal"
+    if out_path:
+        note += f" 图={out_path}"
+    if shot_note:
+        note += shot_note
+    return True, note

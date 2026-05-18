@@ -133,7 +133,19 @@ python -m browser_media_runner.runner "https://x.com/yangyi/status/2043661337839
 
 如果你希望“直接传 URL 自动打开并截图再分析”，建议单独做一层 URL 预处理脚本，然后把截图路径传给 `runner`。
 
-## 6. 常见启动顺序（建议）
+## 6. TradingView WebSocket 推送 → 截图 → 派发（`tv_ws_pic_push_public`）
+
+独立常驻进程：收 WSS 里 `tradingview` 信号（默认仅 **1h / 4h**），格式化后 POST `publish/signal`，再 CDP 截 TradingView 图。
+
+```bash
+python tv_ws_pic_push_public.py
+python tv_ws_pic_push_public.py --skip-screenshot   # 只派发、不截图
+python tv_ws_pic_push_public.py --dry-run           # 仅打印，不 POST
+```
+
+完整说明见 **[tv_ws_pic_push_public.USAGE.md](./tv_ws_pic_push_public.USAGE.md)**。
+
+## 7. 常见启动顺序（建议）
 
 1. 激活虚拟环境  
 2. `pip install -r requirements.txt`  

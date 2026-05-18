@@ -274,6 +274,11 @@ def publish_signal_to_hub(
         "compose_mode": mode,
         "publish": publish,
     }
+    print(
+        f"[publish] POST {url} strategy={strategy!r} styles={styles} "
+        f"signal_len={len(signal)}",
+        file=sys.stderr,
+    )
     try:
         session = requests.Session()
         session.trust_env = False
@@ -292,7 +297,9 @@ def publish_signal_to_hub(
         print(f"[publish] 已派发 strategy={strategy} styles={styles}")
         try:
             body = r.json()
-            print(f"[publish] 响应: {json.dumps(body, ensure_ascii=False)[:800]}")
+            from promat_publish import describe_publish_response
+
+            print("[publish] 响应（润色正文已分行）:\n" + describe_publish_response(body))
         except Exception:
             print(f"[publish] 响应: {(r.text or '')[:500]}")
         return True
