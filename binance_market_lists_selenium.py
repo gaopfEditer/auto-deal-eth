@@ -84,7 +84,7 @@ PRIORITY_FOLLOW_PROFILES: List[str] = [
     f"{PRIORITY_PROFILE_BASE}yanchibit",
     f"{PRIORITY_PROFILE_BASE}aleng888888",
     f"{PRIORITY_PROFILE_BASE}sanmageshuai",
-    f"{PRIORITY_PROFILE_BASE}Square-Creator-446e63a9fd9ef",
+    f"{PRIORITY_PROFILE_BASE}square-creator-92912a51e",
     # f"{PRIORITY_PROFILE_BASE}square-creator-857dc547d",
     f"{PRIORITY_PROFILE_BASE}Square-Creator-1d148bbce7461",
     # f"{PRIORITY_PROFILE_BASE}square-creator-4bd102843",
