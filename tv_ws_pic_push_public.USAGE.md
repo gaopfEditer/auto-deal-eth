@@ -34,14 +34,17 @@
    http://127.0.0.1:8000/api/publish/signal
    ```
 
-4. **需要截图时**：Chrome 已开远程调试（与 `binance_market_lists_selenium` 相同）：
+4. **截图（固定 CDP，非无头）**：`ws_signal_handler` 调用 `capture_tradingview_chart(..., force_cdp=True)`，只连接已启动的 Chrome：
 
    ```bash
-   # macOS 示例
-   /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
+   # macOS 示例（端口与 CHROME_DEBUG_PORT 一致，默认 9222）
+   /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+     --remote-debugging-port=9222 \
+     --user-data-dir="$HOME/chrome-debug"
    ```
 
-   环境变量 `USE_REMOTE_DEBUGGING=True`、`CHROME_DEBUG_PORT=9222`（见 `.env` / `config.py`）。
+   终端应出现：`[INFO] 强制 CDP 截图：Selenium debuggerAddress=127.0.0.1:9222`。  
+   不受 `.env` 里 `USE_REMOTE_DEBUGGING=False` 影响；也不会走 `DEALMSG_USE_PLAYWRIGHT` 独立浏览器。
 
 ---
 
@@ -100,6 +103,8 @@ python tv_ws_pic_push_public.py --dry-run --print-raw
 | `SIGNAL_PUBLISH_DO_PUBLISH` | `true` | JSON 里 `publish` 字段 |
 | `WS_SKIP_TELEGRAM` | （空） | 设为 `1` 则不推 Telegram |
 | `DEALMSG_USE_PLAYWRIGHT` | `0` | 设为 `1` 用 Playwright 截图替代 Selenium |
+| `DEALMSG_TV_SAME_TAB` | （空） | 设为 `1` 强制在当前标签打开 TV，不尝试新标签 |
+| `DEALMSG_CDP_NEW_TAB_WAIT_SEC` | `8` | 等待新标签出现的秒数 |
 
 `.env` 示例：
 
@@ -210,7 +215,9 @@ curl -s -X POST http://127.0.0.1:8000/api/publish/signal \
 
 ```bash
 python tv_ws_pic_push_public_test.py
-python tv_ws_pic_push_public_test.py --skip-screenshot   # 仅测 8000 派发
+# 测试默认 publish=false：只润色预览，不发布到广场
+python tv_ws_pic_push_public_test.py --publish-square   # 确认无误后再发广场
+python tv_ws_pic_push_public_test.py --skip-screenshot
 python tv_ws_pic_push_public_test.py --ticker BTCUSD --period 4h
 ```
 

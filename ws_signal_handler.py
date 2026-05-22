@@ -1,7 +1,8 @@
 """
-WebSocket TradingView 信号：周期过滤 -> 截图 -> 标准文案 -> publish/signal。
+WebSocket TradingView 信号：周期过滤 -> 标准文案 -> publish/signal -> CDP 截图。
 
-供 main.py、ws_push_demo.py --run 共用。
+截图固定走本机 Chrome 远程调试（127.0.0.1:CHROME_DEBUG_PORT，默认 9222），
+不复用无头/自启浏览器。供 tv_ws_pic_push_public、main.py 共用。
 """
 from __future__ import annotations
 
@@ -11,6 +12,7 @@ from typing import FrozenSet, Tuple
 
 from dealMsg.runner import (
     capture_tradingview_chart,
+    chrome_debug_port,
     disable_proxy_env,
     get_screenshot_dir,
     parse_ws_payload,
@@ -57,6 +59,7 @@ def process_tradingview_ws_message(
     *,
     skip_screenshot: bool = False,
     skip_publish: bool = False,
+    publish_to_square: bool = True,
     skip_telegram: bool = False,
     use_telegram_markdown: bool = True,
 ) -> Tuple[bool, str]:
@@ -91,10 +94,10 @@ def process_tradingview_ws_message(
         tg = format_tv_message(obj) if use_telegram_markdown else signal_text
         send_telegram_message(tg)
 
-    # 先派发 signal（与 curl 一致）；截图失败也不影响已发出的 publish
+    # 先 POST publish/signal（publish=false 时仅润色，不上广场）；截图失败不影响
     if not skip_publish:
         disable_proxy_env()
-        ok = publish_signal_to_hub(signal_text)
+        ok = publish_signal_to_hub(signal_text, publish=publish_to_square)
         if not ok:
             return False, "publish/signal 失败（请确认 127.0.0.1:8000 服务已启动）"
 
@@ -106,20 +109,25 @@ def process_tradingview_ws_message(
         out_path = os.path.join(
             get_screenshot_dir(), f"{symbol_part}_{interval_key}.png"
         )
+        cdp_port = chrome_debug_port()
         print(
-            f"[WS] 截图: ticker={ticker} period={period!r} -> {out_path}",
+            f"[WS] 截图(CDP 127.0.0.1:{cdp_port}): ticker={ticker} period={period!r} -> {out_path}",
             file=sys.stderr,
         )
         try:
             capture_tradingview_chart(
-                ticker=ticker, timeframe=period or "1h", out_path=out_path
+                ticker=ticker,
+                timeframe=period or "1h",
+                out_path=out_path,
+                force_cdp=True,
             )
             print(f"[WS] 截图完成: {out_path}", file=sys.stderr)
         except Exception as e:
             print(f"[WS] 截图失败（publish 已先发）: {e}", file=sys.stderr)
             shot_note = f" 截图失败: {e}"
 
-    note = f"已处理 {ticker} {period}，已 POST publish/signal"
+    pub_note = "已 POST publish/signal（已发布广场）" if publish_to_square else "已 POST publish/signal（publish=false，未发广场）"
+    note = f"已处理 {ticker} {period}，{pub_note}" if not skip_publish else f"已处理 {ticker} {period}"
     if out_path:
         note += f" 图={out_path}"
     if shot_note:

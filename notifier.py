@@ -276,9 +276,11 @@ def publish_signal_to_hub(
     }
     print(
         f"[publish] POST {url} strategy={strategy!r} styles={styles} "
-        f"signal_len={len(signal)}",
+        f"publish={publish} signal_len={len(signal)}",
         file=sys.stderr,
     )
+    if not publish:
+        print("[publish] publish=false：仅润色/预览，不会发布到广场", file=sys.stderr)
     try:
         session = requests.Session()
         session.trust_env = False

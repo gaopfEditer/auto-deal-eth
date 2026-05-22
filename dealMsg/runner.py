@@ -152,13 +152,17 @@ def period_to_tradingview_interval(period: str) -> str:
 
 def _tradingview_url(symbol_part: str, timeframe: str) -> str:
     """
-    直接构造 TradingView 地址，避免依赖 config.py 中被注释的 TRADINGVIEW_BASE_URL。
+    构造 TradingView 图表 URL（与浏览器地址栏一致）。
+
+    示例: https://www.tradingview.com/chart/?symbol=BINANCE:BTCUSDT&interval=60
     """
-    # examples:
-    # https://www.tradingview.com/chart/?symbol=ETHUSDT&interval=15
-    # https://www.tradingview.com/chart/?symbol=SOLUSDT.P&interval=60
+    sym = (symbol_part or "").strip().upper()
+    if not sym:
+        raise ValueError("TradingView symbol 为空")
+    if ":" not in sym:
+        sym = f"BINANCE:{sym}"
     interval = period_to_tradingview_interval(timeframe)
-    return f"https://www.tradingview.com/chart/?symbol={symbol_part}&interval={interval}"
+    return f"https://www.tradingview.com/chart/?symbol={sym}&interval={interval}"
 
 
 def _playwright_cdp_url() -> Optional[str]:
@@ -232,12 +236,96 @@ def _dealmsg_use_remote_debugging() -> bool:
     return os.getenv("USE_REMOTE_DEBUGGING", "True").strip().lower() == "true"
 
 
-def capture_tradingview_chart(ticker: str, timeframe: str, out_path: str) -> str:
+def chrome_debug_port() -> int:
+    """本机 Chrome 远程调试端口（与 browser_automation CHROME_DEBUG_PORT 一致，默认 9222）。"""
+    raw = (
+        os.getenv("CHROME_DEBUG_PORT")
+        or os.getenv("DEALMSG_CHROME_DEBUG_PORT")
+        or "9222"
+    ).strip()
+    try:
+        return int(raw)
+    except ValueError:
+        return 9222
+
+
+def _cdp_open_tab_and_goto(driver, url: str, *, page_load_timeout: int = 90) -> Tuple[Optional[str], bool]:
+    """
+    CDP：可选新开标签后，**必定** driver.get(TradingView 完整 URL)。
+    绝不先打开 about:blank 再傻等；新标签失败则在当前标签 get(url)。
+
+    返回 (main_handle, opened_new_tab)。
+    """
+    from selenium.common.exceptions import WebDriverException
+
+    chart_url = (url or "").strip()
+    if not chart_url:
+        raise ValueError("TradingView URL 为空")
+
+    main_handle: Optional[str] = None
+    opened_new_tab = False
+    try:
+        if driver.window_handles:
+            main_handle = driver.current_window_handle
+    except WebDriverException:
+        pass
+
+    same_tab = os.getenv("DEALMSG_TV_SAME_TAB", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+    if not same_tab:
+        n_before = len(driver.window_handles)
+        try:
+            driver.switch_to.new_window("tab")
+            if len(driver.window_handles) > n_before:
+                opened_new_tab = True
+                print("[INFO] CDP：已新开标签", file=sys.stderr)
+        except WebDriverException as e:
+            print(
+                f"[WARN] CDP 新开标签失败: {e}；在当前标签打开 TradingView",
+                file=sys.stderr,
+            )
+            if main_handle:
+                try:
+                    driver.switch_to.window(main_handle)
+                except WebDriverException:
+                    pass
+    else:
+        print("[INFO] DEALMSG_TV_SAME_TAB=1：当前标签导航", file=sys.stderr)
+
+    print(f"[INFO] CDP 导航 → {chart_url}", file=sys.stderr)
+    driver.set_page_load_timeout(page_load_timeout)
+    driver.get(chart_url)
+
+    try:
+        cur = (driver.current_url or "").strip()
+        if cur and "tradingview.com" not in cur.lower():
+            print(
+                f"[WARN] 导航后当前 URL 不像 TradingView: {cur!r}，仍继续等待图表",
+                file=sys.stderr,
+            )
+    except WebDriverException:
+        pass
+
+    return main_handle, opened_new_tab
+
+
+def capture_tradingview_chart(
+    ticker: str,
+    timeframe: str,
+    out_path: str,
+    *,
+    force_cdp: bool = False,
+) -> str:
     """
     截 TradingView 图到指定 out_path。
 
-    - 设置 DEALMSG_USE_PLAYWRIGHT=1 时使用 Playwright + stealth（推荐缓解 Reconnect/风控）
-    - 否则使用 Selenium；远程调试模式在新标签页打开图表，截图后只关闭该标签
+    - force_cdp=True：强制 Selenium 连接 127.0.0.1:CHROME_DEBUG_PORT（默认 9222），
+      不复用无头/自启浏览器；忽略 DEALMSG_USE_PLAYWRIGHT。
+    - 否则：DEALMSG_USE_PLAYWRIGHT=1 时用 Playwright；否则按 DEALMSG_USE_REMOTE_DEBUGGING /
+      USE_REMOTE_DEBUGGING 决定是否 CDP。
     """
     import time
     import traceback
@@ -247,7 +335,11 @@ def capture_tradingview_chart(ticker: str, timeframe: str, out_path: str) -> str
     symbol_part = _tv_binance_symbol(ticker)
     url = _tradingview_url(symbol_part, timeframe)
 
-    if os.getenv("DEALMSG_USE_PLAYWRIGHT", "0").strip().lower() in ("1", "true", "yes"):
+    use_playwright = (
+        not force_cdp
+        and os.getenv("DEALMSG_USE_PLAYWRIGHT", "0").strip().lower() in ("1", "true", "yes")
+    )
+    if use_playwright:
         print("[INFO] 使用 Playwright Stealth 截图（dealMsg/tv_playwright）", file=sys.stderr)
         return _capture_tradingview_playwright(url, out_path)
 
@@ -256,7 +348,26 @@ def capture_tradingview_chart(ticker: str, timeframe: str, out_path: str) -> str
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
 
-    use_remote = _dealmsg_use_remote_debugging()
+    use_remote = True if force_cdp else _dealmsg_use_remote_debugging()
+    if force_cdp:
+        port = chrome_debug_port()
+        print(
+            f"[INFO] 强制 CDP 截图：Selenium debuggerAddress=127.0.0.1:{port} "
+            f"（请先启动 Chrome --remote-debugging-port={port}）",
+            file=sys.stderr,
+        )
+    elif use_remote:
+        print(
+            f"[INFO] Selenium 远程调试：127.0.0.1:{chrome_debug_port()}",
+            file=sys.stderr,
+        )
+    else:
+        print(
+            "[INFO] Selenium 将自启浏览器（非 CDP）。"
+            " tv_ws 链路请使用 force_cdp=True 或设置 USE_REMOTE_DEBUGGING=True",
+            file=sys.stderr,
+        )
+
     driver = init_browser(use_remote_debugging=use_remote)
 
     main_handle = None
@@ -265,16 +376,13 @@ def capture_tradingview_chart(ticker: str, timeframe: str, out_path: str) -> str
 
     try:
         if use_remote and driver.window_handles:
-            main_handle = driver.current_window_handle
-            driver.execute_script("window.open('about:blank','_blank');")
-            WebDriverWait(driver, 15).until(lambda d: len(d.window_handles) > 1)
-            new_handles = [h for h in driver.window_handles if h != main_handle]
-            if new_handles:
-                driver.switch_to.window(new_handles[-1])
-                opened_new_tab = True
-
-        driver.set_page_load_timeout(90)
-        driver.get(url)
+            main_handle, opened_new_tab = _cdp_open_tab_and_goto(
+                driver, url, page_load_timeout=90
+            )
+        else:
+            print(f"[INFO] 导航 → {url}", file=sys.stderr)
+            driver.set_page_load_timeout(90)
+            driver.get(url)
 
         # 多选择器兜底（先长等 #chart-container，再短等其它）
         chart_found = False

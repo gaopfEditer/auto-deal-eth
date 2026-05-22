@@ -7,6 +7,7 @@ tv_ws_pic_push_public 本地联调：不连 WebSocket，用一条模拟 tradingv
 
 用法:
   python tv_ws_pic_push_public_test.py
+  python tv_ws_pic_push_public_test.py --publish-square   # 测试也发布到广场（默认不发布）
   python tv_ws_pic_push_public_test.py --skip-screenshot
   python tv_ws_pic_push_public_test.py --ticker BTCUSD --period 4h
 """
@@ -134,7 +135,12 @@ def main() -> int:
     parser.add_argument(
         "--skip-publish",
         action="store_true",
-        help="只截图/打印，不 POST publish/signal",
+        help="不调用 publish/signal 接口（既不润色也不发广场）",
+    )
+    parser.add_argument(
+        "--publish-square",
+        action="store_true",
+        help="POST 时 publish=true，发布到广场（测试默认 publish=false 仅润色预览）",
     )
     parser.add_argument(
         "--skip-telegram",
@@ -157,12 +163,16 @@ def main() -> int:
         payload = SAMPLE_PAXGUSD_1H
 
     ticker, period = parse_ws_payload(payload)
+    publish_square = args.publish_square
     print(f"[test] 派发地址: {DEFAULT_PUBLISH_URL}", file=sys.stderr)
     print(
         f"[test] ticker={ticker!r} period={period!r} "
-        f"allowed={is_allowed_ws_period(period or '')}",
+        f"allowed={is_allowed_ws_period(period or '')} "
+        f"publish_to_square={publish_square}",
         file=sys.stderr,
     )
+    if not args.skip_publish and not publish_square:
+        print("[test] 默认 publish=false：只请求润色，不发布到广场", file=sys.stderr)
 
     if not is_allowed_ws_period(period or ""):
         print(
@@ -176,6 +186,7 @@ def main() -> int:
         payload,
         skip_screenshot=args.skip_screenshot,
         skip_publish=args.skip_publish,
+        publish_to_square=publish_square,
         skip_telegram=args.skip_telegram,
     )
     print(f"[test] ok={ok} {note}")
