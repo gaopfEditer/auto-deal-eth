@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-# tv_ws_pic_push_public — 使用说明
+# tv_ws — TradingView WebSocket 推送使用说明
 
 监听 WebSocket 推送中的 **TradingView** 告警；对 **1h / 4h** 周期信号生成标准文案，**POST** 到本地内容服务 `publish/signal`，再按需用 CDP 打开 TradingView 截图。
 
@@ -7,8 +6,8 @@
 
 | 文件 | 作用 |
 |------|------|
-| `tv_ws_pic_push_public.py` | 本入口：连接 WSS、心跳 pong、调度处理 |
-| `ws_signal_handler.py` | 周期过滤、格式化、截图、派发 |
+| `tv_ws/pic_push_public.py` | 本入口：连接 WSS、心跳 pong、调度处理 |
+| `tv_ws/signal_handler.py` | 周期过滤、格式化、截图、派发 |
 | `notifier.py` | `format_tv_signal_plain`、`publish_signal_to_hub` |
 | `dealMsg/runner.py` | 解析 ticker/period、`capture_tradingview_chart` |
 
@@ -35,17 +34,14 @@
    http://127.0.0.1:8000/api/publish/signal
    ```
 
-4. **截图（固定 CDP，非无头）**：`ws_signal_handler` 调用 `capture_tradingview_chart(..., force_cdp=True)`，只连接已启动的 Chrome：
+4. **需要截图时**：Chrome 已开远程调试（与 `binance_market_lists_selenium` 相同）：
 
    ```bash
-   # macOS 示例（端口与 CHROME_DEBUG_PORT 一致，默认 9222）
-   /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
-     --remote-debugging-port=9222 \
-     --user-data-dir="$HOME/chrome-debug"
+   # macOS 示例
+   /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
    ```
 
-   终端应出现：`[INFO] 强制 CDP 截图：Selenium debuggerAddress=127.0.0.1:9222`。  
-   不受 `.env` 里 `USE_REMOTE_DEBUGGING=False` 影响；也不会走 `DEALMSG_USE_PLAYWRIGHT` 独立浏览器。
+   环境变量 `USE_REMOTE_DEBUGGING=True`、`CHROME_DEBUG_PORT=9222`（见 `.env` / `config.py`）。
 
 ---
 
@@ -56,7 +52,7 @@ cd /path/to/auto-deal-eth
 source venv/bin/activate
 
 # 默认：收到 1h/4h 信号 → POST publish/signal → TradingView 截图
-python tv_ws_pic_push_public.py
+python -m tv_ws.pic_push_public
 ```
 
 启动后应看到类似：
@@ -83,10 +79,10 @@ python tv_ws_pic_push_public.py
 
 ```bash
 # 只测派发，不截图（需 8000 服务）
-python tv_ws_pic_push_public.py --skip-screenshot
+python -m tv_ws.pic_push_public --skip-screenshot
 
 # 只看消息结构
-python tv_ws_pic_push_public.py --dry-run --print-raw
+python -m tv_ws.pic_push_public --dry-run --print-raw
 ```
 
 ---
@@ -104,8 +100,6 @@ python tv_ws_pic_push_public.py --dry-run --print-raw
 | `SIGNAL_PUBLISH_DO_PUBLISH` | `true` | JSON 里 `publish` 字段 |
 | `WS_SKIP_TELEGRAM` | （空） | 设为 `1` 则不推 Telegram |
 | `DEALMSG_USE_PLAYWRIGHT` | `0` | 设为 `1` 用 Playwright 截图替代 Selenium |
-| `DEALMSG_TV_SAME_TAB` | （空） | 设为 `1` 强制在当前标签打开 TV，不尝试新标签 |
-| `DEALMSG_CDP_NEW_TAB_WAIT_SEC` | `8` | 等待新标签出现的秒数 |
 
 `.env` 示例：
 
@@ -215,11 +209,9 @@ curl -s -X POST http://127.0.0.1:8000/api/publish/signal \
 `tv_ws_pic_push_public_test.py` 用内置 **PAXGUSD 1h** 样本（与真实 WSS 结构一致）直接跑 publish + 截图：
 
 ```bash
-python tv_ws_pic_push_public_test.py
-# 测试默认 publish=false：只润色预览，不发布到广场
-python tv_ws_pic_push_public_test.py --publish-square   # 确认无误后再发广场
-python tv_ws_pic_push_public_test.py --skip-screenshot
-python tv_ws_pic_push_public_test.py --ticker BTCUSD --period 4h
+python -m tv_ws.pic_push_public_test
+python -m tv_ws.pic_push_public_test --skip-screenshot   # 仅测 8000 派发
+python -m tv_ws.pic_push_public_test --ticker BTCUSD --period 4h
 ```
 
 需先启动 `http://127.0.0.1:8000`；截图时仍需 Chrome `--remote-debugging-port=9222`。
@@ -244,7 +236,7 @@ prompts/promat/
 python -c "
 from promat_publish import build_tv_signal_compose_prompt
 from notifier import format_tv_signal_plain
-from tv_ws_pic_push_public_test import SAMPLE_PAXGUSD_1H
+from tv_ws.pic_push_public_test import SAMPLE_PAXGUSD_1H
 sig = format_tv_signal_plain(SAMPLE_PAXGUSD_1H)
 print(build_tv_signal_compose_prompt(sig)[:2000])
 "
@@ -252,11 +244,6 @@ print(build_tv_signal_compose_prompt(sig)[:2000])
 
 ## 12. 与 main.py 的关系
 
-`python main.py --ws` 通过 `websocket-client` + `ws_signal_handler` 走同一套「格式化 → publish → 截图」逻辑（`handle_ws_tv_message`）。
+`python main.py --ws` 通过 `websocket-client` + `tv_ws.signal_handler` 走同一套「格式化 → publish → 截图」逻辑（`handle_ws_tv_message`）。
 
-本脚本 `tv_ws_pic_push_public.py` 为 **独立常驻进程**，使用 `asyncio` + `websockets`，适合单独跑推送链路，不依赖 `main.py` 的 tophub 定时任务。
-=======
-# 文档已迁移
-
-请查看 **[tv_ws/USAGE.md](tv_ws/USAGE.md)**。
->>>>>>> e312c6690781329cfc077dae09b870ebf6dfc995
+本脚本 `tv_ws/pic_push_public.py` 为 **独立常驻进程**，使用 `asyncio` + `websockets`，适合单独跑推送链路，不依赖 `main.py` 的 tophub 定时任务。

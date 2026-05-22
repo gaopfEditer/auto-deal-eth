@@ -1,16 +1,14 @@
-<<<<<<< HEAD
 #!/usr/bin/env python3
 """
 tv_ws_pic_push_public 本地联调：不连 WebSocket，用一条模拟 tradingview 消息
 走完整链路 → 格式化 signal → POST publish/signal → TradingView 截图。
 
-默认样本为终端收到的 PAXGUSD 1h 倒锤子；与 tv_ws_pic_push_public.py 生产逻辑相同。
+默认样本为终端收到的 PAXGUSD 1h 倒锤子；与 tv_ws.pic_push_public 生产逻辑相同。
 
 用法:
-  python tv_ws_pic_push_public_test.py
-  python tv_ws_pic_push_public_test.py --publish-square   # 测试也发布到广场（默认不发布）
-  python tv_ws_pic_push_public_test.py --skip-screenshot
-  python tv_ws_pic_push_public_test.py --ticker BTCUSD --period 4h
+  python -m tv_ws.pic_push_public_test
+  python -m tv_ws.pic_push_public_test --skip-screenshot
+  python -m tv_ws.pic_push_public_test --ticker BTCUSD --period 4h
 """
 from __future__ import annotations
 
@@ -18,14 +16,14 @@ import argparse
 import os
 import sys
 from datetime import datetime, timezone
-from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+from tv_ws.paths import REPO_ROOT
+
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from dealMsg.runner import disable_proxy_env, parse_ws_payload
-from ws_signal_handler import is_allowed_ws_period, process_tradingview_ws_message
+from tv_ws.signal_handler import is_allowed_ws_period, process_tradingview_ws_message
 
 disable_proxy_env()
 
@@ -136,12 +134,7 @@ def main() -> int:
     parser.add_argument(
         "--skip-publish",
         action="store_true",
-        help="不调用 publish/signal 接口（既不润色也不发广场）",
-    )
-    parser.add_argument(
-        "--publish-square",
-        action="store_true",
-        help="POST 时 publish=true，发布到广场（测试默认 publish=false 仅润色预览）",
+        help="只截图/打印，不 POST publish/signal",
     )
     parser.add_argument(
         "--skip-telegram",
@@ -164,16 +157,12 @@ def main() -> int:
         payload = SAMPLE_PAXGUSD_1H
 
     ticker, period = parse_ws_payload(payload)
-    publish_square = args.publish_square
     print(f"[test] 派发地址: {DEFAULT_PUBLISH_URL}", file=sys.stderr)
     print(
         f"[test] ticker={ticker!r} period={period!r} "
-        f"allowed={is_allowed_ws_period(period or '')} "
-        f"publish_to_square={publish_square}",
+        f"allowed={is_allowed_ws_period(period or '')}",
         file=sys.stderr,
     )
-    if not args.skip_publish and not publish_square:
-        print("[test] 默认 publish=false：只请求润色，不发布到广场", file=sys.stderr)
 
     if not is_allowed_ws_period(period or ""):
         print(
@@ -187,7 +176,6 @@ def main() -> int:
         payload,
         skip_screenshot=args.skip_screenshot,
         skip_publish=args.skip_publish,
-        publish_to_square=publish_square,
         skip_telegram=args.skip_telegram,
     )
     print(f"[test] ok={ok} {note}")
@@ -196,11 +184,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-=======
-#!/usr/bin/env python3
-"""兼容入口：逻辑已迁至 tv_ws.pic_push_public_test。推荐: python -m tv_ws.pic_push_public_test"""
-from tv_ws.pic_push_public_test import main
-
-if __name__ == "__main__":
-    raise SystemExit(main())
->>>>>>> e312c6690781329cfc077dae09b870ebf6dfc995

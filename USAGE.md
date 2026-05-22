@@ -53,12 +53,13 @@ python main.py
 
 程序会按 `TIME_RANGES` + `RUN_INTERVAL_MINUTES` 周期执行。
 
-## 4. 启动市场列表抓取（`binance_market_lists_selenium.py`）
+## 4. 启动市场列表抓取（`binance/market_lists_selenium.py`）
 
 ### 4.1 基础运行
 
 ```bash
-python binance_market_lists_selenium.py
+python -m binance.market_lists_selenium
+# 或兼容：python binance_market_lists_selenium.py
 ```
 
 默认效果：
@@ -68,13 +69,13 @@ python binance_market_lists_selenium.py
 ### 4.2 指定输出文件
 
 ```bash
-python binance_market_lists_selenium.py --out ./screenshots/binance_lists.json
+python -m binance.market_lists_selenium --out ./screenshots/binance_lists.json
 ```
 
 ### 4.3 控制抓取与输出行数
 
 ```bash
-python binance_market_lists_selenium.py --max-items 50 --max-print-rows 30
+python -m binance.market_lists_selenium --max-items 50 --max-print-rows 30
 ```
 
 - `--max-items`：每个榜单最多抓取条数
@@ -83,13 +84,13 @@ python binance_market_lists_selenium.py --max-items 50 --max-print-rows 30
 ### 4.4 终端附带完整 JSON
 
 ```bash
-python binance_market_lists_selenium.py --print-json
+python -m binance.market_lists_selenium --print-json
 ```
 
 ### 4.5 常用附加参数
 
 ```bash
-python binance_market_lists_selenium.py --watchlist-url "https://www.binance.com/zh-CN/square?tab=Following" --max-profiles 60 --skip-profile-live-probe
+python -m binance.market_lists_selenium --watchlist-url "https://www.binance.com/zh-CN/square?tab=Following" --max-profiles 60 --skip-profile-live-probe
 ```
 
 - `--watchlist-url`：Square Following 页面地址
@@ -133,17 +134,17 @@ python -m browser_media_runner.runner "https://x.com/yangyi/status/2043661337839
 
 如果你希望“直接传 URL 自动打开并截图再分析”，建议单独做一层 URL 预处理脚本，然后把截图路径传给 `runner`。
 
-## 6. TradingView WebSocket 推送 → 截图 → 派发（`tv_ws_pic_push_public`）
+## 6. TradingView WebSocket 推送 → 截图 → 派发（`tv_ws/`）
 
 独立常驻进程：收 WSS 里 `tradingview` 信号（默认仅 **1h / 4h**），格式化后 POST `publish/signal`，再 CDP 截 TradingView 图。
 
 ```bash
-python tv_ws_pic_push_public.py
-python tv_ws_pic_push_public.py --skip-screenshot   # 只派发、不截图
-python tv_ws_pic_push_public.py --dry-run           # 仅打印，不 POST
+python -m tv_ws.pic_push_public
+python -m tv_ws.pic_push_public --skip-screenshot   # 只派发、不截图
+python -m tv_ws.pic_push_public --dry-run           # 仅打印，不 POST
 ```
 
-完整说明见 **[tv_ws_pic_push_public.USAGE.md](./tv_ws_pic_push_public.USAGE.md)**。
+完整说明见 **[tv_ws/USAGE.md](./tv_ws/USAGE.md)**。
 
 ## 7. 常见启动顺序（建议）
 
