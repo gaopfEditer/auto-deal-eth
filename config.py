@@ -112,7 +112,7 @@ SECTOR_ANALYSIS_PERIODS = [p.strip() for p in SECTOR_ANALYSIS_PERIODS if p.strip
 if not SECTOR_ANALYSIS_PERIODS:
     SECTOR_ANALYSIS_PERIODS = ['1m', '3m', '6m', '1y', '3y', '5y']
 
-# Square 关注流帖子状态：按发帖时间保留的小时数（binance_posts_state / binance_market_lists_selenium）
+# Square 关注流帖子状态：按发帖时间保留的小时数（binance.posts_state / binance.market_lists_selenium）
 # 可通过环境变量 POST_RETENTION_HOURS 覆盖，例如 POST_RETENTION_HOURS=48
 POST_RETENTION_HOURS = int(os.getenv('POST_RETENTION_HOURS', '24').strip() or '24')
 

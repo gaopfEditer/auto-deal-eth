@@ -17,7 +17,7 @@ from datetime import datetime, time as dt_time, timezone
 from browser_automation import capture_target_page
 from image_llm_analyzer import analyze_chart, extract_json_from_gemini_text
 from notifier import format_analysis_message, send_notification, send_telegram_message
-from ws_signal_handler import process_tradingview_ws_message
+from tv_ws.signal_handler import process_tradingview_ws_message
 from config import TARGET_URL
 
 from dealMsg.runner import (

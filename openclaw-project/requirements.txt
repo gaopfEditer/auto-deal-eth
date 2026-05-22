@@ -1,4 +1,0 @@
-# gemini_analyze.py 依赖
-requests>=2.28.0
-Pillow>=10.0.0
-PySocks>=1.7.0   # SOCKS5 代理，.env 加 GEMINI_USE_SOCKS=1 使用（Clash 7891）
