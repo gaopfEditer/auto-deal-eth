@@ -37,24 +37,20 @@ from browser_automation import init_browser
 
 def get_screenshot_dir() -> str:
     """
-    直接读取项目根 .env 的 SCREENSHOT_DIR；未配置时默认 ./screenshots。
+    截图目录：config.SCREENSHOT_DIR（.env 可覆盖）。
+    支持绝对路径（如 /Volumes/RamDisk/app_screenshots）或相对项目根的路径。
     """
-    env_path = PROJECT_ROOT / ".env"
-    screenshot_dir = "./screenshots"
-    if env_path.exists():
-        try:
-            with open(env_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line or line.startswith("#") or "=" not in line:
-                        continue
-                    k, _, v = line.partition("=")
-                    if k.strip() == "SCREENSHOT_DIR":
-                        screenshot_dir = v.strip().strip("\"'")
-                        break
-        except Exception:
-            pass
-    return os.path.join(str(PROJECT_ROOT), screenshot_dir.lstrip("./"))
+    try:
+        from config import SCREENSHOT_DIR
+
+        screenshot_dir = (SCREENSHOT_DIR or "/Volumes/RamDisk/app_screenshots").strip()
+    except Exception:
+        screenshot_dir = "/Volumes/RamDisk/app_screenshots"
+    if os.path.isabs(screenshot_dir):
+        return os.path.abspath(screenshot_dir)
+    return os.path.abspath(
+        os.path.join(str(PROJECT_ROOT), screenshot_dir.lstrip("./"))
+    )
 
 
 def disable_proxy_env() -> None:
@@ -318,12 +314,15 @@ def capture_tradingview_chart(
     out_path: str,
     *,
     force_cdp: bool = False,
+    driver=None,
+    close_driver: bool = True,
 ) -> str:
     """
     截 TradingView 图到指定 out_path。
 
     - force_cdp=True：强制 Selenium 连接 127.0.0.1:CHROME_DEBUG_PORT（默认 9222），
       不复用无头/自启浏览器；忽略 DEALMSG_USE_PLAYWRIGHT。
+    - driver：传入则复用已有 WebDriver；close_driver=False 时不 quit（便于后续 square_publish）。
     - 否则：DEALMSG_USE_PLAYWRIGHT=1 时用 Playwright；否则按 DEALMSG_USE_REMOTE_DEBUGGING /
       USE_REMOTE_DEBUGGING 决定是否 CDP。
     """
@@ -368,7 +367,9 @@ def capture_tradingview_chart(
             file=sys.stderr,
         )
 
-    driver = init_browser(use_remote_debugging=use_remote)
+    own_driver = driver is None
+    if own_driver:
+        driver = init_browser(use_remote_debugging=use_remote)
 
     main_handle = None
     opened_new_tab = False
@@ -439,12 +440,15 @@ def capture_tradingview_chart(
                     pass
             # 远程调试下 quit() 有时会结束整个浏览器；默认仍 quit 以释放会话，便于连续多条消息。
             # 若 quit 会关掉 Chrome，可设 DEALMSG_REMOTE_SKIP_QUIT=1（仅单次截图或需手动结束 chromedriver）
-            skip_quit = use_remote and os.getenv("DEALMSG_REMOTE_SKIP_QUIT", "0").strip().lower() in (
-                "1",
-                "true",
-                "yes",
+            skip_quit = (
+                not close_driver
+                or (
+                    use_remote
+                    and os.getenv("DEALMSG_REMOTE_SKIP_QUIT", "0").strip().lower()
+                    in ("1", "true", "yes")
+                )
             )
-            if not skip_quit:
+            if own_driver and not skip_quit:
                 driver.quit()
         except Exception:
             pass

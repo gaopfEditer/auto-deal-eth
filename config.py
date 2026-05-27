@@ -4,11 +4,16 @@
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*_args, **_kwargs):  # type: ignore[misc]
+        return False
 
 _REPO_ROOT = Path(__file__).resolve().parent
 
-# 加载环境变量
+# 加载环境变量（固定项目根 .env，不依赖 cwd）
+load_dotenv(_REPO_ROOT / ".env")
 load_dotenv()
 
 # Gemini（仅 getinfo/weight 等旧模块仍可读 GEMINI_API_KEY；主流程图分析已改用本地 Ollama chat-image）
@@ -27,6 +32,15 @@ OLLAMA_CHAT_IMAGE_PROMPT = os.getenv(
     "OLLAMA_CHAT_IMAGE_PROMPT", "根据这张图判断趋势"
 ).strip()
 OLLAMA_CHAT_IMAGE_TIMEOUT = int(os.getenv("OLLAMA_CHAT_IMAGE_TIMEOUT", "120"))
+# 榜单逐币 K 线截图分析（gainers_top20）：POST /ollama/chat + promat
+# curl -sS -X POST 'http://127.0.0.1:8000/ollama/chat' -H 'Content-Type: application/json' \
+#   -d '{"promat":"tv_k_line_hot","image_path":"/tmp/img.png"}'
+OLLAMA_CHAT_URL = os.getenv(
+    "OLLAMA_CHAT_URL", "http://127.0.0.1:8000/ollama/chat"
+).strip()
+OLLAMA_RANKS_CHART_PROMAT = os.getenv(
+    "OLLAMA_RANKS_CHART_PROMAT", "tv_k_line_hot"
+).strip()
 # 可选：纯文本 JSON 分类接口（帖子多空），未配置则 classify_square_post_direction 返回 None
 OLLAMA_CLASSIFY_CHAT_URL = os.getenv("OLLAMA_CLASSIFY_CHAT_URL", "").strip()
 
@@ -51,7 +65,8 @@ if not SYMBOLS:
 
 # 第2部分：时间周期配置
 TIME_PERIODS = ['15m', '30m', '1h', '2h']  # 需要截图的4个周期
-SCREENSHOT_DIR = os.getenv('SCREENSHOT_DIR', './screenshots')
+_DEFAULT_SCREENSHOT_DIR = '/Volumes/RamDisk/app_screenshots'
+SCREENSHOT_DIR = os.getenv('SCREENSHOT_DIR', _DEFAULT_SCREENSHOT_DIR).strip() or _DEFAULT_SCREENSHOT_DIR
 SCREENSHOT_WIDTH = int(os.getenv('SCREENSHOT_WIDTH', '1920'))
 SCREENSHOT_HEIGHT = int(os.getenv('SCREENSHOT_HEIGHT', '1080'))
 
@@ -59,6 +74,22 @@ SCREENSHOT_HEIGHT = int(os.getenv('SCREENSHOT_HEIGHT', '1080'))
 DINGTALK_WEBHOOK = os.getenv('DINGTALK_WEBHOOK', '')
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '')
+# 流动性/涨幅榜推送群（gainers_top20）；与 TradingView 信号群 TELEGRAM_CHAT_ID 分离
+TELEGRAM_MARKET_RANKS_CHAT_ID = os.getenv(
+    'TELEGRAM_MARKET_RANKS_CHAT_ID', '-5218901932'
+).strip()
+# 流动性/涨幅榜 JSON 缓存有效期（小时），默认 4h 内不重复抓取
+BINANCE_MARKET_RANKS_CACHE_HOURS = float(
+    os.getenv('BINANCE_MARKET_RANKS_CACHE_HOURS', '4') or '4'
+)
+# gainers_top20 逐币截图+AI 时排除的 base 资产（逗号分隔）
+BINANCE_RANKS_EXCLUDE_BASES = os.getenv(
+    'BINANCE_RANKS_EXCLUDE_BASES',
+    'eth,btc,usdt,usdc,usd1,sui,sol,bnb',
+).strip()
+# 榜单逐币 K 线截图周期
+# gainers_top20 逐币 TradingView 截图周期（15m / 1h / 4h 等，见 dealMsg period_to_tradingview_interval）
+BINANCE_RANKS_CHART_PERIOD = os.getenv('BINANCE_RANKS_CHART_PERIOD', '15m').strip() or '15m'
 
 # Chrome浏览器配置
 # 使用远程调试模式连接到已运行的Chrome（推荐，最安全）

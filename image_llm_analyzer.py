@@ -16,7 +16,9 @@ from config import (
     OLLAMA_CHAT_IMAGE_ROLE,
     OLLAMA_CHAT_IMAGE_TIMEOUT,
     OLLAMA_CHAT_IMAGE_URL,
+    OLLAMA_CHAT_URL,
     OLLAMA_CLASSIFY_CHAT_URL,
+    OLLAMA_RANKS_CHART_PROMAT,
 )
 
 
@@ -176,6 +178,76 @@ def _post_chat_image(abs_image_path: str, role: str, prompt: str) -> str:
         except Exception:
             return (r.text or "").strip()
     return (r.text or "").strip()
+
+
+def _post_ollama_chat_promat(
+    abs_image_path: str,
+    promat: str,
+    *,
+    url: str | None = None,
+    timeout: int | None = None,
+) -> str:
+    """POST /ollama/chat：字段 promat + image_path。"""
+    endpoint = (url or OLLAMA_CHAT_URL or "").strip()
+    if not endpoint:
+        raise RuntimeError("未配置 OLLAMA_CHAT_URL")
+    promat_key = (promat or OLLAMA_RANKS_CHART_PROMAT or "tv_k_line_hot").strip()
+    if not promat_key:
+        raise RuntimeError("promat 为空")
+
+    session = requests.Session()
+    session.trust_env = False
+    payload = {
+        "promat": promat_key,
+        "image_path": abs_image_path,
+    }
+    req_timeout = timeout if timeout is not None else OLLAMA_CHAT_IMAGE_TIMEOUT
+    r = session.post(
+        endpoint,
+        json=payload,
+        headers={"Content-Type": "application/json"},
+        timeout=req_timeout,
+    )
+    if not r.ok:
+        body = (r.text or "")[:800]
+        raise RuntimeError(f"ollama/chat HTTP {r.status_code}: {body}")
+
+    ct = (r.headers.get("content-type") or "").lower()
+    if "application/json" in ct:
+        try:
+            return _normalize_chat_image_response(r.json())
+        except Exception:
+            return (r.text or "").strip()
+    return (r.text or "").strip()
+
+
+def analyze_chart_promat(
+    image_path: str,
+    symbol: str,
+    *,
+    promat: str | None = None,
+) -> dict:
+    """榜单等场景：POST /ollama/chat，promat 默认 tv_k_line_hot。"""
+    if not image_path or not os.path.isfile(image_path):
+        return {
+            "symbol": symbol,
+            "status": "error",
+            "error": f"图片不存在: {image_path}",
+        }
+
+    abs_path = os.path.abspath(image_path)
+    promat_key = (promat or OLLAMA_RANKS_CHART_PROMAT or "tv_k_line_hot").strip()
+    try:
+        print(
+            f"[INFO] 请求 ollama/chat promat={promat_key!r} symbol={symbol} "
+            f"url={OLLAMA_CHAT_URL}",
+            file=sys.stderr,
+        )
+        text = _post_ollama_chat_promat(abs_path, promat_key)
+        return {"symbol": symbol, "analysis": text, "status": "success", "promat": promat_key}
+    except Exception as e:
+        print(f"[ERROR] ollama/chat 图分析失败: {e}", file=sys.stderr)
+        return {"symbol": symbol, "status": "error", "error": str(e)}
 
 
 def analyze_chart(combined_image_path: str, symbol: str, use_api: bool = False):

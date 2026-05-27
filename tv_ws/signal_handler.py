@@ -1,7 +1,9 @@
 """
-WebSocket TradingView 信号：周期过滤 -> 截图 -> 标准文案 -> publish/signal。
+WebSocket TradingView 信号：周期过滤 -> 截图 -> Ollama 润色 -> square_publish -> Telegram。
 
-供 main.py、tv_ws.pic_push_public 共用。
+- 润色：本地 Ollama（config.PROMAT_ANALYSIS）+ prompts/promat，不再 POST 8000。
+- --public：同一 Chrome 会话内 截图 → 润色 → 打开一次 Square 发布。
+- Telegram 与是否 --public 无关；润色/截图/广场失败不阻断 Telegram（除非 WS_SKIP_TELEGRAM）。
 """
 from __future__ import annotations
 
@@ -11,16 +13,20 @@ from typing import FrozenSet, Tuple
 
 from dealMsg.runner import (
     capture_tradingview_chart,
-    disable_proxy_env,
+    chrome_debug_port,
     get_screenshot_dir,
     parse_ws_payload,
     period_to_tradingview_interval,
     _tv_binance_symbol,
 )
-from notifier import format_tv_signal_plain, publish_signal_to_hub, send_telegram_message
-from notifier import format_tv_message
+from promat_publish import telegram_caption_from_publish_body
+from notifier import (
+    format_tv_signal_plain,
+    format_tv_message,
+    send_telegram_message_with_photo,
+)
+from tv_ws.polish import polish_tv_signal
 
-# 仅处理这些周期（小写 canonical）；可用环境变量 WS_ALLOWED_PERIODS=1h,4h 覆盖
 _PERIOD_ALIASES = {
     "60": "1h",
     "60m": "1h",
@@ -40,7 +46,6 @@ def _allowed_periods() -> FrozenSet[str]:
 
 
 def canonical_ws_period(period: str) -> str:
-    """将 metadata.period 规范为 1h / 4h / 15m 等。"""
     p = (period or "").strip().lower()
     if not p:
         return ""
@@ -52,19 +57,134 @@ def is_allowed_ws_period(period: str) -> bool:
     return bool(canon) and canon in _allowed_periods()
 
 
+def _push_telegram(
+    obj: dict,
+    *,
+    signal_text: str,
+    publish_body: dict | None,
+    photo_path: str,
+    use_telegram_markdown: bool,
+) -> bool:
+    tg_from_publish = telegram_caption_from_publish_body(publish_body)
+    if tg_from_publish:
+        tg_text = tg_from_publish
+        tg_markdown = False
+    else:
+        tg_text = format_tv_message(obj) if use_telegram_markdown else signal_text
+        tg_markdown = use_telegram_markdown
+
+    photo = photo_path if photo_path and os.path.isfile(photo_path) else None
+    print(
+        f"[Telegram] 推送（与 --public 无关）: 配文 len={len(tg_text)} "
+        f"{'+ 截图 ' + photo if photo else '(仅文本)'}",
+        file=sys.stderr,
+    )
+    ok = send_telegram_message_with_photo(
+        tg_text,
+        photo,
+        use_markdown=tg_markdown,
+    )
+    if ok:
+        print("[Telegram] 发送成功", file=sys.stderr)
+    else:
+        print("[Telegram] 发送失败（见上方日志）", file=sys.stderr)
+    return ok
+
+
+def _square_post_text(publish_body: dict | None, signal_text: str) -> str:
+    """广场正文：原始 signal 置顶，润色内容接在下面。"""
+    original = (signal_text or "").strip()
+    polished = telegram_caption_from_publish_body(publish_body).strip()
+    if not original:
+        return polished
+    if not polished or polished == original:
+        return original
+    return f"{original}\n\n{polished}"
+
+
+def _publish_to_binance_square(
+    text: str,
+    image_paths: list[str] | None,
+    *,
+    driver=None,
+) -> tuple[bool, str]:
+    from binance.square_publish import publish_square_post
+
+    paths = [p for p in (image_paths or []) if p and os.path.isfile(p)]
+    print(
+        f"[WS][square] 发布广场: text_len={len(text)} images={len(paths)}",
+        file=sys.stderr,
+    )
+    own_driver = driver is None
+    result = publish_square_post(
+        text,
+        paths or None,
+        submit=True,
+        allow_alt_url=False,
+        force_square_goto=True,
+        driver=driver,
+        close_driver=own_driver,
+    )
+    if result.ok:
+        if result.post_url:
+            return True, result.post_url
+        return True, "已点击发布（未解析帖子 URL）"
+    return False, result.error or "square_publish 失败"
+
+
+def _skip_polish() -> bool:
+    return os.getenv("WS_SKIP_POLISH", "").strip().lower() in ("1", "true", "yes")
+
+
+def _polish_signal(signal_text: str) -> tuple[bool, dict | None]:
+    if _skip_polish():
+        print("[WS] 已跳过润色(WS_SKIP_POLISH)", file=sys.stderr)
+        return False, None
+    return polish_tv_signal(signal_text)
+
+
+def _capture_signal_screenshot(
+    *,
+    ticker: str,
+    period: str,
+    driver=None,
+) -> tuple[str, str]:
+    """返回 (out_path, shot_note)。路径见 config.SCREENSHOT_DIR / get_screenshot_dir()。"""
+    shot_dir = get_screenshot_dir()
+    os.makedirs(shot_dir, exist_ok=True)
+    symbol_part = _tv_binance_symbol(ticker)
+    interval_key = period_to_tradingview_interval(period or "1h")
+    out_path = os.path.join(shot_dir, f"{symbol_part}_{interval_key}.png")
+    cdp_port = chrome_debug_port()
+    print(
+        f"[WS] 截图(CDP 127.0.0.1:{cdp_port}): ticker={ticker} period={period!r} -> {out_path}",
+        file=sys.stderr,
+    )
+    try:
+        capture_tradingview_chart(
+            ticker=ticker,
+            timeframe=period or "1h",
+            out_path=out_path,
+            force_cdp=True,
+            driver=driver,
+            close_driver=False,
+        )
+        print(f"[WS] 截图完成: {out_path}", file=sys.stderr)
+        return out_path, ""
+    except Exception as e:
+        print(f"[WS] 截图失败: {e}", file=sys.stderr)
+        return out_path, f" 截图失败: {e}"
+
+
 def process_tradingview_ws_message(
     obj: dict,
     *,
     skip_screenshot: bool = False,
     skip_publish: bool = False,
+    publish_to_square: bool = False,
     skip_telegram: bool = False,
     use_telegram_markdown: bool = True,
 ) -> Tuple[bool, str]:
-    """
-    处理 type=message_received 且 source=tradingview 的完整载荷。
-
-    返回 (是否已执行截图/派发, 说明)。
-    """
     msg = obj.get("message")
     if not isinstance(msg, dict):
         return False, "无 message 字段"
@@ -87,41 +207,96 @@ def process_tradingview_ws_message(
     print(signal_text)
     print("=" * 56 + "\n")
 
-    if not skip_telegram:
-        tg = format_tv_message(obj) if use_telegram_markdown else signal_text
-        send_telegram_message(tg)
-
-    # 先派发 signal（与 curl 一致）；截图失败也不影响已发出的 publish
-    if not skip_publish:
-        disable_proxy_env()
-        ok = publish_signal_to_hub(signal_text)
-        if not ok:
-            return False, "publish/signal 失败（请确认 127.0.0.1:8000 服务已启动）"
-
+    publish_ok = True
+    publish_body: dict | None = None
+    square_ok = True
+    square_note = ""
     out_path = ""
     shot_note = ""
-    if not skip_screenshot:
-        symbol_part = _tv_binance_symbol(ticker)
-        interval_key = period_to_tradingview_interval(period or "1h")
-        out_path = os.path.join(
-            get_screenshot_dir(), f"{symbol_part}_{interval_key}.png"
-        )
-        print(
-            f"[WS] 截图: ticker={ticker} period={period!r} -> {out_path}",
-            file=sys.stderr,
-        )
-        try:
-            capture_tradingview_chart(
-                ticker=ticker, timeframe=period or "1h", out_path=out_path
-            )
-            print(f"[WS] 截图完成: {out_path}", file=sys.stderr)
-        except Exception as e:
-            print(f"[WS] 截图失败（publish 已先发）: {e}", file=sys.stderr)
-            shot_note = f" 截图失败: {e}"
+    cdp_driver = None
 
-    note = f"已处理 {ticker} {period}，已 POST publish/signal"
+    try:
+        if publish_to_square and not skip_publish:
+            from browser_automation import init_browser
+
+            print("[WS] 复用同一 Chrome 会话：截图 → 润色 → 广场", file=sys.stderr)
+            cdp_driver = init_browser(use_remote_debugging=True)
+
+        # 1) 截图
+        if not skip_screenshot:
+            out_path, shot_note = _capture_signal_screenshot(
+                ticker=ticker,
+                period=period or "1h",
+                driver=cdp_driver,
+            )
+
+        # 2) 润色（本地 Ollama，不动浏览器）
+        if not skip_publish:
+            publish_ok, publish_body = _polish_signal(signal_text)
+            if not publish_ok:
+                print(
+                    "[WS][WARN] 润色失败，广场/Telegram 将使用原始 signal 文案",
+                    file=sys.stderr,
+                )
+
+        # 3) 广场发布（强制刷新 Square，避免上次残留图文）
+        if publish_to_square and not skip_publish:
+            post_text = _square_post_text(publish_body, signal_text)
+            images = [out_path] if out_path and os.path.isfile(out_path) else None
+            square_ok, sq_detail = _publish_to_binance_square(
+                post_text,
+                images,
+                driver=cdp_driver,
+            )
+            if square_ok:
+                square_note = f" 广场已发布 ({sq_detail})"
+                print(f"[WS][square] 成功: {sq_detail}", file=sys.stderr)
+            else:
+                square_note = f" 广场发布失败: {sq_detail}"
+                print(f"[WS][square] 失败: {sq_detail}", file=sys.stderr)
+    finally:
+        if cdp_driver is not None:
+            try:
+                cdp_driver.quit()
+            except Exception:
+                pass
+
+    tg_ok = True
+    if not skip_telegram:
+        tg_ok = _push_telegram(
+            obj,
+            signal_text=signal_text,
+            publish_body=publish_body,
+            photo_path=out_path,
+            use_telegram_markdown=use_telegram_markdown,
+        )
+
+    if skip_publish:
+        note = f"已处理 {ticker} {period}"
+    elif publish_to_square:
+        if square_ok and publish_ok:
+            note = f"已处理 {ticker} {period}，已润色 + 广场发布"
+        elif square_ok:
+            note = f"已处理 {ticker} {period}，广场已发布（润色失败，用原文）"
+        elif publish_ok:
+            note = f"已处理 {ticker} {period}，已润色，广场发布失败"
+        else:
+            note = f"已处理 {ticker} {period}，润色与广场均失败"
+    elif publish_ok:
+        note = f"已处理 {ticker} {period}，已润色（未发广场）"
+    else:
+        note = f"已处理 {ticker} {period}，润色失败"
+    if square_note:
+        note += square_note
     if out_path:
         note += f" 图={out_path}"
     if shot_note:
         note += shot_note
-    return True, note
+    if not skip_telegram:
+        note += " 已推 Telegram" if tg_ok else " Telegram 失败"
+
+    if publish_to_square and not skip_publish:
+        overall_ok = square_ok and (skip_telegram or tg_ok)
+    else:
+        overall_ok = (skip_publish or publish_ok) and (skip_telegram or tg_ok)
+    return overall_ok, note

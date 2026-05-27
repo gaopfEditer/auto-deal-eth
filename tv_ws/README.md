@@ -13,17 +13,21 @@
 
 依赖仍在项目根目录：`notifier.py`、`dealMsg/runner.py`、`promat_publish.py`、`browser_automation` 等。
 
+TradingView 截图目录与 `gainers_top20` 相同：`config.SCREENSHOT_DIR`（默认 `/Volumes/RamDisk/app_screenshots`，`.env` 可覆盖）。
+
 ## 运行（在项目根目录）
 
 ```bash
-# 生产：连 WSS，默认 POST + 截图
+# 生产：默认润色 + Telegram 图文 + 截图，不发布广场
 python -m tv_ws.pic_push_public
+python -m tv_ws.pic_push_public --public          # 发布到广场
 
 python -m tv_ws.pic_push_public --skip-screenshot
 python -m tv_ws.pic_push_public --dry-run
 
-# 联调：不连 WebSocket
+# 联调：不连 WebSocket（同样默认不发布，加 --public 才发广场）
 python -m tv_ws.pic_push_public_test
+python -m tv_ws.pic_push_public_test --public
 python -m tv_ws.pic_push_public_test --ticker BTCUSD --period 4h
 ```
 

@@ -74,6 +74,14 @@ from binance.posts_state import (
 DEFAULT_URL = "https://www.binance.com/zh-CN/markets/overview"
 DEFAULT_WATCHLIST_URL = "https://www.binance.com/zh-CN/square?tab=Following"
 BINANCE_TICKER_24H = "https://api.binance.com/api/v3/ticker/24hr"
+# 官方多节点 + data-api（国内/网络不稳时依次尝试）
+BINANCE_TICKER_24H_URLS: Tuple[str, ...] = (
+    BINANCE_TICKER_24H,
+    "https://api1.binance.com/api/v3/ticker/24hr",
+    "https://api2.binance.com/api/v3/ticker/24hr",
+    "https://api3.binance.com/api/v3/ticker/24hr",
+    "https://data-api.binance.vision/api/v3/ticker/24hr",
+)
 # 行情页热榜 / 涨幅榜 / 跌幅榜默认只取前 N（与 Square 关注流的 --max-items 无关）
 DEFAULT_MARKET_RANK_TOP_N = 10
 
@@ -2574,7 +2582,11 @@ def _probe_live_from_profiles(
     return lives
 
 
-def fetch_rankings_from_binance_api(max_items: int) -> Dict[str, List[Dict[str, Any]]]:
+def fetch_rankings_from_binance_api(
+    max_items: int,
+    *,
+    timeout: float = 45,
+) -> Dict[str, List[Dict[str, Any]]]:
     """
     官方现货 24h ticker（无需 API Key）。
     热榜：按 quoteVolume；涨幅/跌幅：按 priceChangePercent。
@@ -2583,9 +2595,52 @@ def fetch_rankings_from_binance_api(max_items: int) -> Dict[str, List[Dict[str, 
     if requests is None:
         raise RuntimeError("缺少依赖 requests：无法使用 API 回退（热榜/涨幅/跌幅）。")
 
-    r = requests.get(BINANCE_TICKER_24H, timeout=45)
-    r.raise_for_status()
-    tickers: List[Dict[str, Any]] = r.json()
+    trust_env = os.getenv("BINANCE_API_TRUST_ENV", "1").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+    max_retries = max(1, int(os.getenv("BINANCE_API_RETRIES", "3") or "3"))
+    retry_delay = float(os.getenv("BINANCE_API_RETRY_DELAY_SEC", "2") or "2")
+
+    session = requests.Session()
+    session.trust_env = trust_env
+
+    last_err: BaseException | None = None
+    tickers: List[Dict[str, Any]] | None = None
+    used_url = ""
+
+    for url in BINANCE_TICKER_24H_URLS:
+        for attempt in range(max_retries):
+            try:
+                r = session.get(url, timeout=timeout)
+                r.raise_for_status()
+                data = r.json()
+                if not isinstance(data, list) or not data:
+                    raise ValueError(f"unexpected ticker payload from {url}")
+                tickers = data
+                used_url = url
+                break
+            except Exception as e:
+                last_err = e
+                if attempt < max_retries - 1:
+                    wait = retry_delay * (attempt + 1)
+                    _scrape_log(
+                        f"API {url} 失败 ({e!s})，{wait:.0f}s 后重试 "
+                        f"({attempt + 1}/{max_retries})…"
+                    )
+                    time.sleep(wait)
+        if tickers is not None:
+            break
+
+    if tickers is None:
+        raise RuntimeError(
+            f"Binance 24h ticker 全部节点失败（已试 {len(BINANCE_TICKER_24H_URLS)} 个 URL）: {last_err}"
+        ) from last_err
+
+    if used_url and used_url != BINANCE_TICKER_24H:
+        _scrape_log(f"24h ticker 使用备用节点: {used_url}")
+
     usdt = [
         t
         for t in tickers
@@ -2647,6 +2702,9 @@ def _collect_section(
     tab_text_candidates: List[str],
     max_items: int,
     api_fallback: Optional[List[Dict[str, Any]]] = None,
+    *,
+    api_fallback_key: Optional[str] = None,
+    api_fallback_timeout: float = 10,
 ) -> Dict[str, object]:
     clicked = _click_first_text(driver, tab_text_candidates)
     _scroll_page_load_lists(driver)
@@ -2662,13 +2720,28 @@ def _collect_section(
     rows = _extract_rows_best_effort(driver, max_items=max_items)
     source = "dom"
     note = ""
-    if len(rows) < 2 and api_fallback:
-        rows = api_fallback[:max_items]
-        source = "api_24h"
-        note = (
-            "页面未解析到足够表格行（常见于虚拟列表/反爬/类名变更），"
-            "已改用官方 GET /api/v3/ticker/24hr 排序结果"
-        )
+    if len(rows) < 2:
+        fb = api_fallback
+        if not fb and api_fallback_key:
+            try:
+                _scrape_log(
+                    f"{section_name} 页面行数不足，尝试 API 回退 ({api_fallback_key})…"
+                )
+                api = fetch_rankings_from_binance_api(
+                    max_items, timeout=api_fallback_timeout
+                )
+                fb = api.get(api_fallback_key, [])
+            except Exception as e:
+                note = f"API 回退失败: {e}"
+                _scrape_log(f"警告：{section_name} {note}")
+        if fb:
+            rows = fb[:max_items]
+            source = "api_24h"
+            if not note:
+                note = (
+                    "页面未解析到足够表格行（常见于虚拟列表/反爬/类名变更），"
+                    "已改用官方 GET /api/v3/ticker/24hr 排序结果"
+                )
     return {
         "section": section_name,
         "clicked_tab": clicked,
@@ -2730,7 +2803,7 @@ def scrape_binance_lists(
     if include_hot_rank:
         _scrape_log("预取 Binance 24h ticker（作榜单 DOM 失败时的回退）…")
         try:
-            api_rankings = fetch_rankings_from_binance_api(top_n)
+            api_rankings = fetch_rankings_from_binance_api(top_n, timeout=8)
             _scrape_log("24h ticker 回退数据已就绪")
         except Exception:
             api_rankings = {
@@ -3011,6 +3084,266 @@ def _print_items_table(
         print(df.to_string())
         if n:
             print(f"\n共 {n} 条。")
+
+
+def scrape_liquidity_gainers_snapshot(
+    *,
+    liquidity_top: int = 30,
+    gainers_top: int = 20,
+    url: str = DEFAULT_URL,
+    use_cdp: bool = True,
+) -> Dict[str, object]:
+    """
+    一次抓取：24h 流动性（USDT 成交额）前 N + 涨幅榜前 M。
+
+    - liquidity：按 quoteVolume 排序（与页面「热榜/成交额」一致）
+    - gainers：按 priceChangePercent 排序
+  - use_cdp=False 时仅用官方 GET /api/v3/ticker/24hr
+    """
+    liq_n = max(0, min(100, int(liquidity_top)))
+    gain_n = max(0, min(100, int(gainers_top)))
+    if liq_n <= 0 and gain_n <= 0:
+        raise ValueError("liquidity_top 与 gainers_top 至少一个大于 0")
+
+    api_max = max(liq_n, gain_n, 1)
+
+    if not use_cdp:
+        api = fetch_rankings_from_binance_api(api_max)
+        api_liq = api["hot_rank"][:liq_n] if liq_n else []
+        api_gain = api["gainers"][:gain_n] if gain_n else []
+
+        def _api_section(name: str, items: List[Dict[str, Any]]) -> Dict[str, object]:
+            return {
+                "section": name,
+                "extraction_source": "api_24h",
+                "count": len(items),
+                "items": items,
+            }
+
+        out: Dict[str, object] = {
+            "overview_url": url,
+            "scraped_at": beijing_time_str(),
+        }
+        if liq_n:
+            out["liquidity"] = _api_section("liquidity", api_liq)
+        if gain_n:
+            out["gainers"] = _api_section("gainers", api_gain)
+        return out
+
+    _scrape_log(
+        f"行情榜单：流动性 TOP{liq_n or '-'} + 涨幅 TOP{gain_n or '-'}，连接 CDP Chrome…"
+    )
+    driver = init_browser(use_remote_debugging=True)
+    try:
+        _scrape_log(f"打开行情页: {url}")
+        driver.get(url)
+        WebDriverWait(driver, 25).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
+        _human_pause_after_nav(1.7, 3.5)
+
+        out = {
+            "overview_url": url,
+            "scraped_at": beijing_time_str(),
+        }
+        if liq_n:
+            _scrape_log(f"处理流动性/成交额榜（取前 {liq_n}）…")
+            sec_liq = _collect_section(
+                driver,
+                "liquidity",
+                ["热榜", "热门", "Hot", "Trending", "成交额", "流动性", "24h成交额"],
+                liq_n,
+                api_fallback_key="hot_rank",
+            )
+            for item in sec_liq.get("items", []) or []:
+                if isinstance(item, dict) and "raw" in item:
+                    item["raw"] = _visible_text(str(item.get("raw", "")))
+            out["liquidity"] = sec_liq
+            _scrape_log(
+                f"流动性榜完成（{sec_liq.get('count', 0)} 条，"
+                f"来源 {sec_liq.get('extraction_source', '')}）"
+            )
+
+        if gain_n:
+            _scrape_log(f"处理涨幅榜（取前 {gain_n}）…")
+            sec_gain = _collect_section(
+                driver,
+                "gainers",
+                ["涨幅榜", "涨幅", "Gainers", "Top Gainers", "涨跌幅"],
+                gain_n,
+                api_fallback_key="gainers",
+            )
+            for item in sec_gain.get("items", []) or []:
+                if isinstance(item, dict) and "raw" in item:
+                    item["raw"] = _visible_text(str(item.get("raw", "")))
+            out["gainers"] = sec_gain
+            _scrape_log(
+                f"涨幅榜完成（{sec_gain.get('count', 0)} 条，"
+                f"来源 {sec_gain.get('extraction_source', '')}）"
+            )
+        return out
+    finally:
+        driver.quit()
+
+
+def scrape_gainers_top_n(
+    top_n: int = 20,
+    url: str = DEFAULT_URL,
+    *,
+    use_cdp: bool = True,
+) -> Dict[str, object]:
+    """兼容：仅抓涨幅榜（见 scrape_liquidity_gainers_snapshot）。"""
+    snap = scrape_liquidity_gainers_snapshot(
+        liquidity_top=0,
+        gainers_top=top_n,
+        url=url,
+        use_cdp=use_cdp,
+    )
+    return {
+        "overview_url": snap.get("overview_url"),
+        "scraped_at": snap.get("scraped_at"),
+        "gainers": snap.get("gainers"),
+    }
+
+
+def _format_quote_volume_short(raw: str) -> str:
+    try:
+        v = float(str(raw).replace(",", "").strip())
+    except (TypeError, ValueError):
+        return (raw or "").strip()
+    if v >= 1_000_000_000:
+        return f"{v / 1_000_000_000:.2f}B"
+    if v >= 1_000_000:
+        return f"{v / 1_000_000:.2f}M"
+    if v >= 1_000:
+        return f"{v / 1_000:.2f}K"
+    return f"{v:.0f}"
+
+
+def _format_rank_section_lines(
+    items: List[Any],
+    *,
+    top_n: int,
+    show_volume: bool = False,
+) -> List[str]:
+    lines: List[str] = []
+    for i, row in enumerate(items[:top_n], 1):
+        if not isinstance(row, dict):
+            continue
+        sym = str(row.get("symbol") or row.get("name") or "").strip()
+        base = sym.replace("USDT", "") if sym else "?"
+        ch = str(row.get("change") or "").strip()
+        price = str(row.get("price") or "").strip()
+        qv = _format_quote_volume_short(str(row.get("quoteVolume") or ""))
+        if show_volume and qv:
+            tail = f"  ·  24h额 {qv} USDT"
+            if ch:
+                tail += f"  ·  {ch}"
+            lines.append(f"{i}. {base}{tail}")
+        elif price and ch:
+            lines.append(f"{i}. {base}  {ch}  ·  {price}")
+        elif ch:
+            lines.append(f"{i}. {base}  {ch}")
+        else:
+            lines.append(f"{i}. {str(row.get('raw') or sym).strip()}")
+    return lines
+
+
+def format_liquidity_gainers_square_brief(
+    payload: Dict[str, object],
+    *,
+    liquidity_top: int = 30,
+    gainers_top: int = 20,
+) -> str:
+    """流动性 TOP + 涨幅 TOP 合并为广场短文。"""
+    scraped = str(payload.get("scraped_at") or "").strip()
+    lines: List[str] = ["📊 币安现货榜单速览"]
+    if scraped:
+        lines.append(f"更新：{scraped}")
+    lines.append("")
+
+    liq_sec = payload.get("liquidity")
+    if isinstance(liq_sec, dict) and liquidity_top > 0:
+        liq_items = liq_sec.get("items") or []
+        n = max(1, min(int(liquidity_top), len(liq_items) or int(liquidity_top)))
+        src = str(liq_sec.get("extraction_source") or "unknown")
+        lines.append(f"💧 24h 流动性 TOP{n}（USDT 成交额）")
+        lines.extend(
+            _format_rank_section_lines(liq_items, top_n=n, show_volume=True)
+        )
+        lines.append("")
+        lines.append(f"（流动性来源: {src}）")
+        lines.append("")
+
+    gain_sec = payload.get("gainers")
+    if isinstance(gain_sec, dict) and gainers_top > 0:
+        gain_items = gain_sec.get("items") or []
+        n = max(1, min(int(gainers_top), len(gain_items) or int(gainers_top)))
+        src = str(gain_sec.get("extraction_source") or "unknown")
+        lines.append(f"📈 涨幅榜 TOP{n}")
+        lines.extend(_format_rank_section_lines(gain_items, top_n=n, show_volume=False))
+        lines.append("")
+        lines.append(f"（涨幅来源: {src}）")
+
+    lines.append("")
+    lines.append("#Binance #流动性 #涨幅榜")
+    return "\n".join(lines).strip()
+
+
+def format_gainers_square_brief(
+    gainers_payload: Dict[str, object],
+    *,
+    top_n: int = 20,
+    title: str | None = None,
+) -> str:
+    """将 scrape_gainers_top_n 结果格式化为广场短文（仅涨幅段）。"""
+    if gainers_payload.get("liquidity"):
+        return format_liquidity_gainers_square_brief(
+            gainers_payload, liquidity_top=0, gainers_top=top_n
+        )
+    sec = gainers_payload.get("gainers")
+    if not isinstance(sec, dict):
+        sec = {}
+    items = sec.get("items") or []
+    if not isinstance(items, list):
+        items = []
+    n = max(1, min(int(top_n), len(items) or int(top_n)))
+    scraped = str(gainers_payload.get("scraped_at") or "").strip()
+    src = str(sec.get("extraction_source") or "unknown").strip()
+    head = title or f"📈 币安现货涨幅榜 TOP{n}"
+    lines = [head]
+    if scraped:
+        lines.append(f"更新：{scraped}")
+    lines.append("")
+    lines.extend(_format_rank_section_lines(items, top_n=n, show_volume=False))
+    lines.append("")
+    lines.append(f"#涨幅榜 #Binance  （来源: {src}）")
+    return "\n".join(lines).strip()
+
+
+def print_liquidity_gainers_stdout(
+    payload: Dict[str, object],
+    *,
+    liquidity_top: int = 30,
+    gainers_top: int = 20,
+) -> None:
+    """终端打印流动性 + 涨幅两个榜单。"""
+    print(f"[binance_ranks] scraped_at={payload.get('scraped_at', '')}")
+    ranking_cols = ["symbol", "price", "change", "quoteVolume"]
+    for title, key, n in (
+        ("24h 流动性", "liquidity", liquidity_top),
+        ("涨幅榜", "gainers", gainers_top),
+    ):
+        sec = payload.get(key)
+        if not isinstance(sec, dict):
+            continue
+        items = sec.get("items") or []
+        src = sec.get("extraction_source", "")
+        note = (sec.get("note") or "").strip()
+        print(f"\n【{title} TOP{n}】  extraction_source={src}")
+        if note:
+            print(f"  note: {note}")
+        _print_items_table("", items, columns=ranking_cols, max_rows=n)
 
 
 def print_result_to_stdout(result: Dict[str, Any], max_rows: int = MAX_STDOUT_ROWS) -> None:

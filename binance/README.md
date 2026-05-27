@@ -6,8 +6,10 @@
 
 | 文件 | 说明 |
 |------|------|
-| `market_lists_selenium.py` | Square 关注流抓取、直播巡检、涨跌榜 |
+| `market_lists_selenium.py` | Square 关注流抓取、直播巡检、涨跌榜（完整流水线） |
+| `gainers_top20.py` | **流动性 TOP30 + 涨幅 TOP20**（CDP + API 回退，默认一次抓两个榜） |
 | `square_publish.py` | 广场发帖（文字 + 多图） |
+| `square_publish_gainers.py` | 流动性 TOP30 + 涨幅 TOP20 → 短文 → 发布广场 |
 | `posts_state.py` | 帖子状态 JSON、Gemini/本地多空分析 |
 | `browser.py` | Selenium 等待/日志工具（抓取与发布共用） |
 | `paths.py` | 项目根路径、默认数据文件路径 |
@@ -21,13 +23,21 @@
 ## 运行方式（在项目根目录）
 
 ```bash
-# 抓取市场 / Square 关注流
+# 抓取市场 / Square 关注流（完整：关注用户、直播、可选涨跌榜）
 python -m binance.market_lists_selenium
-python -m binance.market_lists_selenium --out ./screenshots/binance_lists.json
+python -m binance.market_lists_selenium --include-hot-rank --market-top 20
+
+# 流动性 TOP30 + 涨幅 TOP20（轻量，推荐）
+python -m binance.gainers_top20
+python -m binance.gainers_top20 --liquidity-top 30 --gainers-top 20 --print-text
 
 # 发布广场动态
 python -m binance.square_publish --text "今日观点 …"
 python -m binance.square_publish --text "说明" --image ./a.png --dry-run
+
+# 涨幅榜 → 短文 → 发广场（一条龙）
+python -m binance.square_publish_gainers --dry-run   # 先试填
+python -m binance.square_publish_gainers             # 抓榜并发布
 ```
 
 ## Python 调用
@@ -43,7 +53,9 @@ from binance.market_lists_selenium import scrape_binance_lists
 
 ```bash
 python binance_market_lists_selenium.py
+python binance_gainers_top20.py
 python binance_square_publish.py --text "…"
+python binance_square_publish_gainers.py --dry-run
 ```
 
 ## 前置条件

@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """
 tv_ws_pic_push_public 本地联调：不连 WebSocket，用一条模拟 tradingview 消息
-走完整链路 → 格式化 signal → POST publish/signal → TradingView 截图。
+走完整链路 → 格式化 signal → 8000 润色 → 截图 → Telegram；--public 时 square_publish 发广场。
 
 默认样本为终端收到的 PAXGUSD 1h 倒锤子；与 tv_ws.pic_push_public 生产逻辑相同。
 
 用法:
   python -m tv_ws.pic_push_public_test
+  # 默认：润色 + Telegram 图文，不发布广场；加 --public 走 square_publish
+  python -m tv_ws.pic_push_public_test --public
   python -m tv_ws.pic_push_public_test --skip-screenshot
   python -m tv_ws.pic_push_public_test --ticker BTCUSD --period 4h
+  python tv_ws_pic_push_public_test.py                    # 根目录兼容入口
 """
 from __future__ import annotations
 
@@ -22,14 +25,12 @@ from tv_ws.paths import REPO_ROOT
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dealMsg.runner import disable_proxy_env, parse_ws_payload
+from dealMsg.runner import disable_proxy_env, get_screenshot_dir, parse_ws_payload
 from tv_ws.signal_handler import is_allowed_ws_period, process_tradingview_ws_message
 
 disable_proxy_env()
 
-DEFAULT_PUBLISH_URL = os.getenv(
-    "SIGNAL_PUBLISH_URL", "http://127.0.0.1:8000/api/publish/signal"
-)
+POLISH_NOTE = "Ollama 本地润色 (PROMAT_ANALYSIS)"
 
 # 与终端 id=11566 一致的模拟载荷
 SAMPLE_PAXGUSD_1H: dict = {
@@ -134,7 +135,12 @@ def main() -> int:
     parser.add_argument(
         "--skip-publish",
         action="store_true",
-        help="只截图/打印，不 POST publish/signal",
+        help="不调用 publish/signal 接口（既不润色也不发广场）",
+    )
+    parser.add_argument(
+        "--public",
+        action="store_true",
+        help="发布到广场（POST publish=true）；默认仅润色 + Telegram 图文，不上广场",
     )
     parser.add_argument(
         "--skip-telegram",
@@ -157,12 +163,25 @@ def main() -> int:
         payload = SAMPLE_PAXGUSD_1H
 
     ticker, period = parse_ws_payload(payload)
-    print(f"[test] 派发地址: {DEFAULT_PUBLISH_URL}", file=sys.stderr)
+    publish_public = args.public
+    print(f"[test] 润色: {POLISH_NOTE}", file=sys.stderr)
+    if publish_public:
+        print("[test] 广场发布: binance.square_publish (CDP)", file=sys.stderr)
     print(
         f"[test] ticker={ticker!r} period={period!r} "
-        f"allowed={is_allowed_ws_period(period or '')}",
+        f"allowed={is_allowed_ws_period(period or '')} "
+        f"publish_to_square={publish_public}",
         file=sys.stderr,
     )
+    if not args.skip_publish and not publish_public:
+        print(
+            "[test] 默认：润色 + Telegram 图文，不发布广场；加 --public 走 square_publish",
+            file=sys.stderr,
+        )
+    if not args.skip_screenshot:
+        shot_dir = get_screenshot_dir()
+        os.makedirs(shot_dir, exist_ok=True)
+        print(f"[test] 截图目录: {shot_dir}", file=sys.stderr)
 
     if not is_allowed_ws_period(period or ""):
         print(
@@ -176,6 +195,7 @@ def main() -> int:
         payload,
         skip_screenshot=args.skip_screenshot,
         skip_publish=args.skip_publish,
+        publish_to_square=publish_public,
         skip_telegram=args.skip_telegram,
     )
     print(f"[test] ok={ok} {note}")

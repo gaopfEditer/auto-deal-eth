@@ -51,7 +51,7 @@
 cd /path/to/auto-deal-eth
 source venv/bin/activate
 
-# 默认：收到 1h/4h 信号 → POST publish/signal → TradingView 截图
+# 默认：润色 + Telegram 图文 + 截图，不发布广场；加 --public 才发广场
 python -m tv_ws.pic_push_public
 ```
 
@@ -59,7 +59,7 @@ python -m tv_ws.pic_push_public
 
 ```text
 [WS] 派发地址: http://127.0.0.1:8000/api/publish/signal
-[WS] 连接 wss://bz.a.gaopf.top/api/ws …（直连，POST publish/signal + 截图）
+[WS] 连接 wss://bz.a.gaopf.top/api/ws …（直连，润色 + Telegram 图文（默认不发布广场，加 --public 才发） + 截图）
 [WS] 已连接，等待消息（Ctrl+C 退出）
 ```
 
@@ -69,16 +69,20 @@ python -m tv_ws.pic_push_public
 
 | 参数 | 说明 |
 |------|------|
-| （无） | **默认执行**：格式化 → POST → 截图 |
-| `--dry-run` | 仅打印解析结果，**不** POST、**不**截图（调试协议用） |
-| `--skip-screenshot` | 仍 POST，不打开 TradingView |
+| （无） | **默认**：润色（`publish=false`）→ 截图 → **Telegram 图文**，不上广场 |
+| `--public` | POST 时 `publish=true`，**发布到广场** |
+| `--dry-run` | 仅打印解析结果，**不** POST、**不**截图、**不** Telegram |
+| `--skip-screenshot` | 仍润色 + Telegram，不打开 TradingView |
 | `--print-raw` | 每条消息先打印原始 JSON |
 | `--url <wss>` | 覆盖 WebSocket 地址 |
 
 示例：
 
 ```bash
-# 只测派发，不截图（需 8000 服务）
+# 发布到广场（默认不发）
+python -m tv_ws.pic_push_public --public
+
+# 只测润色 + Telegram，不截图（需 8000 服务）
 python -m tv_ws.pic_push_public --skip-screenshot
 
 # 只看消息结构
@@ -97,7 +101,7 @@ python -m tv_ws.pic_push_public --dry-run --print-raw
 | `SIGNAL_PUBLISH_STYLE_IDS` | `style_tianya_classic` | 逗号分隔 |
 | `SIGNAL_PUBLISH_STRATEGY_ID` | `strategy_left_ambush` | 策略 ID |
 | `SIGNAL_PUBLISH_COMPOSE_MODE` | `manual` |  compose 模式 |
-| `SIGNAL_PUBLISH_DO_PUBLISH` | `true` | JSON 里 `publish` 字段 |
+| `SIGNAL_PUBLISH_DO_PUBLISH` | `true` | 仅当代码未传 `publish=` 时生效；入口默认 `publish=false`，需 `--public` |
 | `WS_SKIP_TELEGRAM` | （空） | 设为 `1` 则不推 Telegram |
 | `DEALMSG_USE_PLAYWRIGHT` | `0` | 设为 `1` 用 Playwright 截图替代 Selenium |
 
@@ -122,11 +126,12 @@ WSS message_received (source=tradingview)
     → 解析 metadata.ticker / period
     → 周期 ∈ {1h, 4h}?  否 → 跳过
     → format_tv_signal_plain → 标准纯文本 signal
-    → POST /api/publish/signal（与下方 curl 一致）
-    → capture_tradingview_chart（CDP 打开 TV 并截图到 screenshots/）
+    → POST /api/publish/signal（默认 publish=false 润色；--public 时 publish=true 发广场）
+    → capture_tradingview_chart（CDP 截图到 `SCREENSHOT_DIR`，默认 `/Volumes/RamDisk/app_screenshots`）
+    → Telegram：润色配文 + 截图（sendPhoto）；无图则仅文本
 ```
 
-**顺序**：先 **POST**，再截图；截图失败不影响已发出的 publish。
+**顺序**：先 **POST 润色**，再截图，再 **Telegram 图文**；截图失败不影响已 POST 的润色/发布。
 
 ---
 
@@ -206,15 +211,21 @@ curl -s -X POST http://127.0.0.1:8000/api/publish/signal \
 
 ## 10. 本地联调（不连 WebSocket）
 
-`tv_ws_pic_push_public_test.py` 用内置 **PAXGUSD 1h** 样本（与真实 WSS 结构一致）直接跑 publish + 截图：
+`tv_ws.pic_push_public_test` 用内置 **PAXGUSD 1h** 样本（与生产逻辑一致）：
 
 ```bash
+# 默认：润色 + Telegram 图文 + 截图，不发布广场
 python -m tv_ws.pic_push_public_test
-python -m tv_ws.pic_push_public_test --skip-screenshot   # 仅测 8000 派发
+
+# 确认无误后再发广场
+python -m tv_ws.pic_push_public_test --public
+
+python -m tv_ws.pic_push_public_test --skip-screenshot   # 不截图，仍润色 + Telegram
+python -m tv_ws.pic_push_public_test --skip-publish      # 不调用 8000，仅 Telegram 原文+图
 python -m tv_ws.pic_push_public_test --ticker BTCUSD --period 4h
 ```
 
-需先启动 `http://127.0.0.1:8000`；截图时仍需 Chrome `--remote-debugging-port=9222`。
+需先启动 `http://127.0.0.1:8000`（润色接口）；截图时仍需 Chrome `--remote-debugging-port=9222`。
 
 ## 11. promat 润色提示词（分行 + 小故事）
 

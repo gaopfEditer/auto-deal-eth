@@ -1,7 +1,7 @@
 """
 币安 Square / 市场列表：抓取、状态、发帖。
 
-命令行（在项目根目录）：
+命令行（在项目根目录，建议先 source venv/bin/activate）：
   python -m binance.market_lists_selenium
   python -m binance.square_publish --text "…"
 """
@@ -13,13 +13,6 @@ from binance.paths import (
     DEFAULT_POSTS_STATE_FILE,
     MARKET_LISTS_PROMPT_FILE,
     REPO_ROOT,
-)
-from binance.posts_state import (
-    POST_RETENTION_HOURS,
-    default_posts_state_path,
-    load_posts_state,
-    process_watchlist_posts,
-    save_posts_state,
 )
 
 __all__ = [
@@ -39,6 +32,16 @@ __all__ = [
 
 
 def __getattr__(name: str):
+    if name in (
+        "POST_RETENTION_HOURS",
+        "default_posts_state_path",
+        "load_posts_state",
+        "save_posts_state",
+        "process_watchlist_posts",
+    ):
+        from binance import posts_state as ps
+
+        return getattr(ps, name)
     if name == "publish_square_post":
         from binance.square_publish import publish_square_post
 

@@ -78,6 +78,23 @@ def format_polished_for_terminal(polished: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def telegram_caption_from_publish_body(body: Optional[Dict[str, Any]]) -> str:
+    """从 publish/signal 响应提取 Telegram 配文（润色正文优先）。"""
+    if not isinstance(body, dict) or not body.get("ok"):
+        return ""
+    polished = body.get("polished")
+    if not isinstance(polished, dict):
+        return ""
+    lines: list[str] = []
+    star = polished.get("star")
+    if star is not None:
+        lines.append(f"⭐ 信号强度: {star}/5")
+    content = normalize_polished_content(polished.get("content"))
+    if content:
+        lines.append(content)
+    return "\n".join(lines).strip()
+
+
 def describe_publish_response(body: Dict[str, Any]) -> str:
     """从 /api/publish/signal 响应 JSON 提取可读摘要。"""
     if not isinstance(body, dict):
