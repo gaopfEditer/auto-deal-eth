@@ -85,7 +85,7 @@ BINANCE_MARKET_RANKS_CACHE_HOURS = float(
 # gainers_top20 逐币截图+AI 时排除的 base 资产（逗号分隔）
 BINANCE_RANKS_EXCLUDE_BASES = os.getenv(
     'BINANCE_RANKS_EXCLUDE_BASES',
-    'eth,btc,usdt,usdc,usd1,sui,sol,bnb',
+    'eth,btc,usdt,usdc,usd1,sui,sol,bnb,u,clv',
 ).strip()
 # 榜单逐币 K 线截图周期
 # gainers_top20 逐币 TradingView 截图周期（15m / 1h / 4h 等，见 dealMsg period_to_tradingview_interval）
