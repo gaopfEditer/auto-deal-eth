@@ -56,6 +56,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from browser_automation import init_browser
 
+from binance.cdp_navigation import cdp_get, cdp_restore, cdp_worker_tab
 from binance.posts_state import (
     DETAIL_FETCH_CACHE_VERSION,
     POST_RETENTION_HOURS,
@@ -539,8 +540,9 @@ def _recover_profile_tab(driver, profile_href: str, *, log: str = "") -> None:
         driver.switch_to.default_content()
     except Exception:
         pass
+    nav = None
     try:
-        driver.get(base)
+        nav = cdp_get(driver, base, page_load_timeout=28, log_prefix="square")
         WebDriverWait(driver, 28).until(
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
@@ -550,6 +552,8 @@ def _recover_profile_tab(driver, profile_href: str, *, log: str = "") -> None:
         _human_pause_after_nav(0.55, 1.15)
     except Exception as e:
         _scrape_log(f"恢复 profile 失败 {base!r}: {e}")
+    finally:
+        cdp_restore(driver, nav)
 
 
 def _modifier_open_new_tab_key():
@@ -1188,8 +1192,9 @@ def _enrich_post_images_from_detail_pages(
                 _scrape_log(
                     f"详情缓存孤儿 post_id={post_id}（state 中无对应帖子），已清除缓存并重新抓取"
                 )
+        nav = None
         try:
-            driver.get(href)
+            nav = cdp_get(driver, href, page_load_timeout=18, log_prefix="square")
             WebDriverWait(driver, 18).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
@@ -1208,6 +1213,8 @@ def _enrich_post_images_from_detail_pages(
                 p["video_url"] = str(video_url).strip()
         except Exception:
             continue
+        finally:
+            cdp_restore(driver, nav)
         if state_for_cache is not None and post_id:
             cache_mut[post_id] = {
                 "at": datetime.now(timezone.utc).isoformat(),
@@ -1483,16 +1490,16 @@ def _extract_square_profile_posts(
         _scrape_log(f"打开主页拉取帖子并检测直播: {base}")
     else:
         _scrape_log(f"打开主页拉取帖子: {base}")
-    driver.get(base)
-    WebDriverWait(driver, 25).until(
-        EC.presence_of_element_located((By.TAG_NAME, "body"))
-    )
-    _human_pause_after_nav(2.0, 4.2)
-    _scroll_profile_feed_until_stable(driver)
-    _human_pause(0.75, 1.65)
-    slug_l = (author_slug or "").lower().strip()
-    posts: List[Dict[str, str]] = (
-        driver.execute_script(
+    with cdp_worker_tab(driver, base, page_load_timeout=25, log_prefix="square"):
+        WebDriverWait(driver, 25).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
+        _human_pause_after_nav(2.0, 4.2)
+        _scroll_profile_feed_until_stable(driver)
+        _human_pause(0.75, 1.65)
+        slug_l = (author_slug or "").lower().strip()
+        posts: List[Dict[str, str]] = (
+            driver.execute_script(
             _SQUARE_ATTACHMENT_IMG_JS
             + """
 const maxItems = arguments[0];
@@ -1560,61 +1567,58 @@ for (const a of anchors) {
   seen.add(href);
 }
 return out;
-        """,
-            max_items,
-            slug_l,
-        )
-        or []
-    )
-    # 视频帖经常需要点中间播放区才会进入详情，补跑一轮中心点点击回扫。
-    existing_hrefs = {(p.get("href") or "").strip() for p in posts if isinstance(p, dict)}
-    # 这里不能再按“剩余额度”扫描，否则普通帖子先占满后视频帖会被跳过。
-    video_scan_quota = min(max(12, max_items), 80)
-    profile_audio_patches: List[Dict[str, Any]] = []
-    if video_scan_quota > 0:
-        extra_video, audio_replay_patches = _extract_profile_video_posts_by_center_click(
-            driver, base, slug_l, existing_hrefs, max_items=video_scan_quota
-        )
-        profile_audio_patches = list(audio_replay_patches or [])
-        if extra_video:
-            # 合并时把视频回扫结果放前面，确保上限裁剪时不会把视频帖全部挤掉。
-            posts = _merge_posts_by_href(extra_video, posts)
-        if audio_replay_patches:
-            _apply_audio_replay_patches_to_posts(posts, audio_replay_patches, slug_l)
-        posts = posts[:max_items]
-    live_hit: Optional[Dict[str, str]] = None
-    if probe_live:
-        _human_pause(0.55, 1.25)
-        hint = (author_display_name or "").strip() or author_slug
-        vu = (view_all_url or DEFAULT_WATCHLIST_URL).strip() or DEFAULT_WATCHLIST_URL
-        # 当前已在主页：先识别 span.live-tag 等信号，避免再跳转 tab=live 时错过主页角标
-        status_home = _detect_live_on_current_square_page(driver)
-        if status_home.get("is_live"):
-            links = status_home.get("live_links") or []
-            live_url = _pick_live_url(base, links)
-            author_disp = hint or author_slug or slug_l
-            live_hit = {
-                "author": author_disp,
-                "profile": base.split("#")[0],
-                "live_url": live_url,
-                "raw": "profile_home_probe",
-            }
-            _show_square_live_toast(
-                driver,
-                author=author_disp,
-                live_url=live_url,
-                view_all_url=vu,
+            """,
+                max_items,
+                slug_l,
             )
-        else:
-            _remove_square_live_toast(driver)
-            live_hit = _probe_single_profile_live(
-                driver,
-                base,
-                author_hint=hint,
-                log_visit=False,
-                view_all_url=vu,
+            or []
+        )
+        # 视频帖经常需要点中间播放区才会进入详情，补跑一轮中心点点击回扫。
+        existing_hrefs = {(p.get("href") or "").strip() for p in posts if isinstance(p, dict)}
+        video_scan_quota = min(max(12, max_items), 80)
+        profile_audio_patches: List[Dict[str, Any]] = []
+        if video_scan_quota > 0:
+            extra_video, audio_replay_patches = _extract_profile_video_posts_by_center_click(
+                driver, base, slug_l, existing_hrefs, max_items=video_scan_quota
             )
-    return posts, live_hit, profile_audio_patches
+            profile_audio_patches = list(audio_replay_patches or [])
+            if extra_video:
+                posts = _merge_posts_by_href(extra_video, posts)
+            if audio_replay_patches:
+                _apply_audio_replay_patches_to_posts(posts, audio_replay_patches, slug_l)
+            posts = posts[:max_items]
+        live_hit: Optional[Dict[str, str]] = None
+        if probe_live:
+            _human_pause(0.55, 1.25)
+            hint = (author_display_name or "").strip() or author_slug
+            vu = (view_all_url or DEFAULT_WATCHLIST_URL).strip() or DEFAULT_WATCHLIST_URL
+            status_home = _detect_live_on_current_square_page(driver)
+            if status_home.get("is_live"):
+                links = status_home.get("live_links") or []
+                live_url = _pick_live_url(base, links)
+                author_disp = hint or author_slug or slug_l
+                live_hit = {
+                    "author": author_disp,
+                    "profile": base.split("#")[0],
+                    "live_url": live_url,
+                    "raw": "profile_home_probe",
+                }
+                _show_square_live_toast(
+                    driver,
+                    author=author_disp,
+                    live_url=live_url,
+                    view_all_url=vu,
+                )
+            else:
+                _remove_square_live_toast(driver)
+                live_hit = _probe_single_profile_live(
+                    driver,
+                    base,
+                    author_hint=hint,
+                    log_visit=False,
+                    view_all_url=vu,
+                )
+        return posts, live_hit, profile_audio_patches
 
 
 def _aspect_video_probe_random_click_and_log_opened_url(
@@ -2980,50 +2984,50 @@ def scrape_binance_lists(
         if include_hot_rank:
             # 热榜 / 涨幅 / 跌幅：overview 上尝试 DOM，失败则用 24h API
             _scrape_log(f"打开行情总览页（榜单）: {url}")
-            driver.get(url)
-            WebDriverWait(driver, 25).until(
-                EC.presence_of_element_located((By.TAG_NAME, "body"))
-            )
-            _human_pause_after_nav(1.7, 3.5)
+            with cdp_worker_tab(driver, url, page_load_timeout=25, log_prefix="markets"):
+                WebDriverWait(driver, 25).until(
+                    EC.presence_of_element_located((By.TAG_NAME, "body"))
+                )
+                _human_pause_after_nav(1.7, 3.5)
 
-            _scrape_log(f"处理涨幅榜（取前 {top_n}）…")
-            sec_gainers = _collect_section(
-                driver,
-                "gainers",
-                ["涨幅榜", "涨幅", "Gainers", "Top Gainers", "涨跌幅"],
-                top_n,
-                api_fallback=api_rankings["gainers"],
-            )
-            _scrape_log(
-                f"涨幅榜完成（{sec_gainers.get('count', 0)} 条，来源 {sec_gainers.get('extraction_source', '')}）"
-            )
+                _scrape_log(f"处理涨幅榜（取前 {top_n}）…")
+                sec_gainers = _collect_section(
+                    driver,
+                    "gainers",
+                    ["涨幅榜", "涨幅", "Gainers", "Top Gainers", "涨跌幅"],
+                    top_n,
+                    api_fallback=api_rankings["gainers"],
+                )
+                _scrape_log(
+                    f"涨幅榜完成（{sec_gainers.get('count', 0)} 条，来源 {sec_gainers.get('extraction_source', '')}）"
+                )
 
-            _scrape_log(f"处理跌幅榜（取前 {top_n}）…")
-            sec_losers = _collect_section(
-                driver,
-                "losers",
-                ["跌幅榜", "跌幅", "Losers", "Top Losers"],
-                top_n,
-                api_fallback=api_rankings["losers"],
-            )
-            _scrape_log(
-                f"跌幅榜完成（{sec_losers.get('count', 0)} 条，来源 {sec_losers.get('extraction_source', '')}）"
-            )
-            data["gainers"] = sec_gainers
-            data["losers"] = sec_losers
+                _scrape_log(f"处理跌幅榜（取前 {top_n}）…")
+                sec_losers = _collect_section(
+                    driver,
+                    "losers",
+                    ["跌幅榜", "跌幅", "Losers", "Top Losers"],
+                    top_n,
+                    api_fallback=api_rankings["losers"],
+                )
+                _scrape_log(
+                    f"跌幅榜完成（{sec_losers.get('count', 0)} 条，来源 {sec_losers.get('extraction_source', '')}）"
+                )
+                data["gainers"] = sec_gainers
+                data["losers"] = sec_losers
 
-            _scrape_log(f"处理全局热榜（取前 {top_n}）…")
-            data["hot_rank"] = _collect_section(
-                driver,
-                "hot_rank",
-                ["热榜", "热门", "Hot", "Trending", "成交额"],
-                top_n,
-                api_fallback=api_rankings["hot_rank"],
-            )
-            hr = data["hot_rank"]
-            _scrape_log(
-                f"热榜完成（{hr.get('count', 0)} 条，来源 {hr.get('extraction_source', '')}）"
-            )
+                _scrape_log(f"处理全局热榜（取前 {top_n}）…")
+                data["hot_rank"] = _collect_section(
+                    driver,
+                    "hot_rank",
+                    ["热榜", "热门", "Hot", "Trending", "成交额"],
+                    top_n,
+                    api_fallback=api_rankings["hot_rank"],
+                )
+                hr = data["hot_rank"]
+                _scrape_log(
+                    f"热榜完成（{hr.get('count', 0)} 条，来源 {hr.get('extraction_source', '')}）"
+                )
         else:
             _scrape_log("已跳过热榜/涨幅榜/跌幅榜（未加 --include-hot-rank）")
 
@@ -3136,52 +3140,52 @@ def scrape_liquidity_gainers_snapshot(
     driver = init_browser(use_remote_debugging=True)
     try:
         _scrape_log(f"打开行情页: {url}")
-        driver.get(url)
-        WebDriverWait(driver, 25).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
-        _human_pause_after_nav(1.7, 3.5)
+        with cdp_worker_tab(driver, url, page_load_timeout=25, log_prefix="markets"):
+            WebDriverWait(driver, 25).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+            _human_pause_after_nav(1.7, 3.5)
 
-        out = {
-            "overview_url": url,
-            "scraped_at": beijing_time_str(),
-        }
-        if liq_n:
-            _scrape_log(f"处理流动性/成交额榜（取前 {liq_n}）…")
-            sec_liq = _collect_section(
-                driver,
-                "liquidity",
-                ["热榜", "热门", "Hot", "Trending", "成交额", "流动性", "24h成交额"],
-                liq_n,
-                api_fallback_key="hot_rank",
-            )
-            for item in sec_liq.get("items", []) or []:
-                if isinstance(item, dict) and "raw" in item:
-                    item["raw"] = _visible_text(str(item.get("raw", "")))
-            out["liquidity"] = sec_liq
-            _scrape_log(
-                f"流动性榜完成（{sec_liq.get('count', 0)} 条，"
-                f"来源 {sec_liq.get('extraction_source', '')}）"
-            )
+            out = {
+                "overview_url": url,
+                "scraped_at": beijing_time_str(),
+            }
+            if liq_n:
+                _scrape_log(f"处理流动性/成交额榜（取前 {liq_n}）…")
+                sec_liq = _collect_section(
+                    driver,
+                    "liquidity",
+                    ["热榜", "热门", "Hot", "Trending", "成交额", "流动性", "24h成交额"],
+                    liq_n,
+                    api_fallback_key="hot_rank",
+                )
+                for item in sec_liq.get("items", []) or []:
+                    if isinstance(item, dict) and "raw" in item:
+                        item["raw"] = _visible_text(str(item.get("raw", "")))
+                out["liquidity"] = sec_liq
+                _scrape_log(
+                    f"流动性榜完成（{sec_liq.get('count', 0)} 条，"
+                    f"来源 {sec_liq.get('extraction_source', '')}）"
+                )
 
-        if gain_n:
-            _scrape_log(f"处理涨幅榜（取前 {gain_n}）…")
-            sec_gain = _collect_section(
-                driver,
-                "gainers",
-                ["涨幅榜", "涨幅", "Gainers", "Top Gainers", "涨跌幅"],
-                gain_n,
-                api_fallback_key="gainers",
-            )
-            for item in sec_gain.get("items", []) or []:
-                if isinstance(item, dict) and "raw" in item:
-                    item["raw"] = _visible_text(str(item.get("raw", "")))
-            out["gainers"] = sec_gain
-            _scrape_log(
-                f"涨幅榜完成（{sec_gain.get('count', 0)} 条，"
-                f"来源 {sec_gain.get('extraction_source', '')}）"
-            )
-        return out
+            if gain_n:
+                _scrape_log(f"处理涨幅榜（取前 {gain_n}）…")
+                sec_gain = _collect_section(
+                    driver,
+                    "gainers",
+                    ["涨幅榜", "涨幅", "Gainers", "Top Gainers", "涨跌幅"],
+                    gain_n,
+                    api_fallback_key="gainers",
+                )
+                for item in sec_gain.get("items", []) or []:
+                    if isinstance(item, dict) and "raw" in item:
+                        item["raw"] = _visible_text(str(item.get("raw", "")))
+                out["gainers"] = sec_gain
+                _scrape_log(
+                    f"涨幅榜完成（{sec_gain.get('count', 0)} 条，"
+                    f"来源 {sec_gain.get('extraction_source', '')}）"
+                )
+            return out
     finally:
         driver.quit()
 

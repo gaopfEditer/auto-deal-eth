@@ -245,67 +245,15 @@ def chrome_debug_port() -> int:
         return 9222
 
 
-def _cdp_open_tab_and_goto(driver, url: str, *, page_load_timeout: int = 90) -> Tuple[Optional[str], bool]:
+def _cdp_open_tab_and_goto(driver, url: str, *, page_load_timeout: int = 90):
     """
-    CDP：可选新开标签后，**必定** driver.get(TradingView 完整 URL)。
-    绝不先打开 about:blank 再傻等；新标签失败则在当前标签 get(url)。
+    CDP 导航：先查找是否已有同 URL 标签（有则刷新），否则新开标签；不占用当前标签。
 
-    返回 (main_handle, opened_new_tab)。
+    返回 CdpNavSession，供 cdp_restore 还原。
     """
-    from selenium.common.exceptions import WebDriverException
+    from binance.cdp_navigation import cdp_goto
 
-    chart_url = (url or "").strip()
-    if not chart_url:
-        raise ValueError("TradingView URL 为空")
-
-    main_handle: Optional[str] = None
-    opened_new_tab = False
-    try:
-        if driver.window_handles:
-            main_handle = driver.current_window_handle
-    except WebDriverException:
-        pass
-
-    same_tab = os.getenv("DEALMSG_TV_SAME_TAB", "").strip().lower() in (
-        "1",
-        "true",
-        "yes",
-    )
-    if not same_tab:
-        n_before = len(driver.window_handles)
-        try:
-            driver.switch_to.new_window("tab")
-            if len(driver.window_handles) > n_before:
-                opened_new_tab = True
-                print("[INFO] CDP：已新开标签", file=sys.stderr)
-        except WebDriverException as e:
-            print(
-                f"[WARN] CDP 新开标签失败: {e}；在当前标签打开 TradingView",
-                file=sys.stderr,
-            )
-            if main_handle:
-                try:
-                    driver.switch_to.window(main_handle)
-                except WebDriverException:
-                    pass
-    else:
-        print("[INFO] DEALMSG_TV_SAME_TAB=1：当前标签导航", file=sys.stderr)
-
-    print(f"[INFO] CDP 导航 → {chart_url}", file=sys.stderr)
-    driver.set_page_load_timeout(page_load_timeout)
-    driver.get(chart_url)
-
-    try:
-        cur = (driver.current_url or "").strip()
-        if cur and "tradingview.com" not in cur.lower():
-            print(
-                f"[WARN] 导航后当前 URL 不像 TradingView: {cur!r}，仍继续等待图表",
-                file=sys.stderr,
-            )
-    except WebDriverException:
-        pass
-
-    return main_handle, opened_new_tab
+    return cdp_goto(driver, url, page_load_timeout=page_load_timeout, log_prefix="CDP")
 
 
 def capture_tradingview_chart(
@@ -371,15 +319,12 @@ def capture_tradingview_chart(
     if own_driver:
         driver = init_browser(use_remote_debugging=use_remote)
 
-    main_handle = None
-    opened_new_tab = False
+    cdp_session = None
     wait_timeout = int(os.getenv("DEALMSG_CHART_WAIT_SEC", "45"))
 
     try:
         if use_remote and driver.window_handles:
-            main_handle, opened_new_tab = _cdp_open_tab_and_goto(
-                driver, url, page_load_timeout=90
-            )
+            cdp_session = _cdp_open_tab_and_goto(driver, url, page_load_timeout=90)
         else:
             print(f"[INFO] 导航 → {url}", file=sys.stderr)
             driver.set_page_load_timeout(90)
@@ -429,15 +374,10 @@ def capture_tradingview_chart(
         raise
     finally:
         try:
-            if use_remote and opened_new_tab and main_handle:
-                try:
-                    driver.close()
-                except Exception:
-                    pass
-                try:
-                    driver.switch_to.window(main_handle)
-                except Exception:
-                    pass
+            if use_remote and cdp_session is not None:
+                from binance.cdp_navigation import cdp_restore
+
+                cdp_restore(driver, cdp_session)
             # 远程调试下 quit() 有时会结束整个浏览器；默认仍 quit 以释放会话，便于连续多条消息。
             # 若 quit 会关掉 Chrome，可设 DEALMSG_REMOTE_SKIP_QUIT=1（仅单次截图或需手动结束 chromedriver）
             skip_quit = (
