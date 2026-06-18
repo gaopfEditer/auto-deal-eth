@@ -208,6 +208,12 @@ python -m browser_media_runner.runner "https://x.com/yangyi/status/2043661337839
 python -m tv_ws.pic_push_public
 python tv_ws_pic_push_public.py
 
+# 仅 Telegram：不润色、不发广场；15m / 1h / 4h 全部转发
+python -m tv_ws.pic_push_public --only-telegram
+python tv_ws_pic_push_public.py --only-telegram
+python -m tv_ws.pic_push_public_only_telegram
+python tv_ws_pic_push_public_only_telegram.py
+
 # 发布到广场
 python -m tv_ws.pic_push_public --public
 

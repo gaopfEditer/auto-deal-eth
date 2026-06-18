@@ -28,6 +28,8 @@ from notifier import (
 from tv_ws.polish import polish_tv_signal
 
 _PERIOD_ALIASES = {
+    "15": "15m",
+    "15m": "15m",
     "60": "1h",
     "60m": "1h",
     "h1": "1h",
@@ -38,10 +40,16 @@ _PERIOD_ALIASES = {
     "4hour": "4h",
 }
 
+# --only-telegram 默认放行周期
+ONLY_TELEGRAM_PERIODS = frozenset({"15m", "1h", "4h"})
 
-def _allowed_periods() -> FrozenSet[str]:
+
+def _allowed_periods(override: FrozenSet[str] | None = None) -> FrozenSet[str]:
+    if override is not None:
+        return override
     raw = os.getenv("WS_ALLOWED_PERIODS", "1h,4h").strip()
-    parts = [p.strip().lower() for p in raw.split(",") if p.strip()]
+    parts = [canonical_ws_period(p) for p in raw.split(",") if p.strip()]
+    parts = [p for p in parts if p]
     return frozenset(parts or ("1h", "4h"))
 
 
@@ -52,9 +60,13 @@ def canonical_ws_period(period: str) -> str:
     return _PERIOD_ALIASES.get(p, p)
 
 
-def is_allowed_ws_period(period: str) -> bool:
+def is_allowed_ws_period(
+    period: str,
+    *,
+    allowed_periods: FrozenSet[str] | None = None,
+) -> bool:
     canon = canonical_ws_period(period)
-    return bool(canon) and canon in _allowed_periods()
+    return bool(canon) and canon in _allowed_periods(allowed_periods)
 
 
 def _push_telegram(
@@ -181,9 +193,11 @@ def process_tradingview_ws_message(
     *,
     skip_screenshot: bool = False,
     skip_publish: bool = False,
+    skip_polish: bool = False,
     publish_to_square: bool = False,
     skip_telegram: bool = False,
     use_telegram_markdown: bool = True,
+    allowed_periods: FrozenSet[str] | None = None,
 ) -> Tuple[bool, str]:
     msg = obj.get("message")
     if not isinstance(msg, dict):
@@ -197,9 +211,9 @@ def process_tradingview_ws_message(
     if not ticker:
         return False, "缺少 ticker"
 
-    if not is_allowed_ws_period(period or ""):
+    if not is_allowed_ws_period(period or "", allowed_periods=allowed_periods):
         canon = canonical_ws_period(period or "")
-        allowed = ", ".join(sorted(_allowed_periods()))
+        allowed = ", ".join(sorted(_allowed_periods(allowed_periods)))
         return False, f"周期 {period!r}（{canon!r}）不在允许列表 [{allowed}]，已跳过"
 
     signal_text = format_tv_signal_plain(obj)
@@ -231,13 +245,15 @@ def process_tradingview_ws_message(
             )
 
         # 2) 润色（本地 Ollama，不动浏览器）
-        if not skip_publish:
+        if not skip_publish and not skip_polish:
             publish_ok, publish_body = _polish_signal(signal_text)
             if not publish_ok:
                 print(
                     "[WS][WARN] 润色失败，广场/Telegram 将使用原始 signal 文案",
                     file=sys.stderr,
                 )
+        elif skip_polish:
+            print("[WS] 已跳过润色（only-telegram / skip_polish）", file=sys.stderr)
 
         # 3) 广场发布（强制刷新 Square，避免上次残留图文）
         if publish_to_square and not skip_publish:
@@ -271,8 +287,10 @@ def process_tradingview_ws_message(
             use_telegram_markdown=use_telegram_markdown,
         )
 
-    if skip_publish:
+    if skip_publish or skip_polish:
         note = f"已处理 {ticker} {period}"
+        if skip_polish and not skip_publish:
+            note += "，未润色"
     elif publish_to_square:
         if square_ok and publish_ok:
             note = f"已处理 {ticker} {period}，已润色 + 广场发布"

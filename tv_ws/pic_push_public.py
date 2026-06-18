@@ -26,7 +26,11 @@ except ImportError:
     pass
 
 from dealMsg.runner import disable_proxy_env, get_screenshot_dir, parse_ws_payload
-from tv_ws.signal_handler import is_allowed_ws_period, process_tradingview_ws_message
+from tv_ws.signal_handler import (
+    ONLY_TELEGRAM_PERIODS,
+    is_allowed_ws_period,
+    process_tradingview_ws_message,
+)
 
 # 仅 WSS 直连禁代理；不在模块级调用，避免影响 Telegram API
 DEFAULT_WS_URI = os.getenv("MAIN_WS_URL", "wss://bz.a.gaopf.top/api/ws")
@@ -78,7 +82,7 @@ def _pong_payload() -> str:
     )
 
 
-def _print_message_received(data: dict) -> None:
+def _print_message_received(data: dict, *, allowed_periods=None) -> None:
     msg = data.get("message")
     if not isinstance(msg, dict):
         print("[message_received] 无 message 字段:", json.dumps(data, ensure_ascii=False)[:500])
@@ -97,7 +101,11 @@ def _print_message_received(data: dict) -> None:
 
     ticker, period = parse_ws_payload(data)
     if ticker:
-        allowed = "允许" if is_allowed_ws_period(period or "") else "跳过（周期不在 WS_ALLOWED_PERIODS）"
+        allowed = (
+            "允许"
+            if is_allowed_ws_period(period or "", allowed_periods=allowed_periods)
+            else "跳过（周期不在允许列表）"
+        )
         print(f"解析 -> ticker={ticker!r}  period={period!r}  [{allowed}]")
     print("-" * 56)
 
@@ -108,6 +116,8 @@ def _handle_payload(
     execute: bool,
     skip_screenshot: bool,
     publish_public: bool,
+    only_telegram: bool = False,
+    allowed_periods=None,
 ) -> None:
     msg = data.get("message")
     if not isinstance(msg, dict):
@@ -121,17 +131,21 @@ def _handle_payload(
         ok, note = process_tradingview_ws_message(
             data,
             skip_screenshot=skip_screenshot,
-            publish_to_square=publish_public,
+            skip_publish=only_telegram,
+            skip_polish=only_telegram,
+            publish_to_square=publish_public and not only_telegram,
             skip_telegram=_ws_skip_telegram(),
+            allowed_periods=allowed_periods,
         )
         print(f"[执行] ok={ok} {note}")
     else:
-        _print_message_received(data)
-        print(
-            f"[提示] 当前为 --dry-run，不会润色、不会截图、不会发广场\n"
-            "       去掉 --dry-run 后：Ollama 润色 + Telegram；加 --public 再经 square_publish 发广场",
-            file=sys.stderr,
+        _print_message_received(data, allowed_periods=allowed_periods)
+        hint = (
+            "去掉 --dry-run 后：仅 Telegram 原文+截图（15m/1h/4h，不润色）"
+            if only_telegram
+            else "去掉 --dry-run 后：Ollama 润色 + Telegram；加 --public 再经 square_publish 发广场"
         )
+        print(f"[提示] 当前为 --dry-run，不会润色、不会截图、不会发广场\n       {hint}", file=sys.stderr)
 
 
 def _ws_connect_kwargs() -> dict:
@@ -169,6 +183,8 @@ async def _handle_payload_async(
     execute: bool,
     skip_screenshot: bool,
     publish_public: bool,
+    only_telegram: bool = False,
+    allowed_periods=None,
 ) -> None:
     """同步链路（截图/润色/发帖）放到线程，避免阻塞 WebSocket 心跳。"""
     await asyncio.to_thread(
@@ -177,6 +193,8 @@ async def _handle_payload_async(
         execute=execute,
         skip_screenshot=skip_screenshot,
         publish_public=publish_public,
+        only_telegram=only_telegram,
+        allowed_periods=allowed_periods,
     )
 
 
@@ -187,6 +205,8 @@ async def _listen_session(
     execute: bool,
     skip_screenshot: bool,
     publish_public: bool,
+    only_telegram: bool = False,
+    allowed_periods=None,
 ) -> None:
     async for raw in ws:
         if isinstance(raw, bytes):
@@ -215,6 +235,8 @@ async def _listen_session(
                 execute=execute,
                 skip_screenshot=skip_screenshot,
                 publish_public=publish_public,
+                only_telegram=only_telegram,
+                allowed_periods=allowed_periods,
             )
             continue
 
@@ -229,6 +251,8 @@ async def run_listener(
     execute: bool,
     skip_screenshot: bool,
     publish_public: bool,
+    only_telegram: bool = False,
+    allowed_periods=None,
 ) -> None:
     try:
         import websockets
@@ -238,12 +262,16 @@ async def run_listener(
         sys.exit(1)
 
     disable_proxy_env()
+    periods_label = ", ".join(sorted(allowed_periods or ONLY_TELEGRAM_PERIODS if only_telegram else ("1h", "4h")))
     if execute:
-        mode = "润色 + Telegram 图文"
-        if publish_public:
-            mode += " + 广场(square_publish/CDP)"
+        if only_telegram:
+            mode = f"仅 Telegram 原文+截图（{periods_label}，不润色、不发广场）"
         else:
-            mode += "（默认不发布广场，加 --public 才发）"
+            mode = "润色 + Telegram 图文"
+            if publish_public:
+                mode += " + 广场(square_publish/CDP)"
+            else:
+                mode += "（默认不发布广场，加 --public 才发）"
         if not skip_screenshot:
             mode += " + 截图"
             try:
@@ -254,8 +282,9 @@ async def run_listener(
                 print(f"[WS][WARN] 截图目录不可用: {e}", file=sys.stderr)
         else:
             mode += "（跳过截图）"
-        print(f"[WS] 润色: Ollama ({os.getenv('PROMAT_ANALYSIS_OLLAMA_BASE_URL', 'http://localhost:11434')})", file=sys.stderr)
-        if publish_public:
+        if not only_telegram:
+            print(f"[WS] 润色: Ollama ({os.getenv('PROMAT_ANALYSIS_OLLAMA_BASE_URL', 'http://localhost:11434')})", file=sys.stderr)
+        if publish_public and not only_telegram:
             print("[WS] 广场发布: binance.square_publish (CDP Chrome 9222)", file=sys.stderr)
         _log_telegram_status()
     else:
@@ -282,6 +311,8 @@ async def run_listener(
                     execute=execute,
                     skip_screenshot=skip_screenshot,
                     publish_public=publish_public,
+                    only_telegram=only_telegram,
+                    allowed_periods=allowed_periods,
                 )
         except KeyboardInterrupt:
             raise
@@ -327,7 +358,17 @@ def main() -> None:
         action="store_true",
         help="发布到币安广场（binance.square_publish/CDP）；默认仅润色不发广场",
     )
+    parser.add_argument(
+        "--only-telegram",
+        action="store_true",
+        help="不润色、不发广场；15m/1h/4h 信号原文+截图直推 Telegram",
+    )
     args = parser.parse_args()
+
+    if args.only_telegram and args.public:
+        parser.error("--only-telegram 与 --public 不能同时使用")
+
+    allowed_periods = ONLY_TELEGRAM_PERIODS if args.only_telegram else None
 
     try:
         asyncio.run(
@@ -337,6 +378,8 @@ def main() -> None:
                 execute=not args.dry_run,
                 skip_screenshot=args.skip_screenshot,
                 publish_public=args.public,
+                only_telegram=args.only_telegram,
+                allowed_periods=allowed_periods,
             )
         )
     except KeyboardInterrupt:
