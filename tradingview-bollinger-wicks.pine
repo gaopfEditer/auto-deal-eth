@@ -73,9 +73,10 @@ tri_conv_ratio = input.float(0.92, title="收敛:右侧波幅≤左侧×", minva
 
 // K线形态设置（射击之星、吞没）
 enable_candle_pattern = input.bool(true, title="启用K线形态预警", tooltip="检测射击之星和吞没形态", group="K线形态设置")
-enable_shooting_star = input.bool(true, title="射击之星", tooltip="上影线长、实体小、下影线短，看跌信号", group="K线形态设置")
+enable_shooting_star = input.bool(true, title="射击之星", tooltip="上影线≥实体1.5倍；下影线无或不足上影线1/2。下轨附近须收阴，其余位置阴阳皆可", group="K线形态设置")
 enable_engulfing = input.bool(true, title="吞没形态", tooltip="当前K线实体完全包住前一根K线实体", group="K线形态设置")
-pattern_upper_wick_ratio = input.float(2.0, title="射击之星上影线/实体比", minval=1.5, maxval=5.0, step=0.1, tooltip="上影线至少为实体的倍数", group="K线形态设置")
+pattern_upper_wick_ratio = input.float(1.5, title="射击之星上影线/实体比", minval=1.5, maxval=5.0, step=0.1, tooltip="上影线须≥实体的该倍数（默认1.5，即1.5倍以上）", group="K线形态设置")
+shooting_star_repeat_bars = input.int(10, title="射击之星(2)窗口(K线数)", minval=2, maxval=50, tooltip="前次射击之星后 N 根K线内再次出现，记作射击之星(2)", group="K线形态设置")
 
 // 维加斯通道：仅用于判断是否给信号名加「V」前缀（不画线、不改变触发逻辑）
 enable_vegas_v_prefix = input.bool(true, title="仅在维加斯附近加 V 前缀", tooltip="关闭则所有信号名均不加 V", group="维加斯(V前缀)")
@@ -188,13 +189,17 @@ custom_triangle_breakout_ok(W, half, conv_ratio) =>
     ok
 
 // ==================== 函数：检测射击之星 ====================
-// 射击之星：上影线长、实体小，下方可有插针但下影线长度 < 上影线1/3
+// 射击之星：上影线 ≥ 实体×1.5（ratio 默认 1.5）；下影线无或 < 上影线×1/2
 detect_shooting_star(h_price, l_price, o_price, c_price, ratio) =>
     body = math.abs(c_price - o_price)
     upper_w = h_price - math.max(o_price, c_price)
     lower_w = math.min(o_price, c_price) - l_price
-    // 实体不能为0，上影线>=实体*ratio，下影线 < 上影线/3（允许有下影线但须远短于上影线）
-    body > 0 and upper_w >= body * ratio and lower_w < upper_w / 3
+    // 上影线须为真实实体的 ratio 倍及以上（默认 1.5 倍；实体为 0 不算）
+    upper_ok = body > syminfo.mintick and upper_w > syminfo.mintick and upper_w >= body * ratio
+    // 下影线 < 上影线×1/2 ⇔ lower_w×2 < upper_w（与实体长短无关）
+    no_lower_wick = lower_w <= syminfo.mintick
+    short_lower_vs_upper = upper_w > syminfo.mintick and lower_w * 2.0 < upper_w
+    upper_ok and (no_lower_wick or short_lower_vs_upper)
 
 // ==================== 函数：检测倒锤子（射击之星倒过来的形态）====================
 // 倒锤子：下影线长、实体小，上方可有插针但上影线 < 下影线1/3，看涨 reversal 信号
@@ -260,6 +265,7 @@ var int continuous_lower_wick_counter = 0  // 连续下插针计数（上下轨�
 // 非上下轨附近连续插针检测（用于存储历史插针位置，允许跳过最多2根K线）
 var array<int> non_zone_upper_wick_bars = array.new<int>()  // 非上轨附近的上插针K线索引
 var array<int> non_zone_lower_wick_bars = array.new<int>()  // 非下轨附近的下插针K线索引
+var int last_shoot_star_bar = na  // 上一根射击之星 bar_index（用于判定射击之星(2)）
 
 // ==================== 主逻辑 ====================
 label_size_value = get_label_size()
@@ -273,6 +279,10 @@ basis_current = ta.sma(close, bb_length)
 dev_current = bb_mult * ta.stdev(close, bb_length)
 upper_current = basis_current + dev_current
 lower_current = basis_current - dev_current
+// 下轨附近（带间自下而上 15% 以内，与吞没 at_lower_band 一致）
+mid_to_lower_bb = basis_current - lower_current
+lower_zone_bb = lower_current + mid_to_lower_bb * 0.15
+at_lower_band = low <= lower_zone_bb
 
 // 维加斯 A/B 组 EMA（仅这四条参与 V 前缀「附近」判定；过滤线不参与）
 vegas_v_e2 = ta.ema(close, vegas_v_a1)
@@ -288,8 +298,18 @@ near_vegas_channel = enable_vegas_v_prefix and bb_width_for_vegas > syminfo.mint
 sig_prefix(s) =>
     near_vegas_channel ? "V" + s : s
 
-// 射击之星（与同脚本 K 线形态条件一致）：与其它信号同根 K 线并存时用于优先告警/抑制部分其它标签
-shoot_bar = enable_candle_pattern and enable_shooting_star and high >= basis_current and detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
+// 是否为射击之星类信号名（含 V 前缀与 (2)）
+is_shoot_star_signal(msg) =>
+    msg == sig_prefix("射击之星") or msg == sig_prefix("射击之星（2）")
+
+// 射击之星：纯 K 线形态；下轨附近须收阴(close<open)，其余位置阴阳皆可
+shoot_star_shape = detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
+shoot_star_lower_ok = not at_lower_band or close < open
+shoot_bar = enable_candle_pattern and enable_shooting_star and shoot_star_shape and shoot_star_lower_ok
+shoot_star_is_second = shoot_bar and not na(last_shoot_star_bar) and bar_index > last_shoot_star_bar and bar_index - last_shoot_star_bar <= shooting_star_repeat_bars
+shoot_star_sig_name = shoot_bar ? (shoot_star_is_second ? sig_prefix("射击之星（2）") : sig_prefix("射击之星")) : ""
+if shoot_bar
+    last_shoot_star_bar := bar_index
 
 // 多周期插针循环移至脚本后部（连续插针/RSI/背离/三角/K 线之后），以便与 shoot_bar 及其它告警同根判定一致
 
@@ -570,30 +590,27 @@ if is_custom_triangle_breakout
 
 plotshape(enable_custom_triangle and is_custom_triangle_breakout and not shoot_bar, title="自定义三角突破", style=shape.triangleup, location=location.belowbar, color=color.new(color.lime, 0), size=size.tiny)
 
-// ==================== K线形态检测（射击之星、吞没，需在布林带上下轨附近）====================
+// ==================== K线形态检测（射击之星、吞没；吞没仍须在布林上下轨附近）====================
 candle_pattern_alert := false
 candle_pattern_alert_message := ""
 
 if enable_candle_pattern
-    // 布林带位置判断：上轨附近（85%以上）、下轨附近（15%以内）
+    // 布林带位置判断：上轨附近（85%以上）；下轨 at_lower_band 已在主逻辑区计算
     mid_to_upper_bb = upper_current - basis_current
     upper_zone_bb = basis_current + mid_to_upper_bb * 0.85
-    mid_to_lower_bb = basis_current - lower_current
-    lower_zone_bb = lower_current + mid_to_lower_bb * 0.15
     at_upper_band = high >= upper_zone_bb
-    at_lower_band = low <= lower_zone_bb
     above_mid_band = high >= basis_current  // 中轨之上
     below_mid_band = low <= basis_current   // 中轨之下
 
-    // 射击之星：看跌信号，需在中轨之上
-    if enable_shooting_star and above_mid_band and detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
+    // 射击之星；10根K线内再次出现记作射击之星(2)
+    if shoot_bar
         candle_pattern_alert := true
-        candle_pattern_alert_message := sig_prefix("射击之星")
+        candle_pattern_alert_message := shoot_star_sig_name
         if show_labels
-            label.new(bar_index, high, sig_prefix("射击之星"), color=color.new(color.orange, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
+            label.new(bar_index, high, shoot_star_sig_name, color=color.new(color.orange, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
 
-    // 倒锤子：看涨信号，射击之星倒过来的形态，需在中轨之下，上影线 < 下影线/3
-    inv_shoot_star = enable_shooting_star and below_mid_band and detect_inverted_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
+    // 倒锤子：看涨信号，需在中轨之下；若已符合射击之星形态则不再标为倒锤子
+    inv_shoot_star = enable_shooting_star and below_mid_band and not shoot_star_shape and detect_inverted_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
     if inv_shoot_star
         candle_pattern_alert := true
         if candle_pattern_alert_message != ""
@@ -626,7 +643,7 @@ if enable_candle_pattern
             label.new(bar_index, high, sig_prefix("看跌吞没"), color=color.new(color.red, 0), textcolor=color.white, style=label.style_label_down, size=label_size_value)
 
 // 多周期插针：在其它告警变量就绪后执行；同根有射击之星时，布林插针标签或其它类告警并存则优先射击之星（不画 MTF 插针标签；MTF 告警仍合并）
-other_sig_vs_shoot_star = continuous_wick_alert or rsi_alert or rsi_divergence_alert or custom_triangle_alert or (candle_pattern_alert and candle_pattern_alert_message != sig_prefix("射击之星"))
+other_sig_vs_shoot_star = continuous_wick_alert or rsi_alert or rsi_divergence_alert or custom_triangle_alert or (candle_pattern_alert and not is_shoot_star_signal(candle_pattern_alert_message))
 
 for i = 0 to array.size(timeframes_code) - 1
     tf_code = array.get(timeframes_code, i)
@@ -738,12 +755,12 @@ if enable_daily_line_push and barstate.isconfirmed
 
 all_signals = continuous_wick_alert or rsi_alert or rsi_divergence_alert or custom_triangle_alert or candle_pattern_alert
 // 同根 K 线：射击之星与其它任意合并信号并存时，推送文案固定为射击之星
-shoot_star_push_priority = shoot_bar and (continuous_wick_alert or rsi_alert or rsi_divergence_alert or custom_triangle_alert or (candle_pattern_alert and candle_pattern_alert_message != sig_prefix("射击之星")))
+shoot_star_push_priority = shoot_bar and (continuous_wick_alert or rsi_alert or rsi_divergence_alert or custom_triangle_alert or (candle_pattern_alert and not is_shoot_star_signal(candle_pattern_alert_message)))
 
 if all_signals
     sig_desc = ""
     if shoot_star_push_priority
-        sig_desc := sig_prefix("射击之星")
+        sig_desc := shoot_star_sig_name
     else if continuous_wick_alert
         sig_desc := continuous_wick_alert_message != "" ? continuous_wick_alert_message : sig_prefix("连续插针")
     else if rsi_alert
