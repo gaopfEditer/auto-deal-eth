@@ -214,6 +214,11 @@ python tv_ws_pic_push_public.py --only-telegram
 python -m tv_ws.pic_push_public_only_telegram
 python tv_ws_pic_push_public_only_telegram.py
 
+# 仅 Telegram 文本（不润色、不截图）
+python tv_ws_pic_push_public.py --only-telegram --no-screenshot
+python -m tv_ws.pic_push_public_only_telegram_text
+python tv_ws_pic_push_public_only_telegram_text.py
+
 # 发布到广场
 python -m tv_ws.pic_push_public --public
 

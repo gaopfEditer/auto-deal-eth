@@ -9,6 +9,7 @@
 | `signal_handler.py` | 周期过滤、格式化文案、POST publish/signal、TradingView 截图 |
 | `pic_push_public.py` | 常驻 WSS 监听（asyncio + websockets） |
 | `pic_push_public_only_telegram.py` | 仅 Telegram：15m/1h/4h 原文+截图，不润色 |
+| `pic_push_public_only_telegram_text.py` | 仅 Telegram 文本：15m/1h/4h 原文，不润色、不截图 |
 | `pic_push_public_test.py` | 本地联调：模拟一条 tradingview 消息 |
 | `USAGE.md` | 完整使用说明 |
 
@@ -29,6 +30,10 @@ python -m tv_ws.pic_push_public --dry-run
 # 仅 Telegram（15m/1h/4h，不润色、不发广场）
 python -m tv_ws.pic_push_public --only-telegram
 python -m tv_ws.pic_push_public_only_telegram
+
+# 仅 Telegram 文本（不截图）
+python tv_ws_pic_push_public.py --only-telegram --no-screenshot
+python -m tv_ws.pic_push_public_only_telegram_text
 
 # 联调：不连 WebSocket（同样默认不发布，加 --public 才发广场）
 python -m tv_ws.pic_push_public_test

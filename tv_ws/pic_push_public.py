@@ -265,7 +265,8 @@ async def run_listener(
     periods_label = ", ".join(sorted(allowed_periods or ONLY_TELEGRAM_PERIODS if only_telegram else ("1h", "4h")))
     if execute:
         if only_telegram:
-            mode = f"仅 Telegram 原文+截图（{periods_label}，不润色、不发广场）"
+            mode = f"仅 Telegram 原文（{periods_label}，不润色、不发广场"
+            mode += "，无截图）" if skip_screenshot else "，含截图）"
         else:
             mode = "润色 + Telegram 图文"
             if publish_public:
@@ -350,8 +351,10 @@ def main() -> None:
     )
     parser.add_argument(
         "--skip-screenshot",
+        "--no-screenshot",
         action="store_true",
-        help="仍润色/Telegram，但不打开 TradingView 截图",
+        dest="skip_screenshot",
+        help="仍推 Telegram，但不打开 TradingView 截图（--no-screenshot 同义）",
     )
     parser.add_argument(
         "--public",
@@ -361,7 +364,7 @@ def main() -> None:
     parser.add_argument(
         "--only-telegram",
         action="store_true",
-        help="不润色、不发广场；15m/1h/4h 信号原文+截图直推 Telegram",
+        help="不润色、不发广场；15m/1h/4h 信号原文推 Telegram（默认含截图，加 --no-screenshot 仅文本）",
     )
     args = parser.parse_args()
 
