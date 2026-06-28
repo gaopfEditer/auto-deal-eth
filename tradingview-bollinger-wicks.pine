@@ -189,8 +189,8 @@ custom_triangle_breakout_ok(W, half, conv_ratio) =>
     ok
 
 // ==================== 函数：检测射击之星 ====================
-// 射击之星：上影线 ≥ 实体×1.5（ratio 默认 1.5）；下影线无或 < 上影线×1/2
-detect_shooting_star(h_price, l_price, o_price, c_price, ratio) =>
+// 射击之星：上影线 ≥ 实体×1.5；下影线无或 < 上影线×1/2；at_lower 时须收阴(close<open)
+detect_shooting_star(h_price, l_price, o_price, c_price, ratio, at_lower) =>
     body = math.abs(c_price - o_price)
     upper_w = h_price - math.max(o_price, c_price)
     lower_w = math.min(o_price, c_price) - l_price
@@ -199,7 +199,10 @@ detect_shooting_star(h_price, l_price, o_price, c_price, ratio) =>
     // 下影线 < 上影线×1/2 ⇔ lower_w×2 < upper_w（与实体长短无关）
     no_lower_wick = lower_w <= syminfo.mintick
     short_lower_vs_upper = upper_w > syminfo.mintick and lower_w * 2.0 < upper_w
-    upper_ok and (no_lower_wick or short_lower_vs_upper)
+    shape_ok = upper_ok and (no_lower_wick or short_lower_vs_upper)
+    // 下轨附近：必须收阴；其余位置不要求阴阳
+    bearish_ok = not at_lower or c_price < o_price
+    shape_ok and bearish_ok
 
 // ==================== 函数：检测倒锤子（射击之星倒过来的形态）====================
 // 倒锤子：下影线长、实体小，上方可有插针但上影线 < 下影线1/3，看涨 reversal 信号
@@ -302,10 +305,9 @@ sig_prefix(s) =>
 is_shoot_star_signal(msg) =>
     msg == sig_prefix("射击之星") or msg == sig_prefix("射击之星（2）")
 
-// 射击之星：纯 K 线形态；下轨附近须收阴(close<open)，其余位置阴阳皆可
-shoot_star_shape = detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio)
-shoot_star_lower_ok = not at_lower_band or close < open
-shoot_bar = enable_candle_pattern and enable_shooting_star and shoot_star_shape and shoot_star_lower_ok
+// 射击之星：形态 + 下轨收阴（low 在带间下 15% 内则须 close<open）
+shoot_star_shape = detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio, at_lower_band)
+shoot_bar = enable_candle_pattern and enable_shooting_star and shoot_star_shape
 shoot_star_is_second = shoot_bar and not na(last_shoot_star_bar) and bar_index > last_shoot_star_bar and bar_index - last_shoot_star_bar <= shooting_star_repeat_bars
 shoot_star_sig_name = shoot_bar ? (shoot_star_is_second ? sig_prefix("射击之星（2）") : sig_prefix("射击之星")) : ""
 if shoot_bar
