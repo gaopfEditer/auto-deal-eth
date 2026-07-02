@@ -73,9 +73,10 @@ tri_conv_ratio = input.float(0.92, title="收敛:右侧波幅≤左侧×", minva
 
 // K线形态设置（射击之星、吞没）
 enable_candle_pattern = input.bool(true, title="启用K线形态预警", tooltip="检测射击之星和吞没形态", group="K线形态设置")
-enable_shooting_star = input.bool(true, title="射击之星", tooltip="上影线≥实体1.5倍；下影线无或不足上影线1/2。下轨附近须收阴，其余位置阴阳皆可", group="K线形态设置")
+enable_shooting_star = input.bool(true, title="射击之星", tooltip="上影线≥实体1.5倍且<4.5倍；下影线无或不足上影线1/2。下轨附近须收阴，其余位置阴阳皆可", group="K线形态设置")
 enable_engulfing = input.bool(true, title="吞没形态", tooltip="当前K线实体完全包住前一根K线实体", group="K线形态设置")
-pattern_upper_wick_ratio = input.float(1.5, title="射击之星上影线/实体比", minval=1.5, maxval=5.0, step=0.1, tooltip="上影线须≥实体的该倍数（默认1.5，即1.5倍以上）", group="K线形态设置")
+pattern_upper_wick_ratio = input.float(1.5, title="射击之星上影线/实体比(下限)", minval=1.5, maxval=5.0, step=0.1, tooltip="上影线须≥实体的该倍数（默认1.5）", group="K线形态设置")
+pattern_upper_wick_max_ratio = input.float(4.5, title="射击之星上影线/实体比(上限)", minval=2.0, maxval=10.0, step=0.1, tooltip="上影线/实体≥该倍数时不标记射击之星（默认4.5，即4.5倍及以上排除）", group="K线形态设置")
 shooting_star_repeat_bars = input.int(10, title="射击之星(2)窗口(K线数)", minval=2, maxval=50, tooltip="前次射击之星后 N 根K线内再次出现，记作射击之星(2)", group="K线形态设置")
 
 // 维加斯通道：仅用于判断是否给信号名加「V」前缀（不画线、不改变触发逻辑）
@@ -189,13 +190,13 @@ custom_triangle_breakout_ok(W, half, conv_ratio) =>
     ok
 
 // ==================== 函数：检测射击之星 ====================
-// 射击之星：上影线 ≥ 实体×1.5；下影线无或 < 上影线×1/2；at_lower 时须收阴(close<open)
-detect_shooting_star(h_price, l_price, o_price, c_price, ratio, at_lower) =>
+// 射击之星：上影线 ∈ [实体×ratio, 实体×max_ratio)；下影线无或 < 上影线×1/2；at_lower 时须收阴
+detect_shooting_star(h_price, l_price, o_price, c_price, ratio, max_ratio, at_lower) =>
     body = math.abs(c_price - o_price)
     upper_w = h_price - math.max(o_price, c_price)
     lower_w = math.min(o_price, c_price) - l_price
-    // 上影线须为真实实体的 ratio 倍及以上（默认 1.5 倍；实体为 0 不算）
-    upper_ok = body > syminfo.mintick and upper_w > syminfo.mintick and upper_w >= body * ratio
+    // 上影线须为真实实体的 ratio 倍及以上，且低于 max_ratio 倍（默认 1.5～4.5；实体为 0 不算）
+    upper_ok = body > syminfo.mintick and upper_w > syminfo.mintick and upper_w >= body * ratio and upper_w < body * max_ratio
     // 下影线 < 上影线×1/2 ⇔ lower_w×2 < upper_w（与实体长短无关）
     no_lower_wick = lower_w <= syminfo.mintick
     short_lower_vs_upper = upper_w > syminfo.mintick and lower_w * 2.0 < upper_w
@@ -306,7 +307,7 @@ is_shoot_star_signal(msg) =>
     msg == sig_prefix("射击之星") or msg == sig_prefix("射击之星（2）")
 
 // 射击之星：形态 + 下轨收阴（low 在带间下 15% 内则须 close<open）
-shoot_star_shape = detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio, at_lower_band)
+shoot_star_shape = detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio, pattern_upper_wick_max_ratio, at_lower_band)
 shoot_bar = enable_candle_pattern and enable_shooting_star and shoot_star_shape
 shoot_star_is_second = shoot_bar and not na(last_shoot_star_bar) and bar_index > last_shoot_star_bar and bar_index - last_shoot_star_bar <= shooting_star_repeat_bars
 shoot_star_sig_name = shoot_bar ? (shoot_star_is_second ? sig_prefix("射击之星（2）") : sig_prefix("射击之星")) : ""
