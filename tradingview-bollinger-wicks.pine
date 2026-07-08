@@ -46,7 +46,7 @@ wick_ratio = input.float(0.3, title="插针比例（实体/影线）", minval=0.
 // 显示选项
 show_labels = input.bool(true, title="显示标签", group="显示设置")
 show_plots = input.bool(true, title="显示布林带", group="显示设置")
-label_size = input.string("small", title="标签大小", options=["tiny", "small", "normal", "large", "huge"], group="显示设置")
+label_size = input.string("tiny", title="标签大小", options=["tiny", "small", "normal", "large", "huge"], group="显示设置")
 
 // 警报设置
 enable_alert = input.bool(true, title="启用警报", tooltip="启用后可在TradingView中设置警报，通过webhook调用API", group="警报设置")
@@ -77,7 +77,7 @@ enable_candle_pattern = input.bool(true, title="启用K线形态预警", tooltip
 enable_shooting_star = input.bool(true, title="射击之星", tooltip="上影线为实体1.5～10倍；下影线无或不足上影线1/2。下轨附近须收阴，其余位置阴阳皆可", group="K线形态设置")
 enable_engulfing = input.bool(true, title="吞没形态", tooltip="当前K线实体完全包住前一根K线实体", group="K线形态设置")
 pattern_upper_wick_ratio = input.float(1.5, title="射击之星上影线/实体比(下限)", minval=1.5, maxval=5.0, step=0.1, tooltip="上影线须≥实体的该倍数（默认1.5）", group="K线形态设置")
-pattern_upper_wick_max_ratio = input.float(10.0, title="射击之星上影线/实体比(上限)", minval=3.0, maxval=30.0, step=0.5, tooltip="上影线/实体超过该倍数时不标记（默认10；过滤极端插针，如实体极小时比例失真）", group="K线形态设置")
+pattern_upper_wick_max_ratio = input.float(20.0, title="射击之星上影线/实体比(上限)", minval=3.0, maxval=30.0, step=0.5, tooltip="上影线/实体超过该倍数时不标记（默认10；过滤极端插针，如实体极小时比例失真）", group="K线形态设置")
 shooting_star_repeat_bars = input.int(5, title="射击之星(2)窗口(K线数)", minval=2, maxval=50, tooltip="第一次射击之星出现后，其后 N 根K线内再次出现，记作射击之星(2)（默认5）", group="K线形态设置")
 
 // 维加斯通道：仅用于判断是否给信号名加「V」前缀（不画线、不改变触发逻辑）
