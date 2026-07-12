@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oi-mornitor"
+version = "1.0.0"
+description = "币安永续 OI 动态热钱雷达"
+requires-python = ">=3.11"
+dependencies = [
+    "aiohttp>=3.9.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+oi-mornitor = "oi_mornitor.__main__:main"
+
+[tool.setuptools]
+packages = ["oi_mornitor"]
+package-dir = { "oi_mornitor" = "." }
+
+[tool.setuptools.package-data]
+oi_mornitor = ["static/dist/**/*", "frontend/**/*"]
