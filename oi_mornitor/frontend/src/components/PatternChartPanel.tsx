@@ -71,104 +71,117 @@ export const PatternChartPanel = memo(function PatternChartPanel({ symbol, state
       seriesRef.current = null;
     }
 
-    const chart = createChart(chartRef.current, {
-      width: chartRef.current.clientWidth,
-      height: chartRef.current.clientHeight,
-      layout: {
-        background: { type: ColorType.Solid, color: "#0a0a0a" },
-        textColor: "#9e9e9e",
-      },
-      grid: {
-        vertLines: { color: "#1e1e1e" },
-        horzLines: { color: "#1e1e1e" },
-      },
-      rightPriceScale: { borderColor: "#2a2a2a" },
-      timeScale: { borderColor: "#2a2a2a", timeVisible: true },
-      crosshair: { mode: 1 },
-    });
+    const candles = [...data.candles]
+      .sort((a, b) => a.time - b.time)
+      .filter((c, i, arr) => i === 0 || c.time !== arr[i - 1].time);
 
-    const series = chart.addCandlestickSeries({
-      upColor: "#00e676",
-      downColor: "#ff5252",
-      borderVisible: false,
-      wickUpColor: "#00e676",
-      wickDownColor: "#ff5252",
-    });
-
-    series.setData(
-      data.candles.map((c) => ({
-        time: c.time as UTCTimestamp,
-        open: c.open,
-        high: c.high,
-        low: c.low,
-        close: c.close,
-      })) as CandlestickData[],
-    );
-
-    if (data.markers?.length) {
-      series.setMarkers(
-        data.markers.map((m) => ({
-          time: m.time as UTCTimestamp,
-          position: m.position,
-          color: m.color,
-          shape: m.shape,
-          text: m.text,
-        })),
-      );
-    }
-
-    data.price_lines?.forEach((line) => {
-      series.createPriceLine({
-        price: line.price,
-        color: line.color,
-        lineWidth: 1,
-        lineStyle: line.kind === "trigger" ? 2 : 0,
-        axisLabelVisible: true,
-        title: line.title,
+    try {
+      const chart = createChart(chartRef.current, {
+        width: chartRef.current.clientWidth,
+        height: chartRef.current.clientHeight,
+        layout: {
+          background: { type: ColorType.Solid, color: "#0a0a0a" },
+          textColor: "#9e9e9e",
+        },
+        grid: {
+          vertLines: { color: "#1e1e1e" },
+          horzLines: { color: "#1e1e1e" },
+        },
+        rightPriceScale: { borderColor: "#2a2a2a" },
+        timeScale: { borderColor: "#2a2a2a", timeVisible: true },
+        crosshair: { mode: 1 },
       });
-    });
 
-    if (data.bb?.upper?.length) {
-      const upper = chart.addLineSeries({
-        color: "rgba(100, 181, 246, 0.45)",
-        lineWidth: 1,
-        priceLineVisible: false,
-        lastValueVisible: false,
+      const series = chart.addCandlestickSeries({
+        upColor: "#00e676",
+        downColor: "#ff5252",
+        borderVisible: false,
+        wickUpColor: "#00e676",
+        wickDownColor: "#ff5252",
       });
-      upper.setData(
-        data.bb.upper.map((p) => ({ time: p.time as UTCTimestamp, value: p.value })),
-      );
-      const lower = chart.addLineSeries({
-        color: "rgba(100, 181, 246, 0.25)",
-        lineWidth: 1,
-        priceLineVisible: false,
-        lastValueVisible: false,
-      });
-      lower.setData(
-        data.bb.lower.map((p) => ({ time: p.time as UTCTimestamp, value: p.value })),
-      );
-    }
 
-    chart.timeScale().fitContent();
-    chartApi.current = chart;
-    seriesRef.current = series;
+      series.setData(
+        candles.map((c) => ({
+          time: c.time as UTCTimestamp,
+          open: c.open,
+          high: c.high,
+          low: c.low,
+          close: c.close,
+        })) as CandlestickData[],
+      );
 
-    const onResize = () => {
-      if (chartRef.current && chartApi.current) {
-        chartApi.current.applyOptions({
-          width: chartRef.current.clientWidth,
-          height: chartRef.current.clientHeight,
-        });
+      const markers = [...(data.markers ?? [])].sort((a, b) => a.time - b.time);
+      if (markers.length) {
+        series.setMarkers(
+          markers.map((m) => ({
+            time: m.time as UTCTimestamp,
+            position: m.position,
+            color: m.color,
+            shape: m.shape,
+            text: m.text,
+          })),
+        );
       }
-    };
-    window.addEventListener("resize", onResize);
 
-    return () => {
-      window.removeEventListener("resize", onResize);
-      chart.remove();
-      chartApi.current = null;
-      seriesRef.current = null;
-    };
+      data.price_lines?.forEach((line) => {
+        series.createPriceLine({
+          price: line.price,
+          color: line.color,
+          lineWidth: 1,
+          lineStyle: line.kind === "trigger" ? 2 : 0,
+          axisLabelVisible: true,
+          title: line.title,
+        });
+      });
+
+      if (data.bb?.upper?.length) {
+        const upper = chart.addLineSeries({
+          color: "rgba(100, 181, 246, 0.45)",
+          lineWidth: 1,
+          priceLineVisible: false,
+          lastValueVisible: false,
+        });
+        upper.setData(
+          [...data.bb.upper]
+            .sort((a, b) => a.time - b.time)
+            .map((p) => ({ time: p.time as UTCTimestamp, value: p.value })),
+        );
+        const lower = chart.addLineSeries({
+          color: "rgba(100, 181, 246, 0.25)",
+          lineWidth: 1,
+          priceLineVisible: false,
+          lastValueVisible: false,
+        });
+        lower.setData(
+          [...data.bb.lower]
+            .sort((a, b) => a.time - b.time)
+            .map((p) => ({ time: p.time as UTCTimestamp, value: p.value })),
+        );
+      }
+
+      chart.timeScale().fitContent();
+      chartApi.current = chart;
+      seriesRef.current = series;
+
+      const onResize = () => {
+        if (chartRef.current && chartApi.current) {
+          chartApi.current.applyOptions({
+            width: chartRef.current.clientWidth,
+            height: chartRef.current.clientHeight,
+          });
+        }
+      };
+      window.addEventListener("resize", onResize);
+
+      return () => {
+        window.removeEventListener("resize", onResize);
+        chart.remove();
+        chartApi.current = null;
+        seriesRef.current = null;
+      };
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "图表渲染失败");
+    }
   }, [data]);
 
   const analysis = data?.analysis;

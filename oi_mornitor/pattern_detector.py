@@ -263,6 +263,22 @@ def _safe_float(val: Any, default: float = 0.0) -> float:
         return default
 
 
+def _sort_series_by_time(items: list[dict[str, Any]], key: str = "time") -> list[dict[str, Any]]:
+    return sorted(items, key=lambda x: x[key])
+
+
+def _dedupe_candles(candles: list[dict[str, float | int]]) -> list[dict[str, float | int]]:
+    seen: set[int] = set()
+    out: list[dict[str, float | int]] = []
+    for c in sorted(candles, key=lambda x: int(x["time"])):
+        t = int(c["time"])
+        if t in seen:
+            continue
+        seen.add(t)
+        out.append(c)
+    return out
+
+
 def build_pattern_chart_payload(
     klines: list[list],
     *,
@@ -427,9 +443,12 @@ def build_pattern_chart_payload(
     })
 
     return {
-        "candles": candles,
-        "markers": markers,
+        "candles": _dedupe_candles(candles),
+        "markers": _sort_series_by_time(markers),
         "price_lines": price_lines,
-        "bb": {"upper": bb_upper, "lower": bb_lower},
+        "bb": {
+            "upper": _sort_series_by_time(bb_upper),
+            "lower": _sort_series_by_time(bb_lower),
+        },
         "analysis": analysis,
     }
