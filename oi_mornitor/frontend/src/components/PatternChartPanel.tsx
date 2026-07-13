@@ -1,15 +1,30 @@
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   ColorType,
   createChart,
-  type IChartApi,
-  type ISeriesApi,
   type CandlestickData,
+  type IChartApi,
+  type IPriceLine,
+  type ISeriesApi,
+  type LineData,
+  type LogicalRange,
+  type SeriesMarker,
   type UTCTimestamp,
 } from "lightweight-charts";
-import type { PatternChartData, PatternState } from "../types";
+import type { PatternCandle, PatternChartData, PatternState } from "../types";
 import { fmtNum, fmtPct } from "../utils/format";
 import { coinInitial, displaySymbol } from "../utils/symbol";
+import {
+  CHART_DEFAULT_LIMIT,
+  CHART_LOAD_CHUNK,
+  CHART_TIMEFRAMES,
+  CHART_VISIBLE_BARS,
+  type ChartTimeframe,
+  fetchPatternChart,
+  mergeBbSeries,
+  mergeCandlesByTime,
+  oldestCandleOpenMs,
+} from "../utils/chartTimeframe";
 
 interface Props {
   symbol: string;
@@ -28,28 +43,195 @@ const MARKER_LEGEND = [
   { kind: "bb_wick", label: "BB-Wicks 插针", color: "#e040fb" },
 ];
 
+function toCandleData(candles: PatternCandle[]): CandlestickData[] {
+  return candles.map((c) => ({
+    time: c.time as UTCTimestamp,
+    open: c.open,
+    high: c.high,
+    low: c.low,
+    close: c.close,
+  }));
+}
+
 export const PatternChartPanel = memo(function PatternChartPanel({ symbol, state, onClose }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartApi = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const upperRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const lowerRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const priceLinesRef = useRef<IPriceLine[]>([]);
+
+  const candlesRef = useRef<PatternCandle[]>([]);
+  const hasMoreRef = useRef(true);
+  const loadingMoreRef = useRef(false);
+  const timeframeRef = useRef<ChartTimeframe>("15m");
+  const metaRef = useRef<PatternChartData | null>(null);
+
+  const [timeframe, setTimeframe] = useState<ChartTimeframe>("15m");
   const [data, setData] = useState<PatternChartData | null>(null);
+  const [candleCount, setCandleCount] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [err, setErr] = useState("");
+
+  const clearPriceLines = useCallback(() => {
+    const series = seriesRef.current;
+    if (!series) return;
+    for (const line of priceLinesRef.current) {
+      series.removePriceLine(line);
+    }
+    priceLinesRef.current = [];
+  }, []);
+
+  const applyPriceLines = useCallback((payload: PatternChartData) => {
+    const series = seriesRef.current;
+    if (!series || payload.partial) return;
+    clearPriceLines();
+    for (const line of payload.price_lines ?? []) {
+      priceLinesRef.current.push(
+        series.createPriceLine({
+          price: line.price,
+          color: line.color,
+          lineWidth: 1,
+          lineStyle: line.kind === "trigger" ? 2 : 0,
+          axisLabelVisible: true,
+          title: line.title,
+        }),
+      );
+    }
+  }, [clearPriceLines]);
+
+  const applyChartSeries = useCallback(
+    (payload: PatternChartData, candles: PatternCandle[], opts?: { isPrepend?: boolean }) => {
+      const series = seriesRef.current;
+      const chart = chartApi.current;
+      if (!series || !chart) return;
+
+      const prevRange = chart.timeScale().getVisibleLogicalRange();
+      const prevLen = candlesRef.current.length;
+      const prepended = opts?.isPrepend ? candles.length - prevLen : 0;
+
+      series.setData(toCandleData(candles));
+
+      const markers = payload.partial ? metaRef.current?.markers : payload.markers;
+      if (markers?.length) {
+        series.setMarkers(
+          markers.map(
+            (m) =>
+              ({
+                time: m.time as UTCTimestamp,
+                position: m.position,
+                color: m.color,
+                shape: m.shape,
+                text: m.text,
+              }) as SeriesMarker<UTCTimestamp>,
+          ),
+        );
+      } else if (!payload.partial) {
+        series.setMarkers([]);
+      }
+
+      if (!payload.partial) {
+        applyPriceLines(payload);
+        metaRef.current = payload;
+      }
+
+      if (upperRef.current) {
+        const upperPts = payload.bb?.upper ?? [];
+        upperRef.current.setData(
+          upperPts.map((p) => ({ time: p.time as UTCTimestamp, value: p.value })) as LineData[],
+        );
+      }
+      if (lowerRef.current) {
+        const lowerPts = payload.bb?.lower ?? [];
+        lowerRef.current.setData(
+          lowerPts.map((p) => ({ time: p.time as UTCTimestamp, value: p.value })) as LineData[],
+        );
+      }
+
+      candlesRef.current = candles;
+      setCandleCount(candles.length);
+
+      if (prevRange && prepended > 0) {
+        chart.timeScale().setVisibleLogicalRange({
+          from: prevRange.from + prepended,
+          to: prevRange.to + prepended,
+        });
+      } else if (!prevRange || prevLen === 0) {
+        const to = candles.length;
+        const from = Math.max(0, to - CHART_VISIBLE_BARS);
+        chart.timeScale().setVisibleLogicalRange({ from, to: to + 2 });
+      }
+    },
+    [applyPriceLines],
+  );
+
+  const loadMoreHistory = useCallback(async () => {
+    if (loadingMoreRef.current || !hasMoreRef.current) return;
+    const oldestMs = oldestCandleOpenMs(candlesRef.current);
+    if (oldestMs == null) return;
+
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    try {
+      const chunk = await fetchPatternChart(symbol, timeframeRef.current, {
+        limit: CHART_LOAD_CHUNK,
+        endTimeMs: oldestMs - 1,
+      });
+      if (!chunk.ok || !chunk.candles?.length) {
+        hasMoreRef.current = false;
+        setHasMore(false);
+        return;
+      }
+      hasMoreRef.current = chunk.has_more !== false;
+      setHasMore(hasMoreRef.current);
+
+      const merged = mergeCandlesByTime(candlesRef.current, chunk.candles);
+      const mergedUpper = mergeBbSeries(metaRef.current?.bb?.upper ?? [], chunk.bb?.upper ?? []);
+      const mergedLower = mergeBbSeries(metaRef.current?.bb?.lower ?? [], chunk.bb?.lower ?? []);
+      if (metaRef.current) {
+        metaRef.current = {
+          ...metaRef.current,
+          bb: { upper: mergedUpper, lower: mergedLower },
+        };
+      }
+      applyChartSeries(
+        { ...chunk, partial: true, bb: { upper: mergedUpper, lower: mergedLower } },
+        merged,
+        { isPrepend: true },
+      );
+    } catch {
+      /* 静默 */
+    } finally {
+      loadingMoreRef.current = false;
+      setLoadingMore(false);
+    }
+  }, [symbol, applyChartSeries]);
 
   useEffect(() => {
     let cancelled = false;
+    timeframeRef.current = timeframe;
+    candlesRef.current = [];
+    hasMoreRef.current = true;
+    loadingMoreRef.current = false;
+    metaRef.current = null;
+    setHasMore(true);
     setLoading(true);
     setErr("");
-    fetch(`/api/patterns/chart?symbol=${encodeURIComponent(symbol)}`)
-      .then((r) => r.json())
-      .then((json: PatternChartData) => {
+    setLoadingMore(false);
+
+    fetchPatternChart(symbol, timeframe, { limit: CHART_DEFAULT_LIMIT })
+      .then((json) => {
         if (cancelled) return;
         if (!json.ok) {
           setErr(json.error || "加载失败");
           setData(null);
-        } else {
-          setData(json);
+          return;
         }
+        hasMoreRef.current = json.has_more !== false;
+        setHasMore(hasMoreRef.current);
+        setData(json);
       })
       .catch(() => {
         if (!cancelled) setErr("网络错误");
@@ -57,23 +239,28 @@ export const PatternChartPanel = memo(function PatternChartPanel({ symbol, state
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+
     return () => {
       cancelled = true;
     };
-  }, [symbol]);
+  }, [symbol, timeframe]);
 
   useEffect(() => {
-    if (!chartRef.current || !data?.candles?.length) return;
+    if (!chartRef.current) return;
 
     if (chartApi.current) {
       chartApi.current.remove();
       chartApi.current = null;
       seriesRef.current = null;
+      upperRef.current = null;
+      lowerRef.current = null;
+      priceLinesRef.current = [];
     }
 
-    const chart = createChart(chartRef.current, {
-      width: chartRef.current.clientWidth,
-      height: chartRef.current.clientHeight,
+    const el = chartRef.current;
+    const chart = createChart(el, {
+      width: el.clientWidth,
+      height: el.clientHeight,
       layout: {
         background: { type: ColorType.Solid, color: "#0a0a0a" },
         textColor: "#9e9e9e",
@@ -83,8 +270,22 @@ export const PatternChartPanel = memo(function PatternChartPanel({ symbol, state
         horzLines: { color: "#1e1e1e" },
       },
       rightPriceScale: { borderColor: "#2a2a2a" },
-      timeScale: { borderColor: "#2a2a2a", timeVisible: true },
+      timeScale: {
+        borderColor: "#2a2a2a",
+        timeVisible: true,
+        secondsVisible: false,
+        barSpacing: 7,
+        minBarSpacing: 0.35,
+        rightOffset: 6,
+        fixLeftEdge: false,
+        fixRightEdge: false,
+      },
       crosshair: { mode: 1 },
+      handleScale: {
+        axisPressedMouseMove: { time: true, price: true },
+        mouseWheel: true,
+        pinch: true,
+      },
     });
 
     const series = chart.addCandlestickSeries({
@@ -95,63 +296,27 @@ export const PatternChartPanel = memo(function PatternChartPanel({ symbol, state
       wickDownColor: "#ff5252",
     });
 
-    series.setData(
-      data.candles.map((c) => ({
-        time: c.time as UTCTimestamp,
-        open: c.open,
-        high: c.high,
-        low: c.low,
-        close: c.close,
-      })) as CandlestickData[],
-    );
-
-    if (data.markers?.length) {
-      series.setMarkers(
-        data.markers.map((m) => ({
-          time: m.time as UTCTimestamp,
-          position: m.position,
-          color: m.color,
-          shape: m.shape,
-          text: m.text,
-        })),
-      );
-    }
-
-    data.price_lines?.forEach((line) => {
-      series.createPriceLine({
-        price: line.price,
-        color: line.color,
-        lineWidth: 1,
-        lineStyle: line.kind === "trigger" ? 2 : 0,
-        axisLabelVisible: true,
-        title: line.title,
-      });
+    upperRef.current = chart.addLineSeries({
+      color: "rgba(100, 181, 246, 0.45)",
+      lineWidth: 1,
+      priceLineVisible: false,
+      lastValueVisible: false,
+    });
+    lowerRef.current = chart.addLineSeries({
+      color: "rgba(100, 181, 246, 0.25)",
+      lineWidth: 1,
+      priceLineVisible: false,
+      lastValueVisible: false,
     });
 
-    if (data.bb?.upper?.length) {
-      const upper = chart.addLineSeries({
-        color: "rgba(100, 181, 246, 0.45)",
-        lineWidth: 1,
-        priceLineVisible: false,
-        lastValueVisible: false,
-      });
-      upper.setData(
-        data.bb.upper.map((p) => ({ time: p.time as UTCTimestamp, value: p.value })),
-      );
-      const lower = chart.addLineSeries({
-        color: "rgba(100, 181, 246, 0.25)",
-        lineWidth: 1,
-        priceLineVisible: false,
-        lastValueVisible: false,
-      });
-      lower.setData(
-        data.bb.lower.map((p) => ({ time: p.time as UTCTimestamp, value: p.value })),
-      );
-    }
-
-    chart.timeScale().fitContent();
     chartApi.current = chart;
     seriesRef.current = series;
+
+    const onRange = (range: LogicalRange | null) => {
+      if (!range || loadingMoreRef.current || !hasMoreRef.current) return;
+      if (range.from < 40) void loadMoreHistory();
+    };
+    chart.timeScale().subscribeVisibleLogicalRangeChange(onRange);
 
     const onResize = () => {
       if (chartRef.current && chartApi.current) {
@@ -165,11 +330,20 @@ export const PatternChartPanel = memo(function PatternChartPanel({ symbol, state
 
     return () => {
       window.removeEventListener("resize", onResize);
+      chart.timeScale().unsubscribeVisibleLogicalRangeChange(onRange);
       chart.remove();
       chartApi.current = null;
       seriesRef.current = null;
+      upperRef.current = null;
+      lowerRef.current = null;
+      priceLinesRef.current = [];
     };
-  }, [data]);
+  }, [symbol, timeframe, loadMoreHistory]);
+
+  useEffect(() => {
+    if (!data?.candles?.length || !seriesRef.current) return;
+    applyChartSeries(data, data.candles);
+  }, [data, applyChartSeries]);
 
   const analysis = data?.analysis;
   const ticker = data?.ticker;
@@ -197,9 +371,24 @@ export const PatternChartPanel = memo(function PatternChartPanel({ symbol, state
             </div>
           </div>
         </div>
-        <button type="button" className="pattern-chart-close" onClick={onClose}>
-          返回列表
-        </button>
+        <div className="pattern-chart-head-actions">
+          <div className="mercu-timeframes pattern-chart-tf">
+            {CHART_TIMEFRAMES.map((tf) => (
+              <button
+                key={tf}
+                type="button"
+                className={`tf-btn ${tf === timeframe ? "active" : ""}`}
+                onClick={() => setTimeframe(tf)}
+                disabled={loading && tf !== timeframe}
+              >
+                {tf}
+              </button>
+            ))}
+          </div>
+          <button type="button" className="pattern-chart-close" onClick={onClose}>
+            返回列表
+          </button>
+        </div>
       </header>
 
       <div className="pattern-chart-body">
@@ -238,7 +427,10 @@ export const PatternChartPanel = memo(function PatternChartPanel({ symbol, state
                 {analysis?.macd_top_weak && <span className="sig macd-weak">MACD 走弱</span>}
                 {analysis?.macd_bull && <span className="sig macd-bull">MACD 金叉放大</span>}
               </div>
-              <p className="pattern-interval-tag">{data?.interval ?? "15m"} · 合约永续</p>
+              <p className="pattern-interval-tag">
+                {timeframe} · 已加载 {candleCount} 根
+                {loadingMore ? " · 加载更早…" : hasMore ? " · 左滑/缩小可加载更多" : " · 已到最早"}
+              </p>
             </>
           )}
         </aside>

@@ -1263,6 +1263,19 @@ button {
   white-space: nowrap;
 }
 
+.pattern-chart-head-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.pattern-chart-tf {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 280px;
+}
+
 .pattern-chart-body {
   flex: 1;
   min-height: 0;

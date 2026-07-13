@@ -244,6 +244,8 @@ export interface PatternChartData {
   bb: { upper: { time: number; value: number }[]; lower: { time: number; value: number }[] };
   analysis: PatternChartAnalysis;
   state: PatternState;
+  partial?: boolean;
+  has_more?: boolean;
   ticker?: {
     last_price?: number;
     price_change_pct_24h?: number;

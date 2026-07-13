@@ -42,6 +42,16 @@
    - 阶段 2：更高低点 HL + 带量突破夹角高点 + MACD 金叉 → `TRIGGER_SIGNAL`（右下角预警）
    - API：`GET /api/patterns`、`POST /api/patterns/watch`、`DELETE /api/patterns/watch?symbol=`
    - 状态持久化：`data/pattern_state.db`
+   - **K 线详情**：多周期切换 `5m/15m/30m/1h/4h/1d`；默认加载 500 根；滚轮缩小 K 线间距或左滑至边缘自动分页加载更早历史（最多 1500/次）
+
+8. **回踩 / Vegas / 射击之星策略（本地 WS + 回测）**
+   - 与形态页 **共用 watchlist**（大象随机 20 或手动追加）
+   - 阶段 1：带量突破 → `BREAKOUT_DETECTED`；或反转背景 → `REVERSAL_WATCH`（不弹窗）
+   - 阶段 2：缩量回踩 **supply_wall / 布林中轨 / Vegas 中线**，或顶部 **射击之星** → `TRIGGER_SIGNAL`
+   - OI 过滤：5m OI 变动率低于 `OI_STRATEGY_OI_MIN_CHANGE_PCT`（默认 -2%）则抑制做多扳机
+   - 雷达 REST 扫描与形态页 SSE 字段：`pullback_states` / `pullback_alerts`
+   - 本地 WS 守护：`python oi_mornitor/scripts/run_coin_monitor.py --from-watchlist`
+   - 回测（成本防守 + 推动止损）：`python oi_mornitor/scripts/run_backtest.py --symbols BTCUSDT,ETHUSDT`
 
 ## 快速启动
 
@@ -142,6 +152,11 @@ asyncio.run(audit())
 | `OI_WEB_PORT` | 8765 | Web 端口 |
 | `OI_HTTP_TIMEOUT_SEC` | 30 | 币安 HTTP 超时秒数 |
 | `HTTPS_PROXY` | — | 国内访问币安必填，如 `http://127.0.0.1:7890` |
+| `OI_STRATEGY_INTERVAL` | 1h | 回踩策略 K 线周期 |
+| `OI_STRATEGY_SYMBOLS` | BTC,ETH,SOL,ORDI | WS 默认监控列表 |
+| `OI_STRATEGY_PULLBACK_TOL` | 0.005 | 回踩贴近支撑容差 |
+| `OI_STRATEGY_PULLBACK_VOL_SHRINK` | 0.6 | 回踩缩量阈值 |
+| `OI_STRATEGY_OI_MIN_CHANGE_PCT` | -2.0 | OI 5m 过低抑制做多扳机 |
 
 ## 网络 / 代理
 

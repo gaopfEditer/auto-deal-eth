@@ -28,9 +28,9 @@ def main() -> None:
     parser.add_argument(
         "mode",
         nargs="?",
-        choices=["daemon", "once", "web"],
+        choices=["daemon", "once", "web", "coin-monitor", "backtest"],
         default="web",
-        help="daemon=终端守护 | once=单次扫描 | web=前端+后端(默认)",
+        help="daemon=终端守护 | once=单次 | web=前端+后端 | coin-monitor=WS本地监控 | backtest=策略回测",
     )
     parser.add_argument("--interval", type=int, default=SCAN_INTERVAL_SEC, help="扫描间隔秒")
     parser.add_argument(
@@ -80,6 +80,18 @@ def main() -> None:
 
         run_production_web()
         return
+
+    if args.mode == "coin-monitor":
+        sys.argv = [sys.argv[0], *sys.argv[2:]]
+        from oi_mornitor.scripts.run_coin_monitor import main as coin_main
+
+        raise SystemExit(coin_main())
+
+    if args.mode == "backtest":
+        sys.argv = [sys.argv[0], *sys.argv[2:]]
+        from oi_mornitor.scripts.run_backtest import main as bt_main
+
+        raise SystemExit(bt_main())
 
     if args.mode == "once":
         from oi_mornitor.radar import get_hot_tickers
