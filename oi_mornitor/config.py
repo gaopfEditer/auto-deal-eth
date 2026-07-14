@@ -88,6 +88,39 @@ PATTERN_STAGE2_VOL_MULT = float(os.getenv("OI_PATTERN_STAGE2_VOL_MULT", "1.5"))
 PATTERN_WATCH_MAX_SEC = int(os.getenv("OI_PATTERN_WATCH_MAX_SEC", "14400"))
 PATTERN_AUTO_PICK_COUNT = int(os.getenv("OI_PATTERN_AUTO_PICK", "20"))
 PATTERN_STATE_DB = _PKG_ROOT / "data" / "pattern_state.db"
+PATTERN_CHART_DEFAULT_LIMIT = int(os.getenv("OI_PATTERN_CHART_LIMIT", "500"))
+PATTERN_CHART_MAX_LIMIT = int(os.getenv("OI_PATTERN_CHART_MAX_LIMIT", "1500"))
+PATTERN_CHART_LOAD_CHUNK = int(os.getenv("OI_PATTERN_CHART_LOAD_CHUNK", "300"))
+PATTERN_CHART_INTERVALS = tuple(
+    x.strip()
+    for x in os.getenv("OI_PATTERN_CHART_INTERVALS", "5m,15m,30m,1h,4h,1d").split(",")
+    if x.strip()
+)
+
+# 回踩 / Vegas / 射击之星策略（WS 本地监控 + 回测）
+STRATEGY_KLINE_INTERVAL = os.getenv("OI_STRATEGY_INTERVAL", "1h")
+STRATEGY_KLINE_LIMIT = int(os.getenv("OI_STRATEGY_KLINE_LIMIT", "200"))
+STRATEGY_VEGAS_PERIODS = tuple(
+    int(x.strip())
+    for x in os.getenv("OI_STRATEGY_VEGAS_PERIODS", "144,169,576,676").split(",")
+    if x.strip()
+)
+STRATEGY_PULLBACK_TOL = float(os.getenv("OI_STRATEGY_PULLBACK_TOL", "0.005"))
+STRATEGY_PULLBACK_VOL_SHRINK = float(os.getenv("OI_STRATEGY_PULLBACK_VOL_SHRINK", "0.6"))
+STRATEGY_SHOOT_WICK_RATIO = float(os.getenv("OI_STRATEGY_SHOOT_WICK_RATIO", "1.5"))
+STRATEGY_SHOOT_WICK_MAX_RATIO = float(os.getenv("OI_STRATEGY_SHOOT_WICK_MAX_RATIO", "20.0"))
+STRATEGY_OI_MIN_CHANGE_PCT = float(os.getenv("OI_STRATEGY_OI_MIN_CHANGE_PCT", "-2.0"))
+STRATEGY_WATCH_MAX_SEC = int(os.getenv("OI_STRATEGY_WATCH_MAX_SEC", "86400"))
+STRATEGY_STATE_DB = _PKG_ROOT / "data" / "pullback_state.db"
+FSTREAM_WS_BASE = os.getenv("OI_FSTREAM_WS", "wss://fstream.binance.com")
+STRATEGY_DEFAULT_SYMBOLS = [
+    s.strip().upper()
+    for s in os.getenv(
+        "OI_STRATEGY_SYMBOLS",
+        "BTCUSDT,ETHUSDT,SOLUSDT,ORDIUSDT",
+    ).split(",")
+    if s.strip()
+]
 
 
 def proxy_url() -> str | None:

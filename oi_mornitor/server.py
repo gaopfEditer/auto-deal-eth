@@ -175,6 +175,11 @@ async def handle_patterns_chart(request: web.Request) -> web.Response:
     symbol = request.query.get("symbol", "").strip().upper()
     if not symbol:
         return _json_response({"ok": False, "error": "symbol required"}, status=400)
+    interval = request.query.get("interval", "").strip() or None
+    limit_raw = request.query.get("limit", "").strip()
+    end_raw = request.query.get("endTime", "").strip()
+    limit = int(limit_raw) if limit_raw.isdigit() else None
+    end_time = int(end_raw) if end_raw.isdigit() else None
     svc = get_service()
     session = await svc._ensure_session()
     try:
@@ -183,6 +188,9 @@ async def handle_patterns_chart(request: web.Request) -> web.Response:
             symbol,
             base_url=svc.radar.base_url,
             pool_rows=svc.radar.last_all_rows,
+            interval=interval,
+            limit=limit,
+            end_time=end_time,
         )
     except Exception as exc:
         logger.exception("形态图表拉取失败 %s", symbol)

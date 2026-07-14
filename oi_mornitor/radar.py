@@ -49,6 +49,7 @@ from oi_mornitor.capital_bias import (
 from oi_mornitor.market_matrix import MarketMatrixCache
 from oi_mornitor.matrix_breakout import MatrixBreakoutEngine
 from oi_mornitor.pattern_monitor import PatternMonitorEngine
+from oi_mornitor.strategy.pullback_engine import PullbackStrategyEngine
 from oi_mornitor.market_snapshot import (
     TIER_HEAVY,
     TIER_MID,
@@ -937,6 +938,7 @@ class RadarService:
         self.matrix = MarketMatrixCache()
         self.breakout_engine = MatrixBreakoutEngine()
         self.pattern_engine = PatternMonitorEngine()
+        self.pullback_engine = PullbackStrategyEngine(self.pattern_engine)
         self._session: aiohttp.ClientSession | None = None
         self._task: asyncio.Task[None] | None = None
         self._running = False
@@ -961,6 +963,21 @@ class RadarService:
             scan_ts=self.radar.last_scan_ts,
         )
         await self.pattern_engine.scan(
+            session,
+            base_url=self.radar.base_url,
+            scan_ts=self.radar.last_scan_ts,
+            pool_rows=self.radar.last_all_rows,
+            fallback_symbols=self.radar.heavyweight_symbol_list,
+        )
+        for row in self.radar.last_all_rows:
+            sym = str(row.get("symbol") or "")
+            pct = row.get("pct_5m")
+            if sym and pct is not None:
+                try:
+                    self.pullback_engine.set_oi_change_pct(sym, float(pct))
+                except (TypeError, ValueError):
+                    pass
+        await self.pullback_engine.scan(
             session,
             base_url=self.radar.base_url,
             scan_ts=self.radar.last_scan_ts,
@@ -1019,10 +1036,13 @@ class RadarService:
             "all_tickers": self.radar.last_all_rows,
             "market_matrix": self.matrix.last_matrix,
             "breakout_alerts": self.breakout_engine.last_alerts,
-            "pattern": self.pattern_engine.get_payload(
-                pool_meta=self.radar.last_pool_meta,
-                fallback_symbols=self.radar.heavyweight_symbol_list,
-            ),
+            "pattern": {
+                **self.pattern_engine.get_payload(
+                    pool_meta=self.radar.last_pool_meta,
+                    fallback_symbols=self.radar.heavyweight_symbol_list,
+                ),
+                **self.pullback_engine.get_payload(),
+            },
             "pool_size": self.radar.last_pool_meta.get("eligible_count")
             or len(self.radar.last_all_rows),
             "thresholds": {

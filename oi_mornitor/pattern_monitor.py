@@ -14,6 +14,8 @@ from oi_mornitor.config import (
     HTTP_TIMEOUT_SEC,
     OI_OI_BATCH_CONCURRENCY,
     PATTERN_AUTO_PICK_COUNT,
+    PATTERN_CHART_DEFAULT_LIMIT,
+    PATTERN_CHART_MAX_LIMIT,
     PATTERN_KLINE_INTERVAL,
     PATTERN_KLINE_LIMIT,
 )
@@ -32,13 +34,43 @@ from oi_mornitor.pattern_state_tracker import PatternStateTracker
 logger = logging.getLogger("OI_Radar")
 
 
+async def fetch_pattern_klines(
+    session: aiohttp.ClientSession,
+    *,
+    base_url: str,
+    symbol: str,
+    interval: str = PATTERN_KLINE_INTERVAL,
+    limit: int = PATTERN_KLINE_LIMIT,
+    end_time: int | None = None,
+) -> list[list[Any]]:
+    """拉取单币种 K 线；end_time 为毫秒时间戳，用于向左分页加载更早历史。"""
+    sym = symbol.strip().upper()
+    cap = min(max(limit, 1), PATTERN_CHART_MAX_LIMIT)
+    timeout = aiohttp.ClientTimeout(total=HTTP_TIMEOUT_SEC)
+    kline_url = f"{base_url.rstrip('/')}/fapi/v1/klines"
+    url = f"{kline_url}?symbol={sym}&interval={interval}&limit={cap}"
+    if end_time is not None and end_time > 0:
+        url += f"&endTime={int(end_time)}"
+    try:
+        async with session.get(url, timeout=timeout) as resp:
+            if resp.status != 200:
+                return []
+            data = await resp.json()
+            return data if isinstance(data, list) else []
+    except (asyncio.TimeoutError, aiohttp.ClientError, ValueError, TypeError):
+        return []
+
+
 async def fetch_pattern_klines_batch(
     session: aiohttp.ClientSession,
     *,
     base_url: str,
     symbols: list[str],
-    interval: str = PATTERN_KLINE_INTERVAL,
+    interval: str | None = None,
+    limit: int | None = None,
 ) -> dict[str, list[list[Any]]]:
+    interval = interval or PATTERN_KLINE_INTERVAL
+    limit = limit if limit is not None else PATTERN_KLINE_LIMIT
     if not symbols:
         return {}
 
@@ -48,7 +80,7 @@ async def fetch_pattern_klines_batch(
     kline_url = f"{base_url.rstrip('/')}/fapi/v1/klines"
 
     async def _one(sym: str) -> None:
-        url = f"{kline_url}?symbol={sym}&interval={interval}&limit={PATTERN_KLINE_LIMIT}"
+        url = f"{kline_url}?symbol={sym}&interval={interval}&limit={limit}"
         async with sem:
             try:
                 async with session.get(url, timeout=timeout) as resp:
@@ -326,16 +358,30 @@ class PatternMonitorEngine:
         *,
         base_url: str = FAPI_BASE_URL,
         pool_rows: list[dict[str, Any]] | None = None,
+        interval: str | None = None,
+        limit: int | None = None,
+        end_time: int | None = None,
     ) -> dict[str, Any]:
         sym = symbol.strip().upper()
-        klines_map = await fetch_pattern_klines_batch(
-            session, base_url=base_url, symbols=[sym]
-        )
-        klines = klines_map.get(sym) or []
+        tf = interval or PATTERN_KLINE_INTERVAL
+        req_limit = limit if limit is not None else PATTERN_CHART_DEFAULT_LIMIT
+        if end_time is None:
+            req_limit = max(req_limit, PATTERN_CHART_DEFAULT_LIMIT)
+        req_limit = min(req_limit, PATTERN_CHART_MAX_LIMIT)
 
+        klines = await fetch_pattern_klines(
+            session,
+            base_url=base_url,
+            symbol=sym,
+            interval=tf,
+            limit=req_limit,
+            end_time=end_time,
+        )
+
+        partial = end_time is not None
         row = self.tracker.get_state(sym)
         state_dict: dict[str, Any] = {}
-        if row:
+        if row and not partial:
             state_dict = {
                 "status": row.status,
                 "status_label": STATUS_LABELS.get(row.status, row.status),
@@ -349,6 +395,16 @@ class PatternMonitorEngine:
             }
 
         chart = build_pattern_chart_payload(klines, state=state_dict)
+
+        if partial:
+            return {
+                "symbol": sym,
+                "interval": tf,
+                "partial": True,
+                "candles": chart["candles"],
+                "bb": chart["bb"],
+                "has_more": len(klines) >= req_limit,
+            }
 
         ticker: dict[str, Any] = {}
         if pool_rows:
@@ -369,7 +425,9 @@ class PatternMonitorEngine:
 
         return {
             "symbol": sym,
-            "interval": PATTERN_KLINE_INTERVAL,
+            "interval": tf,
+            "partial": False,
+            "has_more": len(klines) >= req_limit,
             "ticker": ticker,
             "state": state_dict,
             **chart,
