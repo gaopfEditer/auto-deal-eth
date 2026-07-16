@@ -16,6 +16,7 @@ function parseKline(k: Record<string, unknown>): PatternCandle {
     high: Number(k.h),
     low: Number(k.l),
     close: Number(k.c),
+    volume: Number(k.v ?? 0),
   };
 }
 

@@ -43,6 +43,10 @@ export const MercuHeader = memo(function MercuHeader({
     ? `大象${poolMeta.heavyweight_count ?? 0}·中场${poolMeta.midweight_count ?? 0}·监控${poolMeta.eligible_count ?? poolSize}`
     : `监控 ${poolSize}`;
 
+  const sourceId = poolMeta?.data_source || "binance";
+  const sourceLabel = poolMeta?.data_source_label || "Binance";
+  const isFallback = sourceId !== "binance";
+
   return (
     <header className="mercu-header">
       <div className="mercu-header-left">
@@ -60,6 +64,16 @@ export const MercuHeader = memo(function MercuHeader({
           ))}
         </nav>
         <span className="mercu-pool-badge">{poolLabel}</span>
+        <span
+          className={`mercu-source-badge${isFallback ? " fallback" : ""}`}
+          title={
+            isFallback
+              ? `备选 · ${poolMeta?.fallback_reason || "限流/封禁"} · 链 ${(poolMeta?.fallback_chain || []).join("→")}`
+              : `主源 Binance · 备选 ${(poolMeta?.fallback_chain || ["bybit", "okx", "bitget", "gate"]).join("→")}`
+          }
+        >
+          源 {isFallback ? sourceLabel : "Binance"}
+        </span>
       </div>
       <div className="mercu-header-right">
         <div className="mercu-status">

@@ -18,7 +18,10 @@ from oi_mornitor.config import (
     PATTERN_PIVOT_WINDOW,
     PATTERN_STAGE2_VOL_MULT,
     PATTERN_WICK_RATIO,
+    STRATEGY_VEGAS_FILTER,
+    STRATEGY_VEGAS_PERIODS,
 )
+from oi_mornitor.strategy.indicators import detect_inverted_hammer, detect_shooting_star
 
 STATUS_SEARCHING = "SEARCHING_TOP"
 STATUS_LH = "STAGE_1_LH_DETECTED"
@@ -73,6 +76,11 @@ def enrich_indicators(df: pd.DataFrame) -> pd.DataFrame:
     out["macd_signal"] = out["macd"].ewm(span=9, adjust=False).mean()
     out["macd_hist"] = out["macd"] - out["macd_signal"]
     out["vol_sma20"] = out["volume"].rolling(20).mean()
+
+    # Vegas 双通道：过滤线 12 + A组 144/169 + B组 576/676
+    out["vegas_filter"] = out["close"].ewm(span=STRATEGY_VEGAS_FILTER, adjust=False).mean()
+    for i, period in enumerate(STRATEGY_VEGAS_PERIODS, start=1):
+        out[f"vegas_e{i}"] = out["close"].ewm(span=period, adjust=False).mean()
 
     win = PATTERN_PIVOT_WINDOW
     out["is_pivot_high"] = out["high"] == out["high"].rolling(win, center=True).max()
@@ -290,12 +298,33 @@ def build_pattern_chart_payload(
     state = state or {}
     df = klines_to_df(klines)
     if df.empty:
-        return {"candles": [], "markers": [], "price_lines": [], "analysis": {}, "bb": []}
+        return {
+            "candles": [],
+            "markers": [],
+            "price_lines": [],
+            "analysis": {},
+            "bb": {"upper": [], "mid": [], "lower": []},
+            "vegas": {"filter": [], "a1": [], "a2": [], "b1": [], "b2": []},
+            "macd": {"line": [], "signal": [], "hist": []},
+        }
 
     df = enrich_indicators(df)
     candles: list[dict[str, float | int]] = []
     bb_upper: list[dict[str, float | int]] = []
+    bb_mid: list[dict[str, float | int]] = []
     bb_lower: list[dict[str, float | int]] = []
+    macd_line: list[dict[str, float | int]] = []
+    macd_signal: list[dict[str, float | int]] = []
+    macd_hist: list[dict[str, float | int]] = []
+    vegas: dict[str, list[dict[str, float | int]]] = {
+        "filter": [],
+        "a1": [],
+        "a2": [],
+        "b1": [],
+        "b2": [],
+    }
+    vegas_keys = list(vegas.keys())
+    vegas_cols = ["vegas_filter"] + [f"vegas_e{i}" for i in range(1, len(STRATEGY_VEGAS_PERIODS) + 1)]
 
     for row in df.itertuples(index=False):
         t = _ts_sec(int(row.open_time))
@@ -305,10 +334,20 @@ def build_pattern_chart_payload(
             "high": float(row.high),
             "low": float(row.low),
             "close": float(row.close),
+            "volume": float(row.volume),
         })
         if pd.notna(row.bb_upper):
             bb_upper.append({"time": t, "value": float(row.bb_upper)})
+            bb_mid.append({"time": t, "value": float(row.bb_basis)})
             bb_lower.append({"time": t, "value": float(row.bb_lower)})
+        if pd.notna(getattr(row, "macd", None)):
+            macd_line.append({"time": t, "value": float(row.macd)})
+            macd_signal.append({"time": t, "value": float(row.macd_signal)})
+            macd_hist.append({"time": t, "value": float(row.macd_hist)})
+        for key, col in zip(vegas_keys, vegas_cols):
+            val = getattr(row, col, None)
+            if val is not None and pd.notna(val):
+                vegas[key].append({"time": t, "value": float(val)})
 
     markers: list[dict[str, Any]] = []
     analysis: dict[str, Any] = {
@@ -417,6 +456,34 @@ def build_pattern_chart_payload(
             "kind": "bb_wick",
         })
 
+    # 全量扫描射击之星 / 倒锤子（对齐 BB-Wicks Pine）
+    for _, crow in df.iterrows():
+        if pd.isna(crow.get("bb_basis")):
+            continue
+        below_mid = float(crow["close"]) < float(crow["bb_basis"])
+        shoot = detect_shooting_star(crow)
+        if shoot:
+            markers.append({
+                "time": _ts_sec(int(crow["open_time"])),
+                "position": "aboveBar",
+                "color": "#ff4081",
+                "shape": "arrowDown",
+                "text": "射击之星",
+                "price": float(crow["high"]),
+                "kind": "shooting_star",
+            })
+            continue
+        if below_mid and detect_inverted_hammer(crow):
+            markers.append({
+                "time": _ts_sec(int(crow["open_time"])),
+                "position": "belowBar",
+                "color": "#00bcd4",
+                "shape": "arrowUp",
+                "text": "倒锤子",
+                "price": float(crow["low"]),
+                "kind": "inverted_hammer",
+            })
+
     price_lines: list[dict[str, Any]] = []
     line_defs = [
         ("h_max", h_max, "#ff5252", "H_max 供给墙"),
@@ -448,7 +515,14 @@ def build_pattern_chart_payload(
         "price_lines": price_lines,
         "bb": {
             "upper": _sort_series_by_time(bb_upper),
+            "mid": _sort_series_by_time(bb_mid),
             "lower": _sort_series_by_time(bb_lower),
+        },
+        "vegas": {key: _sort_series_by_time(pts) for key, pts in vegas.items()},
+        "macd": {
+            "line": _sort_series_by_time(macd_line),
+            "signal": _sort_series_by_time(macd_signal),
+            "hist": _sort_series_by_time(macd_hist),
         },
         "analysis": analysis,
     }

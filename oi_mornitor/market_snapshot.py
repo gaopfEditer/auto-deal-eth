@@ -3,7 +3,11 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from oi_mornitor.config import OI_TIER_HEAVY_MIN_USD, OI_TIER_MID_MIN_USD
+from oi_mornitor.config import (
+    FALLBACK_SOURCE_ORDER,
+    OI_TIER_HEAVY_MIN_USD,
+    OI_TIER_MID_MIN_USD,
+)
 
 TIER_HEAVY = "heavyweight"
 TIER_MID = "midweight"
@@ -47,9 +51,16 @@ def pool_meta_from_counts(
     mid: int,
     excluded: int,
     eligible: int,
+    data_source: str = "binance",
+    data_source_label: str = "Binance",
+    fallback_reason: str = "",
 ) -> dict[str, Any]:
     return {
-        "mode": "fapi_ticker_aggregate",
+        "mode": "fapi_ticker_aggregate" if data_source == "binance" else f"{data_source}_ticker_aggregate",
+        "data_source": data_source,
+        "data_source_label": data_source_label,
+        "fallback_reason": fallback_reason,
+        "fallback_chain": list(FALLBACK_SOURCE_ORDER),
         "ticker_count": ticker_count,
         "heavyweight_count": heavy,
         "midweight_count": mid,

@@ -124,6 +124,10 @@ export interface GlobalMeta {
 
 export interface PoolMeta {
   mode: string;
+  data_source?: string;
+  data_source_label?: string;
+  fallback_reason?: string;
+  fallback_chain?: string[];
   ticker_count?: number;
   heavyweight_count?: number;
   midweight_count?: number;
@@ -199,6 +203,7 @@ export interface PatternCandle {
   high: number;
   low: number;
   close: number;
+  volume?: number;
 }
 
 export interface PatternChartMarker {
@@ -241,7 +246,23 @@ export interface PatternChartData {
   candles: PatternCandle[];
   markers: PatternChartMarker[];
   price_lines: PatternPriceLine[];
-  bb: { upper: { time: number; value: number }[]; lower: { time: number; value: number }[] };
+  bb: {
+    upper: { time: number; value: number }[];
+    mid?: { time: number; value: number }[];
+    lower: { time: number; value: number }[];
+  };
+  vegas?: {
+    filter?: { time: number; value: number }[];
+    a1?: { time: number; value: number }[];
+    a2?: { time: number; value: number }[];
+    b1?: { time: number; value: number }[];
+    b2?: { time: number; value: number }[];
+  };
+  macd?: {
+    line?: { time: number; value: number }[];
+    signal?: { time: number; value: number }[];
+    hist?: { time: number; value: number }[];
+  };
   analysis: PatternChartAnalysis;
   state: PatternState;
   partial?: boolean;

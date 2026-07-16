@@ -403,6 +403,8 @@ class PatternMonitorEngine:
                 "partial": True,
                 "candles": chart["candles"],
                 "bb": chart["bb"],
+                "vegas": chart.get("vegas") or {},
+                "macd": chart.get("macd") or {"line": [], "signal": [], "hist": []},
                 "has_more": len(klines) >= req_limit,
             }
 

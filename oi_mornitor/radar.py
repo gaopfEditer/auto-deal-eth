@@ -17,8 +17,10 @@ from typing import Any, Deque, Optional
 
 import aiohttp
 
+from oi_mornitor.exchange_sources import fetch_fallback_feed
 from oi_mornitor.config import (
     ALERT_COOLDOWN_SEC,
+    BINANCE_BAN_COOLDOWN_SEC,
     FAPI_BASE_URL,
     HTTP_TIMEOUT_SEC,
     MAX_RETRIES,
@@ -400,6 +402,19 @@ class BinanceOIRadar:
     _last_global_meta: dict[str, Any] = field(default_factory=dict)
     _last_pool_meta: dict[str, Any] = field(default_factory=dict)
     _consecutive_errors: int = 0
+    _binance_ban_until: float = 0.0
+    _data_source: str = "binance"
+
+    def _mark_binance_banned(self, reason: str = "418") -> None:
+        self._binance_ban_until = time.time() + BINANCE_BAN_COOLDOWN_SEC
+        logger.error(
+            "币安暂时绕过 %.0fs（原因 %s）→ 将改用备选所并标注数据源",
+            BINANCE_BAN_COOLDOWN_SEC,
+            reason,
+        )
+
+    def _binance_banned(self) -> bool:
+        return time.time() < self._binance_ban_until
 
     async def fetch_json(
         self,
@@ -421,9 +436,10 @@ class BinanceOIRadar:
                         await asyncio.sleep(RATE_LIMIT_COOLDOWN_SEC)
                         continue
                     if resp.status == 418:
-                        logger.error("IP 被限流 418，冷却 30s …")
-                        await asyncio.sleep(30)
-                        continue
+                        # 418 = 币安/WAF 封 IP，不是普通限频；多刷只会更糟
+                        self._mark_binance_banned("418")
+                        logger.error("IP 被币安硬封 418，停止重试本轮，改备选所")
+                        return None
                     body = await resp.text()
                     logger.warning("HTTP %s %s — %s", resp.status, url, body[:200])
             except asyncio.TimeoutError:
@@ -470,12 +486,22 @@ class BinanceOIRadar:
         sem = asyncio.Semaphore(OI_OI_BATCH_CONCURRENCY)
         timeout = aiohttp.ClientTimeout(total=HTTP_TIMEOUT_SEC)
         out: dict[str, float] = {}
+        banned = False
 
         async def _one(sym: str) -> None:
+            nonlocal banned
+            if banned:
+                return
             url = f"{self.base_url}/fapi/v1/openInterest?symbol={sym}"
             async with sem:
+                if banned:
+                    return
                 try:
                     async with session.get(url, timeout=timeout) as resp:
+                        if resp.status == 418:
+                            banned = True
+                            self._mark_binance_banned("418_oi_batch")
+                            return
                         if resp.status != 200:
                             return
                         data = await resp.json()
@@ -485,12 +511,18 @@ class BinanceOIRadar:
                     return
 
         await asyncio.gather(*[_one(s) for s in symbols])
+        if banned:
+            return {}
         return out
 
     def build_tier_pool(
         self,
         tickers: list[dict[str, Any]],
         oi_by_symbol: dict[str, float],
+        *,
+        data_source: str = "binance",
+        data_source_label: str = "Binance",
+        fallback_reason: str = "",
     ) -> list[TickerMeta]:
         """按总持仓 USD 分层，排除 < 1000 万。"""
         heavy = mid = excluded = 0
@@ -532,35 +564,75 @@ class BinanceOIRadar:
         if TOP_N > 0:
             pool = pool[:TOP_N]
 
+        self._data_source = data_source
         self._last_pool_meta = pool_meta_from_counts(
             ticker_count=len(tickers),
             heavy=heavy,
             mid=mid,
             excluded=excluded,
             eligible=len(pool),
+            data_source=data_source,
+            data_source_label=data_source_label,
+            fallback_reason=fallback_reason,
         )
         self._ticker_meta = {m.symbol: m for m in pool}
+        src_tag = f"[{data_source_label}]" if data_source != "binance" else "fapi"
         logger.info(
-            "📋 fapi 聚合池: ticker=%d · 大象=%d 中场=%d 排除<%s=%d · 监控=%d",
+            "📋 %s 聚合池: ticker=%d · 大象=%d 中场=%d 排除<%s=%d · 监控=%d%s",
+            src_tag,
             len(tickers),
             heavy,
             mid,
             _fmt_compact(OI_TIER_MID_MIN_USD),
             excluded,
             len(pool),
+            f" · 原因={fallback_reason}" if fallback_reason else "",
         )
         return pool
+
+    async def _pool_from_fallback(
+        self,
+        session: aiohttp.ClientSession,
+        *,
+        reason: str,
+    ) -> list[TickerMeta]:
+        feed = await fetch_fallback_feed(session, reason=reason)
+        if not feed:
+            logger.error("全部备选所失败，候选池为空")
+            return []
+        return self.build_tier_pool(
+            feed.tickers,
+            feed.oi_map,
+            data_source=feed.source_id,
+            data_source_label=feed.label,
+            fallback_reason=reason,
+        )
 
     async def get_active_market_pool(
         self,
         session: aiohttp.ClientSession,
     ) -> list[TickerMeta]:
+        if self._binance_banned():
+            remain = max(0, int(self._binance_ban_until - time.time()))
+            logger.warning("币安冷却中（剩余 %ds），轮询备选所 Bybit→OKX→Bitget→Gate", remain)
+            return await self._pool_from_fallback(session, reason="binance_ban_cooldown")
+
         tickers = await self.fetch_futures_ticker_24h_all(session)
         if not tickers:
+            if self._binance_banned() or self._consecutive_errors > 0:
+                return await self._pool_from_fallback(session, reason="binance_ticker_empty")
             return []
         symbols = [str(t["symbol"]) for t in tickers]
         oi_map = await self.fetch_open_interest_batch(session, symbols)
-        return self.build_tier_pool(tickers, oi_map)
+        if not oi_map:
+            logger.warning("币安 OI 批量为空，轮询备选所")
+            return await self._pool_from_fallback(session, reason="binance_oi_empty")
+        return self.build_tier_pool(
+            tickers,
+            oi_map,
+            data_source="binance",
+            data_source_label="Binance",
+        )
 
     def _row_from_meta(self, meta: TickerMeta) -> dict[str, Any]:
         return {
@@ -847,10 +919,15 @@ class BinanceOIRadar:
             logger.info("⏱ 15m 周期评估启动")
 
         symbols = [m.symbol for m in pool]
-        flow_by_symbol, spot_flow_by_symbol = await asyncio.gather(
-            fetch_taker_flow_batch(session, base_url=self.base_url, symbols=symbols),
-            fetch_spot_taker_flow_batch(session, base_url=SPOT_BASE_URL, symbols=symbols),
-        )
+        # 币安被封时不再打 taker / spot K 线，避免雪上加霜
+        if self._binance_banned() or self._data_source != "binance":
+            flow_by_symbol = {s: empty_flow_by_tf() for s in symbols}
+            spot_flow_by_symbol = {s: empty_flow_by_tf() for s in symbols}
+        else:
+            flow_by_symbol, spot_flow_by_symbol = await asyncio.gather(
+                fetch_taker_flow_batch(session, base_url=self.base_url, symbols=symbols),
+                fetch_spot_taker_flow_batch(session, base_url=SPOT_BASE_URL, symbols=symbols),
+            )
 
         evaluated: list[dict[str, Any]] = []
         for meta in pool:

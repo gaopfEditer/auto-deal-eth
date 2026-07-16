@@ -8,6 +8,7 @@ from oi_mornitor.config import (
     PATTERN_BB_MULT,
     STRATEGY_SHOOT_WICK_MAX_RATIO,
     STRATEGY_SHOOT_WICK_RATIO,
+    STRATEGY_VEGAS_FILTER,
     STRATEGY_VEGAS_PERIODS,
 )
 
@@ -23,6 +24,7 @@ def enrich_strategy_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
     for i, period in enumerate(STRATEGY_VEGAS_PERIODS, start=1):
         out[f"vegas_e{i}"] = out["close"].ewm(span=period, adjust=False).mean()
+    out["vegas_filter"] = out["close"].ewm(span=STRATEGY_VEGAS_FILTER, adjust=False).mean()
     vegas_cols = [f"vegas_e{i}" for i in range(1, len(STRATEGY_VEGAS_PERIODS) + 1)]
     out["vegas_mid"] = out[vegas_cols].mean(axis=1)
     out["vegas_min"] = out[vegas_cols].min(axis=1)
@@ -82,6 +84,24 @@ def detect_shooting_star(
     if at_lower and c >= o:
         return False
     return True
+
+
+def detect_inverted_hammer(
+    row: pd.Series,
+    *,
+    wick_ratio: float = STRATEGY_SHOOT_WICK_RATIO,
+) -> bool:
+    """倒锤子 — 与 tradingview-bollinger-wicks.pine detect_inverted_shooting_star 一致。"""
+    o = float(row["open"])
+    h = float(row["high"])
+    l = float(row["low"])
+    c = float(row["close"])
+    body = abs(c - o)
+    upper_w = h - max(o, c)
+    lower_w = min(o, c) - l
+    if body <= 0:
+        return False
+    return lower_w >= body * wick_ratio and upper_w < lower_w / 3.0
 
 
 def near_bb_upper(row: pd.Series, *, pct_in_band: float = 0.85) -> bool:

@@ -48,6 +48,34 @@ export function mergeBbSeries(
   return [...map.values()].sort((a, b) => a.time - b.time);
 }
 
+export type VegasKey = "filter" | "a1" | "a2" | "b1" | "b2";
+
+export function mergeVegasMap(
+  existing: Partial<Record<VegasKey, { time: number; value: number }[]>> | undefined,
+  incoming: Partial<Record<VegasKey, { time: number; value: number }[]>> | undefined,
+): Record<VegasKey, { time: number; value: number }[]> {
+  const keys: VegasKey[] = ["filter", "a1", "a2", "b1", "b2"];
+  const out = {} as Record<VegasKey, { time: number; value: number }[]>;
+  for (const k of keys) {
+    out[k] = mergeBbSeries(existing?.[k] ?? [], incoming?.[k] ?? []);
+  }
+  return out;
+}
+
+export type MacdKey = "line" | "signal" | "hist";
+
+export function mergeMacdMap(
+  existing: Partial<Record<MacdKey, { time: number; value: number }[]>> | undefined,
+  incoming: Partial<Record<MacdKey, { time: number; value: number }[]>> | undefined,
+): Record<MacdKey, { time: number; value: number }[]> {
+  const keys: MacdKey[] = ["line", "signal", "hist"];
+  const out = {} as Record<MacdKey, { time: number; value: number }[]>;
+  for (const k of keys) {
+    out[k] = mergeBbSeries(existing?.[k] ?? [], incoming?.[k] ?? []);
+  }
+  return out;
+}
+
 export function chartApiUrl(
   symbol: string,
   interval: ChartTimeframe,

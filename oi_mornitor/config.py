@@ -22,11 +22,24 @@ load_dotenv()
 FAPI_BASE_URL = os.getenv("OI_FAPI_BASE_URL", "https://fapi.binance.com").rstrip("/")
 # 币安现货 REST（主力现货流向）
 SPOT_BASE_URL = os.getenv("OI_SPOT_BASE_URL", "https://api.binance.com").rstrip("/")
+# 备选所公共 REST（币安 418 / 失败时按顺序轮询）
+BYBIT_BASE_URL = os.getenv("OI_BYBIT_BASE_URL", "https://api.bybit.com").rstrip("/")
+OKX_BASE_URL = os.getenv("OI_OKX_BASE_URL", "https://www.okx.com").rstrip("/")
+BITGET_BASE_URL = os.getenv("OI_BITGET_BASE_URL", "https://api.bitget.com").rstrip("/")
+GATE_BASE_URL = os.getenv("OI_GATE_BASE_URL", "https://api.gateio.ws").rstrip("/")
+FALLBACK_SOURCE_ORDER = tuple(
+    x.strip().lower()
+    for x in os.getenv("OI_FALLBACK_SOURCES", "bybit,okx,bitget,gate").split(",")
+    if x.strip()
+)
+FALLBACK_MIN_TICKERS = int(os.getenv("OI_FALLBACK_MIN_TICKERS", "30"))
+# 币安 418 / 硬封后，多久内优先走备选所（秒）
+BINANCE_BAN_COOLDOWN_SEC = float(os.getenv("OI_BINANCE_BAN_COOLDOWN_SEC", "300"))
 
 # 候选池：fapi 全市场 ticker/24hr 聚合 + OI 量级分层
 OI_TIER_MID_MIN_USD = float(os.getenv("OI_TIER_MID_MIN_USD", "10000000"))
 OI_TIER_HEAVY_MIN_USD = float(os.getenv("OI_TIER_HEAVY_MIN_USD", "50000000"))
-OI_OI_BATCH_CONCURRENCY = int(os.getenv("OI_OI_BATCH_CONCURRENCY", "40"))
+OI_OI_BATCH_CONCURRENCY = int(os.getenv("OI_OI_BATCH_CONCURRENCY", "20"))
 # 兼容旧配置：0 表示不限制，监控所有符合量级条件的合约
 TOP_N = int(os.getenv("OI_TOP_N", "0"))
 
@@ -100,6 +113,7 @@ PATTERN_CHART_INTERVALS = tuple(
 # 回踩 / Vegas / 射击之星策略（WS 本地监控 + 回测）
 STRATEGY_KLINE_INTERVAL = os.getenv("OI_STRATEGY_INTERVAL", "1h")
 STRATEGY_KLINE_LIMIT = int(os.getenv("OI_STRATEGY_KLINE_LIMIT", "200"))
+STRATEGY_VEGAS_FILTER = int(os.getenv("OI_STRATEGY_VEGAS_FILTER", "12"))
 STRATEGY_VEGAS_PERIODS = tuple(
     int(x.strip())
     for x in os.getenv("OI_STRATEGY_VEGAS_PERIODS", "144,169,576,676").split(",")
