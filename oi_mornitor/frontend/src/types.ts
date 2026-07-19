@@ -135,6 +135,8 @@ export interface PoolMeta {
   eligible_count?: number;
   tier_mid_min_usd?: number;
   tier_heavy_min_usd?: number;
+  taker_flow_status?: "live" | "cached" | "unavailable" | string;
+  proxy_disabled?: boolean;
 }
 
 export interface BreakoutAlert {
@@ -154,6 +156,9 @@ export interface PatternWatchItem {
   symbol: string;
   interval: string;
   added_at: number;
+  pinned?: boolean;
+  pinned_until?: number;
+  pin_remaining_sec?: number;
 }
 
 export interface PatternState {
@@ -174,18 +179,95 @@ export interface PatternState {
 
 export interface PatternAlert {
   symbol: string;
-  type: "pattern_bull_continuation";
+  type: string;
   interval: string;
-  status: string;
+  status?: string;
   status_label: string;
-  lh_price: number;
-  hl: number;
-  trigger_price: number;
-  hh_price: number;
-  last_price: number;
+  lh_price?: number;
+  hl?: number;
+  trigger_price?: number;
+  hh_price?: number;
+  last_price?: number;
+  price?: number;
+  entry_price?: number;
+  exit_price?: number;
+  entry_time?: number;
+  exit_time?: number;
+  leverage?: number;
+  side?: string;
+  logic?: string;
+  pnl_usd?: number;
+  pnl_pct?: number;
+  roe_pct?: number;
   message: string;
-  scan_ts: number;
+  scan_ts?: number;
   kline_close_time: number;
+}
+
+export interface SandboxTrade {
+  id?: number;
+  symbol: string;
+  side: string;
+  logic: string;
+  entry_price: number;
+  exit_price: number;
+  entry_time?: number;
+  exit_time?: number;
+  leverage?: number;
+  pnl_usd: number;
+  pnl_pct: number;
+  roe_pct?: number;
+  reason: string;
+  day?: string;
+  events?: Array<Record<string, unknown>>;
+  is_partial?: number;
+  entry_reason?: string;
+  source?: string;
+  source_label?: string;
+  interval?: string;
+  ref_intervals?: string[];
+  ref_intervals_label?: string;
+}
+
+export interface SandboxStats {
+  day: string;
+  balance: number;
+  open_positions: number;
+  closed_trades: number;
+  wins: number;
+  losses: number;
+  win_rate: number;
+  pnl_usd: number;
+  avg_pnl_pct: number;
+  by_logic?: Record<string, { trades: number; wins: number; pnl_usd: number }>;
+  recent_trades?: SandboxTrade[];
+}
+
+export interface SandboxPosition {
+  id?: number;
+  symbol: string;
+  side: string;
+  logic: string;
+  size: number;
+  entry_price: number;
+  entry_time: number;
+  sl: number;
+  tp1?: number | null;
+  tp2?: number | null;
+  breakeven_armed: boolean;
+  leverage?: number;
+  module?: string;
+  stage?: number;
+  events?: Array<Record<string, unknown>>;
+  highest_price?: number;
+  lowest_price?: number;
+  partial_done?: boolean;
+  entry_reason?: string;
+  source?: string;
+  source_label?: string;
+  interval?: string;
+  ref_intervals?: string[];
+  ref_intervals_label?: string;
 }
 
 export interface PatternPayload {
@@ -195,6 +277,18 @@ export interface PatternPayload {
   pattern_alerts: PatternAlert[];
   heavyweight_pool_size?: number;
   auto_pick_count?: number;
+  watchlist_refresh_sec?: number;
+  watchlist_refresh_tf?: string;
+  last_watchlist_refresh_ts?: number;
+  sandbox_enabled?: boolean;
+  sandbox_day?: string;
+  sandbox_pool?: string[];
+  sandbox_pool_count?: number;
+  sandbox_max_concurrent?: number;
+  sandbox_positions?: SandboxPosition[];
+  sandbox_alerts?: PatternAlert[];
+  sandbox_stats?: SandboxStats;
+  sandbox_scan_ts?: number;
 }
 
 export interface PatternCandle {

@@ -11,16 +11,20 @@ import aiohttp
 
 from oi_mornitor.config import (
     FAPI_BASE_URL,
-    HTTP_TIMEOUT_SEC,
+    MATRIX_TOP_N,
     OI_OI_BATCH_CONCURRENCY,
     PATTERN_AUTO_PICK_COUNT,
     PATTERN_CHART_DEFAULT_LIMIT,
     PATTERN_CHART_MAX_LIMIT,
     PATTERN_KLINE_INTERVAL,
     PATTERN_KLINE_LIMIT,
+    PATTERN_WATCHLIST_REFRESH_SEC,
+    PATTERN_WATCHLIST_REFRESH_TF,
 )
+from oi_mornitor.exchange_sources import fetch_klines_with_fallback
 from oi_mornitor.market_snapshot import TIER_HEAVY
 from oi_mornitor.pattern_detector import (
+    STATUS_EXPIRED,
     STATUS_LABELS,
     STATUS_LH,
     STATUS_SEARCHING,
@@ -29,9 +33,15 @@ from oi_mornitor.pattern_detector import (
     build_pattern_chart_payload,
     evaluate_pattern,
 )
-from oi_mornitor.pattern_state_tracker import PatternStateTracker
+from oi_mornitor.pattern_state_tracker import MAX_WATCH_SYMBOLS, PatternStateTracker
+from oi_mornitor.rank_metrics import TF_LABELS
 
 logger = logging.getLogger("OI_Radar")
+
+# 已进入形态阶段 / 已扳机：刷新 watchlist 时保留
+_PROTECTED_PATTERN_STATUSES = frozenset({STATUS_LH, STATUS_WAITING, STATUS_TRIGGER})
+# 涨幅∩持仓自动入池时，可被腾出的状态
+_EVICTABLE_PATTERN_STATUSES = frozenset({STATUS_SEARCHING, STATUS_EXPIRED})
 
 
 async def fetch_pattern_klines(
@@ -43,22 +53,18 @@ async def fetch_pattern_klines(
     limit: int = PATTERN_KLINE_LIMIT,
     end_time: int | None = None,
 ) -> list[list[Any]]:
-    """拉取单币种 K 线；end_time 为毫秒时间戳，用于向左分页加载更早历史。"""
+    """拉取单币种 K 线；币安 418/失败时自动走 Bybit/OKX 等备选所。"""
     sym = symbol.strip().upper()
     cap = min(max(limit, 1), PATTERN_CHART_MAX_LIMIT)
-    timeout = aiohttp.ClientTimeout(total=HTTP_TIMEOUT_SEC)
-    kline_url = f"{base_url.rstrip('/')}/fapi/v1/klines"
-    url = f"{kline_url}?symbol={sym}&interval={interval}&limit={cap}"
-    if end_time is not None and end_time > 0:
-        url += f"&endTime={int(end_time)}"
-    try:
-        async with session.get(url, timeout=timeout) as resp:
-            if resp.status != 200:
-                return []
-            data = await resp.json()
-            return data if isinstance(data, list) else []
-    except (asyncio.TimeoutError, aiohttp.ClientError, ValueError, TypeError):
-        return []
+    rows, _src = await fetch_klines_with_fallback(
+        session,
+        symbol=sym,
+        interval=interval,
+        limit=cap,
+        end_time=end_time,
+        binance_base_url=base_url,
+    )
+    return rows
 
 
 async def fetch_pattern_klines_batch(
@@ -75,22 +81,24 @@ async def fetch_pattern_klines_batch(
         return {}
 
     sem = asyncio.Semaphore(OI_OI_BATCH_CONCURRENCY)
-    timeout = aiohttp.ClientTimeout(total=HTTP_TIMEOUT_SEC)
     out: dict[str, list[list[Any]]] = {}
-    kline_url = f"{base_url.rstrip('/')}/fapi/v1/klines"
+    # 任一次币安失败后，后续批量请求跳过币安，避免 418 连打
+    skip_binance = False
 
     async def _one(sym: str) -> None:
-        url = f"{kline_url}?symbol={sym}&interval={interval}&limit={limit}"
+        nonlocal skip_binance
         async with sem:
-            try:
-                async with session.get(url, timeout=timeout) as resp:
-                    if resp.status != 200:
-                        out[sym] = []
-                        return
-                    data = await resp.json()
-                    out[sym] = data if isinstance(data, list) else []
-            except (asyncio.TimeoutError, aiohttp.ClientError, ValueError, TypeError):
-                out[sym] = []
+            rows, src = await fetch_klines_with_fallback(
+                session,
+                symbol=sym,
+                interval=interval,
+                limit=limit,
+                binance_base_url=base_url,
+                skip_binance=skip_binance,
+            )
+            if src and src != "binance":
+                skip_binance = True
+            out[sym] = rows
 
     await asyncio.gather(*[_one(s) for s in symbols])
     return out
@@ -133,6 +141,147 @@ def pick_random_heavyweight(
     return random.sample(candidates, count)
 
 
+def _rank_metric(row: dict[str, Any], tf: str, domain: str) -> dict[str, float]:
+    return (row.get("rank_by_tf") or {}).get(tf, {}).get(domain) or {}
+
+
+def _positive_magnitude(row: dict[str, Any], tf: str, domain: str) -> float:
+    m = _rank_metric(row, tf, domain)
+    rate = float(m.get("change_rate") or 0.0)
+    mag = float(m.get("magnitude_usd") or 0.0)
+    if rate <= 0 or mag <= 0:
+        return 0.0
+    return abs(mag)
+
+
+def pick_hot_flow_and_oi(
+    pool_rows: list[dict[str, Any]],
+    *,
+    count: int = PATTERN_AUTO_PICK_COUNT,
+    tf: str = PATTERN_WATCHLIST_REFRESH_TF,
+    exclude: set[str] | None = None,
+    fallback_symbols: list[str] | None = None,
+) -> list[str]:
+    """从合约流入榜 + OI 爆发榜合并挑币；不足时回退大象池。"""
+    exclude = {s.upper() for s in (exclude or set())}
+    eligible = [
+        r
+        for r in pool_rows
+        if r.get("status") != "warming"
+        and str(r.get("symbol") or "").upper() not in exclude
+    ]
+
+    contract_ranked = sorted(
+        eligible,
+        key=lambda r: _positive_magnitude(r, tf, "contract_flow"),
+        reverse=True,
+    )
+    oi_ranked = sorted(
+        eligible,
+        key=lambda r: _positive_magnitude(r, tf, "oi"),
+        reverse=True,
+    )
+
+    out: list[str] = []
+    seen: set[str] = set()
+    half = max(1, (count + 1) // 2)
+
+    def _take(rows: list[dict[str, Any]], domain: str, limit: int) -> None:
+        for row in rows:
+            if len(out) >= limit or len(out) >= count:
+                return
+            if _positive_magnitude(row, tf, domain) <= 0:
+                continue
+            sym = str(row.get("symbol") or "").upper()
+            if not sym or sym in seen:
+                continue
+            seen.add(sym)
+            out.append(sym)
+
+    _take(contract_ranked, "contract_flow", half)
+    _take(oi_ranked, "oi", count)
+    if len(out) < count:
+        _take(contract_ranked, "contract_flow", count)
+    if len(out) < count:
+        for sym in pick_random_heavyweight(
+            pool_rows,
+            count=count - len(out),
+            exclude=seen | exclude,
+            fallback_symbols=fallback_symbols,
+        ):
+            if sym not in seen:
+                seen.add(sym)
+                out.append(sym)
+
+    return out[:count]
+
+
+def _rank_score(row: dict[str, Any], tf: str, domain: str, *, mode: str) -> float:
+    m = _rank_metric(row, tf, domain)
+    rate = float(m.get("change_rate") or 0.0)
+    if rate <= 0:
+        return 0.0
+    if mode == "intensity":
+        return float(m.get("intensity_score") or 0.0)
+    # 与前端 deriveLists 对齐：price 用量级=|rate|，oi 用 |magnitude_usd|
+    if domain == "price":
+        return abs(rate)
+    return abs(float(m.get("magnitude_usd") or 0.0))
+
+
+def _top_board_symbols(
+    rows: list[dict[str, Any]],
+    tf: str,
+    domain: str,
+    *,
+    mode: str,
+    top_n: int,
+) -> list[str]:
+    ranked = sorted(
+        rows,
+        key=lambda r: _rank_score(r, tf, domain, mode=mode),
+        reverse=True,
+    )
+    out: list[str] = []
+    for row in ranked:
+        if _rank_score(row, tf, domain, mode=mode) <= 0:
+            continue
+        sym = str(row.get("symbol") or "").upper()
+        if not sym:
+            continue
+        out.append(sym)
+        if len(out) >= top_n:
+            break
+    return out
+
+
+def find_gainers_oi_intersection(
+    pool_rows: list[dict[str, Any]],
+    *,
+    top_n: int = MATRIX_TOP_N,
+    timeframes: tuple[str, ...] = TF_LABELS,
+) -> list[str]:
+    """
+    雷达涨幅榜 ∩ 持仓正榜（量级或强度任一上榜即计入）。
+    任一周期命中即纳入；返回去重后的 symbol 列表。
+    """
+    eligible = [r for r in pool_rows if r.get("status") != "warming"]
+    hits: list[str] = []
+    seen: set[str] = set()
+    for tf in timeframes:
+        gainers = set(_top_board_symbols(eligible, tf, "price", mode="mag", top_n=top_n)) | set(
+            _top_board_symbols(eligible, tf, "price", mode="intensity", top_n=top_n)
+        )
+        oi_pos = set(_top_board_symbols(eligible, tf, "oi", mode="mag", top_n=top_n)) | set(
+            _top_board_symbols(eligible, tf, "oi", mode="intensity", top_n=top_n)
+        )
+        for sym in gainers & oi_pos:
+            if sym not in seen:
+                seen.add(sym)
+                hits.append(sym)
+    return hits
+
+
 class PatternMonitorEngine:
     def __init__(self) -> None:
         self.tracker = PatternStateTracker()
@@ -140,6 +289,7 @@ class PatternMonitorEngine:
         self._last_states: list[dict[str, Any]] = []
         self._last_scan_ts: float = 0.0
         self._last_pool_rows: list[dict[str, Any]] = []
+        self._last_watchlist_refresh_ts: float = 0.0
 
     @property
     def last_alerts(self) -> list[dict[str, Any]]:
@@ -159,21 +309,29 @@ class PatternMonitorEngine:
     def remove_symbol(self, symbol: str) -> bool:
         return self.tracker.remove_watch(symbol)
 
+    def pin_symbol_to_top(self, symbol: str) -> bool:
+        """手动置顶至少一天（兼容旧 API 名）。"""
+        return self.tracker.pin_watch(symbol)
+
+    def unpin_symbol(self, symbol: str) -> bool:
+        return self.tracker.unpin_watch(symbol)
+
     def ensure_auto_watchlist(
         self,
         pool_rows: list[dict[str, Any]],
         *,
         fallback_symbols: list[str] | None = None,
     ) -> list[str]:
-        """监听列表为空时，从大象池随机挑选默认数量。"""
+        """监听列表为空时，优先合约流入 + OI 爆发，不足再补大象池。"""
         if self.tracker.list_watchlist():
             return []
-        picked = pick_random_heavyweight(pool_rows, fallback_symbols=fallback_symbols)
+        picked = pick_hot_flow_and_oi(pool_rows, fallback_symbols=fallback_symbols)
         if not picked:
             return []
         self.tracker.replace_watchlist(picked)
+        self._last_watchlist_refresh_ts = time.time()
         logger.info(
-            "🎲 形态池自动初始化：大象随机 %d 个 → %s",
+            "🎲 形态池自动初始化：流入/OI %d 个 → %s",
             len(picked),
             ", ".join(picked[:8]) + ("…" if len(picked) > 8 else ""),
         )
@@ -185,21 +343,187 @@ class PatternMonitorEngine:
         *,
         fallback_symbols: list[str] | None = None,
     ) -> list[str]:
-        """清空并重新从大象池随机挑选。"""
-        picked = pick_random_heavyweight(pool_rows, fallback_symbols=fallback_symbols)
+        """清空并重新从合约流入 + OI 爆发挑币（不足补大象）。"""
+        picked = pick_hot_flow_and_oi(pool_rows, fallback_symbols=fallback_symbols)
         if not picked:
             return []
         self.tracker.replace_watchlist(picked)
+        self._last_watchlist_refresh_ts = time.time()
         logger.info(
-            "🎲 形态池随机重选：大象 %d 个 → %s",
+            "🎲 形态池热钱重选：流入/OI %d 个 → %s",
             len(picked),
             ", ".join(picked[:8]) + ("…" if len(picked) > 8 else ""),
         )
         return picked
 
+    def _protected_symbols(self, protect_extra: set[str] | None = None) -> set[str]:
+        protected = {s.upper() for s in (protect_extra or set())}
+        for st in self.tracker.list_states():
+            if st.status in _PROTECTED_PATTERN_STATUSES:
+                protected.add(st.symbol.upper())
+        for w in self.tracker.list_watchlist():
+            if w.is_pinned:
+                protected.add(w.symbol.upper())
+        return protected
+
+    def refresh_watchlist_from_hot(
+        self,
+        pool_rows: list[dict[str, Any]],
+        *,
+        fallback_symbols: list[str] | None = None,
+        protect_extra: set[str] | None = None,
+        force: bool = False,
+    ) -> list[str]:
+        """
+        每隔 PATTERN_WATCHLIST_REFRESH_SEC，用合约流入榜 + OI 爆发榜更新形态列表。
+        已进入 LH/等待 HL/扳机 的币，以及 protect_extra（如沙盒持仓）保留；其余可被替换。
+        """
+        now = time.time()
+        if not force and self._last_watchlist_refresh_ts > 0:
+            if now - self._last_watchlist_refresh_ts < PATTERN_WATCHLIST_REFRESH_SEC:
+                return []
+
+        current = [w.symbol.upper() for w in self.tracker.list_watchlist()]
+        protected = self._protected_symbols(protect_extra)
+        # 只保护仍在 watchlist 内的
+        protected &= set(current)
+
+        hot = pick_hot_flow_and_oi(
+            pool_rows,
+            count=PATTERN_AUTO_PICK_COUNT,
+            fallback_symbols=fallback_symbols,
+        )
+        if not hot and not protected:
+            self._last_watchlist_refresh_ts = now
+            return []
+
+        target: list[str] = []
+        seen: set[str] = set()
+        for sym in protected:
+            if sym not in seen:
+                seen.add(sym)
+                target.append(sym)
+        for sym in hot:
+            if len(target) >= PATTERN_AUTO_PICK_COUNT:
+                break
+            if sym in seen:
+                continue
+            seen.add(sym)
+            target.append(sym)
+
+        # 槽位未满时保留仍在列表中的未进场币（稳定过渡）
+        if len(target) < PATTERN_AUTO_PICK_COUNT:
+            for sym in current:
+                if len(target) >= PATTERN_AUTO_PICK_COUNT:
+                    break
+                if sym in seen:
+                    continue
+                seen.add(sym)
+                target.append(sym)
+
+        target = target[:MAX_WATCH_SYMBOLS]
+        current_set = set(current)
+        target_set = set(target)
+        to_remove = current_set - target_set - protected
+        to_add = [s for s in target if s not in current_set]
+
+        if not to_remove and not to_add:
+            self._last_watchlist_refresh_ts = now
+            return []
+
+        for sym in to_remove:
+            self.tracker.remove_watch(sym)
+        for sym in to_add:
+            self.tracker.add_watch(sym)
+
+        self._last_watchlist_refresh_ts = now
+        logger.info(
+            "🔄 形态池热钱刷新：保留已进场 %d · 移除 %d · 新增 %d → %s",
+            len(protected),
+            len(to_remove),
+            len(to_add),
+            ", ".join(target[:8]) + ("…" if len(target) > 8 else ""),
+        )
+        return target
+
+    def _evict_one_replaceable(self, protect_extra: set[str] | None = None) -> str | None:
+        """腾出一个未进场槽位；优先 EXPIRED，再 SEARCHING（按 added_at 最旧）。"""
+        protected = self._protected_symbols(protect_extra)
+        watch = self.tracker.list_watchlist()
+        states = {s.symbol.upper(): s for s in self.tracker.list_states()}
+        candidates: list[tuple[int, float, str]] = []
+        for w in watch:
+            sym = w.symbol.upper()
+            if sym in protected:
+                continue
+            st = states.get(sym)
+            status = st.status if st else STATUS_SEARCHING
+            if status not in _EVICTABLE_PATTERN_STATUSES:
+                continue
+            # EXPIRED 优先踢出
+            prio = 0 if status == STATUS_EXPIRED else 1
+            candidates.append((prio, w.added_at, sym))
+        if not candidates:
+            return None
+        candidates.sort(key=lambda x: (x[0], x[1]))
+        victim = candidates[0][2]
+        self.tracker.remove_watch(victim)
+        return victim
+
+    def ingest_gainers_oi_intersection(
+        self,
+        pool_rows: list[dict[str, Any]],
+        *,
+        protect_extra: set[str] | None = None,
+    ) -> list[str]:
+        """
+        雷达涨幅榜 ∩ 持仓正榜 → 自动加入形态追踪。
+        列表已满时踢掉未进场币腾位；新币置顶便于看到。
+        """
+        hits = find_gainers_oi_intersection(pool_rows)
+        if not hits:
+            return []
+
+        current = {w.symbol.upper() for w in self.tracker.list_watchlist()}
+        added: list[str] = []
+        for sym in hits:
+            if sym in current:
+                continue
+            while len(current) >= MAX_WATCH_SYMBOLS:
+                victim = self._evict_one_replaceable(protect_extra)
+                if not victim:
+                    break
+                current.discard(victim)
+            if len(current) >= MAX_WATCH_SYMBOLS:
+                logger.info(
+                    "涨幅∩持仓 %s 未能入池：形态列表已满且无可替换币",
+                    sym,
+                )
+                break
+            if self.tracker.add_watch(sym):
+                current.add(sym)
+                self.tracker.bump_watch_to_top(sym)
+                added.append(sym)
+
+        if added:
+            logger.info(
+                "📈 涨幅∩持仓 → 形态追踪 +%d：%s",
+                len(added),
+                ", ".join(added),
+            )
+        return added
+
     def get_watchlist(self) -> list[dict[str, Any]]:
+        now = time.time()
         return [
-            {"symbol": w.symbol, "interval": w.interval, "added_at": w.added_at}
+            {
+                "symbol": w.symbol,
+                "interval": w.interval,
+                "added_at": w.added_at,
+                "pinned": w.is_pinned,
+                "pinned_until": w.pinned_until if w.is_pinned else 0,
+                "pin_remaining_sec": max(0, int(w.pinned_until - now)) if w.is_pinned else 0,
+            }
             for w in self.tracker.list_watchlist()
         ]
 
@@ -223,6 +547,9 @@ class PatternMonitorEngine:
             "pattern_alerts": self._last_alerts,
             "heavyweight_pool_size": heavy_count,
             "auto_pick_count": PATTERN_AUTO_PICK_COUNT,
+            "watchlist_refresh_sec": PATTERN_WATCHLIST_REFRESH_SEC,
+            "watchlist_refresh_tf": PATTERN_WATCHLIST_REFRESH_TF,
+            "last_watchlist_refresh_ts": self._last_watchlist_refresh_ts,
         }
 
     async def scan(
@@ -233,10 +560,22 @@ class PatternMonitorEngine:
         scan_ts: float | None = None,
         pool_rows: list[dict[str, Any]] | None = None,
         fallback_symbols: list[str] | None = None,
+        protect_symbols: set[str] | None = None,
     ) -> list[dict[str, Any]]:
         if pool_rows:
             self._last_pool_rows = pool_rows
+            self.tracker.expire_pins()
             self.ensure_auto_watchlist(pool_rows, fallback_symbols=fallback_symbols)
+            self.refresh_watchlist_from_hot(
+                pool_rows,
+                fallback_symbols=fallback_symbols,
+                protect_extra=protect_symbols,
+            )
+            # 每轮扫描：涨幅榜 ∩ 持仓正榜 → 立即加入形态追踪
+            self.ingest_gainers_oi_intersection(
+                pool_rows,
+                protect_extra=protect_symbols,
+            )
 
         watchlist = self.tracker.list_watchlist()
         if not watchlist:

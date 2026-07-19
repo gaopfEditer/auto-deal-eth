@@ -23,6 +23,8 @@ TF_KLINE_BARS: dict[str, int] = {
 
 MAX_KLINE_LIMIT = max(TF_KLINE_BARS.values())
 
+FlowBySymbol = dict[str, dict[str, dict[str, float]]]
+
 
 def _window_from_klines(klines: list[list[Any]], bars: int) -> dict[str, float]:
     """单周期：净主动流入 = Σ(2×Taker买报价额 − 报价额)；成交额 = Σ报价额。"""
@@ -33,6 +35,9 @@ def _window_from_klines(klines: list[list[Any]], bars: int) -> dict[str, float]:
     quote_sum = 0.0
     net_sum = 0.0
     for row in slice_:
+        if not isinstance(row, (list, tuple)) or len(row) < 11:
+            # 备选所归一化 K 线无 taker buy，跳过该根（无法估净流）
+            continue
         quote = float(row[7])
         taker_buy_quote = float(row[10])
         quote_sum += quote
@@ -53,19 +58,31 @@ async def _fetch_klines_flow_batch(
     *,
     kline_url: str,
     symbols: list[str],
-) -> dict[str, dict[str, dict[str, float]]]:
+) -> tuple[FlowBySymbol, bool]:
     if not symbols:
-        return {}
+        return {}, False
 
     sem = asyncio.Semaphore(OI_OI_BATCH_CONCURRENCY)
     timeout = aiohttp.ClientTimeout(total=HTTP_TIMEOUT_SEC)
-    out: dict[str, dict[str, dict[str, float]]] = {}
+    out: FlowBySymbol = {}
+    hit_418 = False
 
     async def _one(sym: str) -> None:
+        nonlocal hit_418
+        if hit_418:
+            out[sym] = empty_flow_by_tf()
+            return
         url = f"{kline_url}?symbol={sym}&interval=5m&limit={MAX_KLINE_LIMIT}"
         async with sem:
+            if hit_418:
+                out[sym] = empty_flow_by_tf()
+                return
             try:
                 async with session.get(url, timeout=timeout) as resp:
+                    if resp.status == 418:
+                        hit_418 = True
+                        out[sym] = empty_flow_by_tf()
+                        return
                     if resp.status != 200:
                         out[sym] = empty_flow_by_tf()
                         return
@@ -78,7 +95,7 @@ async def _fetch_klines_flow_batch(
                 out[sym] = empty_flow_by_tf()
 
     await asyncio.gather(*[_one(s) for s in symbols])
-    return out
+    return out, hit_418
 
 
 async def fetch_taker_flow_batch(
@@ -86,8 +103,8 @@ async def fetch_taker_flow_batch(
     *,
     base_url: str,
     symbols: list[str],
-) -> dict[str, dict[str, dict[str, float]]]:
-    """并发拉取 U 本位永续 5m K 线 Taker 净流。"""
+) -> tuple[FlowBySymbol, bool]:
+    """并发拉取 U 本位永续 5m K 线 Taker 净流。返回 (by_symbol, hit_418)。"""
     return await _fetch_klines_flow_batch(
         session,
         kline_url=f"{base_url.rstrip('/')}/fapi/v1/klines",
@@ -100,8 +117,8 @@ async def fetch_spot_taker_flow_batch(
     *,
     base_url: str,
     symbols: list[str],
-) -> dict[str, dict[str, dict[str, float]]]:
-    """并发拉取现货 5m K 线 Taker 净流（与合约池同 symbol）。"""
+) -> tuple[FlowBySymbol, bool]:
+    """并发拉取现货 5m K 线 Taker 净流（与合约池同 symbol）。返回 (by_symbol, hit_418)。"""
     return await _fetch_klines_flow_batch(
         session,
         kline_url=f"{base_url.rstrip('/')}/api/v3/klines",

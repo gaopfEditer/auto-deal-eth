@@ -14,6 +14,7 @@ interface RankListProps {
   valueMode: ValueMode;
   /** 负向榜（流出/跌幅）：强制红色 */
   negativeBoard?: boolean;
+  emptyText?: string;
 }
 
 function barValue(row: MatrixRow): number {
@@ -31,6 +32,7 @@ const RankList = memo(function RankList({
   rows,
   valueMode,
   negativeBoard = false,
+  emptyText = "暂无数据",
 }: RankListProps) {
   const maxBar = Math.max(...rows.map((r) => barValue(r)), 1);
 
@@ -42,7 +44,7 @@ const RankList = memo(function RankList({
       </div>
       <ul className="rank-list">
         {rows.length === 0 ? (
-          <li className="rank-empty">暂无数据</li>
+          <li className="rank-empty">{emptyText}</li>
         ) : (
           rows.map((row) => {
             const v = row.matrix_score;
@@ -98,6 +100,8 @@ interface Props {
   oi: OiBlock;
   contract: FlowBlock;
   spot: FlowBlock;
+  /** live | cached | unavailable — 合约/现货 Taker 流向可用性 */
+  takerFlowStatus?: string;
 }
 
 export const MarketMatrixGrid = memo(function MarketMatrixGrid({
@@ -107,13 +111,29 @@ export const MarketMatrixGrid = memo(function MarketMatrixGrid({
   oi,
   contract,
   spot,
+  takerFlowStatus,
 }: Props) {
+  const flowEmptyHint =
+    takerFlowStatus === "unavailable"
+      ? "暂无数据（币安 Taker 流向不可用，请检查代理）"
+      : takerFlowStatus === "cached"
+        ? "暂无数据（使用缓存中，等待刷新）"
+        : "暂无数据";
+  const contractEmpty = contract.inMagnitude.length === 0 && contract.outMagnitude.length === 0;
+  const spotEmpty = spot.inMagnitude.length === 0 && spot.outMagnitude.length === 0;
+
   return (
     <main className="panel matrix-center">
       <div className="matrix-center-head">
         <h2>热钱观察榜单</h2>
         <MercuTimeframes timeframe={timeframe} onTimeframeChange={onTimeframeChange} />
       </div>
+      {(contractEmpty || spotEmpty) && takerFlowStatus && takerFlowStatus !== "live" ? (
+        <p className="matrix-flow-hint">
+          主力合约/现货流向：{flowEmptyHint}
+          {takerFlowStatus === "cached" ? " · 展示缓存" : ""}
+        </p>
+      ) : null}
 
       <div className="matrix-quadrants">
         <div className="matrix-quadrant-grid">
@@ -131,17 +151,23 @@ export const MarketMatrixGrid = memo(function MarketMatrixGrid({
         </div>
 
         <div className="matrix-quadrant-grid">
-          <RankList title="主力合约" subtitle="流入 · 量级榜" rows={contract.inMagnitude} valueMode="mk" />
-          <RankList title="主力合约" subtitle="流出 · 量级榜" rows={contract.outMagnitude} valueMode="mk" negativeBoard />
-          <RankList title="主力合约" subtitle="流入 · 强度榜" rows={contract.inStrength} valueMode="mk" />
-          <RankList title="主力合约" subtitle="流出 · 强度榜" rows={contract.outStrength} valueMode="mk" negativeBoard />
+          <RankList
+            title="主力合约"
+            subtitle="流入 · 量级榜"
+            rows={contract.inMagnitude}
+            valueMode="mk"
+            emptyText={contractEmpty ? flowEmptyHint : undefined}
+          />
+          <RankList title="主力合约" subtitle="流出 · 量级榜" rows={contract.outMagnitude} valueMode="mk" negativeBoard emptyText={contractEmpty ? flowEmptyHint : undefined} />
+          <RankList title="主力合约" subtitle="流入 · 强度榜" rows={contract.inStrength} valueMode="mk" emptyText={contractEmpty ? flowEmptyHint : undefined} />
+          <RankList title="主力合约" subtitle="流出 · 强度榜" rows={contract.outStrength} valueMode="mk" negativeBoard emptyText={contractEmpty ? flowEmptyHint : undefined} />
         </div>
 
         <div className="matrix-quadrant-grid">
-          <RankList title="主力现货" subtitle="流入 · 量级榜" rows={spot.inMagnitude} valueMode="mk" />
-          <RankList title="主力现货" subtitle="流出 · 量级榜" rows={spot.outMagnitude} valueMode="mk" negativeBoard />
-          <RankList title="主力现货" subtitle="流入 · 强度榜" rows={spot.inStrength} valueMode="mk" />
-          <RankList title="主力现货" subtitle="流出 · 强度榜" rows={spot.outStrength} valueMode="mk" negativeBoard />
+          <RankList title="主力现货" subtitle="流入 · 量级榜" rows={spot.inMagnitude} valueMode="mk" emptyText={spotEmpty ? flowEmptyHint : undefined} />
+          <RankList title="主力现货" subtitle="流出 · 量级榜" rows={spot.outMagnitude} valueMode="mk" negativeBoard emptyText={spotEmpty ? flowEmptyHint : undefined} />
+          <RankList title="主力现货" subtitle="流入 · 强度榜" rows={spot.inStrength} valueMode="mk" emptyText={spotEmpty ? flowEmptyHint : undefined} />
+          <RankList title="主力现货" subtitle="流出 · 强度榜" rows={spot.outStrength} valueMode="mk" negativeBoard emptyText={spotEmpty ? flowEmptyHint : undefined} />
         </div>
       </div>
     </main>

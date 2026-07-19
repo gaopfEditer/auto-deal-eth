@@ -51,6 +51,7 @@ from oi_mornitor.capital_bias import (
 from oi_mornitor.market_matrix import MarketMatrixCache
 from oi_mornitor.matrix_breakout import MatrixBreakoutEngine
 from oi_mornitor.pattern_monitor import PatternMonitorEngine
+from oi_mornitor.sandbox import SandboxEngine
 from oi_mornitor.strategy.pullback_engine import PullbackStrategyEngine
 from oi_mornitor.market_snapshot import (
     TIER_HEAVY,
@@ -404,6 +405,11 @@ class BinanceOIRadar:
     _consecutive_errors: int = 0
     _binance_ban_until: float = 0.0
     _data_source: str = "binance"
+    # 代理连不上时临时直连（避免 HTTPS_PROXY 失效导致全站流向/K线全空）
+    _proxy_disabled_until: float = 0.0
+    _flow_cache: dict[str, dict[str, dict[str, float]]] = field(default_factory=dict)
+    _spot_flow_cache: dict[str, dict[str, dict[str, float]]] = field(default_factory=dict)
+    _taker_flow_status: str = "unavailable"  # live | cached | unavailable
 
     def _mark_binance_banned(self, reason: str = "418") -> None:
         self._binance_ban_until = time.time() + BINANCE_BAN_COOLDOWN_SEC
@@ -415,6 +421,47 @@ class BinanceOIRadar:
 
     def _binance_banned(self) -> bool:
         return time.time() < self._binance_ban_until
+
+    def proxy_disabled(self) -> bool:
+        return time.time() < self._proxy_disabled_until
+
+    def mark_proxy_down(self, reason: str = "connect_failed", cooldown_sec: float = 180.0) -> None:
+        self._proxy_disabled_until = time.time() + cooldown_sec
+        logger.warning(
+            "代理不可用（%s），%.0fs 内改直连；请检查 HTTPS_PROXY / 本地代理是否启动",
+            reason,
+            cooldown_sec,
+        )
+
+    @staticmethod
+    def _flow_has_volume(flow: dict[str, dict[str, float]] | None) -> bool:
+        if not flow:
+            return False
+        return any(float(w.get("volume_usd") or 0) > 0 for w in flow.values())
+
+    def _merge_flow_with_cache(
+        self,
+        symbols: list[str],
+        fresh: dict[str, dict[str, dict[str, float]]],
+        cache: dict[str, dict[str, dict[str, float]]],
+    ) -> tuple[dict[str, dict[str, dict[str, float]]], int, int]:
+        """写入有量数据到 cache；无量时回退 cache。返回 (merged, live_n, cached_n)。"""
+        out: dict[str, dict[str, dict[str, float]]] = {}
+        live_n = cached_n = 0
+        for sym in symbols:
+            cur = fresh.get(sym)
+            if self._flow_has_volume(cur):
+                cache[sym] = cur  # type: ignore[assignment]
+                out[sym] = cur  # type: ignore[assignment]
+                live_n += 1
+                continue
+            cached = cache.get(sym)
+            if self._flow_has_volume(cached):
+                out[sym] = cached
+                cached_n += 1
+            else:
+                out[sym] = empty_flow_by_tf()
+        return out, live_n, cached_n
 
     async def fetch_json(
         self,
@@ -454,7 +501,11 @@ class BinanceOIRadar:
                     hint,
                 )
             except aiohttp.ClientError as exc:
-                logger.warning("网络异常 (%s/%s): %s — %s", attempt + 1, MAX_RETRIES, url, exc)
+                err = str(exc)
+                logger.warning("网络异常 (%s/%s): %s — %s", attempt + 1, MAX_RETRIES, url, err)
+                px = proxy_url()
+                if px and ("7890" in err or "Connect call failed" in err or "Cannot connect to host 127.0.0.1" in err):
+                    self.mark_proxy_down(reason="rest_proxy")
             except ValueError as exc:
                 logger.error("JSON 解析失败: %s — %s", url, exc)
                 return None
@@ -919,15 +970,39 @@ class BinanceOIRadar:
             logger.info("⏱ 15m 周期评估启动")
 
         symbols = [m.symbol for m in pool]
-        # 币安被封时不再打 taker / spot K 线，避免雪上加霜
-        if self._binance_banned() or self._data_source != "binance":
-            flow_by_symbol = {s: empty_flow_by_tf() for s in symbols}
-            spot_flow_by_symbol = {s: empty_flow_by_tf() for s in symbols}
+        # Taker 净流仅币安 K 线含 buy_quote；IP 硬封时跳过，避免连打 418。
+        # 候选池来自备选所时仍尝试拉币安 flow；失败则回退内存缓存，避免榜单长期全空。
+        if self._binance_banned():
+            logger.warning("币安冷却中，本轮用缓存合约/现货 Taker 流向")
+            flow_by_symbol, live_c, cached_c = self._merge_flow_with_cache(
+                symbols, {}, self._flow_cache
+            )
+            spot_flow_by_symbol, live_s, cached_s = self._merge_flow_with_cache(
+                symbols, {}, self._spot_flow_cache
+            )
         else:
-            flow_by_symbol, spot_flow_by_symbol = await asyncio.gather(
+            (fresh_flow, flow_418), (fresh_spot, spot_418) = await asyncio.gather(
                 fetch_taker_flow_batch(session, base_url=self.base_url, symbols=symbols),
                 fetch_spot_taker_flow_batch(session, base_url=SPOT_BASE_URL, symbols=symbols),
             )
+            if flow_418 or spot_418:
+                self._mark_binance_banned("418_taker_flow")
+            flow_by_symbol, live_c, cached_c = self._merge_flow_with_cache(
+                symbols, fresh_flow, self._flow_cache
+            )
+            spot_flow_by_symbol, live_s, cached_s = self._merge_flow_with_cache(
+                symbols, fresh_spot, self._spot_flow_cache
+            )
+
+        if live_c + live_s > 0:
+            self._taker_flow_status = "live"
+        elif cached_c + cached_s > 0:
+            self._taker_flow_status = "cached"
+        else:
+            self._taker_flow_status = "unavailable"
+            if proxy_url() and not self.proxy_disabled():
+                # 全空且配置了代理：多半是代理挂了，下一轮直连重试
+                self.mark_proxy_down(reason="taker_flow_empty")
 
         evaluated: list[dict[str, Any]] = []
         for meta in pool:
@@ -999,7 +1074,10 @@ class BinanceOIRadar:
 
     @property
     def last_pool_meta(self) -> dict[str, Any]:
-        return dict(self._last_pool_meta)
+        meta = dict(self._last_pool_meta)
+        meta["taker_flow_status"] = self._taker_flow_status
+        meta["proxy_disabled"] = self.proxy_disabled()
+        return meta
 
     @property
     def heavyweight_symbol_list(self) -> list[str]:
@@ -1016,17 +1094,29 @@ class RadarService:
         self.breakout_engine = MatrixBreakoutEngine()
         self.pattern_engine = PatternMonitorEngine()
         self.pullback_engine = PullbackStrategyEngine(self.pattern_engine)
+        self.sandbox_engine = SandboxEngine()
         self._session: aiohttp.ClientSession | None = None
+        self._session_trust_env: bool | None = None
         self._task: asyncio.Task[None] | None = None
         self._running = False
 
     async def _ensure_session(self) -> aiohttp.ClientSession:
-        if self._session is None or self._session.closed:
+        # 代理失效时关闭 trust_env，改为直连，否则所有请求都会卡在 127.0.0.1:7890
+        want_trust = bool(proxy_url()) and not self.radar.proxy_disabled()
+        if (
+            self._session is None
+            or self._session.closed
+            or self._session_trust_env != want_trust
+        ):
+            if self._session is not None and not self._session.closed:
+                await self._session.close()
             self._session = aiohttp.ClientSession(
                 headers={"User-Agent": "oi-mornitor/1.0"},
-                trust_env=True,
+                trust_env=want_trust,
                 connector=aiohttp.TCPConnector(limit=20, ttl_dns_cache=300),
             )
+            self._session_trust_env = want_trust
+            logger.info("HTTP session trust_env=%s（代理%s）", want_trust, "开" if want_trust else "关/直连")
         return self._session
 
     async def scan_once(self) -> list[dict[str, Any]]:
@@ -1039,12 +1129,16 @@ class RadarService:
             base_url=self.radar.base_url,
             scan_ts=self.radar.last_scan_ts,
         )
+        sandbox_open = {
+            p.symbol.upper() for p in self.sandbox_engine.tracker.list_positions()
+        }
         await self.pattern_engine.scan(
             session,
             base_url=self.radar.base_url,
             scan_ts=self.radar.last_scan_ts,
             pool_rows=self.radar.last_all_rows,
             fallback_symbols=self.radar.heavyweight_symbol_list,
+            protect_symbols=sandbox_open,
         )
         for row in self.radar.last_all_rows:
             sym = str(row.get("symbol") or "")
@@ -1060,6 +1154,14 @@ class RadarService:
             scan_ts=self.radar.last_scan_ts,
             pool_rows=self.radar.last_all_rows,
             fallback_symbols=self.radar.heavyweight_symbol_list,
+        )
+        await self.sandbox_engine.scan(
+            session,
+            base_url=self.radar.base_url,
+            scan_ts=self.radar.last_scan_ts,
+            pool_rows=self.radar.last_all_rows,
+            fallback_symbols=self.radar.heavyweight_symbol_list,
+            pattern_states=self.pattern_engine.last_states,
         )
         return hot
 
@@ -1119,6 +1221,7 @@ class RadarService:
                     fallback_symbols=self.radar.heavyweight_symbol_list,
                 ),
                 **self.pullback_engine.get_payload(),
+                **self.sandbox_engine.get_payload(),
             },
             "pool_size": self.radar.last_pool_meta.get("eligible_count")
             or len(self.radar.last_all_rows),

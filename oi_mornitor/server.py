@@ -152,7 +152,31 @@ async def handle_patterns_watch_delete(request: web.Request) -> web.Response:
     return _json_response({"ok": ok, "watchlist": get_service().pattern_engine.get_watchlist()})
 
 
-
+async def handle_patterns_watch_pin(request: web.Request) -> web.Response:
+    try:
+        body = await request.json()
+    except json.JSONDecodeError:
+        return _json_response({"ok": False, "error": "invalid json"}, status=400)
+    symbol = str(body.get("symbol", "")).strip().upper()
+    if not symbol:
+        return _json_response({"ok": False, "error": "symbol required"}, status=400)
+    # pinned=false / action=unpin → 取消置顶；默认置顶一天
+    action = str(body.get("action", "")).strip().lower()
+    pinned_flag = body.get("pinned")
+    want_unpin = action in ("unpin", "clear", "cancel") or pinned_flag is False
+    svc = get_service()
+    if want_unpin:
+        ok = svc.pattern_engine.unpin_symbol(symbol)
+        if not ok:
+            return _json_response(
+                {"ok": False, "error": "symbol not pinned or not in watchlist"},
+                status=404,
+            )
+    else:
+        ok = svc.pattern_engine.pin_symbol_to_top(symbol)
+        if not ok:
+            return _json_response({"ok": False, "error": "symbol not in watchlist"}, status=404)
+    return _json_response({"ok": True, "watchlist": svc.pattern_engine.get_watchlist()})
 
 
 async def handle_patterns_random(_request: web.Request) -> web.Response:
@@ -197,7 +221,76 @@ async def handle_patterns_chart(request: web.Request) -> web.Response:
         return _json_response({"ok": False, "error": str(exc)}, status=500)
     if not data.get("candles"):
         return _json_response({"ok": False, "error": "K线数据为空"}, status=404)
+    if not data.get("partial"):
+        trade_markers = svc.sandbox_engine.get_trade_markers(symbol)
+        if trade_markers:
+            merged = list(data.get("markers") or []) + trade_markers
+            data["markers"] = merged
+            data["sandbox_markers"] = trade_markers
     return _json_response({"ok": True, **data})
+
+
+async def handle_sandbox_stats(_request: web.Request) -> web.Response:
+    svc = get_service()
+    return _json_response({"ok": True, **svc.sandbox_engine.get_payload()})
+
+
+async def handle_sandbox_reshuffle(_request: web.Request) -> web.Response:
+    svc = get_service()
+    rows = svc.radar.last_all_rows
+    fallback = svc.radar.heavyweight_symbol_list
+    candidates = [str(r.get("symbol")) for r in rows if r.get("oi_tier") == "heavyweight"]
+    if not candidates:
+        candidates = list(fallback)
+    if not candidates:
+        return _json_response({"ok": False, "error": "大象池未就绪"}, status=503)
+    picked = svc.sandbox_engine.ensure_daily_pool(candidates, force=True)
+    return _json_response({"ok": True, "picked": picked, **svc.sandbox_engine.get_payload()})
+
+
+async def handle_sandbox_enter(request: web.Request) -> web.Response:
+    """手动选择逻辑/方向，市价纸面开仓。"""
+    try:
+        body = await request.json()
+    except json.JSONDecodeError:
+        return _json_response({"ok": False, "error": "invalid json"}, status=400)
+    symbol = str(body.get("symbol", "")).strip().upper()
+    logic = str(body.get("logic", "")).strip().upper()
+    side = str(body.get("side", "")).strip().upper()
+    if not symbol or not logic or not side:
+        return _json_response(
+            {"ok": False, "error": "需要 symbol / logic(S|T) / side(LONG|SHORT)"},
+            status=400,
+        )
+    svc = get_service()
+    market_price = None
+    for row in svc.radar.last_all_rows:
+        if str(row.get("symbol") or "").upper() == symbol:
+            try:
+                market_price = float(row.get("last_price") or 0) or None
+            except (TypeError, ValueError):
+                market_price = None
+            break
+    pattern_state = next(
+        (
+            s
+            for s in svc.pattern_engine.last_states
+            if str(s.get("symbol") or "").upper() == symbol
+        ),
+        None,
+    )
+    session = await svc._ensure_session()
+    result = await svc.sandbox_engine.manual_enter(
+        session,
+        symbol=symbol,
+        logic=logic,
+        side=side,
+        base_url=svc.radar.base_url,
+        market_price=market_price,
+        pattern_state=pattern_state,
+    )
+    status = 200 if result.get("ok") else 400
+    return _json_response(result, status=status)
 
 
 async def handle_stream(request: web.Request) -> web.StreamResponse:
@@ -290,9 +383,16 @@ def create_app() -> web.Application:
 
     app.router.add_delete("/api/patterns/watch", handle_patterns_watch_delete)
 
+    app.router.add_post("/api/patterns/watch/pin", handle_patterns_watch_pin)
+
     app.router.add_post("/api/patterns/random", handle_patterns_random)
 
     app.router.add_get("/api/patterns/chart", handle_patterns_chart)
+
+    app.router.add_get("/api/sandbox", handle_sandbox_stats)
+
+    app.router.add_post("/api/sandbox/reshuffle", handle_sandbox_reshuffle)
+    app.router.add_post("/api/sandbox/enter", handle_sandbox_enter)
 
     app.router.add_get("/api/stream", handle_stream)
 

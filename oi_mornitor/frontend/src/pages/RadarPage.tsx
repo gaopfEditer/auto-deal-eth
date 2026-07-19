@@ -41,6 +41,7 @@ export function RadarPage() {
           oi={lists.oi}
           contract={lists.contract}
           spot={lists.spot}
+          takerFlowStatus={snapshot.pool_meta?.taker_flow_status}
         />
         <GlobalTrendPanel
           meta={meta}

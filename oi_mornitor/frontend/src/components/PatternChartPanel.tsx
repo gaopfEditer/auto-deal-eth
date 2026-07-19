@@ -14,7 +14,7 @@ import {
   type UTCTimestamp,
 } from "lightweight-charts";
 import type { PatternCandle, PatternChartData, PatternState } from "../types";
-import { chartPriceFormat, fmtMetaPrice, fmtNum, fmtPct } from "../utils/format";
+import { chartPriceFormat, formatChartAxisPrice, fmtMetaPrice, fmtNum, fmtPct } from "../utils/format";
 import { coinInitial, displaySymbol } from "../utils/symbol";
 import type { TickerRow } from "../types";
 import { useBinanceChartLive } from "../hooks/useBinanceChartLive";
@@ -42,6 +42,16 @@ interface Props {
   state?: PatternState;
   liveTicker?: TickerRow;
   onClose: () => void;
+  /** 右键标题：打开与左侧列表相同的操作菜单 */
+  onTitleContextMenu?: (e: React.MouseEvent, symbol: string) => void;
+  /** 沙盒手动市价进场（当前图表币种） */
+  sandboxEnabled?: boolean;
+  manualEnterBusy?: boolean;
+  onManualEnter?: (args: {
+    symbol: string;
+    logic: "S" | "T";
+    side: "LONG" | "SHORT";
+  }) => void;
 }
 
 type ChartLayers = {
@@ -260,8 +270,15 @@ export const PatternChartPanel = memo(function PatternChartPanel({
   state,
   liveTicker,
   onClose,
+  onTitleContextMenu,
+  sandboxEnabled = false,
+  manualEnterBusy = false,
+  onManualEnter,
 }: Props) {
+  const [manualLogic, setManualLogic] = useState<"S" | "T">("S");
+  const [manualSide, setManualSide] = useState<"LONG" | "SHORT">("LONG");
   const chartRef = useRef<HTMLDivElement>(null);
+  const crosshairPriceRef = useRef<HTMLDivElement>(null);
   const chartApi = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const upperRef = useRef<ISeriesApi<"Line"> | null>(null);
@@ -281,6 +298,7 @@ export const PatternChartPanel = memo(function PatternChartPanel({
   const metaRef = useRef<PatternChartData | null>(null);
   const layersRef = useRef<ChartLayers>(DEFAULT_LAYERS);
   const priceDecimalsRef = useRef(2);
+  const lastCloseRef = useRef(0);
 
   const [timeframe, setTimeframe] = useState<ChartTimeframe>("15m");
   const [data, setData] = useState<PatternChartData | null>(null);
@@ -315,10 +333,7 @@ export const PatternChartPanel = memo(function PatternChartPanel({
     chartApi.current?.applyOptions({
       localization: {
         ...chartLocalization,
-        priceFormatter: (p: number) => {
-          const d = priceDecimalsRef.current;
-          return d <= 0 ? String(Math.round(p)) : p.toFixed(d);
-        },
+        priceFormatter: (p: number) => formatChartAxisPrice(p, priceDecimalsRef.current),
       },
     });
   }, []);
@@ -440,6 +455,8 @@ export const PatternChartPanel = memo(function PatternChartPanel({
         candlesRef.current = sortedCandles;
         setCandleCount(sortedCandles.length);
         setLastCandleTime(sortedCandles.at(-1)?.time ?? null);
+        const close = sortedCandles.at(-1)?.close;
+        if (close != null) applyPriceAxisFormat(close);
 
         if (prevRange && prepended > 0) {
           chart.timeScale().setVisibleLogicalRange({
@@ -455,7 +472,7 @@ export const PatternChartPanel = memo(function PatternChartPanel({
         setErr(e instanceof Error ? e.message : "图表渲染失败");
       }
     },
-    [applyPriceLines],
+    [applyPriceLines, applyPriceAxisFormat],
   );
 
   const loadMoreHistory = useCallback(async () => {
@@ -726,16 +743,16 @@ export const PatternChartPanel = memo(function PatternChartPanel({
         rightPriceScale: { borderColor: "#2a2a2a" },
         localization: {
           ...chartLocalization,
-          priceFormatter: (p: number) => {
-            const d = priceDecimalsRef.current;
-            return d <= 0 ? String(Math.round(p)) : p.toFixed(d);
-          },
+          priceFormatter: (p: number) => formatChartAxisPrice(p, priceDecimalsRef.current),
         },
         timeScale: {
           borderColor: "#2a2a2a",
           ...chartTimeScaleOptions,
         },
-        crosshair: { mode: CrosshairMode.Normal },
+        crosshair: {
+          mode: CrosshairMode.Normal,
+          horzLine: { labelVisible: false },
+        },
         handleScale: {
           axisPressedMouseMove: { time: true, price: true },
           mouseWheel: true,
@@ -831,6 +848,50 @@ export const PatternChartPanel = memo(function PatternChartPanel({
       chartApi.current = chart;
       seriesRef.current = series;
 
+      const hideCrosshairPrice = () => {
+        const label = crosshairPriceRef.current;
+        if (label) label.style.display = "none";
+      };
+
+      const onCrosshairMove = (param: {
+        point?: { x: number; y: number } | undefined;
+        time?: unknown;
+      }) => {
+        const label = crosshairPriceRef.current;
+        const seriesApi = seriesRef.current;
+        if (!label || !seriesApi) return;
+        if (
+          !param.point ||
+          param.time === undefined ||
+          param.point.x < 0 ||
+          param.point.y < 0
+        ) {
+          hideCrosshairPrice();
+          return;
+        }
+        const price = seriesApi.coordinateToPrice(param.point.y);
+        if (price == null || !Number.isFinite(price)) {
+          hideCrosshairPrice();
+          return;
+        }
+        const d = priceDecimalsRef.current;
+        const priceStr = d <= 0 ? String(Math.round(price)) : price.toFixed(d);
+        const last = lastCloseRef.current;
+        if (last > 0) {
+          const pctChg = ((price - last) / last) * 100;
+          const sign = pctChg >= 0 ? "+" : "";
+          label.textContent = `${priceStr} (${sign}${pctChg.toFixed(2)}%)`;
+          label.classList.toggle("pos", pctChg >= 0);
+          label.classList.toggle("neg", pctChg < 0);
+        } else {
+          label.textContent = priceStr;
+          label.classList.remove("pos", "neg");
+        }
+        label.style.display = "block";
+        label.style.top = `${param.point.y}px`;
+      };
+      chart.subscribeCrosshairMove(onCrosshairMove);
+
       const onRange = (range: LogicalRange | null) => {
         if (!range || loadingMoreRef.current || !hasMoreRef.current) return;
         if (range.from < 40) void loadMoreHistory();
@@ -850,6 +911,8 @@ export const PatternChartPanel = memo(function PatternChartPanel({
       return () => {
         window.removeEventListener("resize", onResize);
         chart.timeScale().unsubscribeVisibleLogicalRangeChange(onRange);
+        chart.unsubscribeCrosshairMove(onCrosshairMove);
+        hideCrosshairPrice();
         chart.remove();
         chartApi.current = null;
         seriesRef.current = null;
@@ -884,6 +947,17 @@ export const PatternChartPanel = memo(function PatternChartPanel({
   const statusLabel = analysis?.status_label || state?.status_label || "—";
 
   useEffect(() => {
+    const seed =
+      lastPrice ??
+      candlesRef.current.at(-1)?.close ??
+      data?.candles?.at(-1)?.close ??
+      0;
+    if (seed && Number.isFinite(seed) && seed > 0) {
+      lastCloseRef.current = Number(seed);
+    }
+  }, [lastPrice, data?.candles, candleCount]);
+
+  useEffect(() => {
     if (!seriesRef.current) return;
     const seed =
       lastPrice ??
@@ -902,52 +976,91 @@ export const PatternChartPanel = memo(function PatternChartPanel({
   return (
     <div className="pattern-chart-panel">
       <header className="pattern-chart-head">
-        <div className="pattern-chart-title">
-          <span className="coin-avatar">{coinInitial(symbol)}</span>
-          <div>
-            <h2>${displaySymbol(symbol)}</h2>
-            <div className="pattern-chart-meta">
-              <span className={pct != null && pct >= 0 ? "pos" : "neg"}>
-                ${fmtMetaPrice(lastPrice)}
-                {pct != null ? ` · ${fmtPct(pct)}` : ""}
-              </span>
-              <span>OI {fmtNum(oiUsd)}</span>
-              <span>24h额 {fmtNum(quoteVol)}</span>
-              <span className="pat-status-tag">{statusLabel}</span>
+        <div className="pattern-chart-head-top">
+          <div
+            className="pattern-chart-title"
+            title={onTitleContextMenu ? "右键可置顶（至少 1 天）或取消置顶" : undefined}
+            onContextMenu={(e) => onTitleContextMenu?.(e, symbol)}
+          >
+            <span className="coin-avatar">{coinInitial(symbol)}</span>
+            <div>
+              <h2>${displaySymbol(symbol)}</h2>
+              <div className="pattern-chart-meta">
+                <span className={pct != null && pct >= 0 ? "pos" : "neg"}>
+                  ${fmtMetaPrice(lastPrice)}
+                  {pct != null ? ` · ${fmtPct(pct)}` : ""}
+                </span>
+                <span>OI {fmtNum(oiUsd)}</span>
+                <span>24h额 {fmtNum(quoteVol)}</span>
+                <span className="pat-status-tag">{statusLabel}</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="pattern-chart-head-actions">
-          <div className="mercu-timeframes pattern-chart-tf">
-            {CHART_TIMEFRAMES.map((tf) => (
-              <button
-                key={tf}
-                type="button"
-                className={`tf-btn ${tf === timeframe ? "active" : ""}`}
-                onClick={() => setTimeframe(tf)}
-                disabled={loading && tf !== timeframe}
-              >
-                {tf}
-              </button>
-            ))}
+          <div className="pattern-chart-head-actions">
+            <div className="mercu-timeframes pattern-chart-tf">
+              {CHART_TIMEFRAMES.map((tf) => (
+                <button
+                  key={tf}
+                  type="button"
+                  className={`tf-btn ${tf === timeframe ? "active" : ""}`}
+                  onClick={() => setTimeframe(tf)}
+                  disabled={loading && tf !== timeframe}
+                >
+                  {tf}
+                </button>
+              ))}
+            </div>
+            <div className="pattern-chart-layers" role="group" aria-label="图表图层">
+              {LAYER_TOGGLES.map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`layer-btn ${layers[key] ? "active" : ""}`}
+                  onClick={() => toggleLayer(key)}
+                  title={layers[key] ? `隐藏${label}` : `显示${label}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="pattern-chart-close" onClick={onClose}>
+              返回列表
+            </button>
           </div>
-          <div className="pattern-chart-layers" role="group" aria-label="图表图层">
-            {LAYER_TOGGLES.map(({ key, label }) => (
-              <button
-                key={key}
-                type="button"
-                className={`layer-btn ${layers[key] ? "active" : ""}`}
-                onClick={() => toggleLayer(key)}
-                title={layers[key] ? `隐藏${label}` : `显示${label}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <button type="button" className="pattern-chart-close" onClick={onClose}>
-            返回列表
-          </button>
         </div>
+        {sandboxEnabled && onManualEnter ? (
+          <div className="sandbox-manual chart-head">
+            <span className="sandbox-manual-label">手动市价进场 · ${displaySymbol(symbol)}</span>
+            <select
+              value={manualLogic}
+              onChange={(e) => setManualLogic(e.target.value as "S" | "T")}
+              disabled={manualEnterBusy}
+              aria-label="逻辑"
+            >
+              <option value="S">S · 短线猎手</option>
+              <option value="T">T · 长线维加斯</option>
+            </select>
+            <select
+              value={manualSide}
+              onChange={(e) => setManualSide(e.target.value as "LONG" | "SHORT")}
+              disabled={manualEnterBusy}
+              aria-label="方向"
+            >
+              <option value="LONG">做多 LONG</option>
+              <option value="SHORT">做空 SHORT</option>
+            </select>
+            <button
+              type="button"
+              className="pattern-random-btn"
+              disabled={manualEnterBusy}
+              onClick={() =>
+                onManualEnter({ symbol, logic: manualLogic, side: manualSide })
+              }
+            >
+              市价开仓
+            </button>
+          </div>
+        ) : null}
       </header>
 
       <div className="pattern-chart-body">
@@ -1009,7 +1122,14 @@ export const PatternChartPanel = memo(function PatternChartPanel({
             </>
           )}
         </aside>
-        <div className="pattern-chart-wrap" ref={chartRef} />
+        <div className="pattern-chart-wrap">
+          <div className="pattern-chart-canvas" ref={chartRef} />
+          <div
+            ref={crosshairPriceRef}
+            className="pattern-crosshair-price"
+            aria-hidden
+          />
+        </div>
       </div>
     </div>
   );

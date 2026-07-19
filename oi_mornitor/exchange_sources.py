@@ -302,3 +302,308 @@ async def fetch_fallback_feed(
 
     logger.error("全部备选源失败（%s）", "→".join(tried) or "空")
     return None
+
+
+# ── K 线兜底（统一成币安 klines 数组格式）──────────────────────────
+
+_INTERVAL_MS: dict[str, int] = {
+    "1m": 60_000,
+    "5m": 300_000,
+    "15m": 900_000,
+    "30m": 1_800_000,
+    "1h": 3_600_000,
+    "4h": 14_400_000,
+    "1d": 86_400_000,
+}
+
+_BYBIT_INTERVAL = {
+    "1m": "1",
+    "5m": "5",
+    "15m": "15",
+    "30m": "30",
+    "1h": "60",
+    "4h": "240",
+    "1d": "D",
+}
+
+_OKX_BAR = {
+    "1m": "1m",
+    "5m": "5m",
+    "15m": "15m",
+    "30m": "30m",
+    "1h": "1H",
+    "4h": "4H",
+    "1d": "1D",
+}
+
+_BITGET_GRAN = {
+    "1m": "1m",
+    "5m": "5m",
+    "15m": "15m",
+    "30m": "30m",
+    "1h": "1H",
+    "4h": "4H",
+    "1d": "1D",
+}
+
+
+def _binance_row(
+    open_ms: int,
+    o: float,
+    h: float,
+    l: float,
+    c: float,
+    vol: float,
+    quote: float,
+    interval: str,
+) -> list[Any]:
+    span = _INTERVAL_MS.get(interval, 900_000)
+    close_ms = open_ms + span - 1
+    return [open_ms, str(o), str(h), str(l), str(c), str(vol), close_ms, str(quote)]
+
+
+def _symbol_to_okx_swap(symbol: str) -> str:
+    base = symbol.upper().removesuffix("USDT")
+    return f"{base}-USDT-SWAP"
+
+
+def _symbol_to_gate_contract(symbol: str) -> str:
+    base = symbol.upper().removesuffix("USDT")
+    return f"{base}_USDT"
+
+
+async def _fetch_binance_klines(
+    session: aiohttp.ClientSession,
+    *,
+    base_url: str,
+    symbol: str,
+    interval: str,
+    limit: int,
+    end_time: int | None,
+) -> list[list[Any]]:
+    url = (
+        f"{base_url.rstrip('/')}/fapi/v1/klines"
+        f"?symbol={symbol}&interval={interval}&limit={limit}"
+    )
+    if end_time is not None and end_time > 0:
+        url += f"&endTime={int(end_time)}"
+    timeout = aiohttp.ClientTimeout(total=HTTP_TIMEOUT_SEC)
+    try:
+        async with session.get(url, timeout=timeout) as resp:
+            if resp.status == 418:
+                logger.warning("Binance klines 418（IP 硬封）%s", symbol)
+                return []
+            if resp.status != 200:
+                body = await resp.text()
+                logger.warning("Binance klines HTTP %s %s — %s", resp.status, symbol, body[:160])
+                return []
+            data = await resp.json()
+            return data if isinstance(data, list) else []
+    except (aiohttp.ClientError, asyncio.TimeoutError, ValueError, TypeError) as exc:
+        logger.warning("Binance klines 失败 %s: %s", symbol, exc)
+        return []
+
+
+async def _fetch_bybit_klines(
+    session: aiohttp.ClientSession,
+    *,
+    symbol: str,
+    interval: str,
+    limit: int,
+    end_time: int | None,
+) -> list[list[Any]]:
+    iv = _BYBIT_INTERVAL.get(interval)
+    if not iv:
+        return []
+    url = (
+        f"{BYBIT_BASE_URL}/v5/market/kline"
+        f"?category=linear&symbol={symbol}&interval={iv}&limit={limit}"
+    )
+    if end_time is not None and end_time > 0:
+        url += f"&end={int(end_time)}"
+    payload = await _get_json(session, url, source="Bybit-klines")
+    if not isinstance(payload, dict) or int(payload.get("retCode") or -1) != 0:
+        return []
+    rows_raw = (payload.get("result") or {}).get("list") or []
+    out: list[list[Any]] = []
+    for row in rows_raw:
+        try:
+            open_ms = int(row[0])
+            o, h, l, c = float(row[1]), float(row[2]), float(row[3]), float(row[4])
+            vol, quote = float(row[5]), float(row[6])
+        except (IndexError, TypeError, ValueError):
+            continue
+        out.append(_binance_row(open_ms, o, h, l, c, vol, quote, interval))
+    out.sort(key=lambda r: int(r[0]))
+    return out
+
+
+async def _fetch_okx_klines(
+    session: aiohttp.ClientSession,
+    *,
+    symbol: str,
+    interval: str,
+    limit: int,
+    end_time: int | None,
+) -> list[list[Any]]:
+    bar = _OKX_BAR.get(interval)
+    if not bar:
+        return []
+    inst = _symbol_to_okx_swap(symbol)
+    url = (
+        f"{OKX_BASE_URL}/api/v5/market/candles"
+        f"?instId={inst}&bar={bar}&limit={min(limit, 300)}"
+    )
+    if end_time is not None and end_time > 0:
+        # OKX after = 请求此时间戳之前（更旧）的数据
+        url += f"&after={int(end_time)}"
+    payload = await _get_json(session, url, source="OKX-klines")
+    if not isinstance(payload, dict) or str(payload.get("code")) != "0":
+        return []
+    out: list[list[Any]] = []
+    for row in payload.get("data") or []:
+        try:
+            open_ms = int(row[0])
+            o, h, l, c = float(row[1]), float(row[2]), float(row[3]), float(row[4])
+            vol = float(row[5])
+            quote = float(row[7]) if len(row) > 7 else float(row[6])
+        except (IndexError, TypeError, ValueError):
+            continue
+        out.append(_binance_row(open_ms, o, h, l, c, vol, quote, interval))
+    out.sort(key=lambda r: int(r[0]))
+    return out
+
+
+async def _fetch_bitget_klines(
+    session: aiohttp.ClientSession,
+    *,
+    symbol: str,
+    interval: str,
+    limit: int,
+    end_time: int | None,
+) -> list[list[Any]]:
+    gran = _BITGET_GRAN.get(interval)
+    if not gran:
+        return []
+    url = (
+        f"{BITGET_BASE_URL}/api/v2/mix/market/candles"
+        f"?productType=USDT-FUTURES&symbol={symbol}&granularity={gran}&limit={min(limit, 200)}"
+    )
+    if end_time is not None and end_time > 0:
+        url += f"&endTime={int(end_time)}"
+    payload = await _get_json(session, url, source="Bitget-klines")
+    if not isinstance(payload, dict) or str(payload.get("code")) not in ("00000", "0"):
+        return []
+    out: list[list[Any]] = []
+    for row in payload.get("data") or []:
+        try:
+            open_ms = int(row[0])
+            o, h, l, c = float(row[1]), float(row[2]), float(row[3]), float(row[4])
+            vol = float(row[5])
+            quote = float(row[6]) if len(row) > 6 else 0.0
+        except (IndexError, TypeError, ValueError):
+            continue
+        out.append(_binance_row(open_ms, o, h, l, c, vol, quote, interval))
+    out.sort(key=lambda r: int(r[0]))
+    return out
+
+
+async def _fetch_gate_klines(
+    session: aiohttp.ClientSession,
+    *,
+    symbol: str,
+    interval: str,
+    limit: int,
+    end_time: int | None,
+) -> list[list[Any]]:
+    if interval not in _INTERVAL_MS:
+        return []
+    contract = _symbol_to_gate_contract(symbol)
+    url = (
+        f"{GATE_BASE_URL}/api/v4/futures/usdt/candlesticks"
+        f"?contract={contract}&interval={interval}&limit={min(limit, 2000)}"
+    )
+    if end_time is not None and end_time > 0:
+        url += f"&to={int(end_time) // 1000}"
+    payload = await _get_json(session, url, source="Gate-klines")
+    if not isinstance(payload, list):
+        return []
+    out: list[list[Any]] = []
+    for row in payload:
+        try:
+            if isinstance(row, dict):
+                open_ms = int(row["t"]) * 1000
+                o, h, l, c = float(row["o"]), float(row["h"]), float(row["l"]), float(row["c"])
+                vol = float(row.get("v") or 0)
+                quote = float(row.get("sum") or 0)
+            else:
+                # 兼容数组格式 [t, v, c, h, l, o]
+                open_ms = int(row[0]) * 1000
+                o, h, l, c = float(row[5]), float(row[3]), float(row[4]), float(row[2])
+                vol = float(row[1])
+                quote = 0.0
+        except (IndexError, KeyError, TypeError, ValueError):
+            continue
+        out.append(_binance_row(open_ms, o, h, l, c, vol, quote, interval))
+    out.sort(key=lambda r: int(r[0]))
+    return out
+
+
+_KLINE_FETCHERS: dict[str, Callable[..., Awaitable[list[list[Any]]]]] = {
+    "bybit": _fetch_bybit_klines,
+    "okx": _fetch_okx_klines,
+    "bitget": _fetch_bitget_klines,
+    "gate": _fetch_gate_klines,
+}
+
+
+async def fetch_klines_with_fallback(
+    session: aiohttp.ClientSession,
+    *,
+    symbol: str,
+    interval: str,
+    limit: int,
+    end_time: int | None = None,
+    binance_base_url: str | None = None,
+    skip_binance: bool = False,
+    order: tuple[str, ...] | None = None,
+) -> tuple[list[list[Any]], str]:
+    """
+    拉单币种 K 线，币安失败/418 时按 FALLBACK_SOURCE_ORDER 轮询。
+    返回 (klines, source_id)；source_id 为 binance / bybit / okx / …
+    """
+    sym = symbol.strip().upper()
+    if not skip_binance and binance_base_url:
+        rows = await _fetch_binance_klines(
+            session,
+            base_url=binance_base_url,
+            symbol=sym,
+            interval=interval,
+            limit=limit,
+            end_time=end_time,
+        )
+        if rows:
+            return rows, "binance"
+
+    chain = order or FALLBACK_SOURCE_ORDER
+    for sid in chain:
+        fn = _KLINE_FETCHERS.get(sid)
+        if not fn:
+            continue
+        try:
+            rows = await fn(
+                session,
+                symbol=sym,
+                interval=interval,
+                limit=limit,
+                end_time=end_time,
+            )
+        except Exception as exc:  # noqa: BLE001 — 单源失败继续
+            logger.warning("K线备选 %s 异常 %s: %s", sid, sym, exc)
+            continue
+        if rows:
+            logger.info("K线备选命中 %s · %s · %s · n=%d", sid, sym, interval, len(rows))
+            return rows, sid
+
+    logger.warning("K线全部来源失败 %s %s", sym, interval)
+    return [], ""

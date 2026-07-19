@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from oi_mornitor.config import PATTERN_STATE_DB, PATTERN_WATCH_MAX_SEC
+from oi_mornitor.config import PATTERN_PIN_TTL_SEC, PATTERN_STATE_DB, PATTERN_WATCH_MAX_SEC
 from oi_mornitor.pattern_detector import (
     STATUS_EXPIRED,
     STATUS_LH,
@@ -42,6 +42,11 @@ class PatternWatchItem:
     symbol: str
     interval: str
     added_at: float
+    pinned_until: float = 0.0
+
+    @property
+    def is_pinned(self) -> bool:
+        return self.pinned_until > time.time()
 
 
 @dataclass
@@ -78,10 +83,19 @@ class PatternStateTracker:
                 CREATE TABLE IF NOT EXISTS pattern_watchlist (
                     symbol TEXT PRIMARY KEY,
                     interval TEXT NOT NULL DEFAULT '15m',
-                    added_at REAL NOT NULL
+                    added_at REAL NOT NULL,
+                    pinned_until REAL NOT NULL DEFAULT 0
                 )
                 """
             )
+            cols = {
+                row[1]
+                for row in conn.execute("PRAGMA table_info(pattern_watchlist)").fetchall()
+            }
+            if "pinned_until" not in cols:
+                conn.execute(
+                    "ALTER TABLE pattern_watchlist ADD COLUMN pinned_until REAL NOT NULL DEFAULT 0"
+                )
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS pattern_state (
@@ -139,12 +153,25 @@ class PatternStateTracker:
         )
 
     def list_watchlist(self) -> list[PatternWatchItem]:
+        now = time.time()
         with self._connect() as conn:
             rows = conn.execute(
-                "SELECT * FROM pattern_watchlist ORDER BY added_at ASC"
+                """
+                SELECT * FROM pattern_watchlist
+                ORDER BY
+                    CASE WHEN pinned_until > ? THEN 0 ELSE 1 END ASC,
+                    pinned_until DESC,
+                    added_at ASC
+                """,
+                (now,),
             ).fetchall()
         return [
-            PatternWatchItem(symbol=r["symbol"], interval=r["interval"], added_at=r["added_at"])
+            PatternWatchItem(
+                symbol=r["symbol"],
+                interval=r["interval"],
+                added_at=_safe_float(r["added_at"]),
+                pinned_until=_safe_float(r["pinned_until"] if "pinned_until" in r.keys() else 0),
+            )
             for r in rows
         ]
 
@@ -162,8 +189,8 @@ class PatternStateTracker:
                 return False
             conn.execute(
                 """
-                INSERT INTO pattern_watchlist (symbol, interval, added_at)
-                VALUES (?, ?, ?)
+                INSERT INTO pattern_watchlist (symbol, interval, added_at, pinned_until)
+                VALUES (?, ?, ?, 0)
                 ON CONFLICT(symbol) DO NOTHING
                 """,
                 (sym, interval, now),
@@ -188,6 +215,74 @@ class PatternStateTracker:
             conn.commit()
             return cur.rowcount > 0
 
+    def pin_watch(self, symbol: str, *, ttl_sec: float | None = None) -> bool:
+        """手动置顶：维持至少 ttl_sec（默认一天），到期自动失效。"""
+        sym = symbol.strip().upper()
+        if not sym:
+            return False
+        ttl = float(ttl_sec if ttl_sec is not None else PATTERN_PIN_TTL_SEC)
+        until = time.time() + max(1.0, ttl)
+        with self._connect() as conn:
+            exists = conn.execute(
+                "SELECT 1 FROM pattern_watchlist WHERE symbol = ?", (sym,)
+            ).fetchone()
+            if not exists:
+                return False
+            conn.execute(
+                "UPDATE pattern_watchlist SET pinned_until = ? WHERE symbol = ?",
+                (until, sym),
+            )
+            conn.commit()
+        return True
+
+    def unpin_watch(self, symbol: str) -> bool:
+        """手动取消置顶。"""
+        sym = symbol.strip().upper()
+        if not sym:
+            return False
+        with self._connect() as conn:
+            cur = conn.execute(
+                "UPDATE pattern_watchlist SET pinned_until = 0 WHERE symbol = ? AND pinned_until > 0",
+                (sym,),
+            )
+            conn.commit()
+            return cur.rowcount > 0
+
+    def expire_pins(self) -> int:
+        """清除已到期的置顶标记。"""
+        now = time.time()
+        with self._connect() as conn:
+            cur = conn.execute(
+                "UPDATE pattern_watchlist SET pinned_until = 0 WHERE pinned_until > 0 AND pinned_until <= ?",
+                (now,),
+            )
+            conn.commit()
+            return cur.rowcount
+
+    def bump_watch_to_top(self, symbol: str) -> bool:
+        """软置顶：仅调整排序（不设 sticky pin），供自动入池用。"""
+        sym = symbol.strip().upper()
+        if not sym:
+            return False
+        with self._connect() as conn:
+            exists = conn.execute(
+                "SELECT 1 FROM pattern_watchlist WHERE symbol = ?", (sym,)
+            ).fetchone()
+            if not exists:
+                return False
+            min_at = conn.execute("SELECT MIN(added_at) FROM pattern_watchlist").fetchone()[0]
+            new_at = (float(min_at) if min_at is not None else time.time()) - 1.0
+            conn.execute(
+                "UPDATE pattern_watchlist SET added_at = ? WHERE symbol = ?",
+                (new_at, sym),
+            )
+            conn.commit()
+        return True
+
+    def pin_watch_to_top(self, symbol: str) -> bool:
+        """兼容旧调用：改为 sticky 置顶一天。"""
+        return self.pin_watch(symbol)
+
     def clear_watchlist(self) -> None:
         with self._connect() as conn:
             conn.execute("DELETE FROM pattern_watchlist")
@@ -204,8 +299,8 @@ class PatternStateTracker:
             for sym in unique:
                 conn.execute(
                     """
-                    INSERT INTO pattern_watchlist (symbol, interval, added_at)
-                    VALUES (?, ?, ?)
+                    INSERT INTO pattern_watchlist (symbol, interval, added_at, pinned_until)
+                    VALUES (?, ?, ?, 0)
                     """,
                     (sym, interval, now),
                 )
@@ -223,13 +318,18 @@ class PatternStateTracker:
         return self._row_to_state(row)
 
     def list_states(self) -> list[PatternStateRow]:
+        now = time.time()
         with self._connect() as conn:
             rows = conn.execute(
                 """
                 SELECT ps.* FROM pattern_state ps
                 INNER JOIN pattern_watchlist pw ON pw.symbol = ps.symbol
-                ORDER BY pw.added_at ASC
-                """
+                ORDER BY
+                    CASE WHEN pw.pinned_until > ? THEN 0 ELSE 1 END ASC,
+                    pw.pinned_until DESC,
+                    pw.added_at ASC
+                """,
+                (now,),
             ).fetchall()
         return [self._row_to_state(r) for r in rows]
 

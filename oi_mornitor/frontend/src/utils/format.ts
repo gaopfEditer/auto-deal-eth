@@ -47,7 +47,7 @@ export function fmtPct(n: number | null | undefined): string {
   return `${sign}${v.toFixed(2)}%`;
 }
 
-/** pattern-chart-meta 价格有效数字位数 */
+/** pattern-chart-meta 价格有效数字位数（与头部价格展示一致） */
 export const META_PRICE_SIGFIGS = 5;
 
 /** 与头部 meta 价格一致的展示 */
@@ -57,19 +57,27 @@ export function fmtMetaPrice(n: number | null | undefined): string {
 }
 
 /**
- * 从 toPrecision(META_PRICE_SIGFIGS) 结果推断小数位数，供 K 线价格轴对齐 meta。
+ * 从 pattern-chart-meta 实际展示串推断小数位数，供 K 线 Y 轴对齐。
+ * 例：533.75 → 2；1.2000 → 4；87000 → 0。
  */
 export function priceDecimalsFromMetaPrice(n: number | null | undefined): number {
-  if (n == null || !Number.isFinite(n)) return 2;
-  const s = Math.abs(Number(n)).toPrecision(META_PRICE_SIGFIGS);
+  if (n == null || !Number.isFinite(Number(n))) return 2;
+  const s = fmtMetaPrice(n);
+  if (s === "—") return 2;
   if (/e/i.test(s)) {
-    const [base, expStr] = s.split(/e/i);
+    const [base, expStr] = s.replace(/^-/, "").split(/e/i);
     const exp = Number(expStr);
     const fracLen = (base.split(".")[1] ?? "").length;
     return Math.min(10, Math.max(0, fracLen - exp));
   }
   const i = s.indexOf(".");
   return i < 0 ? 0 : s.length - i - 1;
+}
+
+/** K 线价格轴 / 十字光标价格文本 */
+export function formatChartAxisPrice(p: number, decimals: number): string {
+  if (!Number.isFinite(p)) return "";
+  return decimals <= 0 ? String(Math.round(p)) : p.toFixed(decimals);
 }
 
 export function chartPriceFormat(n: number | null | undefined): {

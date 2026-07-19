@@ -100,6 +100,11 @@ PATTERN_WICK_RATIO = float(os.getenv("OI_PATTERN_WICK_RATIO", "0.3"))
 PATTERN_STAGE2_VOL_MULT = float(os.getenv("OI_PATTERN_STAGE2_VOL_MULT", "1.5"))
 PATTERN_WATCH_MAX_SEC = int(os.getenv("OI_PATTERN_WATCH_MAX_SEC", "14400"))
 PATTERN_AUTO_PICK_COUNT = int(os.getenv("OI_PATTERN_AUTO_PICK", "20"))
+# 形态 watchlist：每隔 N 秒用合约流入榜 + OI 爆发榜刷新（未进场币可替换）
+PATTERN_WATCHLIST_REFRESH_SEC = int(os.getenv("OI_PATTERN_WATCHLIST_REFRESH_SEC", "7200"))
+PATTERN_WATCHLIST_REFRESH_TF = os.getenv("OI_PATTERN_WATCHLIST_REFRESH_TF", "15m").strip() or "15m"
+# 手动置顶维持时长（秒），到期自动取消；也可手动取消
+PATTERN_PIN_TTL_SEC = int(os.getenv("OI_PATTERN_PIN_TTL_SEC", "86400"))
 PATTERN_STATE_DB = _PKG_ROOT / "data" / "pattern_state.db"
 PATTERN_CHART_DEFAULT_LIMIT = int(os.getenv("OI_PATTERN_CHART_LIMIT", "500"))
 PATTERN_CHART_MAX_LIMIT = int(os.getenv("OI_PATTERN_CHART_MAX_LIMIT", "1500"))
@@ -135,6 +140,75 @@ STRATEGY_DEFAULT_SYMBOLS = [
     ).split(",")
     if s.strip()
 ]
+
+# 沙盒纸面交易（逻辑 A/B/C/D · 每日随机 N 币）
+SANDBOX_ENABLED = os.getenv("OI_SANDBOX_ENABLED", "1").strip().lower() in (
+    "1",
+    "true",
+    "yes",
+    "on",
+)
+SANDBOX_DAILY_COUNT = int(os.getenv("OI_SANDBOX_DAILY_COUNT", "12"))
+SANDBOX_INTERVAL = os.getenv("OI_SANDBOX_INTERVAL", "15m")
+SANDBOX_KLINE_LIMIT = int(os.getenv("OI_SANDBOX_KLINE_LIMIT", "200"))
+# 策略参考周期（展示/记录用；信号执行周期仍为 SANDBOX_INTERVAL）
+SANDBOX_REF_INTERVALS_HUNTER = tuple(
+    s.strip()
+    for s in os.getenv("OI_SANDBOX_REF_INTERVALS_HUNTER", "15m").split(",")
+    if s.strip()
+)
+SANDBOX_REF_INTERVALS_TREND = tuple(
+    s.strip()
+    for s in os.getenv("OI_SANDBOX_REF_INTERVALS_TREND", "15m,1h,4h,1d").split(",")
+    if s.strip()
+)
+# 单笔保证金（U）；名义仓位 = 保证金 × 杠杆
+SANDBOX_NOTIONAL_USD = float(os.getenv("OI_SANDBOX_NOTIONAL_USD", "1"))
+SANDBOX_INITIAL_BALANCE = float(os.getenv("OI_SANDBOX_INITIAL_BALANCE", "1000"))
+# 最大同时持仓币数
+SANDBOX_MAX_CONCURRENT = int(os.getenv("OI_SANDBOX_MAX_CONCURRENT", "10"))
+# —— 短线猎手 S ——
+SANDBOX_HUNTER_SL_PAD = float(os.getenv("OI_SANDBOX_HUNTER_SL_PAD", "0.001"))  # 0.1%
+SANDBOX_HUNTER_ATR_MULT = float(os.getenv("OI_SANDBOX_HUNTER_ATR_MULT", "2"))
+# —— 长线维加斯 T（价变阈值为设计基准；ROE≈价变%×杠杆）——
+SANDBOX_TREND_SLOPE_MIN = float(os.getenv("OI_SANDBOX_TREND_SLOPE_MIN", "0.0003"))
+SANDBOX_TREND_SL_PAD = float(os.getenv("OI_SANDBOX_TREND_SL_PAD", "0.002"))  # EMA169 外 0.2%
+SANDBOX_TREND_BE_PRICE_PCT = float(os.getenv("OI_SANDBOX_TREND_BE_PRICE_PCT", "0.75"))
+SANDBOX_TREND_PARTIAL_PRICE_PCT = float(
+    os.getenv("OI_SANDBOX_TREND_PARTIAL_PRICE_PCT", "1.0")
+)
+SANDBOX_TREND_PARTIAL_FRAC = float(os.getenv("OI_SANDBOX_TREND_PARTIAL_FRAC", "0.30"))
+SANDBOX_TREND_TRAIL_PCT = float(os.getenv("OI_SANDBOX_TREND_TRAIL_PCT", "1.0"))
+# 阶梯上移止损：峰值价变每满 STEP_PROFIT% → SL 相对入场再锁定 STEP_SL_LIFT%
+SANDBOX_STEP_TRAIL_PROFIT_PCT = float(
+    os.getenv("OI_SANDBOX_STEP_TRAIL_PROFIT_PCT", "2.2")
+)
+SANDBOX_STEP_TRAIL_SL_LIFT_PCT = float(
+    os.getenv("OI_SANDBOX_STEP_TRAIL_SL_LIFT_PCT", "1.0")
+)
+SANDBOX_BREAKEVEN_PCT = float(os.getenv("OI_SANDBOX_BREAKEVEN_PCT", "1.5"))
+SANDBOX_HL_TRAIL_BUF = float(os.getenv("OI_SANDBOX_HL_TRAIL_BUF", "0.005"))
+SANDBOX_BB_STOP_BUF = float(os.getenv("OI_SANDBOX_BB_STOP_BUF", "0.003"))
+SANDBOX_RANGE_SLOPE_MAX = float(os.getenv("OI_SANDBOX_RANGE_SLOPE_MAX", "0.0015"))
+# 主动平仓旧参数（兼容）；S/T 模块主要用上面阈值
+SANDBOX_MIN_HOLD_BARS = int(os.getenv("OI_SANDBOX_MIN_HOLD_BARS", "2"))
+SANDBOX_SOFT_EXIT_MIN_MOVE_PCT = float(
+    os.getenv("OI_SANDBOX_SOFT_EXIT_MIN_MOVE_PCT", "0.25")
+)
+# 止损距离上限：BTC/ETH ≤1%，山寨 ≤3%
+SANDBOX_SL_MAX_PCT_MAJOR = float(os.getenv("OI_SANDBOX_SL_MAX_PCT_MAJOR", "1.0"))
+SANDBOX_SL_MAX_PCT_ALT = float(os.getenv("OI_SANDBOX_SL_MAX_PCT_ALT", "3.0"))
+SANDBOX_MAJOR_SYMBOLS = tuple(
+    s.strip().upper()
+    for s in os.getenv("OI_SANDBOX_MAJOR_SYMBOLS", "BTCUSDT,ETHUSDT").split(",")
+    if s.strip()
+)
+# 杠杆：BTC/ETH 100x，山寨 30x（SANDBOX_NOTIONAL_USD 为单笔保证金）
+SANDBOX_LEVERAGE_MAJOR = float(os.getenv("OI_SANDBOX_LEVERAGE_MAJOR", "100"))
+SANDBOX_LEVERAGE_ALT = float(os.getenv("OI_SANDBOX_LEVERAGE_ALT", "30"))
+# 平仓后至少隔 N 根已收盘 K 才允许同币再入场（防反复触发）
+SANDBOX_REENTRY_COOLDOWN_BARS = int(os.getenv("OI_SANDBOX_REENTRY_COOLDOWN_BARS", "8"))
+SANDBOX_STATE_DB = _PKG_ROOT / "data" / "sandbox_state.db"
 
 
 def proxy_url() -> str | None:

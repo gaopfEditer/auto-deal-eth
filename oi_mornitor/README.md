@@ -38,8 +38,11 @@
    - React 动态雷达 Web UI（SSE 实时推送）
 
 7. **形态追踪页 `/patterns`**
-   - 启动后监听列表为空时，自动从**大象池**随机挑选 20 个币种（`OI_PATTERN_AUTO_PICK=20`）
-   - 支持手动追加 / 移除；**大象随机重选** 清空并重新随机 20 个
+   - 启动后监听列表为空时，优先从**合约流入榜 + OI 爆发榜**挑选 20 个（`OI_PATTERN_AUTO_PICK=20`），不足再补大象池
+   - 每隔 2 小时自动刷新（`OI_PATTERN_WATCHLIST_REFRESH_SEC=7200`）；已进场（LH / 等待 HL / 扳机）与沙盒持仓保留，其余可被替换
+   - **雷达联动**：同周期同时上「涨幅榜」与「持仓正榜」（量级或强度）的币，每轮扫描自动加入形态追踪（满员时替换未进场币）
+   - 支持手动追加 / 移除；右键**置顶**至少 1 天（`OI_PATTERN_PIN_TTL_SEC=86400`，可手动取消）；**热钱重选** 清空并按流入/OI 重新挑选
+   - 沙盒：**手动市价进场**（选 S/T 逻辑 + 多/空）→ `POST /api/sandbox/enter`
    - 阶段 1：次高点 LH + BB-Wicks 上轨插针 / MACD 高位走弱 → `STAGE_1_LH_DETECTED`（不弹窗）
    - 阶段 2：更高低点 HL + 带量突破夹角高点 + MACD 金叉 → `TRIGGER_SIGNAL`（右下角预警）
    - API：`GET /api/patterns`、`POST /api/patterns/watch`、`DELETE /api/patterns/watch?symbol=`

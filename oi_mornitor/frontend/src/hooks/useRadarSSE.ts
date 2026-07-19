@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { RadarSnapshot } from "../types";
+import type { PatternPayload, RadarSnapshot } from "../types";
 import { EMPTY_SNAPSHOT } from "../types";
 
 export function useRadarSSE(intervalMs = 5000) {
@@ -9,6 +9,17 @@ export function useRadarSSE(intervalMs = 5000) {
 
   const apply = useCallback((data: RadarSnapshot) => {
     setSnapshot(data);
+  }, []);
+
+  /** 本地补丁：watch/pin/remove 等 API 成功后立刻反映，不必等下一轮 SSE */
+  const patchPattern = useCallback((partial: Partial<PatternPayload>) => {
+    setSnapshot((prev) => ({
+      ...prev,
+      pattern: {
+        ...(prev.pattern ?? EMPTY_SNAPSHOT.pattern!),
+        ...partial,
+      },
+    }));
   }, []);
 
   useEffect(() => {
@@ -53,5 +64,5 @@ export function useRadarSSE(intervalMs = 5000) {
     };
   }, [apply, intervalMs]);
 
-  return { snapshot, online };
+  return { snapshot, online, patchPattern };
 }
