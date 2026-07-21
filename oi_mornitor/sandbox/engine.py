@@ -15,6 +15,7 @@ from oi_mornitor.config import (
     FAPI_BASE_URL,
     SANDBOX_DAILY_COUNT,
     SANDBOX_ENABLED,
+    SANDBOX_FEE_PCT,
     SANDBOX_INTERVAL,
     SANDBOX_KLINE_LIMIT,
     SANDBOX_MAX_CONCURRENT,
@@ -25,12 +26,14 @@ from oi_mornitor.market_snapshot import TIER_HEAVY
 from oi_mornitor.pattern_monitor import fetch_pattern_klines, fetch_pattern_klines_batch
 from oi_mornitor.sandbox.logics import (
     SandboxSignal,
+    apply_sandbox_fees,
     bar_time_sec,
     build_manual_entry_signal,
     enrich_sandbox_df,
     entry_source_label,
     evaluate_entry,
     evaluate_exit_and_trail,
+    exit_reason_label,
     ref_intervals_for_logic,
     resolve_entry_source,
     sandbox_leverage,
@@ -137,6 +140,7 @@ class SandboxEngine:
             "sandbox_positions": positions,
             "sandbox_alerts": list(self._last_alerts),
             "sandbox_stats": self.tracker.stats(day),
+            "sandbox_trade_history": self.tracker.list_trades(limit=500),
         }
 
     def get_trade_markers(self, symbol: str) -> list[dict[str, Any]]:
@@ -476,6 +480,7 @@ class SandboxEngine:
             meta["source"] = source
             meta["source_label"] = entry_source_label(source)
             meta["manual"] = source == "manual"
+            meta["fee_pct"] = SANDBOX_FEE_PCT
             meta["events"] = [
                 {
                     "type": "entry",
@@ -489,6 +494,7 @@ class SandboxEngine:
                     "entry_reason": meta.get("entry_reason") or sig.message,
                     "source": source,
                     "source_label": meta["source_label"],
+                    "fee_pct": SANDBOX_FEE_PCT,
                     "interval": meta.get("interval") or SANDBOX_INTERVAL,
                     "ref_intervals": meta.get("ref_intervals"),
                 }
@@ -634,14 +640,21 @@ class SandboxEngine:
             frac = float((sig.meta or {}).get("partial_frac") or 0.3)
             frac = min(max(frac, 0.05), 0.9)
             exit_px = float(sig.price)
-            close_size = pos.size * frac
             if pos.side == "LONG":
                 pnl_pct = (exit_px - pos.entry_price) / pos.entry_price * 100.0
             else:
                 pnl_pct = (pos.entry_price - exit_px) / pos.entry_price * 100.0
             lev = float(meta.get("leverage") or sandbox_leverage(sym))
             margin = float(meta.get("margin_usd") or SANDBOX_NOTIONAL_USD)
-            pnl_usd = pnl_pct / 100.0 * margin * lev * frac
+            fee_pct = float(meta.get("fee_pct") or SANDBOX_FEE_PCT)
+            gross_pnl_pct = pnl_pct
+            pnl_pct, pnl_usd, fee_usd, fee_price_pct = apply_sandbox_fees(
+                pnl_pct=gross_pnl_pct,
+                margin_usd=margin,
+                leverage=lev,
+                frac=frac,
+                fee_pct=fee_pct,
+            )
             roe_pct = pnl_pct * lev
             bal = self.tracker.get_balance() + pnl_usd
             self.tracker.set_balance(bal)
@@ -655,14 +668,23 @@ class SandboxEngine:
                     "frac": frac,
                     "pnl_usd": pnl_usd,
                     "pnl_pct": pnl_pct,
+                    "gross_pnl_pct": gross_pnl_pct,
+                    "fee_usd": fee_usd,
+                    "fee_pct": fee_pct,
+                    "fee_price_pct": fee_price_pct,
                     "roe_pct": roe_pct,
                     "stage": 2,
+                    "reason": "partial",
+                    "exit_code": "partial",
+                    "exit_label": exit_reason_label("partial"),
                     "message": sig.message,
                 },
             )
             meta["partial_done"] = True
             meta["stage"] = 2
             meta["remaining_frac"] = float(meta.get("remaining_frac") or 1.0) * (1.0 - frac)
+            meta["partial_pnl_usd"] = float(meta.get("partial_pnl_usd") or 0.0) + pnl_usd
+            meta["partial_fee_usd"] = float(meta.get("partial_fee_usd") or 0.0) + fee_usd
             if sm.get("highest_price") is not None:
                 meta["highest_price"] = float(sm["highest_price"])
             if sm.get("lowest_price") is not None:
@@ -671,33 +693,15 @@ class SandboxEngine:
             pos.breakeven_armed = True
             pos.meta_json = json.dumps(meta, ensure_ascii=False)
             self.tracker.upsert_position(pos)
-            self.tracker.add_trade(
-                {
-                    "symbol": sym,
-                    "side": pos.side,
-                    "logic": pos.logic,
-                    "entry_price": pos.entry_price,
-                    "exit_price": exit_px,
-                    "entry_time": pos.entry_time,
-                    "exit_time": bar_time,
-                    "size": close_size,
-                    "leverage": lev,
-                    "pnl_usd": pnl_usd,
-                    "pnl_pct": pnl_pct,
-                    "roe_pct": roe_pct,
-                    "reason": f"partial_{frac:.0%}",
-                    "events_json": json.dumps(meta.get("events") or [], ensure_ascii=False),
-                    "is_partial": 1,
-                    **self._trade_context(pos, meta),
-                }
-            )
+            # 减仓不单独落库成第二笔；事件记入持仓，待全平合并为一条成交
             logger.info(
-                "沙盒减仓 %s %s %.0f%% @ %s pnl=%.4fU",
+                "沙盒减仓 %s %s %.0f%% @ %s pnl=%.4fU fee=%.4fU",
                 sym,
                 pos.logic,
                 frac * 100,
                 exit_px,
                 pnl_usd,
+                fee_usd,
             )
             return {
                 "type": "partial",
@@ -713,6 +717,9 @@ class SandboxEngine:
                 "pnl_usd": pnl_usd,
                 "pnl_pct": pnl_pct,
                 "roe_pct": roe_pct,
+                "fee_usd": fee_usd,
+                "exit_code": "partial",
+                "exit_label": exit_reason_label("partial"),
                 "message": sig.message,
                 "interval": SANDBOX_INTERVAL,
                 "kline_close_time": bar_time,
@@ -732,10 +739,25 @@ class SandboxEngine:
             lev = float(meta.get("leverage") or sandbox_leverage(sym))
             margin = float(meta.get("margin_usd") or SANDBOX_NOTIONAL_USD)
             rem = float(meta.get("remaining_frac") or 1.0)
-            pnl_usd = pnl_pct / 100.0 * margin * lev * rem
+            fee_pct = float(meta.get("fee_pct") or SANDBOX_FEE_PCT)
+            gross_pnl_pct = pnl_pct
+            pnl_pct, pnl_usd, fee_usd, fee_price_pct = apply_sandbox_fees(
+                pnl_pct=gross_pnl_pct,
+                margin_usd=margin,
+                leverage=lev,
+                frac=rem,
+                fee_pct=fee_pct,
+            )
+            partial_pnl = float(meta.get("partial_pnl_usd") or 0.0)
+            partial_fee = float(meta.get("partial_fee_usd") or 0.0)
+            total_pnl = pnl_usd + partial_pnl
+            total_fee = fee_usd + partial_fee
             roe_pct = pnl_pct * lev
             bal = self.tracker.get_balance() + pnl_usd
             self.tracker.set_balance(bal)
+            sm = dict(sig.meta or {})
+            exit_code = str(sm.get("exit_code") or sm.get("reason") or "exit")
+            exit_label = str(sm.get("exit_label") or exit_reason_label(exit_code, sig.message))
             self._append_event(
                 meta,
                 {
@@ -743,13 +765,21 @@ class SandboxEngine:
                     "time": bar_time,
                     "price": exit_px,
                     "sl": pos.sl,
-                    "reason": (sig.meta or {}).get("reason") or sig.message,
+                    "reason": exit_code,
+                    "exit_code": exit_code,
+                    "exit_label": exit_label,
+                    "held_bars": sm.get("held_bars"),
                     "pnl_usd": pnl_usd,
                     "pnl_pct": pnl_pct,
+                    "gross_pnl_pct": gross_pnl_pct,
+                    "fee_usd": fee_usd,
+                    "fee_pct": fee_pct,
+                    "fee_price_pct": fee_price_pct,
                     "roe_pct": roe_pct,
                     "message": sig.message,
                 },
             )
+            reason = f"{exit_code}|{exit_label}|{sig.message}"
             self.tracker.add_trade(
                 {
                     "symbol": sym,
@@ -761,10 +791,14 @@ class SandboxEngine:
                     "exit_time": bar_time,
                     "size": pos.size,
                     "leverage": lev,
-                    "pnl_usd": pnl_usd,
+                    "pnl_usd": total_pnl,
                     "pnl_pct": pnl_pct,
                     "roe_pct": roe_pct,
-                    "reason": (sig.meta or {}).get("reason") or sig.message,
+                    "fee_usd": total_fee,
+                    "fee_pct": fee_pct,
+                    "reason": reason,
+                    "exit_code": exit_code,
+                    "exit_label": exit_label,
                     "events_json": json.dumps(meta.get("events") or [], ensure_ascii=False),
                     "is_partial": 0,
                     **self._trade_context(pos, meta),
@@ -777,12 +811,14 @@ class SandboxEngine:
                 self.tracker.delete_position(sym)
             self._last_exit_bar[sym] = bar_time
             logger.info(
-                "沙盒平仓 #%s %s %s %s pnl=%.4fU 价变=%.2f%% ROE=%.1f%% (%gx) bal=%.2f",
+                "沙盒平仓 #%s %s %s %s %s pnl=%.4fU fee=%.4fU 价变=%.2f%% ROE=%.1f%% (%gx) bal=%.2f",
                 pos.id,
                 sym,
                 pos.side,
                 pos.logic,
-                pnl_usd,
+                exit_label,
+                total_pnl,
+                total_fee,
                 pnl_pct,
                 roe_pct,
                 lev,
@@ -800,13 +836,16 @@ class SandboxEngine:
                 "entry_time": pos.entry_time,
                 "exit_time": bar_time,
                 "leverage": lev,
-                "pnl_usd": pnl_usd,
+                "pnl_usd": total_pnl,
                 "pnl_pct": pnl_pct,
                 "roe_pct": roe_pct,
+                "fee_usd": total_fee,
+                "exit_code": exit_code,
+                "exit_label": exit_label,
                 "events": meta.get("events") or [],
                 "message": sig.message,
                 "interval": SANDBOX_INTERVAL,
                 "kline_close_time": bar_time,
-                "status_label": f"沙盒平仓 · 逻辑{pos.logic} · {pnl_usd:+.2f}U",
+                "status_label": f"沙盒平仓 · {exit_label} · {total_pnl:+.2f}U(含费)",
             }
         return None

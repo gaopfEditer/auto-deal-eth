@@ -7,15 +7,18 @@ from typing import Any
 import pandas as pd
 
 from oi_mornitor.config import (
+    SANDBOX_FEE_PCT,
     SANDBOX_HUNTER_ATR_MULT,
     SANDBOX_HUNTER_SL_PAD,
     SANDBOX_INTERVAL,
     SANDBOX_LEVERAGE_ALT,
     SANDBOX_LEVERAGE_MAJOR,
     SANDBOX_MAJOR_SYMBOLS,
+    SANDBOX_MIN_HOLD_BARS,
     SANDBOX_RANGE_SLOPE_MAX,
     SANDBOX_REF_INTERVALS_HUNTER,
     SANDBOX_REF_INTERVALS_TREND,
+    SANDBOX_SOFT_EXIT_MIN_MOVE_PCT,
     SANDBOX_STEP_TRAIL_PROFIT_PCT,
     SANDBOX_STEP_TRAIL_SL_LIFT_PCT,
     SANDBOX_TREND_BE_PRICE_PCT,
@@ -56,6 +59,36 @@ def is_major_symbol(symbol: str) -> bool:
 
 def sandbox_leverage(symbol: str) -> float:
     return SANDBOX_LEVERAGE_MAJOR if is_major_symbol(symbol) else SANDBOX_LEVERAGE_ALT
+
+
+def sandbox_round_trip_fee_pct(fee_pct: float | None = None) -> float:
+    """开+平双边手续费（价格变动百分点，与回测一致）。"""
+    one = float(fee_pct if fee_pct is not None else SANDBOX_FEE_PCT)
+    return max(0.0, one) * 2.0
+
+
+def apply_sandbox_fees(
+    *,
+    pnl_pct: float,
+    margin_usd: float,
+    leverage: float,
+    frac: float = 1.0,
+    fee_pct: float | None = None,
+) -> tuple[float, float, float, float]:
+    """
+    从毛利中扣开平双边手续费。
+    返回 (net_pnl_pct, net_pnl_usd, fee_usd, fee_price_pct)。
+    fee 按名义本金 margin×lev×frac 计：单边 fee_pct%，双边 ×2。
+    """
+    one = float(fee_pct if fee_pct is not None else SANDBOX_FEE_PCT)
+    one = max(0.0, one)
+    fee_price_pct = one * 2.0
+    frac = min(max(float(frac), 0.0), 1.0)
+    notional = float(margin_usd) * float(leverage) * frac
+    fee_usd = notional * (one / 100.0) * 2.0
+    net_pnl_pct = float(pnl_pct) - fee_price_pct
+    net_pnl_usd = net_pnl_pct / 100.0 * float(margin_usd) * float(leverage) * frac
+    return net_pnl_pct, net_pnl_usd, fee_usd, fee_price_pct
 
 
 def entry_source_label(source: str) -> str:
@@ -522,6 +555,55 @@ def _price_pnl_pct(side: str, entry: float, px: float) -> float:
     return (entry - px) / entry * 100.0
 
 
+# 出场原因码 → 中文（便于复盘改进）
+EXIT_REASON_LABELS: dict[str, str] = {
+    "sl": "硬止损",
+    "step_sl": "阶梯锁定止损",
+    "bb_mid": "布林中轨止盈",
+    "atr2": "ATR止盈",
+    "trail": "跟踪止损",
+    "partial": "阶段减仓",
+    "breakeven": "保本移损",
+    "step_trail": "阶梯移止损",
+}
+
+
+def exit_reason_label(code: str, fallback: str = "") -> str:
+    c = str(code or "").strip().lower()
+    return EXIT_REASON_LABELS.get(c) or fallback or c or "未知出场"
+
+
+def _soft_tp_allowed(
+    *,
+    held: int,
+    side: str,
+    entry_price: float,
+    price: float,
+) -> bool:
+    """
+    主动止盈门槛（防入场后立刻被中轨/ATR打出）：
+    - 至少持仓 MIN_HOLD 根已收盘 K
+    - 收盘价相对入场已有 SOFT_EXIT_MIN_MOVE_PCT 以上有利波动
+    硬止损不受此限。
+    """
+    if held < max(1, SANDBOX_MIN_HOLD_BARS):
+        return False
+    return _price_pnl_pct(side, entry_price, price) >= SANDBOX_SOFT_EXIT_MIN_MOVE_PCT
+
+
+def _exit_meta(reason: str, event: str, message: str, **extra: Any) -> dict[str, Any]:
+    label = exit_reason_label(reason, message)
+    out = {
+        "reason": reason,
+        "event": event,
+        "exit_code": reason,
+        "exit_label": label,
+        "message": message,
+    }
+    out.update(extra)
+    return out
+
+
 def _step_trail_sl(
     side: str,
     entry: float,
@@ -573,9 +655,9 @@ def evaluate_exit_and_trail(
 ) -> list[SandboxSignal]:
     """
     平仓/阶段管理：
-    - 硬止损（入场当根不触发）
+    - 硬止损（入场当根不触发；不受最短持仓限制）
     - 通用阶梯：峰值盈利每满 2.2% → 相对入场锁定 +1% SL（可叠加）
-    - S：中轨或 2×ATR 全平
+    - S：中轨或 2×ATR 全平（需最短持仓 + 最小有利波动，用收盘价判定中轨）
     - T：阶段1保本 → 阶段2减仓30% → 阶段3跟踪1%
     """
     del tp2  # 短线只用中轨/ATR；长线用状态机
@@ -596,26 +678,28 @@ def evaluate_exit_and_trail(
 
     # —— 硬止损 ——
     if side == "LONG" and low <= incoming_sl:
+        msg = f"硬止损 · 持仓{held}根 · SL={incoming_sl:.6g}"
         out.append(
             SandboxSignal(
                 action="exit",
                 side=side,
                 logic=logic,
                 price=incoming_sl,
-                message=f"触发止损 {incoming_sl:.6g}",
-                meta={"reason": "sl", "event": "exit_sl"},
+                message=msg,
+                meta=_exit_meta("sl", "exit_sl", msg, held_bars=held),
             )
         )
         return out
     if side == "SHORT" and high >= incoming_sl:
+        msg = f"硬止损 · 持仓{held}根 · SL={incoming_sl:.6g}"
         out.append(
             SandboxSignal(
                 action="exit",
                 side=side,
                 logic=logic,
                 price=incoming_sl,
-                message=f"触发止损 {incoming_sl:.6g}",
-                meta={"reason": "sl", "event": "exit_sl"},
+                message=msg,
+                meta=_exit_meta("sl", "exit_sl", msg, held_bars=held),
             )
         )
         return out
@@ -626,6 +710,9 @@ def evaluate_exit_and_trail(
     )
     stage = int(meta.get("stage") or 0)
     partial_done = bool(meta.get("partial_done"))
+    soft_ok = _soft_tp_allowed(
+        held=held, side=side, entry_price=entry_price, price=price
+    )
 
     highest = float(meta.get("highest_price") or entry_price)
     lowest = float(meta.get("lowest_price") or entry_price)
@@ -648,25 +735,25 @@ def evaluate_exit_and_trail(
             "highest_price": highest,
             "lowest_price": lowest,
             "step_trail_level": max(prev_steps, step_n),
+            "held_bars": held,
         }
         base.update(extra)
         return base
 
     def _emit_step_trail(new_sl: float) -> SandboxSignal:
+        msg = (
+            f"阶梯移止损 · 峰值盈利≥{step_n * SANDBOX_STEP_TRAIL_PROFIT_PCT:.1f}% "
+            f"→ 锁定+{step_n * SANDBOX_STEP_TRAIL_SL_LIFT_PCT:.1f}% · SL→{new_sl:.6g}"
+        )
         return SandboxSignal(
             action="trail",
             side=side,
             logic=logic,
             price=price,
             sl=new_sl,
-            message=(
-                f"阶梯移止损 · 峰值盈利≥{step_n * SANDBOX_STEP_TRAIL_PROFIT_PCT:.1f}% "
-                f"→ 锁定+{step_n * SANDBOX_STEP_TRAIL_SL_LIFT_PCT:.1f}% · SL→{new_sl:.6g}"
-            ),
+            message=msg,
             meta=_sync_meta(
-                reason="step_trail",
-                event="trail_update",
-                breakeven_armed=True,
+                **_exit_meta("step_trail", "trail_update", msg, breakeven_armed=True)
             ),
         )
 
@@ -675,65 +762,81 @@ def evaluate_exit_and_trail(
         if step_upgraded:
             out.append(_emit_step_trail(working_sl))
             if side == "LONG" and low <= working_sl:
+                msg = f"阶梯锁定止损 · 持仓{held}根 · SL={working_sl:.6g}"
                 out.append(
                     SandboxSignal(
                         action="exit",
                         side=side,
                         logic=logic,
                         price=working_sl,
-                        message=f"触发阶梯止损 {working_sl:.6g}",
-                        meta=_sync_meta(reason="sl", event="exit_sl"),
+                        message=msg,
+                        meta=_sync_meta(**_exit_meta("step_sl", "exit_sl", msg)),
                     )
                 )
                 return out
             if side == "SHORT" and high >= working_sl:
+                msg = f"阶梯锁定止损 · 持仓{held}根 · SL={working_sl:.6g}"
                 out.append(
                     SandboxSignal(
                         action="exit",
                         side=side,
                         logic=logic,
                         price=working_sl,
-                        message=f"触发阶梯止损 {working_sl:.6g}",
-                        meta=_sync_meta(reason="sl", event="exit_sl"),
+                        message=msg,
+                        meta=_sync_meta(**_exit_meta("step_sl", "exit_sl", msg)),
                     )
                 )
                 return out
-        if bb_m > 0:
-            if side == "LONG" and high >= bb_m:
-                out.append(
-                    SandboxSignal(
-                        action="exit",
-                        side=side,
-                        logic=logic,
-                        price=bb_m,
-                        message="短线猎手 · 触及布林中轨全平",
-                        meta={"reason": "bb_mid", "event": "exit_tp"},
-                    )
+        # 主动止盈：最短持仓 + 最小有利波动；中轨用收盘价（避免影线秒平）
+        if soft_ok and bb_m > 0:
+            if side == "LONG" and price >= bb_m:
+                msg = (
+                    f"布林中轨止盈 · 持仓{held}根 · 收盘触及中轨 "
+                    f"(≥{SANDBOX_SOFT_EXIT_MIN_MOVE_PCT:g}%有利)"
                 )
-                return out
-            if side == "SHORT" and low <= bb_m:
-                out.append(
-                    SandboxSignal(
-                        action="exit",
-                        side=side,
-                        logic=logic,
-                        price=bb_m,
-                        message="短线猎手 · 触及布林中轨全平",
-                        meta={"reason": "bb_mid", "event": "exit_tp"},
-                    )
-                )
-                return out
-        if atr > 0 and entry_price > 0:
-            move = abs(price - entry_price)
-            if move >= atr * SANDBOX_HUNTER_ATR_MULT and _price_pnl_pct(side, entry_price, price) > 0:
                 out.append(
                     SandboxSignal(
                         action="exit",
                         side=side,
                         logic=logic,
                         price=price,
-                        message=f"短线猎手 · 有利波动≥{SANDBOX_HUNTER_ATR_MULT:.0f}×ATR 全平",
-                        meta={"reason": "atr2", "event": "exit_tp"},
+                        message=msg,
+                        meta=_exit_meta("bb_mid", "exit_tp", msg, held_bars=held),
+                    )
+                )
+                return out
+            if side == "SHORT" and price <= bb_m:
+                msg = (
+                    f"布林中轨止盈 · 持仓{held}根 · 收盘触及中轨 "
+                    f"(≥{SANDBOX_SOFT_EXIT_MIN_MOVE_PCT:g}%有利)"
+                )
+                out.append(
+                    SandboxSignal(
+                        action="exit",
+                        side=side,
+                        logic=logic,
+                        price=price,
+                        message=msg,
+                        meta=_exit_meta("bb_mid", "exit_tp", msg, held_bars=held),
+                    )
+                )
+                return out
+        if soft_ok and atr > 0 and entry_price > 0:
+            move = abs(price - entry_price)
+            if move >= atr * SANDBOX_HUNTER_ATR_MULT and _price_pnl_pct(
+                side, entry_price, price
+            ) > 0:
+                msg = (
+                    f"ATR止盈 · 持仓{held}根 · 有利波动≥{SANDBOX_HUNTER_ATR_MULT:.0f}×ATR"
+                )
+                out.append(
+                    SandboxSignal(
+                        action="exit",
+                        side=side,
+                        logic=logic,
+                        price=price,
+                        message=msg,
+                        meta=_exit_meta("atr2", "exit_tp", msg, held_bars=held),
                     )
                 )
                 return out
@@ -767,29 +870,25 @@ def evaluate_exit_and_trail(
         if side == "LONG":
             trail_sl = _improve_sl(side, highest * (1.0 - trail_pct), step_sl)
             if low <= trail_sl:
+                msg = f"跟踪止损 · 持仓{held}根 · SL={trail_sl:.6g}"
                 out.append(
                     SandboxSignal(
                         action="exit",
                         side=side,
                         logic=logic,
                         price=trail_sl,
-                        message=f"尾仓跟踪止损 · 回撤/阶梯锁利 SL={trail_sl:.6g}",
-                        meta=_sync_meta(
-                            reason="trail",
-                            event="exit_trail",
-                            trailing_sl=trail_sl,
-                            stage=3,
-                        ),
+                        message=msg,
+                        meta=_sync_meta(**_exit_meta("trail", "exit_trail", msg)),
                     )
                 )
                 return out
-            if trail_sl > incoming_sl * 1.0005:
+            if step_upgraded or abs(trail_sl - incoming_sl) / max(incoming_sl, 1e-12) >= 0.0005:
                 reason = "step_trail" if step_upgraded else "trailing_update"
                 msg = (
                     f"阶梯移止损 · 峰值≥{step_n * SANDBOX_STEP_TRAIL_PROFIT_PCT:.1f}% "
                     f"锁定+{step_n * SANDBOX_STEP_TRAIL_SL_LIFT_PCT:.1f}% · SL→{trail_sl:.6g}"
                     if step_upgraded
-                    else f"尾仓跟踪上移 SL→{trail_sl:.6g}"
+                    else f"跟踪移止损 · SL→{trail_sl:.6g}"
                 )
                 out.append(
                     SandboxSignal(
@@ -802,7 +901,8 @@ def evaluate_exit_and_trail(
                         meta=_sync_meta(
                             reason=reason,
                             event="trail_update",
-                            stage=3,
+                            exit_code=reason,
+                            exit_label=exit_reason_label(reason, msg),
                             breakeven_armed=True,
                         ),
                     )
@@ -820,37 +920,32 @@ def evaluate_exit_and_trail(
                         reason="extreme_sync",
                         event="sync",
                         silent=True,
-                        stage=3,
                     ),
                 )
             )
             return out
-
+        # SHORT
         trail_sl = _improve_sl(side, lowest * (1.0 + trail_pct), step_sl)
         if high >= trail_sl:
+            msg = f"跟踪止损 · 持仓{held}根 · SL={trail_sl:.6g}"
             out.append(
                 SandboxSignal(
                     action="exit",
                     side=side,
                     logic=logic,
                     price=trail_sl,
-                    message=f"尾仓跟踪止损 · 反弹/阶梯锁利 SL={trail_sl:.6g}",
-                    meta=_sync_meta(
-                        reason="trail",
-                        event="exit_trail",
-                        trailing_sl=trail_sl,
-                        stage=3,
-                    ),
+                    message=msg,
+                    meta=_sync_meta(**_exit_meta("trail", "exit_trail", msg)),
                 )
             )
             return out
-        if trail_sl < incoming_sl * 0.9995:
+        if step_upgraded or abs(trail_sl - incoming_sl) / max(incoming_sl, 1e-12) >= 0.0005:
             reason = "step_trail" if step_upgraded else "trailing_update"
             msg = (
                 f"阶梯移止损 · 峰值≥{step_n * SANDBOX_STEP_TRAIL_PROFIT_PCT:.1f}% "
                 f"锁定+{step_n * SANDBOX_STEP_TRAIL_SL_LIFT_PCT:.1f}% · SL→{trail_sl:.6g}"
                 if step_upgraded
-                else f"尾仓跟踪下移 SL→{trail_sl:.6g}"
+                else f"跟踪移止损 · SL→{trail_sl:.6g}"
             )
             out.append(
                 SandboxSignal(
@@ -863,7 +958,8 @@ def evaluate_exit_and_trail(
                     meta=_sync_meta(
                         reason=reason,
                         event="trail_update",
-                        stage=3,
+                        exit_code=reason,
+                        exit_label=exit_reason_label(reason, msg),
                         breakeven_armed=True,
                     ),
                 )
@@ -881,24 +977,24 @@ def evaluate_exit_and_trail(
                     reason="extreme_sync",
                     event="sync",
                     silent=True,
-                    stage=3,
                 ),
             )
         )
         return out
 
-    # 阶段 2：减仓 30%
-    if not partial_done and pnl_now >= partial_pct:
+
+    # 阶段 2：减仓 30%（同样要求最短持仓，避免刚进场就减）
+    if not partial_done and soft_ok and pnl_now >= partial_pct:
+        msg = f"阶段减仓 · 持仓{held}根 · 价变≥{partial_pct}% 减仓{partial_frac*100:.0f}%"
         out.append(
             SandboxSignal(
                 action="partial",
                 side=side,
                 logic=logic,
                 price=price,
-                message=f"阶段2 · 价变≥{partial_pct}% 减仓{partial_frac*100:.0f}%",
+                message=msg,
                 meta=_sync_meta(
-                    reason="partial",
-                    event="partial_tp",
+                    **_exit_meta("partial", "partial_tp", msg),
                     partial_frac=partial_frac,
                     stage=2,
                     partial_done=True,
@@ -922,6 +1018,8 @@ def evaluate_exit_and_trail(
                 meta=_sync_meta(
                     reason="post_partial_trail",
                     event="trail_update",
+                    exit_code="trail",
+                    exit_label=exit_reason_label("trail"),
                     stage=2,
                     partial_done=True,
                     breakeven_armed=True,
@@ -943,6 +1041,7 @@ def evaluate_exit_and_trail(
             side == "SHORT" and be_sl < incoming_sl * 0.9999
         )
         if improve:
+            msg = f"保本移损 · 持仓{held}根 · 价变≥{be_pct}% 止损移至保本/阶梯"
             out.append(
                 SandboxSignal(
                     action="trail",
@@ -950,10 +1049,9 @@ def evaluate_exit_and_trail(
                     logic=logic,
                     price=price,
                     sl=be_sl,
-                    message=f"阶段1 · 价变≥{be_pct}% 止损移至保本/阶梯",
+                    message=msg,
                     meta=_sync_meta(
-                        reason="breakeven",
-                        event="trail_be",
+                        **_exit_meta("breakeven", "trail_be", msg),
                         stage=1,
                         breakeven_armed=True,
                     ),

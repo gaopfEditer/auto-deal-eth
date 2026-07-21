@@ -130,6 +130,22 @@ class SandboxTracker:
                 conn.execute(
                     "ALTER TABLE trades ADD COLUMN source TEXT NOT NULL DEFAULT 'auto'"
                 )
+            if "exit_code" not in cols:
+                conn.execute(
+                    "ALTER TABLE trades ADD COLUMN exit_code TEXT NOT NULL DEFAULT ''"
+                )
+            if "exit_label" not in cols:
+                conn.execute(
+                    "ALTER TABLE trades ADD COLUMN exit_label TEXT NOT NULL DEFAULT ''"
+                )
+            if "fee_usd" not in cols:
+                conn.execute(
+                    "ALTER TABLE trades ADD COLUMN fee_usd REAL NOT NULL DEFAULT 0"
+                )
+            if "fee_pct" not in cols:
+                conn.execute(
+                    "ALTER TABLE trades ADD COLUMN fee_pct REAL NOT NULL DEFAULT 0"
+                )
             row = conn.execute("SELECT balance FROM account WHERE id = 1").fetchone()
             if row is None:
                 conn.execute(
@@ -350,14 +366,27 @@ class SandboxTracker:
                 "entry_reason": trade.get("entry_reason"),
             }
         )
+        exit_code = str(trade.get("exit_code") or "")
+        exit_label = str(trade.get("exit_label") or "")
+        if not exit_code and trade.get("reason"):
+            # reason 形如 code|label|message
+            parts = str(trade["reason"]).split("|", 2)
+            if len(parts) >= 2 and parts[0] and not parts[0].startswith("partial_"):
+                exit_code = parts[0]
+                exit_label = exit_label or parts[1]
+        if not exit_label and exit_code:
+            from oi_mornitor.sandbox.logics import exit_reason_label as _erl
+
+            exit_label = _erl(exit_code)
         with self._connect() as conn:
             conn.execute(
                 """
                 INSERT INTO trades (
                     symbol, side, logic, entry_price, exit_price, entry_time, exit_time,
                     size, leverage, pnl_usd, pnl_pct, roe_pct, reason, day,
-                    events_json, is_partial, entry_reason, interval, ref_intervals, source
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    events_json, is_partial, entry_reason, interval, ref_intervals, source,
+                    exit_code, exit_label, fee_usd, fee_pct
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     str(trade["symbol"]).upper(),
@@ -380,6 +409,10 @@ class SandboxTracker:
                     str(trade.get("interval") or SANDBOX_INTERVAL or "15m"),
                     refs_s,
                     source,
+                    exit_code,
+                    exit_label,
+                    float(trade.get("fee_usd") or 0),
+                    float(trade.get("fee_pct") or 0),
                 ),
             )
 
@@ -505,6 +538,29 @@ class SandboxTracker:
                     break
         t["source"] = source
         t["source_label"] = entry_source_label(source)
+        exit_code = str(t.get("exit_code") or "")
+        exit_label = str(t.get("exit_label") or "")
+        if not exit_code:
+            reason = str(t.get("reason") or "")
+            if "|" in reason:
+                parts = reason.split("|", 2)
+                exit_code = parts[0]
+                if not exit_label and len(parts) > 1:
+                    exit_label = parts[1]
+            else:
+                for e in t.get("events") or []:
+                    if e.get("type") == "exit":
+                        exit_code = str(e.get("exit_code") or e.get("reason") or "")
+                        exit_label = str(e.get("exit_label") or "")
+                        break
+        if exit_code and not exit_label:
+            from oi_mornitor.sandbox.logics import exit_reason_label as _erl
+
+            exit_label = _erl(exit_code, str(t.get("reason") or ""))
+        t["exit_code"] = exit_code
+        t["exit_label"] = exit_label
+        t["fee_usd"] = float(t.get("fee_usd") or 0)
+        t["fee_pct"] = float(t.get("fee_pct") or 0)
         return t
 
     @staticmethod

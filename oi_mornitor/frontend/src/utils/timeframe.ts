@@ -21,13 +21,22 @@ const EMPTY_RANK: RankMetricSnapshot = {
 
 export function getOiWindow(row: TickerRow, tf: OiTimeframe): { delta_usd: number; pct: number } {
   const fromMap = row.oi_by_tf?.[tf];
-  if (fromMap) return fromMap;
+  const raw = fromMap
+    ? fromMap
+    : tf === "15m"
+      ? { delta_usd: row.delta_15m_usd ?? 0, pct: row.pct_15m ?? 0 }
+      : { delta_usd: row.delta_5m_usd ?? 0, pct: row.pct_5m ?? 0 };
 
-  // 兼容旧快照
-  if (tf === "15m") {
-    return { delta_usd: row.delta_15m_usd ?? 0, pct: row.pct_15m ?? 0 };
+  // 前端兜底：屏蔽历史脏点导致的荒谬 OI 差分（与后端 OI_DELTA_MAX_PCT 对齐）
+  const maxPct = 150;
+  if (!Number.isFinite(raw.pct) || Math.abs(raw.pct) > maxPct) {
+    return { delta_usd: 0, pct: 0 };
   }
-  return { delta_usd: row.delta_5m_usd ?? 0, pct: row.pct_5m ?? 0 };
+  const oiUsd = row.current_oi_usd ?? 0;
+  if (oiUsd > 0 && Math.abs(raw.delta_usd) > oiUsd * (1 + maxPct / 100)) {
+    return { delta_usd: 0, pct: 0 };
+  }
+  return raw;
 }
 
 export function getPriceWindow(row: TickerRow, tf: OiTimeframe): PriceWindowSnapshot {

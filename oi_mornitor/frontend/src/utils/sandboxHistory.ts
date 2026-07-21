@@ -1,7 +1,21 @@
-/** 沙盒历史订单：localStorage，最多保留 3 天 */
+/** 沙盒历史订单：localStorage，最多保留 90 天（支持近三月筛选） */
 
 export const SANDBOX_HISTORY_KEY = "oi_sandbox_trade_history_v1";
-export const SANDBOX_HISTORY_RETAIN_DAYS = 3;
+export const SANDBOX_HISTORY_RETAIN_DAYS = 90;
+
+export type SandboxHistoryRange = "1d" | "2d" | "7d" | "30d" | "90d";
+
+export const SANDBOX_HISTORY_RANGE_OPTIONS: Array<{
+  id: SandboxHistoryRange;
+  label: string;
+  days: number;
+}> = [
+  { id: "1d", label: "今日", days: 1 },
+  { id: "2d", label: "近两天", days: 2 },
+  { id: "7d", label: "近一周", days: 7 },
+  { id: "30d", label: "近一月", days: 30 },
+  { id: "90d", label: "近三月", days: 90 },
+];
 
 export interface SandboxHistoryTrade {
   key: string;
@@ -24,9 +38,15 @@ export interface SandboxHistoryTrade {
   entry_reason?: string;
   source?: string;
   source_label?: string;
+  exit_code?: string;
+  exit_label?: string;
+  fee_usd?: number;
+  fee_pct?: number;
   interval?: string;
   ref_intervals?: string[];
   ref_intervals_label?: string;
+  /** 合并后的阶段事件文案（; 分隔） */
+  stage_events?: string;
 }
 
 export type SandboxTradeInput = {
@@ -50,6 +70,10 @@ export type SandboxTradeInput = {
   entry_reason?: string;
   source?: string;
   source_label?: string;
+  exit_code?: string;
+  exit_label?: string;
+  fee_usd?: number;
+  fee_pct?: number;
   interval?: string;
   ref_intervals?: string[] | string;
   ref_intervals_label?: string;
@@ -71,6 +95,21 @@ function cutoffDayKey(retainDays = SANDBOX_HISTORY_RETAIN_DAYS): string {
   return localDayKey(Math.floor(d.getTime() / 1000));
 }
 
+/** 同笔仓位分组键：币种+方向+逻辑+入场时间 */
+export function positionGroupKey(t: {
+  symbol: string;
+  side: string;
+  logic: string;
+  entry_time?: number;
+}): string {
+  return [
+    String(t.symbol).toUpperCase(),
+    t.side,
+    t.logic,
+    t.entry_time ?? 0,
+  ].join("|");
+}
+
 export function tradeKey(t: {
   symbol: string;
   side: string;
@@ -80,17 +119,65 @@ export function tradeKey(t: {
   entry_price: number;
   exit_price: number;
   id?: number | string;
+  is_partial?: number;
 }): string {
+  // 同仓多段（减仓+全平）共用 group key，便于合并
+  if (!t.is_partial) {
+    return `pos:${positionGroupKey(t)}`;
+  }
   if (t.id != null && t.id !== "") return `id:${t.id}`;
   return [
-    String(t.symbol).toUpperCase(),
-    t.side,
-    t.logic,
-    t.entry_time ?? 0,
+    "partial",
+    positionGroupKey(t),
     t.exit_time ?? 0,
-    Number(t.entry_price).toFixed(8),
     Number(t.exit_price).toFixed(8),
   ].join("|");
+}
+
+function fmtPx(n: unknown): string {
+  const v = Number(n);
+  if (!Number.isFinite(v)) return "";
+  if (Math.abs(v) >= 1000) return v.toFixed(2);
+  if (Math.abs(v) >= 1) return v.toFixed(4);
+  return v.toPrecision(4);
+}
+
+/** 阶段事件合并为一条，用 ; 分隔 */
+export function formatStageEvents(
+  events?: Array<Record<string, unknown>>,
+  fallbackReason?: string,
+): string {
+  if (!events?.length) {
+    return fallbackReason?.trim() || "—";
+  }
+  const parts: string[] = [];
+  for (const e of events) {
+    const typ = String(e.type || "");
+    if (!typ || typ === "sync") continue;
+    const label =
+      typ === "entry"
+        ? "入"
+        : typ === "exit"
+          ? "出"
+          : typ === "partial"
+            ? "减"
+            : typ === "trail"
+              ? "移"
+              : typ;
+    const exitLabel = e.exit_label ? String(e.exit_label) : "";
+    const msg = String(e.message || e.entry_reason || e.reason || exitLabel || "");
+    const px = e.price != null ? `@${fmtPx(e.price)}` : "";
+    const sl = e.sl != null ? ` SL${fmtPx(e.sl)}` : "";
+    const bit = exitLabel && typ === "exit"
+      ? `${label}${px}${sl} ${exitLabel}`
+      : msg
+        ? `${label}${px}${sl} ${msg}`
+        : `${label}${px}${sl}`;
+    const cleaned = bit.replace(/\s+/g, " ").trim();
+    if (cleaned && !parts.includes(cleaned)) parts.push(cleaned);
+  }
+  if (!parts.length) return fallbackReason?.trim() || "—";
+  return parts.join("; ");
 }
 
 export function normalizeTrade(
@@ -145,6 +232,24 @@ export function normalizeTrade(
   if (!sourceLabel) {
     sourceLabel = source === "manual" || source === "手动" ? "手动" : "自动";
   }
+  let exitCode = String(raw.exit_code || "");
+  let exitLabel = String(raw.exit_label || "");
+  if (!exitCode && raw.reason && String(raw.reason).includes("|")) {
+    const parts = String(raw.reason).split("|", 2);
+    exitCode = parts[0];
+    exitLabel = exitLabel || parts[1] || "";
+  }
+  if (!exitCode && Array.isArray(events)) {
+    const ex = [...events].reverse().find((e) => e?.type === "exit");
+    if (ex) {
+      exitCode = String(ex.exit_code || ex.reason || "");
+      exitLabel = exitLabel || String(ex.exit_label || "");
+    }
+  }
+  const stage = formatStageEvents(
+    Array.isArray(events) ? events : undefined,
+    String(raw.reason || ""),
+  );
   return {
     key: tradeKey({ ...raw, symbol, entry_time, exit_time }),
     symbol,
@@ -166,10 +271,65 @@ export function normalizeTrade(
     entry_reason: entryReason,
     source,
     source_label: sourceLabel,
+    exit_code: exitCode,
+    exit_label: exitLabel,
+    fee_usd: raw.fee_usd != null ? Number(raw.fee_usd) : undefined,
+    fee_pct: raw.fee_pct != null ? Number(raw.fee_pct) : undefined,
     interval: String(raw.interval || "15m"),
     ref_intervals: refs,
     ref_intervals_label: raw.ref_intervals_label || refs.join(" · "),
+    stage_events: stage,
   };
+}
+
+/** 把同仓减仓行 + 全平行合并为一条 */
+export function mergeLinkedTrades(trades: SandboxHistoryTrade[]): SandboxHistoryTrade[] {
+  const groups = new Map<string, SandboxHistoryTrade[]>();
+  for (const t of trades) {
+    const gk = positionGroupKey(t);
+    const list = groups.get(gk) || [];
+    list.push(t);
+    groups.set(gk, list);
+  }
+  const out: SandboxHistoryTrade[] = [];
+  for (const [, rows] of groups) {
+    if (rows.length === 1) {
+      const only = rows[0];
+      out.push({
+        ...only,
+        stage_events: only.stage_events || formatStageEvents(only.events, only.reason),
+      });
+      continue;
+    }
+    rows.sort((a, b) => (a.exit_time || 0) - (b.exit_time || 0));
+    const finals = rows.filter((r) => !r.is_partial);
+    const base = finals.length ? finals[finals.length - 1] : rows[rows.length - 1];
+    const eventMap = new Map<string, Record<string, unknown>>();
+    for (const r of rows) {
+      for (const e of r.events || []) {
+        const k = `${e.type}|${e.time}|${e.price}|${e.message || e.reason || ""}`;
+        if (!eventMap.has(k)) eventMap.set(k, e);
+      }
+    }
+    const events = [...eventMap.values()].sort(
+      (a, b) => Number(a.time || 0) - Number(b.time || 0),
+    );
+    const pnl = rows.reduce((s, r) => s + (Number(r.pnl_usd) || 0), 0);
+    const fee = rows.reduce((s, r) => s + (Number(r.fee_usd) || 0), 0);
+    out.push({
+      ...base,
+      key: `pos:${positionGroupKey(base)}`,
+      pnl_usd: pnl,
+      fee_usd: fee || base.fee_usd,
+      is_partial: 0,
+      events,
+      exit_code: base.exit_code || rows.map((r) => r.exit_code).find(Boolean),
+      exit_label: base.exit_label || rows.map((r) => r.exit_label).find(Boolean),
+      stage_events: formatStageEvents(events, base.reason),
+      saved_at: Math.min(...rows.map((r) => r.saved_at || Date.now())),
+    });
+  }
+  return out.sort((a, b) => (b.exit_time || b.saved_at) - (a.exit_time || a.saved_at));
 }
 
 export function pruneHistory(
@@ -185,6 +345,26 @@ export function pruneHistory(
       return t.saved_at >= cutoffMs;
     })
     .sort((a, b) => (b.exit_time || b.saved_at) - (a.exit_time || a.saved_at));
+}
+
+export function filterHistoryByRange(
+  trades: SandboxHistoryTrade[],
+  range: SandboxHistoryRange,
+): SandboxHistoryTrade[] {
+  const opt = SANDBOX_HISTORY_RANGE_OPTIONS.find((o) => o.id === range);
+  const days = opt?.days ?? 1;
+  const cutoff = cutoffDayKey(days);
+  const cutoffMs = (() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - (days - 1));
+    return d.getTime();
+  })();
+  return trades.filter((t) => {
+    if (t.day && t.day >= cutoff) return true;
+    if (t.exit_time > 0) return t.exit_time * 1000 >= cutoffMs;
+    return t.saved_at >= cutoffMs;
+  });
 }
 
 export function loadSandboxHistory(): SandboxHistoryTrade[] {
@@ -204,14 +384,14 @@ export function loadSandboxHistory(): SandboxHistoryTrade[] {
         return n;
       })
       .filter((t): t is SandboxHistoryTrade => t != null);
-    return pruneHistory(trades);
+    return mergeLinkedTrades(pruneHistory(trades));
   } catch {
     return [];
   }
 }
 
 export function saveSandboxHistory(trades: SandboxHistoryTrade[]): SandboxHistoryTrade[] {
-  const next = pruneHistory(trades);
+  const next = mergeLinkedTrades(pruneHistory(trades));
   try {
     localStorage.setItem(SANDBOX_HISTORY_KEY, JSON.stringify(next));
   } catch {
@@ -231,7 +411,18 @@ export function mergeSandboxHistory(
     const n = normalizeTrade(raw, fallbackDay);
     if (!n) continue;
     const prev = map.get(n.key);
-    map.set(n.key, prev ? { ...n, saved_at: prev.saved_at } : n);
+    if (prev && n.is_partial && !prev.is_partial) {
+      // 旧减仓行撞上已合并全平：并入事件与盈亏
+      const events = [...(prev.events || []), ...(n.events || [])];
+      map.set(prev.key, {
+        ...prev,
+        pnl_usd: (prev.pnl_usd || 0) + (n.pnl_usd || 0),
+        events,
+        stage_events: formatStageEvents(events, prev.reason),
+      });
+      continue;
+    }
+    map.set(n.key, prev ? { ...n, saved_at: prev.saved_at, key: prev.key } : n);
   }
   return saveSandboxHistory([...map.values()]);
 }

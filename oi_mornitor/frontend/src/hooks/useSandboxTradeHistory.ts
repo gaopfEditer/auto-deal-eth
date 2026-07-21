@@ -25,12 +25,17 @@ function alertToTrade(a: PatternAlert): SandboxTradeInput | null {
     pnl_pct: a.pnl_pct ?? 0,
     roe_pct: a.roe_pct,
     reason: a.message || "",
+    events: a.events as Array<Record<string, unknown>> | undefined,
+    exit_code: a.exit_code,
+    exit_label: a.exit_label,
+    is_partial: 0,
   };
 }
 
-/** 把服务端 recent_trades + 平仓 toast 合并进 localStorage（最多 3 天） */
+/** 把服务端历史 + 平仓 toast 合并进 localStorage（最多 90 天） */
 export function useSandboxTradeHistory(opts: {
   recentTrades?: SandboxTradeInput[] | null;
+  historyTrades?: SandboxTradeInput[] | null;
   day?: string;
   exitAlerts?: PatternAlert[];
   scanTs?: number;
@@ -40,14 +45,14 @@ export function useSandboxTradeHistory(opts: {
   );
 
   const serverSig = useMemo(() => {
-    const list = opts.recentTrades ?? [];
+    const list = [...(opts.historyTrades ?? []), ...(opts.recentTrades ?? [])];
     return list
       .map(
         (t) =>
-          `${t.symbol}:${t.entry_time ?? 0}:${t.exit_time ?? 0}:${t.pnl_usd}:${t.exit_price}`,
+          `${t.symbol}:${t.entry_time ?? 0}:${t.exit_time ?? 0}:${t.pnl_usd}:${t.exit_price}:${t.is_partial ?? 0}`,
       )
       .join("|");
-  }, [opts.recentTrades]);
+  }, [opts.recentTrades, opts.historyTrades]);
 
   const alertSig = useMemo(() => {
     return (opts.exitAlerts ?? [])
@@ -60,7 +65,10 @@ export function useSandboxTradeHistory(opts: {
   }, [opts.exitAlerts]);
 
   useEffect(() => {
-    const incoming: SandboxTradeInput[] = [...(opts.recentTrades ?? [])];
+    const incoming: SandboxTradeInput[] = [
+      ...(opts.historyTrades ?? []),
+      ...(opts.recentTrades ?? []),
+    ];
     for (const a of opts.exitAlerts ?? []) {
       const t = alertToTrade(a);
       if (t) incoming.push(t);

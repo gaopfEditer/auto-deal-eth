@@ -46,6 +46,8 @@ TOP_N = int(os.getenv("OI_TOP_N", "0"))
 # 异动阈值
 OI_USD_LIMIT = float(os.getenv("OI_USD_LIMIT", "1500000"))
 OI_PCT_LIMIT = float(os.getenv("OI_PCT_LIMIT", "5.0"))
+# 单窗口 OI 变动上限：超过视为口径跳变（备选所单位切换 / 脏样本），丢弃差分并重置缓存
+OI_DELTA_MAX_PCT = float(os.getenv("OI_DELTA_MAX_PCT", "150"))
 
 # 网络限频：每次请求后休眠秒数
 REQUEST_INTERVAL_SEC = float(os.getenv("OI_REQUEST_INTERVAL_SEC", "0.1"))
@@ -206,6 +208,8 @@ SANDBOX_MAJOR_SYMBOLS = tuple(
 # 杠杆：BTC/ETH 100x，山寨 30x（SANDBOX_NOTIONAL_USD 为单笔保证金）
 SANDBOX_LEVERAGE_MAJOR = float(os.getenv("OI_SANDBOX_LEVERAGE_MAJOR", "100"))
 SANDBOX_LEVERAGE_ALT = float(os.getenv("OI_SANDBOX_LEVERAGE_ALT", "30"))
+# 合约 taker 手续费（占名义本金的 %，单边；开+平各收一次，与回测 fee_pct 一致）
+SANDBOX_FEE_PCT = float(os.getenv("OI_SANDBOX_FEE_PCT", "0.04"))
 # 平仓后至少隔 N 根已收盘 K 才允许同币再入场（防反复触发）
 SANDBOX_REENTRY_COOLDOWN_BARS = int(os.getenv("OI_SANDBOX_REENTRY_COOLDOWN_BARS", "8"))
 SANDBOX_STATE_DB = _PKG_ROOT / "data" / "sandbox_state.db"

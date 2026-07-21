@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import type { PatternAlert, PatternState, PatternWatchItem } from "../types";
+import type { PatternAlert, PatternPayload, PatternState, PatternWatchItem } from "../types";
 import { coinInitial, displaySymbol } from "../utils/symbol";
 import { MercuHeader } from "../components/MercuHeader";
 import { PatternChartPanel } from "../components/PatternChartPanel";
@@ -8,20 +8,38 @@ import { SandboxToastStack } from "../components/SandboxToastStack";
 import { useRadarSSE } from "../hooks/useRadarSSE";
 import { useSandboxTradeHistory } from "../hooks/useSandboxTradeHistory";
 import { fmtMetaPrice, fmtTs } from "../utils/format";
-import { SANDBOX_HISTORY_RETAIN_DAYS } from "../utils/sandboxHistory";
+import {
+  filterHistoryByRange,
+  SANDBOX_HISTORY_RANGE_OPTIONS,
+  SANDBOX_HISTORY_RETAIN_DAYS,
+  type SandboxHistoryRange,
+} from "../utils/sandboxHistory";
 
-function fmtTradeEvents(events?: Array<Record<string, unknown>>): string {
-  if (!events?.length) return "—";
+function fmtTradeEvents(events?: Array<Record<string, unknown>>, fallback?: string): string {
+  if (!events?.length) return fallback?.trim() || "—";
   return events
     .filter((e) => e.type && e.type !== "sync")
-    .slice(-4)
     .map((e) => {
-      const t = e.type === "entry" ? "入" : e.type === "exit" ? "出" : e.type === "partial" ? "减" : "移";
+      const t =
+        e.type === "entry"
+          ? "入"
+          : e.type === "exit"
+            ? "出"
+            : e.type === "partial"
+              ? "减"
+              : "移";
       const px = e.price != null ? fmtMetaPrice(Number(e.price)) : "";
       const sl = e.sl != null ? ` SL${fmtMetaPrice(Number(e.sl))}` : "";
-      return `${t}@${px}${sl}`;
+      const extra =
+        e.type === "exit" && e.exit_label
+          ? ` ${String(e.exit_label)}`
+          : e.message
+            ? ` ${String(e.message)}`
+            : "";
+      return `${t}@${px}${sl}${extra}`.replace(/\s+/g, " ").trim();
     })
-    .join(" → ");
+    .filter(Boolean)
+    .join("; ");
 }
 
 const STATUS_CLASS: Record<string, string> = {
@@ -55,12 +73,6 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
     () => sandboxAlerts.filter((a) => a.type === "exit"),
     [sandboxAlerts],
   );
-  const sandboxHistory = useSandboxTradeHistory({
-    recentTrades: sandboxStats?.recent_trades,
-    day: sandboxStats?.day,
-    exitAlerts: sandboxExitAlerts,
-    scanTs: sandboxScanTs,
-  });
   const watchingStates = useMemo(
     () =>
       states.filter(
@@ -70,14 +82,45 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
   );
   const sandboxOn = pattern?.sandbox_enabled !== false;
   const sandboxMaxConcurrent = pattern?.sandbox_max_concurrent ?? 10;
-  const enteredSymbols = useMemo(
-    () => new Set(sandboxPositions.map((p) => p.symbol.toUpperCase())),
-    [sandboxPositions],
-  );
+  const enteredSymbols = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of sandboxPositions) {
+      const s = String(p.symbol || "").trim().toUpperCase();
+      if (s) set.add(s);
+    }
+    return set;
+  }, [sandboxPositions]);
+
+  /** 左侧列表：置顶 → 进行中持仓 → 其余（组内保持原相对顺序） */
+  const sortedWatchlist = useMemo(() => {
+    const pinned: PatternWatchItem[] = [];
+    const trading: PatternWatchItem[] = [];
+    const rest: PatternWatchItem[] = [];
+    for (const w of watchlist) {
+      const sym = String(w.symbol || "").trim().toUpperCase();
+      if (w.pinned) pinned.push(w);
+      else if (enteredSymbols.has(sym)) trading.push(w);
+      else rest.push(w);
+    }
+    return [...pinned, ...trading, ...rest];
+  }, [watchlist, enteredSymbols]);
 
   const [manualSym, setManualSym] = useState("");
   const [manualLogic, setManualLogic] = useState<"S" | "T">("S");
   const [manualSide, setManualSide] = useState<"LONG" | "SHORT">("LONG");
+  const [historyRange, setHistoryRange] = useState<SandboxHistoryRange>("7d");
+
+  const sandboxHistory = useSandboxTradeHistory({
+    recentTrades: sandboxStats?.recent_trades,
+    historyTrades: pattern?.sandbox_trade_history,
+    day: sandboxStats?.day,
+    exitAlerts: sandboxExitAlerts,
+    scanTs: sandboxScanTs,
+  });
+  const filteredHistory = useMemo(
+    () => filterHistoryByRange(sandboxHistory, historyRange),
+    [sandboxHistory, historyRange],
+  );
 
   const reshuffleSandbox = useCallback(async () => {
     setBusy(true);
@@ -115,6 +158,15 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
         else {
           setMainTab("sandbox");
           setSelectedSymbol(sym);
+          // 立刻同步持仓到左侧列表高亮（不必等下一轮 SSE）
+          const patch: Partial<PatternPayload> = {};
+          if (Array.isArray(data.sandbox_positions)) {
+            patch.sandbox_positions = data.sandbox_positions;
+          }
+          if (data.sandbox_stats) patch.sandbox_stats = data.sandbox_stats;
+          if (Array.isArray(data.sandbox_pool)) patch.sandbox_pool = data.sandbox_pool;
+          if (Array.isArray(data.sandbox_alerts)) patch.sandbox_alerts = data.sandbox_alerts;
+          if (Object.keys(patch).length) patchPattern(patch);
         }
       } catch {
         setErr("网络错误");
@@ -122,7 +174,7 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
         setBusy(false);
       }
     },
-    [manualSym, selectedSymbol, manualLogic, manualSide],
+    [manualSym, selectedSymbol, manualLogic, manualSide, patchPattern],
   );
 
   const addSymbol = useCallback(async () => {
@@ -299,19 +351,19 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
           </div>
           {err && <p className="pattern-err">{err}</p>}
           <p className="pattern-meta">
-            已监听 {watchlist.length} / 30（亮色=已置顶 ≥1 天）
+            已监听 {watchlist.length} / 30（排序：置顶 → 持仓 → 其他）
           </p>
 
           <ul className="pattern-watchlist">
-            {watchlist.length === 0 ? (
+            {sortedWatchlist.length === 0 ? (
               <li className="pattern-empty">等待雷达扫描后按合约流入 / OI 爆发自动挑选…</li>
             ) : (
-              watchlist.map((w) => {
+              sortedWatchlist.map((w) => {
                 const st = states.find((s) => s.symbol === w.symbol);
                 const cls = STATUS_CLASS[st?.status ?? "SEARCHING_TOP"] ?? "pat-search";
                 const active = selectedSymbol === w.symbol;
                 const pinned = Boolean(w.pinned);
-                const entered = enteredSymbols.has(w.symbol.toUpperCase());
+                const entered = enteredSymbols.has(String(w.symbol || "").trim().toUpperCase());
                 const pinHours =
                   pinned && (w.pin_remaining_sec ?? 0) > 0
                     ? Math.max(1, Math.ceil((w.pin_remaining_sec ?? 0) / 3600))
@@ -320,6 +372,7 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                   <li
                     key={w.symbol}
                     className={`pattern-watch-item ${cls}${active ? " active" : ""}${pinned ? " pinned" : ""}${entered ? " entered" : ""}`}
+                    data-entered={entered ? "1" : undefined}
                     role="button"
                     tabIndex={0}
                     title={
@@ -621,8 +674,23 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                         ? `${sandboxStats.pnl_usd >= 0 ? "+" : ""}${sandboxStats.pnl_usd.toFixed(2)}U`
                         : "—"}
                       {" · "}
-                      历史本地近 {SANDBOX_HISTORY_RETAIN_DAYS} 天（{sandboxHistory.length} 笔）
+                      历史本地近 {SANDBOX_HISTORY_RETAIN_DAYS} 天
                     </p>
+                    <div className="sandbox-history-filters">
+                      {SANDBOX_HISTORY_RANGE_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          className={`sandbox-range-btn${historyRange === opt.id ? " active" : ""}`}
+                          onClick={() => setHistoryRange(opt.id)}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                      <span className="sandbox-range-count">
+                        {filteredHistory.length} 笔
+                      </span>
+                    </div>
                     <div className="sandbox-pool">
                       {sandboxPool.length === 0 ? (
                         <span className="pattern-empty">等待扫描生成日池…</span>
@@ -714,23 +782,32 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                           <th>入场原因</th>
                           <th>入场时间/价</th>
                           <th>出场时间/价</th>
+                          <th>出场逻辑</th>
                           <th>盈亏</th>
                           <th>阶段事件</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {sandboxHistory.length === 0 ? (
+                        {filteredHistory.length === 0 ? (
                           <tr>
-                            <td colSpan={11} className="pattern-empty">
-                              暂无平仓记录（本地保留近 {SANDBOX_HISTORY_RETAIN_DAYS} 天）
+                            <td colSpan={12} className="pattern-empty">
+                              该时间范围内暂无平仓记录（本地保留近 {SANDBOX_HISTORY_RETAIN_DAYS} 天）
                             </td>
                           </tr>
                         ) : (
-                          sandboxHistory.map((t) => {
-                            const ev = fmtTradeEvents(t.events);
+                          filteredHistory.map((t) => {
+                            const ev =
+                              t.stage_events ||
+                              fmtTradeEvents(t.events, t.reason);
                             const srcLabel =
                               t.source_label ||
                               (t.source === "manual" || t.source === "手动" ? "手动" : "自动");
+                            const exitLabel =
+                              t.exit_label ||
+                              (t.reason?.includes("|")
+                                ? t.reason.split("|")[1]
+                                : "") ||
+                              "—";
                             return (
                             <tr
                               key={t.key}
@@ -769,6 +846,7 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                                 {t.exit_time ? fmtTs(t.exit_time) : "—"}
                                 <span className="sandbox-pnl-sub">{fmtMetaPrice(t.exit_price)}</span>
                               </td>
+                              <td className="sandbox-events">{exitLabel}</td>
                               <td className={t.pnl_usd >= 0 ? "pos" : "neg"}>
                                 {t.pnl_usd >= 0 ? "+" : ""}
                                 {t.pnl_usd.toFixed(2)}U
@@ -783,11 +861,12 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                                     t.roe_pct ?? t.pnl_pct * (t.leverage ?? 30)
                                   ).toFixed(1)}
                                   %
+                                  {t.fee_usd != null && Number(t.fee_usd) > 0
+                                    ? ` · 费${Number(t.fee_usd).toFixed(4)}U`
+                                    : ""}
                                 </span>
                               </td>
-                              <td className="sandbox-events">
-                                {ev !== "—" ? ev : t.reason}
-                              </td>
+                              <td className="sandbox-events">{ev}</td>
                             </tr>
                             );
                           })

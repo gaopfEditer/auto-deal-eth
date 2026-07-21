@@ -382,7 +382,13 @@ button {
 /* ── Matrix center ── */
 .matrix-center {
   border-right: 1px solid var(--border);
-  overflow: hidden;
+  /* 矮屏时整块中栏向下滚动，避免下排榜盖住上排 */
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .matrix-center-head {
@@ -392,6 +398,10 @@ button {
   padding: 12px 16px;
   border-bottom: 1px solid var(--border-soft);
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg-panel);
 }
 
 .matrix-center-head h2 {
@@ -414,35 +424,50 @@ button {
   font-size: 0.75rem;
   color: var(--muted);
   line-height: 1.35;
+  flex-shrink: 0;
 }
 
 .matrix-quadrants {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
+  /* 高度随内容撑开，由 .matrix-center 负责滚动；始终两列并排沾满宽度 */
+  flex: 0 0 auto;
+  height: auto;
+  min-height: min-content;
+  overflow: visible;
   padding: 10px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: max-content;
+  align-content: start;
+  align-items: stretch;
   gap: 8px;
 }
 
 .matrix-quadrant-grid {
-  min-height: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: max-content;
+  align-items: stretch;
   gap: 0;
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
   background: var(--bg-card);
+  height: max-content;
+  min-width: 0;
+  width: 100%;
+  min-height: 0;
+  /* 防止内容溢出画到相邻象限上方 */
+  isolation: isolate;
+  position: relative;
+  z-index: 0;
 }
 
 .matrix-quadrant-grid .rank-panel {
   border: none;
   border-radius: 0;
   min-height: 0;
+  height: auto;
+  overflow: hidden;
   background: transparent;
 }
 
@@ -467,7 +492,7 @@ button {
 .matrix-quadrant-grid .rank-item {
   position: relative;
   display: grid;
-  grid-template-columns: 18px 20px 1fr auto;
+  grid-template-columns: 18px 20px minmax(0, 1fr) auto;
   gap: 4px;
   padding: 4px 6px;
   overflow: hidden;
@@ -523,7 +548,7 @@ button {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  height: 100%;
+  height: auto;
 }
 
 .rank-panel-head {
@@ -548,10 +573,10 @@ button {
 .rank-list {
   list-style: none;
   padding: 4px 0;
-  flex: 1;
+  flex: 0 0 auto;
   min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
+  height: auto;
 }
 
 .rank-item {
@@ -561,10 +586,26 @@ button {
   gap: 6px;
   padding: 5px 10px;
   font-size: 0.72rem;
+  cursor: default;
+  transition: background 0.12s ease, box-shadow 0.12s ease;
 }
 
 .rank-item:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* 跨榜同币悬浮识意（压过条形背景） */
+.rank-item.is-cross-hover {
+  background: rgba(100, 181, 246, 0.2) !important;
+  box-shadow: inset 0 0 0 1px rgba(100, 181, 246, 0.45);
+}
+
+.rank-item.is-cross-hover.rank-item-bg::before {
+  opacity: 0.45;
+}
+
+.rank-item.is-cross-hover:hover {
+  background: rgba(100, 181, 246, 0.28) !important;
 }
 
 .rank-badge {
@@ -1057,8 +1098,23 @@ button {
   box-shadow: inset 2px 0 0 rgba(255, 193, 7, 0.7);
 }
 
-.pattern-watch-item.entered {
-  border-color: rgba(0, 230, 118, 0.4);
+/* 沙盒持仓：强于状态色/置顶/选中，保证左侧一眼可见 */
+.pattern-watch-item.entered,
+.pattern-watch-item.entered.pat-search,
+.pattern-watch-item.entered.pat-lh,
+.pattern-watch-item.entered.pat-wait,
+.pattern-watch-item.entered.pat-fire,
+.pattern-watch-item.entered.pat-expired,
+.pattern-watch-item.entered.pinned,
+.pattern-watch-item.entered.active {
+  border-color: rgba(0, 230, 118, 0.65);
+  background: rgba(0, 160, 80, 0.16);
+  box-shadow: inset 3px 0 0 #00e676;
+}
+
+.pattern-watch-item.entered:hover,
+.pattern-watch-item.entered.active:hover {
+  background: rgba(0, 180, 90, 0.24);
 }
 
 .pattern-entered-badge {
@@ -1071,7 +1127,7 @@ button {
   padding: 2px 6px;
   border-radius: 3px;
   color: #041a0c;
-  background: rgba(0, 230, 118, 0.88);
+  background: rgba(0, 230, 118, 0.92);
 }
 
 .pattern-pin-btn {
@@ -1918,6 +1974,7 @@ button {
   padding: 5px 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   color: #bbb;
+  vertical-align: top;
 }
 
 .sandbox-table th {
@@ -1962,6 +2019,8 @@ button {
   line-height: 1.2;
   padding: 2px 6px;
   border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: top;
 }
 
 .sandbox-src.manual {
@@ -1972,6 +2031,42 @@ button {
 .sandbox-src.auto {
   color: #e3f2fd;
   background: rgba(100, 181, 246, 0.35);
+}
+
+.sandbox-history-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.sandbox-range-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 0.68rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.sandbox-range-btn:hover {
+  color: #ddd;
+  border-color: rgba(100, 181, 246, 0.4);
+}
+
+.sandbox-range-btn.active {
+  color: #e3f2fd;
+  border-color: rgba(100, 181, 246, 0.55);
+  background: rgba(100, 181, 246, 0.18);
+}
+
+.sandbox-range-count {
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-left: 4px;
 }
 
 .toast-card.sandbox-signal {
@@ -1995,10 +2090,10 @@ button {
   .mercu-body {
     grid-template-columns: 240px 1fr 220px;
   }
+  /* 仍保持两列象限，禁止单列占满宽 */
   .matrix-quadrants {
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(4, minmax(280px, auto));
-    overflow-y: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: max-content;
   }
 }
 
@@ -2010,6 +2105,10 @@ button {
     overflow: visible;
   }
   .panel { border-right: none; border-bottom: 1px solid var(--border); max-height: 420px; }
+  .matrix-center { max-height: none; }
+  .matrix-quadrants {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .toast-stack { width: calc(100% - 32px); right: 16px; left: 16px; }
   .breakout-toast-stack { width: calc(100% - 32px); right: 16px; left: 16px; }
   .pattern-layout { grid-template-columns: 1fr; }

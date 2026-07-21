@@ -12,6 +12,9 @@ export interface OiAlertItem {
   isSuppressed: boolean;
 }
 
+/** 与后端 OI_DELTA_MAX_PCT 对齐：超过视为脏数据，不进异动流 */
+const OI_DELTA_MAX_PCT = 150;
+
 function isTriggered(
   deltaUsd: number,
   pct: number,
@@ -19,6 +22,20 @@ function isTriggered(
   pctLimit: number,
 ): boolean {
   return Math.abs(deltaUsd) >= usdLimit || Math.abs(pct) >= pctLimit;
+}
+
+function isPlausibleOiDelta(
+  deltaUsd: number,
+  pct: number,
+  currentOiUsd: number,
+): boolean {
+  if (!Number.isFinite(deltaUsd) || !Number.isFinite(pct)) return false;
+  if (Math.abs(pct) > OI_DELTA_MAX_PCT) return false;
+  // Δ 不应远超当前持仓量级（脏基线常见表现）
+  if (currentOiUsd > 0 && Math.abs(deltaUsd) > currentOiUsd * (1 + OI_DELTA_MAX_PCT / 100)) {
+    return false;
+  }
+  return true;
 }
 
 function windowRank(window: OiAlertWindow): number {
@@ -44,6 +61,7 @@ export function deriveOiAlerts(
 
     for (const w of windows) {
       if (!isTriggered(w.deltaUsd, w.pct, usdLimit, pctLimit)) continue;
+      if (!isPlausibleOiDelta(w.deltaUsd, w.pct, row.current_oi_usd ?? 0)) continue;
 
       const rawWins = row.raw_triggered_windows ?? [];
       const trigWins = row.triggered_windows ?? [];

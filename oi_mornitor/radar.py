@@ -26,6 +26,7 @@ from oi_mornitor.config import (
     MAX_RETRIES,
     OI_5M_RECORD_INTERVAL_SEC,
     OI_CACHE_MAXLEN,
+    OI_DELTA_MAX_PCT,
     OI_OI_BATCH_CONCURRENCY,
     OI_PCT_LIMIT,
     OI_TIER_HEAVY_MIN_USD,
@@ -134,13 +135,34 @@ class OIRadarCache:
     def __init__(self, maxlen: int = OI_CACHE_MAXLEN) -> None:
         self._maxlen = maxlen
         self._history: dict[str, Deque[OISnapshot]] = {}
+        self._source: dict[str, str] = {}
 
-    def update(self, symbol: str, oi_base: float, price: float) -> None:
+    def clear(self, symbol: str) -> None:
+        self._history.pop(symbol, None)
+        self._source.pop(symbol, None)
+
+    def update(
+        self,
+        symbol: str,
+        oi_base: float,
+        price: float,
+        *,
+        source: str = "",
+    ) -> None:
+        src = (source or "").strip().lower()
+        prev = self._source.get(symbol, "")
+        if src and prev and src != prev:
+            # 币安 ↔ 备选所切换时 OI 单位/口径常不可比，清空后再采样
+            logger.info("OI 缓存重置 %s · 源 %s → %s", symbol, prev, src)
+            self.clear(symbol)
         if symbol not in self._history:
             self._history[symbol] = deque(maxlen=self._maxlen)
         self._history[symbol].append(OISnapshot(time.time(), oi_base, price))
+        if src:
+            self._source[symbol] = src
 
     def get_historical(self, symbol: str, minutes_ago: int) -> Optional[OISnapshot]:
+        """取 ≥ minutes_ago 之前的最近快照；历史不足窗口长度时返回 None（禁止用最早点冒充）。"""
         dq = self._history.get(symbol)
         if not dq:
             return None
@@ -148,7 +170,39 @@ class OIRadarCache:
         for snap in reversed(dq):
             if snap.ts <= target_ts:
                 return snap
-        return dq[0]
+        return None
+
+    def recent_anchor_oi(self, symbol: str, n: int = 8) -> Optional[float]:
+        """近期 OI 中位数，用于识别历史脏点（单点跳变）。"""
+        dq = self._history.get(symbol)
+        if not dq:
+            return None
+        vals = [s.oi_base for s in list(dq)[-n:] if s.oi_base > 0]
+        if not vals:
+            return None
+        return float(statistics.median(vals))
+
+    def prune_incompatible(self, symbol: str, anchor_oi: float, max_pct: float) -> int:
+        """剔除相对锚点跳变过大的历史点，避免 15m/1h 反复踩到脏样本。"""
+        dq = self._history.get(symbol)
+        if not dq or anchor_oi <= 0:
+            return 0
+        max_ratio = 1.0 + max(max_pct, 1.0) / 100.0
+        kept: list[OISnapshot] = []
+        dropped = 0
+        for snap in dq:
+            if snap.oi_base <= 0:
+                dropped += 1
+                continue
+            ratio = anchor_oi / snap.oi_base
+            if ratio > max_ratio or ratio < (1.0 / max_ratio):
+                dropped += 1
+                continue
+            kept.append(snap)
+        if dropped:
+            dq.clear()
+            dq.extend(kept)
+        return dropped
 
 
 class OI5mChangeHistory:
@@ -703,8 +757,43 @@ class BinanceOIRadar:
             return 0.0, 0.0, 0.0
         delta_base = current.oi_base - past.oi_base
         pct = (delta_base / past.oi_base) * 100.0
+        # 短窗口内 OI 不可能暴涨数百/数千倍；多半是脏样本或跨所单位不一致
+        if abs(pct) > OI_DELTA_MAX_PCT:
+            return 0.0, 0.0, 0.0
         delta_usd = delta_base * current.price
         return delta_base, delta_usd, pct
+
+    @staticmethod
+    def _is_oi_discontinuity(current: OISnapshot, past: Optional[OISnapshot]) -> bool:
+        if past is None or past.oi_base <= 0 or current.oi_base <= 0:
+            return False
+        ratio = current.oi_base / past.oi_base
+        max_ratio = 1.0 + OI_DELTA_MAX_PCT / 100.0
+        return ratio > max_ratio or ratio < (1.0 / max_ratio)
+
+    @classmethod
+    def _sanitize_past(
+        cls,
+        cache: OIRadarCache,
+        symbol: str,
+        current: OISnapshot,
+        past: Optional[OISnapshot],
+    ) -> Optional[OISnapshot]:
+        """丢弃相对当前值跳变过大的基线；并清掉同类脏历史点。"""
+        if past is None:
+            return None
+        if cls._is_oi_discontinuity(current, past):
+            dropped = cache.prune_incompatible(symbol, current.oi_base, OI_DELTA_MAX_PCT)
+            if dropped:
+                logger.warning(
+                    "OI 脏历史剔除 %s · dropped=%d · past=%.6g now=%.6g",
+                    symbol,
+                    dropped,
+                    past.oi_base,
+                    current.oi_base,
+                )
+            return None
+        return past
 
     @staticmethod
     def _is_triggered(delta_usd: float, pct: float, usd_limit: float, pct_limit: float) -> bool:
@@ -759,11 +848,46 @@ class BinanceOIRadar:
         oi_base = row["openInterest"]
         price = row["last_price"]
         current = OISnapshot(time.time(), oi_base, price)
+        source = getattr(self, "_data_source", "") or ""
 
         past_5m = self.cache.get_historical(symbol, 5)
         past_15m = self.cache.get_historical(symbol, 15)
 
-        self.cache.update(symbol, oi_base, price)
+        # 先按当前值清洗历史：XRP 曾出现 19M↔345M 交替脏点，只看 5m 会漏掉 15m 假暴涨
+        if current.oi_base > 0:
+            dropped = self.cache.prune_incompatible(symbol, current.oi_base, OI_DELTA_MAX_PCT)
+            if dropped:
+                logger.warning(
+                    "OI 历史跳变清洗 %s · dropped=%d · now=%.6g · src=%s",
+                    symbol,
+                    dropped,
+                    current.oi_base,
+                    source or "-",
+                )
+                past_5m = self.cache.get_historical(symbol, 5)
+                past_15m = self.cache.get_historical(symbol, 15)
+
+        past_5m = self._sanitize_past(self.cache, symbol, current, past_5m)
+        past_15m = self._sanitize_past(self.cache, symbol, current, past_15m)
+
+        # 相对近期锚点仍跳变 → 整段重置重采
+        anchor = self.cache.recent_anchor_oi(symbol)
+        if anchor and current.oi_base > 0:
+            ratio = current.oi_base / anchor
+            max_ratio = 1.0 + OI_DELTA_MAX_PCT / 100.0
+            if ratio > max_ratio or ratio < (1.0 / max_ratio):
+                logger.warning(
+                    "OI 口径跳变，重置缓存 %s · anchor=%.6g → now=%.6g · src=%s",
+                    symbol,
+                    anchor,
+                    oi_base,
+                    source or "-",
+                )
+                self.cache.clear(symbol)
+                past_5m = None
+                past_15m = None
+
+        self.cache.update(symbol, oi_base, price, source=source)
 
         if past_5m is None:
             row.update(

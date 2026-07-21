@@ -202,6 +202,9 @@ export interface PatternAlert {
   message: string;
   scan_ts?: number;
   kline_close_time: number;
+  events?: Array<Record<string, unknown>>;
+  exit_code?: string;
+  exit_label?: string;
 }
 
 export interface SandboxTrade {
@@ -224,6 +227,10 @@ export interface SandboxTrade {
   entry_reason?: string;
   source?: string;
   source_label?: string;
+  exit_code?: string;
+  exit_label?: string;
+  fee_usd?: number;
+  fee_pct?: number;
   interval?: string;
   ref_intervals?: string[];
   ref_intervals_label?: string;
@@ -265,6 +272,8 @@ export interface SandboxPosition {
   entry_reason?: string;
   source?: string;
   source_label?: string;
+  exit_code?: string;
+  exit_label?: string;
   interval?: string;
   ref_intervals?: string[];
   ref_intervals_label?: string;
@@ -288,6 +297,7 @@ export interface PatternPayload {
   sandbox_positions?: SandboxPosition[];
   sandbox_alerts?: PatternAlert[];
   sandbox_stats?: SandboxStats;
+  sandbox_trade_history?: SandboxTrade[];
   sandbox_scan_ts?: number;
 }
 
