@@ -69,9 +69,10 @@ python -m tv_ws.pic_push_public
 
 | 参数 | 说明 |
 |------|------|
-| （无） | **默认**：润色（`publish=false`）→ 截图 → **Telegram 图文**，不上广场 |
-| `--public` | POST 时 `publish=true`，**发布到广场** |
-| `--dry-run` | 仅打印解析结果，**不** POST、**不**截图、**不** Telegram |
+| （无） | **默认**：润色（趋势+信心）→ 截图 → **Telegram 图文**，不上广场；信心≥80 打【高信心担子】 |
+| `--public` | 发布到广场（配文同样含趋势/信心/高信心标） |
+| `--dry-run` | 仅打印解析结果，**不**润色、**不**截图、**不** Telegram |
+| `--judge` | 配合 `--dry-run`：对允许周期调用 Ollama 输出趋势建议/信心（不发送） |
 | `--skip-screenshot` | 仍润色 + Telegram，不打开 TradingView |
 | `--print-raw` | 每条消息先打印原始 JSON |
 | `--url <wss>` | 覆盖 WebSocket 地址 |
@@ -82,7 +83,10 @@ python -m tv_ws.pic_push_public
 # 发布到广场（默认不发）
 python -m tv_ws.pic_push_public --public
 
-# 只测润色 + Telegram，不截图（需 8000 服务）
+# dry-run 下用模型判断（不发担子）
+python -m tv_ws.pic_push_public --dry-run --judge
+
+# 只测润色 + Telegram，不截图
 python -m tv_ws.pic_push_public --skip-screenshot
 
 # 只看消息结构
@@ -103,6 +107,9 @@ python -m tv_ws.pic_push_public --dry-run --print-raw
 | `SIGNAL_PUBLISH_COMPOSE_MODE` | `manual` |  compose 模式 |
 | `SIGNAL_PUBLISH_DO_PUBLISH` | `true` | 仅当代码未传 `publish=` 时生效；入口默认 `publish=false`，需 `--public` |
 | `WS_SKIP_TELEGRAM` | （空） | 设为 `1` 则不推 Telegram |
+| `TV_SIGNAL_HIGH_CONFIDENCE` | `80` | 信心≥该值 → 发出的担子打「【高信心担子】」标 |
+| `PROMAT_ANALYSIS_OLLAMA_BASE_URL` | `http://localhost:11434` | 本地 Ollama |
+| `PROMAT_ANALYSIS_OLLAMA_MODEL` | `gemma-uncensored` | 润色/判断模型 |
 | `DEALMSG_USE_PLAYWRIGHT` | `0` | 设为 `1` 用 Playwright 截图替代 Selenium |
 
 `.env` 示例：

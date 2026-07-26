@@ -17,7 +17,13 @@ except ImportError:
     requests = None  # type: ignore
 
 from image_llm_analyzer import extract_json_from_gemini_text
-from promat_publish import build_tv_signal_compose_prompt, format_polished_for_terminal
+from promat_publish import (
+    build_tv_signal_compose_prompt,
+    format_polished_for_terminal,
+    is_high_confidence,
+    normalize_confidence,
+    normalize_trend,
+)
 
 try:
     from config import PROMAT_ANALYSIS
@@ -107,6 +113,24 @@ def polish_tv_signal(signal_text: str) -> Tuple[bool, Optional[Dict[str, Any]]]:
         if not isinstance(parsed, dict):
             print("[polish] 模型输出无法解析为 JSON", file=sys.stderr)
             return False, None
+
+        # 规范化趋势 / 信心，供担子打标
+        trend = normalize_trend(parsed.get("trend"))
+        conf = normalize_confidence(parsed.get("confidence"))
+        if trend:
+            parsed["trend"] = trend
+        if conf is not None:
+            parsed["confidence"] = conf
+        # 无 confidence 时用 star 粗映射，便于旧模型兼容
+        if conf is None and parsed.get("star") is not None:
+            try:
+                star_i = int(parsed.get("star") or 0)
+                mapped = max(0, min(100, star_i * 20))
+                parsed["confidence"] = mapped
+                conf = mapped
+            except (TypeError, ValueError):
+                pass
+        parsed["high_confidence"] = is_high_confidence(parsed)
 
         body: Dict[str, Any] = {
             "ok": True,

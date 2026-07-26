@@ -42,14 +42,29 @@
    - 每隔 2 小时自动刷新（`OI_PATTERN_WATCHLIST_REFRESH_SEC=7200`）；已进场（LH / 等待 HL / 扳机）与沙盒持仓保留，其余可被替换
    - **雷达联动**：同周期同时上「涨幅榜」与「持仓正榜」（量级或强度）的币，每轮扫描自动加入形态追踪（满员时替换未进场币）
    - 支持手动追加 / 移除；右键**置顶**至少 1 天（`OI_PATTERN_PIN_TTL_SEC=86400`，可手动取消）；**热钱重选** 清空并按流入/OI 重新挑选
-   - 沙盒：**手动市价进场**（选 S/T 逻辑 + 多/空）→ `POST /api/sandbox/enter`
    - 阶段 1：次高点 LH + BB-Wicks 上轨插针 / MACD 高位走弱 → `STAGE_1_LH_DETECTED`（不弹窗）
    - 阶段 2：更高低点 HL + 带量突破夹角高点 + MACD 金叉 → `TRIGGER_SIGNAL`（右下角预警）
    - API：`GET /api/patterns`、`POST /api/patterns/watch`、`DELETE /api/patterns/watch?symbol=`
    - 状态持久化：`data/pattern_state.db`
    - **K 线详情**：多周期切换 `5m/15m/30m/1h/4h/1d`；默认加载 500 根；滚轮缩小 K 线间距或左滑至边缘自动分页加载更早历史（最多 1500/次）
+   - **K 线来源（部署后）**：浏览器直连币安 `fapi/v1/klines` + 本地算 BB/Vegas/MACD，减轻服务端压力；形态状态/沙盒入出标记走轻量 `GET /api/patterns/chart-meta`。实时 K 线已是前端 WS。设 `VITE_CHART_KLINES_SOURCE=backend` 可整包回退服务端代拉
 
-8. **回踩 / Vegas / 射击之星策略（本地 WS + 回测）**
+8. **沙盒纸面交易（形态页「沙盒」Tab）** — 完整规则见 [`SIGNAL_LOGIC.md` §9](./SIGNAL_LOGIC.md#9-沙盒纸面交易什么时候开单--止盈--止损)
+
+   | | 短线猎手 **S** | 长线维加斯 **T** |
+   |--|----------------|------------------|
+   | **何时开** | 市场 `RANGE`：触布林上轨/LH + 射击之星做空；触下轨/HL + 倒锤/锤子做多 | 市场 `BULL`/`BEAR`：顺势回踩 EMA12/隧道 + 反包或 HL/LH |
+   | **初始止损** | 信号 K 极值 ±0.1% | HL/LH 或 EMA169 外 0.2% |
+   | **止损上限** | 裁剪到距入场 ≤ **2.5×ATR(14)**（波动大时自动放宽） | 同左 |
+   | **止盈** | 收盘到布林中轨或 ≥2×ATR（需持仓≥2 根且有利≥0.25%） | ≥0.75% 保本 → ≥1% 减仓 30% → 极值回撤 1% 全平 |
+   | **通用** | 峰值每满 2.2% 阶梯上移 SL（每档锁 +1%）；硬止损击穿立即全平；入场当根不平仓 | 同左 |
+
+   - 执行周期默认 **15m + 1h** 同等扫描（`OI_SANDBOX_INTERVALS`）；同币同周期自动单仓，两周期可并存
+   - 日池随机 12 币 / 最多同时 10 仓；保证金 1U；杠杆 100x（BTC·ETH）/ 30x（山寨）；双边手续费默认各 0.04%
+   - **手动市价进场**（选 S/T + 多/空 + 15m/1h）→ `POST /api/sandbox/enter`；自动同币同周期单仓，手动可叠仓
+   - **卡片信号**：WS `/ws/cards` 或 `POST /api/cards`；沙盒可筛「卡片」；止盈止损按卡片，S/T 逻辑不变
+
+9. **回踩 / Vegas / 射击之星策略（本地 WS + 回测）**
    - 与形态页 **共用 watchlist**（大象随机 20 或手动追加）
    - 阶段 1：带量突破 → `BREAKOUT_DETECTED`；或反转背景 → `REVERSAL_WATCH`（不弹窗）
    - 阶段 2：缩量回踩 **supply_wall / 布林中轨 / Vegas 中线**，或顶部 **射击之星** → `TRIGGER_SIGNAL`
@@ -162,6 +177,15 @@ asyncio.run(audit())
 | `OI_STRATEGY_PULLBACK_TOL` | 0.005 | 回踩贴近支撑容差 |
 | `OI_STRATEGY_PULLBACK_VOL_SHRINK` | 0.6 | 回踩缩量阈值 |
 | `OI_STRATEGY_OI_MIN_CHANGE_PCT` | -2.0 | OI 5m 过低抑制做多扳机 |
+| `OI_SANDBOX_INTERVALS` | 15m,1h | 沙盒执行周期列表 |
+| `OI_SANDBOX_KLINE_LIMIT_1H` | 720 | 沙盒 1h K 线拉取根数 |
+| `OI_CARD_WS_ENABLED` | 1 | 卡片 WebSocket / HTTP 接入 |
+| `OI_CARD_WS_PATH` | /ws/cards | 卡片 WS 路径 |
+| `OI_CARD_NEAR_ENTRY_PCT` | 1.0 | 山寨限价卡近场阈值 %（约 20x/30x） |
+| `OI_CARD_NEAR_ENTRY_PCT_MAJOR` | 0.2 | 主流限价卡近场阈值 %（约 100x） |
+| `OI_SANDBOX_MAX_CONCURRENT` | 10 | 沙盒最大同时持仓 |
+| `OI_SANDBOX_SL_ATR_MULT` | 2.5 | 沙盒初始止损距离上限 = 倍数 × ATR(14) |
+| `OI_SANDBOX_FEE_PCT` | 0.04 | 沙盒单边手续费 %（名义） |
 
 ## 网络 / 代理
 

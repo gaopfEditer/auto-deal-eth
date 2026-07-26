@@ -21,6 +21,9 @@ const TYPE_LABEL: Record<string, string> = {
   exit: "沙盒平仓",
   trail: "沙盒移止损",
   partial: "沙盒减仓",
+  card_watch: "卡片接入",
+  card_near: "卡片近场",
+  card_order: "卡片挂单",
 };
 
 export const SandboxToastStack = memo(function SandboxToastStack({

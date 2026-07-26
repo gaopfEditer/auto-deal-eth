@@ -1,16 +1,21 @@
 """沙盒入场/出场 — 短线猎手(S) + 长线维加斯(T)。"""
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any
 
 import pandas as pd
 
 from oi_mornitor.config import (
+    CARD_NEAR_ENTRY_MAJOR_LEV,
+    CARD_NEAR_ENTRY_PCT,
+    CARD_NEAR_ENTRY_PCT_MAJOR,
     SANDBOX_FEE_PCT,
     SANDBOX_HUNTER_ATR_MULT,
     SANDBOX_HUNTER_SL_PAD,
     SANDBOX_INTERVAL,
+    SANDBOX_INTERVALS,
     SANDBOX_LEVERAGE_ALT,
     SANDBOX_LEVERAGE_MAJOR,
     SANDBOX_MAJOR_SYMBOLS,
@@ -18,6 +23,9 @@ from oi_mornitor.config import (
     SANDBOX_RANGE_SLOPE_MAX,
     SANDBOX_REF_INTERVALS_HUNTER,
     SANDBOX_REF_INTERVALS_TREND,
+    SANDBOX_SL_ATR_MULT,
+    SANDBOX_SL_MAX_PCT_ALT,
+    SANDBOX_SL_MAX_PCT_MAJOR,
     SANDBOX_SOFT_EXIT_MIN_MOVE_PCT,
     SANDBOX_STEP_TRAIL_PROFIT_PCT,
     SANDBOX_STEP_TRAIL_SL_LIFT_PCT,
@@ -61,6 +69,93 @@ def sandbox_leverage(symbol: str) -> float:
     return SANDBOX_LEVERAGE_MAJOR if is_major_symbol(symbol) else SANDBOX_LEVERAGE_ALT
 
 
+def card_near_entry_pct(symbol: str, leverage: float | None = None) -> float:
+    """
+    卡片限价近场阈值（距入场区 %）：
+    - 主流（BTC/ETH）或杠杆 ≥ CARD_NEAR_ENTRY_MAJOR_LEV（默认 80，对应约 100x）→ 0.2%
+    - 山寨小杠杆（约 20x/30x）→ 1%
+    """
+    lev = float(leverage) if leverage and float(leverage) > 0 else 0.0
+    if is_major_symbol(symbol) or lev >= CARD_NEAR_ENTRY_MAJOR_LEV:
+        return CARD_NEAR_ENTRY_PCT_MAJOR
+    return CARD_NEAR_ENTRY_PCT
+
+
+def sandbox_sl_max_pct(symbol: str) -> float:
+    """兼容旧接口：百分比上限已弃用，返回历史默认值仅供展示。"""
+    return SANDBOX_SL_MAX_PCT_MAJOR if is_major_symbol(symbol) else SANDBOX_SL_MAX_PCT_ALT
+
+
+def clamp_sandbox_sl(
+    symbol: str,
+    entry: float,
+    side: str,
+    sl: float,
+    *,
+    atr: float | None = None,
+) -> float:
+    """
+    用 2.5×ATR(14) 作为止损距离上限，取代 0.5%/1.5% 百分比硬推。
+
+    OI 暴增时 ATR 变大，允许更宽的止损，避免被噪音扫掉。
+    结构 SL 距入场超过 mult×ATR 时收束；ATR 无效时不裁剪。
+    """
+    del symbol  # 距离由 ATR 决定，不再按主流/山寨百分比分档
+    if entry <= 0 or sl <= 0:
+        return sl
+    atr_v = float(atr or 0.0)
+    if atr_v <= 0:
+        return float(sl)
+    mult = float(SANDBOX_SL_ATR_MULT)
+    if mult <= 0:
+        return float(sl)
+    dist = atr_v * mult
+    side_u = side.upper()
+    if side_u == "LONG":
+        floor = entry - dist
+        capped = max(float(sl), floor)
+        return min(capped, entry * (1.0 - 1e-6))
+    if side_u == "SHORT":
+        ceil = entry + dist
+        capped = min(float(sl), ceil)
+        return max(capped, entry * (1.0 + 1e-6))
+    return float(sl)
+
+
+def apply_entry_sl_cap(symbol: str, sig: SandboxSignal) -> SandboxSignal:
+    """入场信号按 2.5×ATR(14) 裁剪止损，并回写 meta / 文案中的 SL。"""
+    if sig.action != "enter" or not sig.sl or sig.price <= 0:
+        return sig
+    if (sig.meta or {}).get("skip_sl_cap"):
+        return sig
+    old = float(sig.sl)
+    meta = dict(sig.meta or {})
+    atr = float(meta.get("atr") or 0.0)
+    new = clamp_sandbox_sl(symbol, float(sig.price), sig.side, old, atr=atr)
+    meta["sl_raw"] = old
+    meta["initial_sl"] = new
+    meta["sl_atr"] = atr
+    meta["sl_atr_mult"] = float(SANDBOX_SL_ATR_MULT)
+    if atr > 0:
+        meta["sl_max_dist"] = atr * float(SANDBOX_SL_ATR_MULT)
+        meta["sl_capped"] = abs(new - old) / max(float(sig.price), 1e-12) >= 1e-8
+    else:
+        meta["sl_capped"] = False
+    meta.pop("sl_max_pct", None)
+    if abs(new - old) / max(float(sig.price), 1e-12) < 1e-8:
+        sig.meta = meta
+        return sig
+    sig.sl = new
+    sig.meta = meta
+    if "SL=" in sig.message:
+        sig.message = re.sub(r"SL=[0-9.eE+-]+", f"SL={new:.6g}", sig.message, count=1)
+    else:
+        sig.message = f"{sig.message} · SL={new:.6g}".strip(" ·")
+    if meta.get("entry_reason"):
+        meta["entry_reason"] = sig.message
+    return sig
+
+
 def sandbox_round_trip_fee_pct(fee_pct: float | None = None) -> float:
     """开+平双边手续费（价格变动百分点，与回测一致）。"""
     one = float(fee_pct if fee_pct is not None else SANDBOX_FEE_PCT)
@@ -92,7 +187,12 @@ def apply_sandbox_fees(
 
 
 def entry_source_label(source: str) -> str:
-    return "手动" if str(source).strip().lower() in ("manual", "手动") else "自动"
+    s = str(source).strip().lower()
+    if s in ("manual", "手动"):
+        return "手动"
+    if s in ("card", "卡片"):
+        return "卡片"
+    return "自动"
 
 
 def resolve_entry_source(
@@ -100,11 +200,13 @@ def resolve_entry_source(
     *,
     force_manual: bool = False,
 ) -> str:
-    """订单来源：manual=手动下单，auto=策略自动。"""
-    if force_manual:
-        return "manual"
+    """订单来源：manual=手动 / card=卡片 / auto=策略自动。"""
     meta = meta or {}
     raw = str(meta.get("source") or meta.get("source_label") or "").strip().lower()
+    if raw in ("card", "卡片") or meta.get("card_id") or str(meta.get("logic") or "") == "C":
+        return "card"
+    if force_manual:
+        return "manual"
     if raw in ("manual", "手动"):
         return "manual"
     if raw in ("auto", "自动"):
@@ -114,14 +216,36 @@ def resolve_entry_source(
     reason = str(meta.get("entry_reason") or meta.get("message") or "")
     if reason.startswith("手动"):
         return "manual"
+    if reason.startswith("卡片") or "card_id" in meta:
+        return "card"
     return "auto"
 
 
-def ref_intervals_for_logic(logic: str) -> list[str]:
-    """参考周期：短线以 15m 为主；长线参考 15m/1h/4h/1d。"""
+_TF_ORDER = ("15m", "30m", "1h", "4h", "1d")
+
+
+def normalize_sandbox_interval(interval: str | None) -> str:
+    iv = (interval or SANDBOX_INTERVAL or "15m").strip()
+    return iv if iv else "15m"
+
+
+def sandbox_intervals() -> tuple[str, ...]:
+    return SANDBOX_INTERVALS or (normalize_sandbox_interval(None),)
+
+
+def ref_intervals_for_logic(logic: str, interval: str | None = None) -> list[str]:
+    """参考周期：短线=执行周期；长线=执行周期及以上（默认 15m/1h/4h/1d）。"""
+    iv = normalize_sandbox_interval(interval)
     if logic == "T":
-        return list(SANDBOX_REF_INTERVALS_TREND) or ["15m", "1h", "4h", "1d"]
-    return list(SANDBOX_REF_INTERVALS_HUNTER) or [SANDBOX_INTERVAL or "15m"]
+        base = list(SANDBOX_REF_INTERVALS_TREND) or ["15m", "1h", "4h", "1d"]
+        try:
+            idx = _TF_ORDER.index(iv)
+            allowed = set(_TF_ORDER[idx:])
+            out = [x for x in base if x in allowed]
+        except ValueError:
+            out = [iv] + [x for x in base if x != iv]
+        return out or [iv]
+    return [iv]
 
 
 def entry_meta_common(
@@ -129,12 +253,14 @@ def entry_meta_common(
     message: str,
     *,
     source: str = "auto",
+    interval: str | None = None,
 ) -> dict[str, Any]:
-    refs = ref_intervals_for_logic(logic)
+    iv = normalize_sandbox_interval(interval)
+    refs = ref_intervals_for_logic(logic, iv)
     src = resolve_entry_source({"source": source})
     return {
         "entry_reason": message,
-        "interval": SANDBOX_INTERVAL or "15m",
+        "interval": iv,
         "ref_intervals": refs,
         "ref_intervals_label": " · ".join(refs),
         "source": src,
@@ -265,8 +391,10 @@ def evaluate_hunter_entry(
     df: pd.DataFrame,
     *,
     structure: dict[str, Any],
+    interval: str | None = None,
 ) -> SandboxSignal | None:
     """模块一：短线猎手 — 布林极限 + 射击之星 / 倒锤·锤子。"""
+    iv = normalize_sandbox_interval(interval)
     last = df.iloc[-1]
     price = float(last["close"])
     high = float(last["high"])
@@ -285,7 +413,7 @@ def evaluate_hunter_entry(
 
     if (touch_up or touch_lh) and detect_shooting_star(last):
         sl = hunter_sl("SHORT", high, low)
-        msg = f"短线猎手做空 · 射击之星 · SL={sl:.6g}"
+        msg = f"短线猎手做空 · {iv} · 射击之星 · SL={sl:.6g}"
         return SandboxSignal(
             action="enter",
             side="SHORT",
@@ -295,7 +423,7 @@ def evaluate_hunter_entry(
             tp1=bb_m if bb_m > 0 else None,
             message=msg,
             meta={
-                **entry_meta_common("S", msg),
+                **entry_meta_common("S", msg, interval=iv),
                 "module": "hunter",
                 "module_label": "短线猎手",
                 "signal_high": high,
@@ -310,7 +438,7 @@ def evaluate_hunter_entry(
     hammerish = detect_inverted_hammer(last) or detect_hammer(last)
     if (touch_dn or touch_hl) and hammerish:
         sl = hunter_sl("LONG", high, low)
-        msg = f"短线猎手做多 · 倒锤/锤子 · SL={sl:.6g}"
+        msg = f"短线猎手做多 · {iv} · 倒锤/锤子 · SL={sl:.6g}"
         return SandboxSignal(
             action="enter",
             side="LONG",
@@ -320,7 +448,7 @@ def evaluate_hunter_entry(
             tp1=bb_m if bb_m > 0 else None,
             message=msg,
             meta={
-                **entry_meta_common("S", msg),
+                **entry_meta_common("S", msg, interval=iv),
                 "module": "hunter",
                 "module_label": "短线猎手",
                 "signal_high": high,
@@ -339,8 +467,10 @@ def evaluate_trend_entry(
     *,
     status: str,
     structure: dict[str, Any],
+    interval: str | None = None,
 ) -> SandboxSignal | None:
     """模块二：长线维加斯 — 顺势回踩过滤线/隧道 + 阳线反包或 HL/LH。"""
+    iv = normalize_sandbox_interval(interval)
     last = df.iloc[-1]
     prev = df.iloc[-2]
     price = float(last["close"])
@@ -362,7 +492,8 @@ def evaluate_trend_entry(
         )
         if touched and reclaimed and confirm:
             sl = trend_sl_long(price, hl, e2 or tunnel_lo)
-            msg = f"长线回踩做多 · SL={sl:.6g}"
+            atr = float(last["atr14"]) if pd.notna(last.get("atr14")) else 0.0
+            msg = f"长线回踩做多 · {iv} · SL={sl:.6g}"
             return SandboxSignal(
                 action="enter",
                 side="LONG",
@@ -371,12 +502,13 @@ def evaluate_trend_entry(
                 sl=sl,
                 message=msg,
                 meta={
-                    **entry_meta_common("T", msg),
+                    **entry_meta_common("T", msg, interval=iv),
                     "module": "trend",
                     "module_label": "长线维加斯",
                     "filter": filt,
                     "ema169": e2,
                     "hl": hl,
+                    "atr": atr,
                     "initial_sl": sl,
                     "stage": 0,
                     "be_price_pct": SANDBOX_TREND_BE_PRICE_PCT,
@@ -394,7 +526,8 @@ def evaluate_trend_entry(
         )
         if touched and rejected and confirm:
             sl = trend_sl_short(price, lh, e2 or tunnel_hi)
-            msg = f"长线回抽做空 · SL={sl:.6g}"
+            atr = float(last["atr14"]) if pd.notna(last.get("atr14")) else 0.0
+            msg = f"长线回抽做空 · {iv} · SL={sl:.6g}"
             return SandboxSignal(
                 action="enter",
                 side="SHORT",
@@ -403,12 +536,13 @@ def evaluate_trend_entry(
                 sl=sl,
                 message=msg,
                 meta={
-                    **entry_meta_common("T", msg),
+                    **entry_meta_common("T", msg, interval=iv),
                     "module": "trend",
                     "module_label": "长线维加斯",
                     "filter": filt,
                     "ema169": e2,
                     "lh": lh,
+                    "atr": atr,
                     "initial_sl": sl,
                     "stage": 0,
                     "be_price_pct": SANDBOX_TREND_BE_PRICE_PCT,
@@ -425,16 +559,20 @@ def evaluate_entry(
     *,
     symbol: str,
     structure: dict[str, Any] | None = None,
+    interval: str | None = None,
 ) -> SandboxSignal | None:
     """Trend_Status 分流：RANGE→S，BULL/BEAR→T。"""
     if len(df) < 60:
         return None
+    iv = normalize_sandbox_interval(interval)
     structure = structure or {}
     status = trend_status(df)
     structure = {**structure, "trend_status": status, "symbol": symbol.upper()}
     if status == "RANGE":
-        return evaluate_hunter_entry(df, structure=structure)
-    return evaluate_trend_entry(df, status=status, structure=structure)
+        sig = evaluate_hunter_entry(df, structure=structure, interval=iv)
+    else:
+        sig = evaluate_trend_entry(df, status=status, structure=structure, interval=iv)
+    return apply_entry_sl_cap(symbol, sig) if sig else None
 
 
 def build_manual_entry_signal(
@@ -445,6 +583,7 @@ def build_manual_entry_signal(
     side: str,
     structure: dict[str, Any] | None = None,
     market_price: float | None = None,
+    interval: str | None = None,
 ) -> SandboxSignal | None:
     """
     手动市价进场：不校验形态扳机，按所选逻辑/方向用最新价开仓，
@@ -456,6 +595,7 @@ def build_manual_entry_signal(
     side = side.strip().upper()
     if logic not in ("S", "T") or side not in ("LONG", "SHORT"):
         return None
+    iv = normalize_sandbox_interval(interval)
 
     structure = structure or {}
     last = df.iloc[-1]
@@ -481,9 +621,9 @@ def build_manual_entry_signal(
             sl = max(sl, price * (1.0 + SANDBOX_HUNTER_SL_PAD))
         label = "短线猎手"
         module = "hunter"
-        msg = f"手动市价 · {label}{'做多' if side == 'LONG' else '做空'} · SL={sl:.6g}"
+        msg = f"手动市价 · {label}{'做多' if side == 'LONG' else '做空'} · {iv} · SL={sl:.6g}"
         meta = {
-            **entry_meta_common("S", msg, source="manual"),
+            **entry_meta_common("S", msg, source="manual", interval=iv),
             "module": module,
             "module_label": label,
             "signal_high": high,
@@ -494,15 +634,18 @@ def build_manual_entry_signal(
             "stage": 0,
             "trend_status": status,
         }
-        return SandboxSignal(
-            action="enter",
-            side=side,
-            logic="S",
-            price=price,
-            sl=sl,
-            tp1=bb_m if bb_m > 0 else None,
-            message=msg,
-            meta=meta,
+        return apply_entry_sl_cap(
+            symbol,
+            SandboxSignal(
+                action="enter",
+                side=side,
+                logic="S",
+                price=price,
+                sl=sl,
+                tp1=bb_m if bb_m > 0 else None,
+                message=msg,
+                meta=meta,
+            ),
         )
 
     # logic T
@@ -511,15 +654,16 @@ def build_manual_entry_signal(
     else:
         sl = trend_sl_short(price, lh, e2 or tunnel_hi)
     label = "长线维加斯"
-    msg = f"手动市价 · {label}{'做多' if side == 'LONG' else '做空'} · SL={sl:.6g}"
+    msg = f"手动市价 · {label}{'做多' if side == 'LONG' else '做空'} · {iv} · SL={sl:.6g}"
     meta = {
-        **entry_meta_common("T", msg, source="manual"),
+        **entry_meta_common("T", msg, source="manual", interval=iv),
         "module": "trend",
         "module_label": label,
         "filter": float(last["vegas_filter"]) if pd.notna(last.get("vegas_filter")) else 0.0,
         "ema169": e2,
         "hl": hl,
         "lh": lh,
+        "atr": atr,
         "initial_sl": sl,
         "stage": 0,
         "be_price_pct": SANDBOX_TREND_BE_PRICE_PCT,
@@ -528,14 +672,17 @@ def build_manual_entry_signal(
         "trail_pct": SANDBOX_TREND_TRAIL_PCT,
         "trend_status": status,
     }
-    return SandboxSignal(
-        action="enter",
-        side=side,
-        logic="T",
-        price=price,
-        sl=sl,
-        message=msg,
-        meta=meta,
+    return apply_entry_sl_cap(
+        symbol,
+        SandboxSignal(
+            action="enter",
+            side=side,
+            logic="T",
+            price=price,
+            sl=sl,
+            message=msg,
+            meta=meta,
+        ),
     )
 
 
@@ -565,7 +712,141 @@ EXIT_REASON_LABELS: dict[str, str] = {
     "partial": "阶段减仓",
     "breakeven": "保本移损",
     "step_trail": "阶梯移止损",
+    "card_sl": "卡片止损",
+    "card_tp": "卡片止盈",
+    "card_tp_partial": "卡片分批止盈",
 }
+
+
+def evaluate_card_exit(
+    df: pd.DataFrame,
+    *,
+    side: str,
+    entry_price: float,
+    sl: float,
+    tps: list[float] | None = None,
+    tp1: float | None = None,
+    tp2: float | None = None,
+    meta: dict[str, Any] | None = None,
+) -> list[SandboxSignal]:
+    """
+    卡片仓出场：严格按卡片 SL / 多级 TP。
+    - 触及 SL → 全平
+    - 多级 TP：依次减仓（等分），最后一级全平
+    - 不做阶梯/维加斯移损
+    """
+    if df is None or df.empty:
+        return []
+    last = df.iloc[-1]
+    high = float(last["high"])
+    low = float(last["low"])
+    close = float(last["close"])
+    side_u = side.upper()
+    meta = dict(meta or {})
+    levels: list[float] = []
+    for x in tps or meta.get("card_tps") or []:
+        try:
+            v = float(x)
+            if v > 0:
+                levels.append(v)
+        except (TypeError, ValueError):
+            continue
+    if not levels:
+        for x in (tp1, tp2, meta.get("tp3")):
+            if x is not None and float(x) > 0:
+                levels.append(float(x))
+    # 方向排序：多单 TP 升序，空单 TP 降序
+    if side_u == "LONG":
+        levels = sorted(set(levels))
+    else:
+        levels = sorted(set(levels), reverse=True)
+
+    done = int(meta.get("card_tp_done") or 0)
+    out: list[SandboxSignal] = []
+
+    # 硬止损优先
+    sl_hit = (side_u == "LONG" and low <= float(sl)) or (
+        side_u == "SHORT" and high >= float(sl)
+    )
+    if sl_hit and sl > 0:
+        out.append(
+            SandboxSignal(
+                action="exit",
+                side=side_u,
+                logic="C",
+                price=float(sl),
+                sl=float(sl),
+                message=f"卡片止损 SL={sl:.6g}",
+                meta={
+                    "exit_code": "card_sl",
+                    "exit_label": exit_reason_label("card_sl"),
+                    "card_id": meta.get("card_id"),
+                },
+            )
+        )
+        return out
+
+    remaining_levels = levels[done:]
+    if not remaining_levels:
+        return out
+
+    hit_idx = None
+    for i, tp in enumerate(remaining_levels):
+        if side_u == "LONG" and high >= tp:
+            hit_idx = i
+            break
+        if side_u == "SHORT" and low <= tp:
+            hit_idx = i
+            break
+    if hit_idx is None:
+        return out
+
+    # 一根 K 可能越过多个 TP：按顺序处理到最远触及档
+    # 简化：只处理第一档；若只剩一档则全平
+    tp = remaining_levels[0]
+    next_done = done + 1
+    is_last = next_done >= len(levels)
+    if is_last or len(levels) == 1:
+        out.append(
+            SandboxSignal(
+                action="exit",
+                side=side_u,
+                logic="C",
+                price=float(tp),
+                sl=float(sl) if sl else None,
+                message=f"卡片止盈 TP={tp:.6g}",
+                meta={
+                    "exit_code": "card_tp",
+                    "exit_label": exit_reason_label("card_tp"),
+                    "card_id": meta.get("card_id"),
+                    "card_tp_done": next_done,
+                },
+            )
+        )
+        return out
+
+    # 分批：按剩余档数等分当前仓
+    left_levels = len(levels) - done
+    frac = 1.0 / max(left_levels, 1)
+    out.append(
+        SandboxSignal(
+            action="partial",
+            side=side_u,
+            logic="C",
+            price=float(tp),
+            sl=float(sl) if sl else None,
+            message=f"卡片分批止盈 TP={tp:.6g} · {frac:.0%}",
+            meta={
+                "exit_code": "card_tp_partial",
+                "exit_label": exit_reason_label("card_tp_partial"),
+                "card_id": meta.get("card_id"),
+                "card_tp_done": next_done,
+                "partial_frac": frac,
+            },
+        )
+    )
+    return out
+
 
 
 def exit_reason_label(code: str, fallback: str = "") -> str:

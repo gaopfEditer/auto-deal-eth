@@ -2033,6 +2033,16 @@ button {
   background: rgba(100, 181, 246, 0.35);
 }
 
+.sandbox-src.card {
+  color: #1b1008;
+  background: rgba(255, 171, 64, 0.9);
+}
+
+.sandbox-filter-sep {
+  opacity: 0.35;
+  margin: 0 0.25rem;
+}
+
 .sandbox-history-filters {
   display: flex;
   flex-wrap: wrap;
@@ -2063,10 +2073,30 @@ button {
   background: rgba(100, 181, 246, 0.18);
 }
 
-.sandbox-range-count {
-  font-size: 0.68rem;
-  color: var(--muted);
+.sandbox-range-stats {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
   margin-left: 4px;
+  font-size: 0.68rem;
+}
+
+.sandbox-range-count {
+  color: var(--muted);
+}
+
+.sandbox-range-pnl {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.sandbox-range-pnl.pos {
+  color: #00e676;
+}
+
+.sandbox-range-pnl.neg {
+  color: #ff5252;
 }
 
 .toast-card.sandbox-signal {

@@ -19,7 +19,7 @@ from dealMsg.runner import (
     period_to_tradingview_interval,
     _tv_binance_symbol,
 )
-from promat_publish import telegram_caption_from_publish_body
+from promat_publish import is_high_confidence, telegram_caption_from_publish_body
 from notifier import (
     format_tv_signal_plain,
     format_tv_message,
@@ -250,6 +250,13 @@ def process_tradingview_ws_message(
             if not publish_ok:
                 print(
                     "[WS][WARN] 润色失败，广场/Telegram 将使用原始 signal 文案",
+                    file=sys.stderr,
+                )
+            elif isinstance(publish_body, dict) and is_high_confidence(
+                publish_body.get("polished")
+            ):
+                print(
+                    "[WS] 高信心担子：Telegram/广场配文将带【高信心担子】标记",
                     file=sys.stderr,
                 )
         elif skip_polish:

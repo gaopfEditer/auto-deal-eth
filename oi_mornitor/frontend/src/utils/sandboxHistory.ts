@@ -367,6 +367,41 @@ export function filterHistoryByRange(
   });
 }
 
+export type SandboxHistoryRangeStats = {
+  trades: number;
+  wins: number;
+  losses: number;
+  win_rate: number;
+  pnl_usd: number;
+  fee_usd: number;
+};
+
+/** 当前筛选维度下的笔数 / 胜率 / 盈亏汇总 */
+export function summarizeHistoryRange(
+  trades: SandboxHistoryTrade[],
+): SandboxHistoryRangeStats {
+  let wins = 0;
+  let losses = 0;
+  let pnl = 0;
+  let fee = 0;
+  for (const t of trades) {
+    const p = Number(t.pnl_usd) || 0;
+    pnl += p;
+    fee += Number(t.fee_usd) || 0;
+    if (p > 0) wins += 1;
+    else if (p < 0) losses += 1;
+  }
+  const n = trades.length;
+  return {
+    trades: n,
+    wins,
+    losses,
+    win_rate: n > 0 ? wins / n : 0,
+    pnl_usd: pnl,
+    fee_usd: fee,
+  };
+}
+
 export function loadSandboxHistory(): SandboxHistoryTrade[] {
   try {
     const raw = localStorage.getItem(SANDBOX_HISTORY_KEY);

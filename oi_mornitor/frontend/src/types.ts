@@ -277,6 +277,39 @@ export interface SandboxPosition {
   interval?: string;
   ref_intervals?: string[];
   ref_intervals_label?: string;
+  card_id?: string;
+  card_tps?: number[];
+  tp3?: number | null;
+}
+
+export interface SandboxCardOrder {
+  card_id: string;
+  symbol: string;
+  side: string;
+  status: string;
+  position_id?: number | null;
+  created_at?: number;
+  updated_at?: number;
+  /** 卡片发单时间（unix 秒，优先 signal_at） */
+  signal_at?: number | null;
+  author_name?: string;
+  author_id?: string;
+  channel_name?: string;
+  guild_name?: string;
+  message_id?: string;
+  event?: string;
+  signal_phase?: string;
+  entry_type?: string;
+  entry_low?: number | null;
+  entry_high?: number | null;
+  tps?: number[];
+  sl?: number | null;
+  leverage?: number | null;
+  title?: string;
+  source_label?: string;
+  last_price?: number;
+  near_pct?: number;
+  fill_price?: number;
 }
 
 export interface PatternPayload {
@@ -294,11 +327,15 @@ export interface PatternPayload {
   sandbox_pool?: string[];
   sandbox_pool_count?: number;
   sandbox_max_concurrent?: number;
+  /** 沙盒执行周期，默认 ["15m","1h"] */
+  sandbox_intervals?: string[];
   sandbox_positions?: SandboxPosition[];
+  sandbox_card_orders?: SandboxCardOrder[];
   sandbox_alerts?: PatternAlert[];
   sandbox_stats?: SandboxStats;
   sandbox_trade_history?: SandboxTrade[];
   sandbox_scan_ts?: number;
+  card_near_entry_pct?: number;
 }
 
 export interface PatternCandle {

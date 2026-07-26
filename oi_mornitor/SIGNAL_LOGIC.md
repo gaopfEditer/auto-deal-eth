@@ -208,126 +208,214 @@ at_lower（近布林下轨）时必须收阴，其它位置阴阳皆可
 
 ---
 
-## 9. 沙盒纸面交易：短线猎手(S) + 长线维加斯(T)
+## 9. 沙盒纸面交易：什么时候开单 / 止盈 / 止损
 
 实现：`sandbox/logics.py`（判定）· `sandbox/engine.py`（执行）· `sandbox/tracker.py`（SQLite）  
-周期：默认 **15m** 已收盘 K；日池随机 12 币；**最大同时持仓 `SANDBOX_MAX_CONCURRENT=10`**。  
-保证金：默认 **1U** / 单；杠杆 BTC·ETH **100x**，山寨 **30x**。  
-同一根已收盘 K 每币只评估一次；**入场当根不平仓**（避免影线假平仓）。
+前端：形态页「沙盒」Tab · Toast · 持仓/历史表（`sandboxHistory.ts`，本地约 **90 天**）。
 
-### 9.1 Trend_Status 分流（策略不冲突）
+> 以下阈值均为**币种价格变动 %**（不是 ROE）。账面 ROE ≈ 价变% × 杠杆（BTC/ETH 100x，山寨 30x）。
+
+### 9.0 资金与执行约定
+
+| 项 | 默认 | 说明 |
+|----|------|------|
+| K 线周期 | **15m + 1h** 已收盘 K（同等扫描） | `OI_SANDBOX_INTERVALS`（默认 `15m,1h`）；单周期可设 `15m` |
+| 日扫描池 | 随机 **12** 币 | `OI_SANDBOX_DAILY_COUNT`；可「重抽」 |
+| 最大同时持仓 | **10** | `OI_SANDBOX_MAX_CONCURRENT`；先触发先开（跨周期合计） |
+| 单笔保证金 | **1U** | `OI_SANDBOX_NOTIONAL_USD`；名义 = 保证金 × 杠杆 |
+| 杠杆 | BTC/ETH **100x**，其余 **30x** | `OI_SANDBOX_LEVERAGE_*` |
+| 手续费 | 单边 **0.04%** 名义 | 开+平各一次，从 PnL 扣除（`OI_SANDBOX_FEE_PCT`） |
+| 再入场冷却 | 平仓后再等 **8** 根**该仓位周期** K | `OI_SANDBOX_REENTRY_COOLDOWN_BARS`；按 `symbol|interval` |
+| 评估节奏 | 同币+同周期同一根已收盘 K 只评一次 | **入场当根不平仓**（`held_bars≤0` 直接跳过） |
+
+开单来源：
+
+- **自动 `auto`**：日池在每个启用周期上扫描，命中 S/T 入场条件  
+- **手动 `manual`**：形态页「手动市价进场」→ `POST /api/sandbox/enter`（可选 `interval`；不校验形态扳机，仍按所选 S/T 算初始 SL，后续出场规则相同）
+- **卡片 `card`（logic=`C`）**：WebSocket `OI_CARD_WS_PATH`（默认 `/ws/cards`）或 `POST /api/cards` 推送卡片；**不改 S/T 规则**，额外监听卡片币种。市价卡立即纸面入场；限价卡近场提醒并挂单——**主流（BTC/ETH 或杠杆≥80，约 100x）距入场区 ≤0.2%**，**山寨小杠杆（约 20x/30x）≤1%**——触价后入场。出场只用卡片 SL / 多级 TP（分批），不用阶梯/维加斯。同步回卡片系统时带 `card_id`。
+
+自动：同币**同周期**同时仅允许 1 笔开仓（15m 与 1h 可并存）；手动/卡片：同币可叠多笔。持仓/平仓/冷却均按仓位自己的 `interval` 取对应 K 线（卡片仓 interval=`card`）。
+
+---
+
+### 9.1 什么时候开单（Trend_Status 分流）
+
+先判市场状态，再决定用哪套入场逻辑（两套互斥，避免震荡里硬做趋势、趋势里硬抄底）：
 
 ```
-trend_status(df):
+trend_status(15m df):
   BULL  = Vegas 慢速通道(EMA576/676) 斜率向上 且 收盘 > 慢速中轨
   BEAR  = 斜率向下 且 收盘 < 慢速中轨
-  RANGE = 其余（含 A/B 通道纠缠的横盘）
+  RANGE = 其余（含快慢通道纠缠的横盘）
 
 入场路由：
-  RANGE → 只评估模块 S（短线猎手）
-  BULL / BEAR → 只评估模块 T（长线维加斯，同向）
+  RANGE      → 只评估模块 S（短线猎手）
+  BULL/BEAR  → 只评估模块 T（长线维加斯，且必须同向）
 ```
 
-### 9.2 模块一 · 短线猎手（logic=`S`）
+#### 9.1.1 短线猎手 S — 开多 / 开空
 
-**环境**：震荡 / 趋势末端；价格触及布林上下轨极限，或贴 LH / HL。
+**环境**：`RANGE`（震荡或趋势末端纠缠）。
 
-| 方向 | 入场触发 | 止损（极小） | 出场（全平，不留尾） |
-|------|----------|--------------|----------------------|
-| 空 | 触及布林上轨 **或** LH，当根标准射击之星 | 信号 K **最高价 × (1+0.1%)** | 触及布林中轨 **或** 有利波动 ≥ **2×ATR** |
-| 多 | 触及布林下轨 **或** HL，当根倒锤子/锤子 | 信号 K **最低价 × (1−0.1%)** | 同上 |
+| 方向 | 开单条件（当根已收盘 K，需同时满足） |
+|------|--------------------------------------|
+| **空** | 触及布林**上轨**或结构 **LH**，且当根为标准**射击之星** |
+| **多** | 触及布林**下轨**或结构 **HL**，且当根为**倒锤子 / 锤子** |
 
-逻辑：止损被直接击穿 = 反转失败，**瞬间离场、绝不扛单**。
+入场价 = 该根**收盘价**。
 
-配置：`OI_SANDBOX_HUNTER_SL_PAD`（默认 0.001）、`OI_SANDBOX_HUNTER_ATR_MULT`（默认 2）。
+#### 9.1.2 长线维加斯 T — 开多 / 开空
 
-### 9.3 模块二 · 长线维加斯（logic=`T`）
+**环境**：仅 `BULL` 做多 / 仅 `BEAR` 做空。
 
-**方向过滤**：仅 BULL 做多 / BEAR 做空。
+| 方向 | 开单条件（当根，需同时满足） |
+|------|------------------------------|
+| **多** | ① 回踩触及 Vegas **过滤线 EMA12** 或隧道（EMA144/169）下沿；② 收盘重新站上过滤线/隧道；③ 确认 = **阳线反包** 或 结构 **HL** |
+| **空** | ① 回抽触及过滤线或隧道上沿；② 收盘仍在过滤线/隧道下方；③ 确认 = **阴线反包** 或 结构 **LH** |
 
-**入场（顺势回踩）**
+---
 
-- 多：回踩 Vegas 过滤线 EMA12 或隧道 EMA144/169 获支撑；确认 = **阳线反包** 或 结构 **HL**  
-- 空：回抽过滤线/隧道遇阻；确认 = **阴线反包** 或 结构 **LH**
+### 9.2 初始止损（开仓立刻写入）
 
-**初始止损**
+#### 结构止损（算出来的原始 SL）
 
-- 多：`max(HL×0.9995, EMA169×(1−0.2%))`，且低于入场价  
-- 空：对称（LH / EMA169 上方 0.2%）
+| 模块 | 多单 | 空单 |
+|------|------|------|
+| **S 猎手** | 信号 K 最低价 × (1−0.1%) | 信号 K 最高价 × (1+0.1%) |
+| **T 维加斯** | `max(HL×0.9995, EMA169×(1−0.2%))`，且必须低于入场价；无结构位时用入场×(1−0.2%) | 对称（LH / EMA169 上方 0.2%） |
 
-### 9.4 长线智能化出场（分阶段状态机）
+#### 距离上限（ATR 动态，取代百分比硬裁剪）
 
-设计基准用「币种实际价格」阈值（对应约 20x 下的 ROE 口述：15% ROE≈0.75% 价、20% ROE≈1% 价）。  
-账面 ROE ≈ 价变% × 实际杠杆（100x/30x）。
+入场后一律 `apply_entry_sl_cap`：用 **`2.5 × ATR(14)`** 作为距入场的最大止损距离（`OI_SANDBOX_SL_ATR_MULT`，默认 2.5）。
 
-| 阶段 | 触发（价变有利） | 动作 | 记录事件 `type` |
-|------|------------------|------|-----------------|
-| **0** 持仓 | 开仓 | 写入入场时间/价/初始 SL | `entry` |
-| **1** 首轮防守 | ≥ **0.75%** | SL 移至 **开仓成本（保本）** | `trail`（reason=breakeven） |
-| **阶梯锁利**（S/T 全程） | 峰值价变每满 **2.2%** | SL 相对入场再锁定 **+1%**（可叠加：4.4%→+2%，6.6%→+3%…） | `trail`（reason=step_trail） |
-| **2** 首批落袋 | ≥ **1.0%** | **市价减仓 30%**，余 70% 开跟踪 | `partial` + `trail` |
-| **3** 尾仓追踪 | 自持仓以来极值回撤 **1%** | 强制全平剩余仓位；与阶梯锁利取更优 SL | `exit`（reason=trail）或持续 `trail` 更新 SL |
+- 多：结构 SL 过远则**上移**到 `入场 − 2.5×ATR`  
+- 空：结构 SL 过远则**下移**到 `入场 + 2.5×ATR`  
+- ATR 无效时**不裁剪**（保留结构 SL）  
+- OI 暴增时波动率升高 → ATR 变大 → 允许更宽止损，避免被噪音扫损  
+- 已开仓位不会因改配置自动重算；仅**新开仓**生效  
+
+硬止损击穿（多：`low≤SL` / 空：`high≥SL`）→ **立即全平**，不受最短持仓限制。
+
+---
+
+### 9.3 止盈与移损（持仓后）
+
+**通用（S / T 都有）— 阶梯锁利**
+
+- 持仓以来极值相对入场的有利价变，每满 **2.2%** → SL 相对入场再锁定 **+1%**（可叠加：4.4%→+2%，6.6%→+3%…）  
+- 事件：`trail` / `reason=step_trail`；若当根已触及新 SL → `exit` / `step_sl`
+
+#### 9.3.1 短线 S — 主动止盈（全平，不留尾）
+
+在**硬止损未触发**时，需同时满足软出场门槛，才允许主动止盈：
+
+1. 持仓已满至少 **2** 根 15m（`OI_SANDBOX_MIN_HOLD_BARS`）  
+2. 收盘价相对入场已有 ≥ **0.25%** 有利波动（`OI_SANDBOX_SOFT_EXIT_MIN_MOVE_PCT`）
+
+| 止盈方式 | 条件 | 出场码 |
+|----------|------|--------|
+| 布林中轨 | 收盘触及/越过中轨（不用影线） | `bb_mid` |
+| ATR | 收盘有利波动 ≥ **2×ATR14** | `atr2` |
+
+逻辑：止损被打穿 = 反转失败，瞬间离场；中轨/ATR 用来落袋，避免影线秒平。
+
+#### 9.3.2 长线 T — 分阶段（保本 → 减仓 → 跟踪）
+
+| 阶段 | 触发（价变有利） | 动作 | 事件 |
+|------|------------------|------|------|
+| **0** | 开仓 | 写入入场价 / 初始 SL | `entry` |
+| **1** | ≥ **0.75%** | SL 移至**开仓成本（保本）** | `trail` / `breakeven` |
+| **阶梯** | 峰值每满 **2.2%** | 相对入场锁定 +1%/+2%/…（与 S 相同） | `trail` / `step_trail` |
+| **2** | ≥ **1.0%** | **市价减仓 30%**，余 70% 进入跟踪 | `partial` + `trail` |
+| **3** | 自持仓极值回撤 **1%** | 剩余仓位全平；跟踪 SL 与阶梯取更优 | `exit` / `trail` |
 
 伪代码（多单尾仓）：
 
 ```python
-if price > highest_price:
-    highest_price = price
-    trailing_sl = highest_price * 0.99   # 永远距高点 1%
-if low <= trailing_sl:
-    close_all()  # 全平离场
+if high > highest_price:
+    highest_price = high
+trail_sl = max(highest_price * 0.99, step_trail_sl)  # 距高点 1%，或更优阶梯锁
+if low <= trail_sl:
+    close_all()
 ```
 
-配置：
+---
+
+### 9.4 出场原因码（复盘用）
+
+| code | 含义 |
+|------|------|
+| `sl` | 硬止损 |
+| `step_sl` | 阶梯锁定止损被打穿 |
+| `bb_mid` | 短线：布林中轨止盈 |
+| `atr2` | 短线：2×ATR 止盈 |
+| `breakeven` / `step_trail` / `trailing_update` | 移损（未平仓） |
+| `partial` | 长线减仓 30% |
+| `trail` | 长线跟踪止损全平 |
+
+前端历史表：partial + 最终全平合并为一行，阶段事件用 `;` 连接。
+
+---
+
+### 9.5 配置一览（沙盒交易相关）
 
 | 环境变量 | 默认 | 含义 |
 |----------|------|------|
-| `OI_SANDBOX_TREND_BE_PRICE_PCT` | 0.75 | 阶段1 保本价变% |
-| `OI_SANDBOX_TREND_PARTIAL_PRICE_PCT` | 1.0 | 阶段2 减仓价变% |
-| `OI_SANDBOX_TREND_PARTIAL_FRAC` | 0.30 | 减仓比例 |
-| `OI_SANDBOX_TREND_TRAIL_PCT` | 1.0 | 尾仓回撤% |
-| `OI_SANDBOX_STEP_TRAIL_PROFIT_PCT` | 2.2 | 阶梯：峰值盈利每满该% |
-| `OI_SANDBOX_STEP_TRAIL_SL_LIFT_PCT` | 1.0 | 阶梯：每档相对入场锁定的% |
-| `OI_SANDBOX_TREND_SL_PAD` | 0.002 | 隧道外安全垫 |
-| `OI_SANDBOX_MAX_CONCURRENT` | 10 | 最大同时交易币数 |
+| `OI_SANDBOX_INTERVALS` | 15m,1h | 交易执行周期列表（逗号分隔） |
+| `OI_SANDBOX_INTERVAL` | （列表首项） | 兼容旧变量；未设 `INTERVALS` 时仍可用单值思路，以 `INTERVALS` 为准 |
+| `OI_SANDBOX_KLINE_LIMIT` | 200 | 15m 等周期拉取根数 |
+| `OI_SANDBOX_KLINE_LIMIT_1H` | 720 | 1h 拉取根数（够 Vegas EMA676） |
+| `OI_SANDBOX_DAILY_COUNT` | 12 | 日池币数 |
+| `OI_SANDBOX_MAX_CONCURRENT` | 10 | 最大同时持仓 |
+| `OI_SANDBOX_NOTIONAL_USD` | 1 | 单笔保证金 U |
+| `OI_SANDBOX_LEVERAGE_MAJOR` / `_ALT` | 100 / 30 | BTC·ETH / 山寨杠杆 |
+| `OI_SANDBOX_FEE_PCT` | 0.04 | 单边手续费 %（名义） |
+| `OI_SANDBOX_HUNTER_SL_PAD` | 0.001 | S：信号 K 极值外垫 |
+| `OI_SANDBOX_HUNTER_ATR_MULT` | 2 | S：ATR 止盈倍数 |
+| `OI_SANDBOX_SL_ATR_MULT` | 2.5 | 初始止损距离上限 = 该值 × ATR(14) |
+| `OI_SANDBOX_TREND_SL_PAD` | 0.002 | T：EMA169 外垫 |
+| `OI_SANDBOX_TREND_BE_PRICE_PCT` | 0.75 | T：保本触发价变% |
+| `OI_SANDBOX_TREND_PARTIAL_PRICE_PCT` | 1.0 | T：减仓触发价变% |
+| `OI_SANDBOX_TREND_PARTIAL_FRAC` | 0.30 | T：减仓比例 |
+| `OI_SANDBOX_TREND_TRAIL_PCT` | 1.0 | T：尾仓回撤% |
+| `OI_SANDBOX_STEP_TRAIL_PROFIT_PCT` | 2.2 | 阶梯：峰值每满该% |
+| `OI_SANDBOX_STEP_TRAIL_SL_LIFT_PCT` | 1.0 | 阶梯：每档锁定% |
+| `OI_SANDBOX_MIN_HOLD_BARS` | 2 | 软止盈最短持仓根数 |
+| `OI_SANDBOX_SOFT_EXIT_MIN_MOVE_PCT` | 0.25 | 软止盈最小有利价变% |
+| `OI_SANDBOX_REENTRY_COOLDOWN_BARS` | 8 | 同币再开冷却根数 |
 
-### 9.5 单笔交易必须记录的字段（生命周期）
+---
 
-每一单（含减仓腿）在 SQLite `trades` + 持仓 `meta_json.events` + 前端 localStorage（近 3 天）中保留：
+### 9.6 单笔生命周期字段
+
+SQLite `trades` + 持仓 `meta_json.events` + 前端 localStorage：
 
 | 字段 | 说明 |
 |------|------|
 | `entry_time` / `entry_price` | 开仓时间（K 收盘秒）与价格 |
-| `exit_time` / `exit_price` | 本腿平仓/减仓时间与价格 |
-| `side` / `logic`（S\|T） / `leverage` | 方向、模块、杠杆 |
-| `sl`（持仓中） | 当前生效止损 |
+| `exit_time` / `exit_price` | 平仓/减仓时间与价格 |
+| `side` / `logic`（S\|T） / `leverage` / `source` | 方向、模块、杠杆、手动/自动 |
+| `sl` | 当前生效止损 |
 | `stage` / `partial_done` | 长线阶段；是否已减仓 |
 | `highest_price` / `lowest_price` | 跟踪极值 |
-| `events[]` | 有序事件链（见下） |
-| `pnl_usd` / `pnl_pct` / `roe_pct` | 本腿盈亏 |
-
-**`events[]` 元素约定**
+| `events[]` | 有序事件链 |
+| `pnl_usd` / `pnl_pct` / `roe_pct` | 扣费后盈亏 |
 
 ```json
 [
-  {"type":"entry","time":1710000000,"price":1.23,"sl":1.20,"side":"LONG","logic":"T","message":"..."},
-  {"type":"trail","time":1710000900,"price":1.24,"sl":1.23,"stage":1,"reason":"breakeven"},
-  {"type":"partial","time":1710001800,"price":1.25,"frac":0.3,"pnl_usd":0.09,"stage":2},
-  {"type":"trail","time":1710001800,"price":1.25,"sl":1.2375,"stage":2,"reason":"post_partial_trail"},
-  {"type":"exit","time":1710003600,"price":1.24,"reason":"trail","pnl_usd":0.05}
+  {"type":"entry","time":1710000000,"price":1.23,"sl":1.221,"side":"LONG","logic":"T","source":"auto"},
+  {"type":"trail","time":1710000900,"price":1.24,"sl":1.23,"reason":"breakeven"},
+  {"type":"partial","time":1710001800,"price":1.25,"frac":0.3},
+  {"type":"exit","time":1710003600,"price":1.24,"reason":"trail"}
 ]
 ```
 
-前端列表展示：**入场时间/价、出场时间/价、盈亏、阶段事件链**（`入@价 → 移 SL → 减@价 → 出@价`）。
+---
 
-### 9.6 并发与资金
+### 9.7 设计要点
 
-- 日池 N 币并行扫描；**先触发先开**，持仓数达到 3 则不再新开。  
-- 同币平仓后冷却 `SANDBOX_REENTRY_COOLDOWN_BARS`（默认 8 根 15m）再允许入场。  
-- 历史订单：浏览器 `localStorage` 键 `oi_sandbox_trade_history_v1`，**最多保留 3 天**。
-
-### 9.7 为何这样拆更有效
-
-1. **策略不冲突**：RANGE 只玩边界反转，趋势明确才做回踩顺势。  
-2. **移动止损更聪明**：先保本 → 再锁 30% → 尾仓才给 1% 回撤空间，避免一开仓就用 1% 跟踪把利润吐光。  
-3. **多币并发**：Max=3 提高资金利用率，同时控制风险暴露。
+1. **策略不冲突**：RANGE 只做边界反转（S）；趋势明确才做回踩顺势（T）。  
+2. **止损先紧后活**：结构位 + 硬上限 → 开仓风险可控；盈利后再阶梯上移 / 保本 / 跟踪。  
+3. **短线防抖**：中轨用收盘判定 + 最短持仓 + 最小有利波动，减少影线假平仓。  
+4. **长线分阶段**：先保本 → 减仓 30% 落袋 → 尾仓才给 1% 回撤空间。  
+5. **多币并发**：日池 12、上限 10，先触发先开；平仓后冷却防反复扫损。

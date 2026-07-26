@@ -12,6 +12,7 @@ import {
   filterHistoryByRange,
   SANDBOX_HISTORY_RANGE_OPTIONS,
   SANDBOX_HISTORY_RETAIN_DAYS,
+  summarizeHistoryRange,
   type SandboxHistoryRange,
 } from "../utils/sandboxHistory";
 
@@ -108,7 +109,16 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
   const [manualSym, setManualSym] = useState("");
   const [manualLogic, setManualLogic] = useState<"S" | "T">("S");
   const [manualSide, setManualSide] = useState<"LONG" | "SHORT">("LONG");
+  const [manualInterval, setManualInterval] = useState<"15m" | "1h">("15m");
   const [historyRange, setHistoryRange] = useState<SandboxHistoryRange>("7d");
+  const [sandboxFilter, setSandboxFilter] = useState<"all" | "st" | "card">("all");
+  const sandboxIntervals = useMemo(() => {
+    const raw = pattern?.sandbox_intervals;
+    if (Array.isArray(raw) && raw.length) {
+      return raw.map(String).filter((x) => x === "15m" || x === "1h") as Array<"15m" | "1h">;
+    }
+    return ["15m", "1h"] as Array<"15m" | "1h">;
+  }, [pattern?.sandbox_intervals]);
 
   const sandboxHistory = useSandboxTradeHistory({
     recentTrades: sandboxStats?.recent_trades,
@@ -117,10 +127,44 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
     exitAlerts: sandboxExitAlerts,
     scanTs: sandboxScanTs,
   });
-  const filteredHistory = useMemo(
-    () => filterHistoryByRange(sandboxHistory, historyRange),
-    [sandboxHistory, historyRange],
+  const filteredHistory = useMemo(() => {
+    const byRange = filterHistoryByRange(sandboxHistory, historyRange);
+    if (sandboxFilter === "card") {
+      return byRange.filter(
+        (t) => t.logic === "C" || t.source === "card" || t.source_label === "卡片",
+      );
+    }
+    if (sandboxFilter === "st") {
+      return byRange.filter(
+        (t) => t.logic !== "C" && t.source !== "card" && t.source_label !== "卡片",
+      );
+    }
+    return byRange;
+  }, [sandboxHistory, historyRange, sandboxFilter]);
+  const historyRangeStats = useMemo(
+    () => summarizeHistoryRange(filteredHistory),
+    [filteredHistory],
   );
+  const filteredPositions = useMemo(() => {
+    if (sandboxFilter === "card") {
+      return sandboxPositions.filter(
+        (p) => p.logic === "C" || p.source === "card" || p.source_label === "卡片",
+      );
+    }
+    if (sandboxFilter === "st") {
+      return sandboxPositions.filter(
+        (p) => p.logic !== "C" && p.source !== "card" && p.source_label !== "卡片",
+      );
+    }
+    return sandboxPositions;
+  }, [sandboxPositions, sandboxFilter]);
+  const cardOrders = pattern?.sandbox_card_orders ?? [];
+  const filteredCardOrders = useMemo(() => {
+    if (sandboxFilter === "st") return [];
+    return cardOrders.filter((o) =>
+      ["watching", "near", "ordered", "filled"].includes(o.status),
+    );
+  }, [cardOrders, sandboxFilter]);
 
   const reshuffleSandbox = useCallback(async () => {
     setBusy(true);
@@ -137,10 +181,16 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
   }, []);
 
   const manualSandboxEnter = useCallback(
-    async (args?: { symbol?: string; logic?: "S" | "T"; side?: "LONG" | "SHORT" }) => {
+    async (args?: {
+      symbol?: string;
+      logic?: "S" | "T";
+      side?: "LONG" | "SHORT";
+      interval?: "15m" | "1h";
+    }) => {
       const sym = (args?.symbol || manualSym || selectedSymbol || "").trim().toUpperCase();
       const logic = args?.logic || manualLogic;
       const side = args?.side || manualSide;
+      const interval = args?.interval || manualInterval;
       if (!sym) {
         setErr("请填写或选中币种");
         return;
@@ -151,7 +201,7 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
         const res = await fetch("/api/sandbox/enter", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ symbol: sym, logic, side }),
+          body: JSON.stringify({ symbol: sym, logic, side, interval }),
         });
         const data = await res.json();
         if (!data.ok) setErr(data.error || "市价开仓失败");
@@ -174,7 +224,7 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
         setBusy(false);
       }
     },
-    [manualSym, selectedSymbol, manualLogic, manualSide, patchPattern],
+    [manualSym, selectedSymbol, manualLogic, manualSide, manualInterval, patchPattern],
   );
 
   const addSymbol = useCallback(async () => {
@@ -625,6 +675,18 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                         <option value="LONG">做多 LONG</option>
                         <option value="SHORT">做空 SHORT</option>
                       </select>
+                      <select
+                        value={manualInterval}
+                        onChange={(e) => setManualInterval(e.target.value as "15m" | "1h")}
+                        disabled={busy}
+                        aria-label="执行周期"
+                      >
+                        {sandboxIntervals.map((iv) => (
+                          <option key={iv} value={iv}>
+                            {iv}
+                          </option>
+                        ))}
+                      </select>
                       <button
                         type="button"
                         className="pattern-random-btn"
@@ -651,8 +713,9 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                           <strong>趋势回踩波段</strong>
                         </header>
                         <p>
-                          BULL/BEAR：回踩 EMA12/隧道确认。价变 ≥0.75% 保本 → ≥1% 减仓 30% →
-                          尾仓自极值回撤 1% 全平。
+                          BULL/BEAR：回踩 EMA12/隧道确认。初始止损距入场不超过
+                          2.5×ATR(14)（OI 暴增波动大时自动放宽）。价变 ≥0.75% 保本 → ≥1% 减仓
+                          30% → 尾仓自极值回撤 1% 全平。
                         </p>
                       </article>
                       <article className="strategy-brief">
@@ -667,8 +730,8 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                       </article>
                     </div>
                     <p className="pattern-hint-main">
-                      日池 {sandboxPool.length} · 并发≤{sandboxMaxConcurrent} ·
-                      余额 {sandboxStats?.balance?.toFixed(2) ?? "—"}U · 胜率{" "}
+                      日池 {sandboxPool.length} · 周期 {sandboxIntervals.join(" + ")} · 并发≤
+                      {sandboxMaxConcurrent} · 余额 {sandboxStats?.balance?.toFixed(2) ?? "—"}U · 胜率{" "}
                       {sandboxStats ? `${(sandboxStats.win_rate * 100).toFixed(0)}%` : "—"} · 今日盈亏{" "}
                       {sandboxStats
                         ? `${sandboxStats.pnl_usd >= 0 ? "+" : ""}${sandboxStats.pnl_usd.toFixed(2)}U`
@@ -677,6 +740,25 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                       历史本地近 {SANDBOX_HISTORY_RETAIN_DAYS} 天
                     </p>
                     <div className="sandbox-history-filters">
+                      {(
+                        [
+                          { id: "all" as const, label: "全部" },
+                          { id: "st" as const, label: "S/T" },
+                          { id: "card" as const, label: "卡片" },
+                        ] as const
+                      ).map((opt) => (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          className={`sandbox-range-btn${sandboxFilter === opt.id ? " active" : ""}`}
+                          onClick={() => setSandboxFilter(opt.id)}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                      <span className="sandbox-filter-sep" aria-hidden>
+                        |
+                      </span>
                       {SANDBOX_HISTORY_RANGE_OPTIONS.map((opt) => (
                         <button
                           key={opt.id}
@@ -687,8 +769,27 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                           {opt.label}
                         </button>
                       ))}
-                      <span className="sandbox-range-count">
-                        {filteredHistory.length} 笔
+                      <span className="sandbox-range-stats">
+                        <span className="sandbox-range-count">
+                          {historyRangeStats.trades} 笔
+                          {historyRangeStats.trades > 0
+                            ? ` · 胜 ${historyRangeStats.wins} / 负 ${historyRangeStats.losses} · 胜率 ${(historyRangeStats.win_rate * 100).toFixed(0)}%`
+                            : ""}
+                        </span>
+                        <span
+                          className={`sandbox-range-pnl${
+                            historyRangeStats.trades === 0
+                              ? ""
+                              : historyRangeStats.pnl_usd >= 0
+                                ? " pos"
+                                : " neg"
+                          }`}
+                        >
+                          盈亏{" "}
+                          {historyRangeStats.trades === 0
+                            ? "—"
+                            : `${historyRangeStats.pnl_usd >= 0 ? "+" : ""}${historyRangeStats.pnl_usd.toFixed(2)}U`}
+                        </span>
                       </span>
                     </div>
                     <div className="sandbox-pool">
@@ -713,12 +814,87 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                       )}
                     </div>
 
-                    {sandboxPositions.length > 0 && (
+                    {filteredCardOrders.length > 0 && (
+                      <table className="sandbox-table">
+                        <thead>
+                          <tr>
+                            <th>卡片ID</th>
+                            <th>发单时间</th>
+                            <th>作者</th>
+                            <th>币种</th>
+                            <th>状态</th>
+                            <th>方向</th>
+                            <th>入场</th>
+                            <th>止盈</th>
+                            <th>止损</th>
+                            <th>杠杆</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredCardOrders.map((o) => (
+                            <tr
+                              key={o.card_id}
+                              className="clickable"
+                              onClick={() => setSelectedSymbol(o.symbol)}
+                            >
+                              <td>
+                                {o.card_id}
+                                {o.source_label || o.channel_name || o.guild_name ? (
+                                  <span className="sandbox-pnl-sub">
+                                    {[o.guild_name, o.channel_name || o.source_label]
+                                      .filter(Boolean)
+                                      .join(" · ")}
+                                  </span>
+                                ) : null}
+                              </td>
+                              <td>
+                                {fmtTs(
+                                  o.signal_at || o.created_at || 0
+                                )}
+                              </td>
+                              <td>{o.author_name || "—"}</td>
+                              <td>${displaySymbol(o.symbol)}</td>
+                              <td>
+                                {o.status === "watching"
+                                  ? "监听"
+                                  : o.status === "near"
+                                    ? "近场"
+                                    : o.status === "ordered"
+                                      ? "挂单"
+                                      : o.status === "filled"
+                                        ? "已入场"
+                                        : o.status}
+                              </td>
+                              <td>{o.side}</td>
+                              <td className="sandbox-tf">
+                                {o.entry_type === "market"
+                                  ? "市价"
+                                  : o.entry_low != null
+                                    ? o.entry_high != null && o.entry_high !== o.entry_low
+                                      ? `${o.entry_low}-${o.entry_high}`
+                                      : String(o.entry_low)
+                                    : "—"}
+                              </td>
+                              <td className="sandbox-tf">
+                                {(o.tps || []).length
+                                  ? (o.tps || []).join(" · ")
+                                  : "—"}
+                              </td>
+                              <td>{o.sl != null ? fmtMetaPrice(o.sl) : "—"}</td>
+                              <td>{o.leverage != null ? `${o.leverage}x` : "—"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+
+                    {filteredPositions.length > 0 && (
                       <table className="sandbox-table">
                         <thead>
                           <tr>
                             <th>币种</th>
                             <th>来源</th>
+                            <th>周期</th>
                             <th>模块</th>
                             <th>方向</th>
                             <th>参考周期</th>
@@ -729,9 +905,9 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {sandboxPositions.map((p) => (
+                          {filteredPositions.map((p) => (
                             <tr
-                              key={p.id ?? `${p.symbol}-${p.entry_time}-${p.logic}`}
+                              key={p.id ?? `${p.symbol}-${p.entry_time}-${p.logic}-${p.interval}`}
                               className="clickable"
                               onClick={() => setSelectedSymbol(p.symbol)}
                             >
@@ -739,23 +915,40 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                               <td>
                                 <span
                                   className={`sandbox-src${
-                                    (p.source || p.source_label) === "manual" ||
-                                    p.source_label === "手动"
-                                      ? " manual"
-                                      : " auto"
+                                    p.source === "card" || p.source_label === "卡片"
+                                      ? " card"
+                                      : (p.source || p.source_label) === "manual" ||
+                                          p.source_label === "手动"
+                                        ? " manual"
+                                        : " auto"
                                   }`}
                                 >
                                   {p.source_label ||
-                                    (p.source === "manual" ? "手动" : "自动")}
+                                    (p.source === "manual"
+                                      ? "手动"
+                                      : p.source === "card"
+                                        ? "卡片"
+                                        : "自动")}
+                                  {p.card_id ? ` · ${p.card_id}` : ""}
                                 </span>
                               </td>
+                              <td className="sandbox-tf">{p.interval || "15m"}</td>
                               <td>
-                                {p.module || (p.logic === "S" ? "短线" : p.logic === "T" ? "长线" : p.logic)}
+                                {p.module ||
+                                  (p.logic === "S"
+                                    ? "短线"
+                                    : p.logic === "T"
+                                      ? "长线"
+                                      : p.logic === "C"
+                                        ? "卡片"
+                                        : p.logic)}
                               </td>
                               <td>{p.side}</td>
                               <td className="sandbox-tf">
                                 {p.ref_intervals_label ||
-                                  (p.logic === "T" ? "15m · 1h · 4h · 1d" : "15m")}
+                                  (p.logic === "T"
+                                    ? "15m · 1h · 4h · 1d"
+                                    : p.interval || "15m")}
                               </td>
                               <td className="sandbox-events">{p.entry_reason || "—"}</td>
                               <td>
@@ -776,6 +969,7 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                           <th>日期</th>
                           <th>币种</th>
                           <th>来源</th>
+                          <th>周期</th>
                           <th>逻辑</th>
                           <th>方向</th>
                           <th>参考周期</th>
@@ -790,7 +984,7 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                       <tbody>
                         {filteredHistory.length === 0 ? (
                           <tr>
-                            <td colSpan={12} className="pattern-empty">
+                            <td colSpan={13} className="pattern-empty">
                               该时间范围内暂无平仓记录（本地保留近 {SANDBOX_HISTORY_RETAIN_DAYS} 天）
                             </td>
                           </tr>
@@ -801,7 +995,11 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                               fmtTradeEvents(t.events, t.reason);
                             const srcLabel =
                               t.source_label ||
-                              (t.source === "manual" || t.source === "手动" ? "手动" : "自动");
+                              (t.source === "card" || t.source === "卡片"
+                                ? "卡片"
+                                : t.source === "manual" || t.source === "手动"
+                                  ? "手动"
+                                  : "自动");
                             const exitLabel =
                               t.exit_label ||
                               (t.reason?.includes("|")
@@ -819,12 +1017,17 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                               <td>
                                 <span
                                   className={`sandbox-src${
-                                    srcLabel === "手动" ? " manual" : " auto"
+                                    srcLabel === "卡片"
+                                      ? " card"
+                                      : srcLabel === "手动"
+                                        ? " manual"
+                                        : " auto"
                                   }`}
                                 >
                                   {srcLabel}
                                 </span>
                               </td>
+                              <td className="sandbox-tf">{t.interval || "15m"}</td>
                               <td>{t.logic}</td>
                               <td>{t.side}</td>
                               <td className="sandbox-tf">
@@ -833,7 +1036,7 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                                     ? t.ref_intervals.join(" · ")
                                     : t.logic === "T"
                                       ? "15m · 1h · 4h · 1d"
-                                      : "15m")}
+                                      : t.interval || "15m")}
                               </td>
                               <td className="sandbox-events">
                                 {t.entry_reason || "—"}

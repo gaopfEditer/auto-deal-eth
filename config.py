@@ -185,6 +185,10 @@ PROMAT_PUBLISH = {
     "strategy_path": str(_PROMAT_PUBLISH_DIR / "strategy_left_ambush.txt"),
     "compose_path": str(_PROMAT_PUBLISH_DIR / "tv_signal_compose.txt"),
 }
+# 润色 JSON 中 confidence≥该值 → 发出的担子打「高信心」标（便于验证）
+TV_SIGNAL_HIGH_CONFIDENCE = int(
+    os.getenv("TV_SIGNAL_HIGH_CONFIDENCE", "80").strip() or "80"
+)
 
 # 数据库配置
 # 生产环境应从 .env.local 读取，这里提供默认值

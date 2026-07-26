@@ -151,9 +151,18 @@ SANDBOX_ENABLED = os.getenv("OI_SANDBOX_ENABLED", "1").strip().lower() in (
     "on",
 )
 SANDBOX_DAILY_COUNT = int(os.getenv("OI_SANDBOX_DAILY_COUNT", "12"))
-SANDBOX_INTERVAL = os.getenv("OI_SANDBOX_INTERVAL", "15m")
+# 执行周期：默认 15m + 1h 同等扫描（OI_SANDBOX_INTERVALS=15m 可只跑单周期）
+SANDBOX_INTERVALS: tuple[str, ...] = tuple(
+    s.strip()
+    for s in os.getenv("OI_SANDBOX_INTERVALS", "15m,1h").split(",")
+    if s.strip()
+) or ("15m", "1h")
+# 兼容旧代码：主周期 = 列表首项
+SANDBOX_INTERVAL = SANDBOX_INTERVALS[0]
 SANDBOX_KLINE_LIMIT = int(os.getenv("OI_SANDBOX_KLINE_LIMIT", "200"))
-# 策略参考周期（展示/记录用；信号执行周期仍为 SANDBOX_INTERVAL）
+# 1h/更高周期至少拉够 Vegas 慢速通道（EMA676）
+SANDBOX_KLINE_LIMIT_1H = int(os.getenv("OI_SANDBOX_KLINE_LIMIT_1H", "720"))
+# 策略参考周期（展示/记录用；信号执行周期为仓位自己的 interval）
 SANDBOX_REF_INTERVALS_HUNTER = tuple(
     s.strip()
     for s in os.getenv("OI_SANDBOX_REF_INTERVALS_HUNTER", "15m").split(",")
@@ -197,9 +206,11 @@ SANDBOX_MIN_HOLD_BARS = int(os.getenv("OI_SANDBOX_MIN_HOLD_BARS", "2"))
 SANDBOX_SOFT_EXIT_MIN_MOVE_PCT = float(
     os.getenv("OI_SANDBOX_SOFT_EXIT_MIN_MOVE_PCT", "0.25")
 )
-# 止损距离上限：BTC/ETH ≤1%，山寨 ≤3%
-SANDBOX_SL_MAX_PCT_MAJOR = float(os.getenv("OI_SANDBOX_SL_MAX_PCT_MAJOR", "1.0"))
-SANDBOX_SL_MAX_PCT_ALT = float(os.getenv("OI_SANDBOX_SL_MAX_PCT_ALT", "3.0"))
+# 初始止损距离：2.5×ATR(14) 动态上限（取代旧 0.5%/1.5% 百分比硬裁剪）
+SANDBOX_SL_ATR_MULT = float(os.getenv("OI_SANDBOX_SL_ATR_MULT", "2.5"))
+# 以下百分比仅作兼容占位，入场裁剪已改走 ATR，不再使用
+SANDBOX_SL_MAX_PCT_MAJOR = float(os.getenv("OI_SANDBOX_SL_MAX_PCT_MAJOR", "0.5"))
+SANDBOX_SL_MAX_PCT_ALT = float(os.getenv("OI_SANDBOX_SL_MAX_PCT_ALT", "1.5"))
 SANDBOX_MAJOR_SYMBOLS = tuple(
     s.strip().upper()
     for s in os.getenv("OI_SANDBOX_MAJOR_SYMBOLS", "BTCUSDT,ETHUSDT").split(",")
@@ -213,6 +224,23 @@ SANDBOX_FEE_PCT = float(os.getenv("OI_SANDBOX_FEE_PCT", "0.04"))
 # 平仓后至少隔 N 根已收盘 K 才允许同币再入场（防反复触发）
 SANDBOX_REENTRY_COOLDOWN_BARS = int(os.getenv("OI_SANDBOX_REENTRY_COOLDOWN_BARS", "8"))
 SANDBOX_STATE_DB = _PKG_ROOT / "data" / "sandbox_state.db"
+
+# —— 卡片信号 WebSocket（外部卡片系统推送 → 沙盒评估）——
+CARD_WS_ENABLED = os.getenv("OI_CARD_WS_ENABLED", "1").strip().lower() in (
+    "1",
+    "true",
+    "yes",
+    "on",
+)
+CARD_WS_PATH = os.getenv("OI_CARD_WS_PATH", "/ws/cards").strip() or "/ws/cards"
+# 限价近场：山寨小杠杆（约 20x/30x）默认 1%；主流高杠杆（约 100x）默认 0.2%
+CARD_NEAR_ENTRY_PCT = float(os.getenv("OI_CARD_NEAR_ENTRY_PCT", "1.0"))
+CARD_NEAR_ENTRY_PCT_MAJOR = float(os.getenv("OI_CARD_NEAR_ENTRY_PCT_MAJOR", "0.2"))
+# 卡片杠杆 ≥ 该值视为「主流档」近场阈值（无币种信息时回退）
+CARD_NEAR_ENTRY_MAJOR_LEV = float(os.getenv("OI_CARD_NEAR_ENTRY_MAJOR_LEV", "80"))
+# 卡片仓位执行评估周期（触 TP/SL 用该周期已收盘 K 的高低点）
+CARD_EVAL_INTERVAL = os.getenv("OI_CARD_EVAL_INTERVAL", "15m").strip() or "15m"
+CARD_DEFAULT_LEVERAGE = float(os.getenv("OI_CARD_DEFAULT_LEVERAGE", "10"))
 
 
 def proxy_url() -> str | None:

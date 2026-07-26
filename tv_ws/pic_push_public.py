@@ -26,6 +26,9 @@ except ImportError:
     pass
 
 from dealMsg.runner import disable_proxy_env, get_screenshot_dir, parse_ws_payload
+from notifier import format_tv_signal_plain
+from promat_publish import format_polished_for_terminal, is_high_confidence
+from tv_ws.polish import polish_tv_signal
 from tv_ws.signal_handler import (
     ONLY_TELEGRAM_PERIODS,
     is_allowed_ws_period,
@@ -110,6 +113,29 @@ def _print_message_received(data: dict, *, allowed_periods=None) -> None:
     print("-" * 56)
 
 
+def _judge_signal_dry(data: dict, *, allowed_periods=None) -> None:
+    """dry-run + --judge：对允许周期调用 Ollama，打印趋势/信心（不发担子）。"""
+    ticker, period = parse_ws_payload(data)
+    if not ticker:
+        return
+    if not is_allowed_ws_period(period or "", allowed_periods=allowed_periods):
+        return
+    signal_text = format_tv_signal_plain(data)
+    print(f"[judge] 调用 Ollama 扫描 {ticker} {period} …", file=sys.stderr)
+    ok, body = polish_tv_signal(signal_text)
+    if not ok or not body:
+        print("[judge] 模型判断失败", file=sys.stderr)
+        return
+    polished = body.get("polished") if isinstance(body, dict) else None
+    if isinstance(polished, dict):
+        print("[judge]\n" + format_polished_for_terminal(polished), file=sys.stderr)
+        if is_high_confidence(polished):
+            print(
+                "[judge] → 高信心：正式发出时担子将带【高信心担子】标记",
+                file=sys.stderr,
+            )
+
+
 def _handle_payload(
     data: dict,
     *,
@@ -118,6 +144,7 @@ def _handle_payload(
     publish_public: bool,
     only_telegram: bool = False,
     allowed_periods=None,
+    judge: bool = False,
 ) -> None:
     msg = data.get("message")
     if not isinstance(msg, dict):
@@ -140,12 +167,20 @@ def _handle_payload(
         print(f"[执行] ok={ok} {note}")
     else:
         _print_message_received(data, allowed_periods=allowed_periods)
+        if judge:
+            _judge_signal_dry(data, allowed_periods=allowed_periods)
         hint = (
             "去掉 --dry-run 后：仅 Telegram 原文+截图（15m/1h/4h，不润色）"
             if only_telegram
-            else "去掉 --dry-run 后：Ollama 润色 + Telegram；加 --public 再经 square_publish 发广场"
+            else "去掉 --dry-run 后：Ollama 润色（趋势+信心）+ Telegram；"
+            "高信心担子带【高信心担子】标；加 --public 再发广场"
         )
-        print(f"[提示] 当前为 --dry-run，不会润色、不会截图、不会发广场\n       {hint}", file=sys.stderr)
+        if not judge and not only_telegram:
+            hint += "\n       加 --judge 可在 dry-run 下对「允许」周期调用模型判断（不发送）"
+        print(
+            f"[提示] 当前为 --dry-run，不会截图、不会发广场\n       {hint}",
+            file=sys.stderr,
+        )
 
 
 def _ws_connect_kwargs() -> dict:
@@ -185,6 +220,7 @@ async def _handle_payload_async(
     publish_public: bool,
     only_telegram: bool = False,
     allowed_periods=None,
+    judge: bool = False,
 ) -> None:
     """同步链路（截图/润色/发帖）放到线程，避免阻塞 WebSocket 心跳。"""
     await asyncio.to_thread(
@@ -195,6 +231,7 @@ async def _handle_payload_async(
         publish_public=publish_public,
         only_telegram=only_telegram,
         allowed_periods=allowed_periods,
+        judge=judge,
     )
 
 
@@ -207,6 +244,7 @@ async def _listen_session(
     publish_public: bool,
     only_telegram: bool = False,
     allowed_periods=None,
+    judge: bool = False,
 ) -> None:
     async for raw in ws:
         if isinstance(raw, bytes):
@@ -237,6 +275,7 @@ async def _listen_session(
                 publish_public=publish_public,
                 only_telegram=only_telegram,
                 allowed_periods=allowed_periods,
+                judge=judge,
             )
             continue
 
@@ -253,6 +292,7 @@ async def run_listener(
     publish_public: bool,
     only_telegram: bool = False,
     allowed_periods=None,
+    judge: bool = False,
 ) -> None:
     try:
         import websockets
@@ -290,6 +330,8 @@ async def run_listener(
         _log_telegram_status()
     else:
         mode = "仅打印（--dry-run）"
+        if judge:
+            mode += " + Ollama 判断（--judge，不发送）"
     print(f"[WS] 连接 {ws_uri} …（直连，{mode}）")
     connect_kw = _ws_connect_kwargs()
     print(
@@ -314,6 +356,7 @@ async def run_listener(
                     publish_public=publish_public,
                     only_telegram=only_telegram,
                     allowed_periods=allowed_periods,
+                    judge=judge,
                 )
         except KeyboardInterrupt:
             raise
@@ -366,10 +409,20 @@ def main() -> None:
         action="store_true",
         help="不润色、不发广场；15m/1h/4h 信号原文推 Telegram（默认含截图，加 --no-screenshot 仅文本）",
     )
+    parser.add_argument(
+        "--judge",
+        action="store_true",
+        help="配合 --dry-run：对允许周期的信号调用 Ollama 输出趋势建议/信心指数（不发 Telegram/广场）",
+    )
     args = parser.parse_args()
 
     if args.only_telegram and args.public:
         parser.error("--only-telegram 与 --public 不能同时使用")
+    if args.judge and not args.dry_run:
+        print(
+            "[提示] --judge 主要用于 --dry-run；正式运行时润色本身已含趋势/信心",
+            file=sys.stderr,
+        )
 
     allowed_periods = ONLY_TELEGRAM_PERIODS if args.only_telegram else None
 
@@ -383,6 +436,7 @@ def main() -> None:
                 publish_public=args.public,
                 only_telegram=args.only_telegram,
                 allowed_periods=allowed_periods,
+                judge=args.judge,
             )
         )
     except KeyboardInterrupt:

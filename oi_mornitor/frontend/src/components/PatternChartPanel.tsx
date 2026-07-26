@@ -51,6 +51,7 @@ interface Props {
     symbol: string;
     logic: "S" | "T";
     side: "LONG" | "SHORT";
+    interval?: "15m" | "1h";
   }) => void;
 }
 
@@ -277,6 +278,7 @@ export const PatternChartPanel = memo(function PatternChartPanel({
 }: Props) {
   const [manualLogic, setManualLogic] = useState<"S" | "T">("S");
   const [manualSide, setManualSide] = useState<"LONG" | "SHORT">("LONG");
+  const [manualInterval, setManualInterval] = useState<"15m" | "1h">("15m");
   const chartRef = useRef<HTMLDivElement>(null);
   const crosshairPriceRef = useRef<HTMLDivElement>(null);
   const chartApi = useRef<IChartApi | null>(null);
@@ -672,6 +674,9 @@ export const PatternChartPanel = memo(function PatternChartPanel({
     setErr("");
     setLoadingMore(false);
     setLastCandleTime(null);
+    if (timeframe === "15m" || timeframe === "1h") {
+      setManualInterval(timeframe);
+    }
 
     fetchPatternChart(symbol, timeframe, { limit: CHART_DEFAULT_LIMIT })
       .then((json) => {
@@ -1049,12 +1054,28 @@ export const PatternChartPanel = memo(function PatternChartPanel({
               <option value="LONG">做多 LONG</option>
               <option value="SHORT">做空 SHORT</option>
             </select>
+            <select
+              value={manualInterval}
+              onChange={(e) =>
+                setManualInterval(e.target.value as "15m" | "1h")
+              }
+              disabled={manualEnterBusy}
+              aria-label="执行周期"
+            >
+              <option value="15m">15m</option>
+              <option value="1h">1h</option>
+            </select>
             <button
               type="button"
               className="pattern-random-btn"
               disabled={manualEnterBusy}
               onClick={() =>
-                onManualEnter({ symbol, logic: manualLogic, side: manualSide })
+                onManualEnter({
+                  symbol,
+                  logic: manualLogic,
+                  side: manualSide,
+                  interval: manualInterval,
+                })
               }
             >
               市价开仓
