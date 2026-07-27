@@ -715,6 +715,8 @@ EXIT_REASON_LABELS: dict[str, str] = {
     "card_sl": "卡片止损",
     "card_tp": "卡片止盈",
     "card_tp_partial": "卡片分批止盈",
+    "manual": "手动平仓",
+    "manual_partial": "手动减仓",
 }
 
 

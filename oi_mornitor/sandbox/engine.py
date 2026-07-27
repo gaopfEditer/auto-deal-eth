@@ -762,6 +762,134 @@ class SandboxEngine:
         logger.info("沙盒手动市价入场 %s %s %s %s @ %s", sym, side_u, logic_u, iv, sig.price)
         return {"ok": True, "alert": alert, **self.get_payload()}
 
+    async def manual_close(
+        self,
+        session: aiohttp.ClientSession,
+        *,
+        position_id: int | None = None,
+        symbol: str | None = None,
+        pct: float = 100.0,
+        market_price: float | None = None,
+        base_url: str = FAPI_BASE_URL,
+    ) -> dict[str, Any]:
+        """手动按剩余仓百分比市价平仓 / 减仓。pct=100 全平。"""
+        if not SANDBOX_ENABLED:
+            return {"ok": False, "error": "沙盒未启用"}
+        try:
+            pct_f = float(pct)
+        except (TypeError, ValueError):
+            return {"ok": False, "error": "pct 须为数字"}
+        if pct_f <= 0 or pct_f > 100:
+            return {"ok": False, "error": "pct 须在 (0, 100]"}
+
+        pos = None
+        if position_id is not None:
+            try:
+                pos = self.tracker.get_position_by_id(int(position_id))
+            except (TypeError, ValueError):
+                pos = None
+        if pos is None and symbol:
+            sym_q = symbol.strip().upper()
+            cands = self.tracker.list_positions_for_symbol(sym_q)
+            if len(cands) == 1:
+                pos = cands[0]
+            elif len(cands) > 1:
+                return {
+                    "ok": False,
+                    "error": f"{sym_q} 有多仓，请传 position_id",
+                }
+        if pos is None or not pos.id:
+            return {"ok": False, "error": "持仓不存在"}
+
+        sym = pos.symbol.upper()
+        try:
+            meta = json.loads(pos.meta_json or "{}")
+        except json.JSONDecodeError:
+            meta = {}
+        iv = normalize_sandbox_interval(str(meta.get("interval") or SANDBOX_INTERVAL))
+
+        price = float(market_price) if market_price and market_price > 0 else 0.0
+        if price <= 0:
+            klines = await fetch_pattern_klines(
+                session,
+                base_url=base_url,
+                symbol=sym,
+                interval=iv,
+                limit=min(5, self._kline_limit(iv)),
+            )
+            if not klines:
+                return {"ok": False, "error": "无法获取最新价"}
+            try:
+                price = float(klines[-1][4])  # close
+            except (TypeError, ValueError, IndexError):
+                return {"ok": False, "error": "无法解析最新价"}
+        if price <= 0:
+            return {"ok": False, "error": "最新价无效"}
+
+        bar_time = int(time.time())
+        full = pct_f >= 99.9
+        if full:
+            code = "manual"
+            label = exit_reason_label(code)
+            sig = SandboxSignal(
+                action="exit",
+                side=pos.side,
+                logic=pos.logic,
+                price=price,
+                sl=pos.sl,
+                message=f"手动平仓 100% · 市价 {price:.6g}",
+                meta={
+                    "exit_code": code,
+                    "exit_label": label,
+                    "manual": True,
+                    "card_id": meta.get("card_id"),
+                },
+            )
+        else:
+            code = "manual_partial"
+            label = exit_reason_label(code)
+            frac = pct_f / 100.0
+            sig = SandboxSignal(
+                action="partial",
+                side=pos.side,
+                logic=pos.logic,
+                price=price,
+                sl=pos.sl,
+                message=f"手动减仓 {pct_f:.0f}% · 市价 {price:.6g}",
+                meta={
+                    "exit_code": code,
+                    "exit_label": label,
+                    "partial_frac": frac,
+                    "manual": True,
+                    "card_id": meta.get("card_id"),
+                },
+            )
+
+        alert = self._apply_signal(sym, sig, bar_time, pos=pos, force=True)
+        if not alert:
+            return {"ok": False, "error": "平仓失败（仓位可能已变）"}
+
+        if full:
+            cid = str(meta.get("card_id") or "")
+            if cid:
+                co = self.tracker.get_card_order(cid)
+                if co and co.get("status") != "closed":
+                    co["status"] = "closed"
+                    self.tracker.upsert_card_order(co)
+
+        self._last_alerts = [alert] + self._last_alerts[:19]
+        self._last_scan_ts = time.time()
+        logger.info(
+            "沙盒手动%s #%s %s %s %.1f%% @ %s",
+            "平仓" if full else "减仓",
+            pos.id,
+            sym,
+            pos.logic,
+            pct_f,
+            price,
+        )
+        return {"ok": True, "alert": alert, **self.get_payload()}
+
     async def scan(
         self,
         session: aiohttp.ClientSession,
@@ -1172,11 +1300,13 @@ class SandboxEngine:
                 meta = json.loads(pos.meta_json or "{}")
             except json.JSONDecodeError:
                 meta = {}
-            # 卡片可多级分批；S/T 仅一次 partial_done
-            if meta.get("partial_done") and pos.logic != "C":
+            # 卡片可多级分批；S/T 仅一次策略 partial_done（手动 force 可继续减）
+            if meta.get("partial_done") and pos.logic != "C" and not force:
                 return None
             frac = float((sig.meta or {}).get("partial_frac") or 0.3)
-            frac = min(max(frac, 0.05), 0.9)
+            frac = min(max(frac, 0.01), 0.99)  # 相对当前剩余仓
+            rem = float(meta.get("remaining_frac") or 1.0)
+            fee_frac = rem * frac  # 相对初始保证金
             exit_px = float(sig.price)
             if pos.side == "LONG":
                 pnl_pct = (exit_px - pos.entry_price) / pos.entry_price * 100.0
@@ -1190,13 +1320,15 @@ class SandboxEngine:
                 pnl_pct=gross_pnl_pct,
                 margin_usd=margin,
                 leverage=lev,
-                frac=frac,
+                frac=fee_frac,
                 fee_pct=fee_pct,
             )
             roe_pct = pnl_pct * lev
             bal = self.tracker.get_balance() + pnl_usd
             self.tracker.set_balance(bal)
             sm = dict(sig.meta or {})
+            exit_code = str(sm.get("exit_code") or "partial")
+            exit_label = str(sm.get("exit_label") or exit_reason_label(exit_code))
             self._append_event(
                 meta,
                 {
@@ -1204,6 +1336,7 @@ class SandboxEngine:
                     "time": bar_time,
                     "price": exit_px,
                     "frac": frac,
+                    "fee_frac": fee_frac,
                     "pnl_usd": pnl_usd,
                     "pnl_pct": pnl_pct,
                     "gross_pnl_pct": gross_pnl_pct,
@@ -1212,19 +1345,19 @@ class SandboxEngine:
                     "fee_price_pct": fee_price_pct,
                     "roe_pct": roe_pct,
                     "stage": 2,
-                    "reason": "partial",
-                    "exit_code": "partial",
-                    "exit_label": exit_reason_label("partial"),
+                    "reason": exit_code,
+                    "exit_code": exit_code,
+                    "exit_label": exit_label,
                     "message": sig.message,
                 },
             )
             if pos.logic == "C":
                 meta["card_tp_done"] = int(sm.get("card_tp_done") or meta.get("card_tp_done") or 0)
                 meta["partial_done"] = False
-            else:
+            elif not force:
                 meta["partial_done"] = True
             meta["stage"] = 2
-            meta["remaining_frac"] = float(meta.get("remaining_frac") or 1.0) * (1.0 - frac)
+            meta["remaining_frac"] = rem * (1.0 - frac)
             meta["partial_pnl_usd"] = float(meta.get("partial_pnl_usd") or 0.0) + pnl_usd
             meta["partial_fee_usd"] = float(meta.get("partial_fee_usd") or 0.0) + fee_usd
             if sm.get("highest_price") is not None:
@@ -1237,7 +1370,7 @@ class SandboxEngine:
             self.tracker.upsert_position(pos)
             # 减仓不单独落库成第二笔；事件记入持仓，待全平合并为一条成交
             logger.info(
-                "沙盒减仓 %s %s %.0f%% @ %s pnl=%.4fU fee=%.4fU",
+                "沙盒减仓 %s %s %.0f%%(剩仓) @ %s pnl=%.4fU fee=%.4fU",
                 sym,
                 pos.logic,
                 frac * 100,
@@ -1245,8 +1378,6 @@ class SandboxEngine:
                 pnl_usd,
                 fee_usd,
             )
-            exit_code = str(sm.get("exit_code") or "partial")
-            exit_label = str(sm.get("exit_label") or exit_reason_label(exit_code))
             return {
                 "type": "partial",
                 "symbol": sym,
@@ -1270,7 +1401,7 @@ class SandboxEngine:
                     str(meta.get("interval") or SANDBOX_INTERVAL)
                 ),
                 "kline_close_time": bar_time,
-                "status_label": f"沙盒减仓 · 逻辑{pos.logic} · {pnl_usd:+.2f}U",
+                "status_label": f"沙盒减仓 · {exit_label} · {pnl_usd:+.2f}U",
             }
 
         if sig.action == "exit" and pos:

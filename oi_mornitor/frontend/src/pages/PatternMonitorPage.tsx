@@ -110,6 +110,9 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
   const [manualLogic, setManualLogic] = useState<"S" | "T">("S");
   const [manualSide, setManualSide] = useState<"LONG" | "SHORT">("LONG");
   const [manualInterval, setManualInterval] = useState<"15m" | "1h">("15m");
+  /** 持仓手动平仓百分比，key=position id */
+  const [closePctById, setClosePctById] = useState<Record<number, number>>({});
+  const [closingId, setClosingId] = useState<number | null>(null);
   const [historyRange, setHistoryRange] = useState<SandboxHistoryRange>("7d");
   const [sandboxFilter, setSandboxFilter] = useState<"all" | "st" | "card">("all");
   const sandboxIntervals = useMemo(() => {
@@ -225,6 +228,49 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
       }
     },
     [manualSym, selectedSymbol, manualLogic, manualSide, manualInterval, patchPattern],
+  );
+
+  const manualSandboxClose = useCallback(
+    async (positionId: number, pct: number) => {
+      if (!positionId) {
+        setErr("缺少持仓 ID");
+        return;
+      }
+      const p = Math.min(100, Math.max(1, Math.round(Number(pct) || 100)));
+      setClosingId(positionId);
+      setBusy(true);
+      setErr("");
+      try {
+        const res = await fetch("/api/sandbox/close", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ position_id: positionId, pct: p }),
+        });
+        const data = await res.json();
+        if (!data.ok) setErr(data.error || "平仓失败");
+        else {
+          const patch: Partial<PatternPayload> = {};
+          if (Array.isArray(data.sandbox_positions)) {
+            patch.sandbox_positions = data.sandbox_positions;
+          }
+          if (data.sandbox_stats) patch.sandbox_stats = data.sandbox_stats;
+          if (Array.isArray(data.sandbox_trade_history)) {
+            patch.sandbox_trade_history = data.sandbox_trade_history;
+          }
+          if (Array.isArray(data.sandbox_alerts)) patch.sandbox_alerts = data.sandbox_alerts;
+          if (Array.isArray(data.sandbox_card_orders)) {
+            patch.sandbox_card_orders = data.sandbox_card_orders;
+          }
+          if (Object.keys(patch).length) patchPattern(patch);
+        }
+      } catch {
+        setErr("网络错误");
+      } finally {
+        setBusy(false);
+        setClosingId(null);
+      }
+    },
+    [patchPattern],
   );
 
   const addSymbol = useCallback(async () => {
@@ -902,6 +948,7 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                             <th>入场时间/价</th>
                             <th>止损</th>
                             <th>事件</th>
+                            <th>平仓</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -957,6 +1004,73 @@ export const PatternMonitorPage = memo(function PatternMonitorPage() {
                               </td>
                               <td>{fmtMetaPrice(p.sl)}</td>
                               <td className="sandbox-events">{fmtTradeEvents(p.events)}</td>
+                              <td
+                                className="sandbox-close-cell"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {p.id != null ? (
+                                  <div className="sandbox-close-row">
+                                    <div className="sandbox-close-presets">
+                                      {[25, 50, 75, 100].map((n) => (
+                                        <button
+                                          key={n}
+                                          type="button"
+                                          className={`sandbox-close-pct${
+                                            (closePctById[p.id!] ?? 100) === n
+                                              ? " active"
+                                              : ""
+                                          }`}
+                                          disabled={busy || closingId === p.id}
+                                          onClick={() =>
+                                            setClosePctById((prev) => ({
+                                              ...prev,
+                                              [p.id!]: n,
+                                            }))
+                                          }
+                                        >
+                                          {n}%
+                                        </button>
+                                      ))}
+                                    </div>
+                                    <div className="sandbox-close-actions">
+                                      <input
+                                        type="number"
+                                        min={1}
+                                        max={100}
+                                        step={1}
+                                        className="sandbox-close-input"
+                                        value={closePctById[p.id] ?? 100}
+                                        disabled={busy || closingId === p.id}
+                                        onChange={(e) => {
+                                          const v = Math.min(
+                                            100,
+                                            Math.max(1, Number(e.target.value) || 1),
+                                          );
+                                          setClosePctById((prev) => ({
+                                            ...prev,
+                                            [p.id!]: v,
+                                          }));
+                                        }}
+                                      />
+                                      <button
+                                        type="button"
+                                        className="sandbox-close-btn"
+                                        disabled={busy || closingId === p.id}
+                                        onClick={() =>
+                                          void manualSandboxClose(
+                                            p.id!,
+                                            closePctById[p.id!] ?? 100,
+                                          )
+                                        }
+                                      >
+                                        {closingId === p.id ? "…" : "平仓"}
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  "—"
+                                )}
+                              </td>
                             </tr>
                           ))}
                         </tbody>

@@ -1,3 +1,5 @@
+> ⚠️ **已迁移**：正式目录为 [`auto-script/discord-collector/oi_mornitor`](../../auto-script/discord-collector/oi_mornitor)。详见 [`MOVED.md`](./MOVED.md)。
+
 # OI Monitor — 币安永续动态热钱雷达
 
 免签（无需 API Key）的币安 U 本位永续 **持仓量(OI) 异动雷达**，基于 `asyncio + aiohttp` 异步架构。  
