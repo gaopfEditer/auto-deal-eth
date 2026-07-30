@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CryptoPulse — 宏观时间轴 · 广场榜单</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <header class="top">
+    <div class="brand">
+      <span class="brand-mark">CP</span>
+      <div>
+        <h1>CryptoPulse</h1>
+        <p class="tagline">宏观大事件 · 交易所广场榜单</p>
+      </div>
+    </div>
+    <div class="ticker-rail compact" aria-label="24h 热搜币种">
+      <span class="ticker-label">24H HOT</span>
+      <div class="ticker-track" id="tickerTrack">
+        <span class="ticker-item muted">加载中…</span>
+      </div>
+    </div>
+    <button type="button" class="btn-ingest" id="btnIngest" title="触发抓取">刷新源</button>
+  </header>
+
+  <div class="workspace">
+    <aside class="timeline-panel" aria-label="宏观时间轴">
+      <div class="timeline-head">
+        <h2>宏观时间轴</h2>
+        <p class="timeline-sub">金十 ≥3★ · 未来 24h · 可滚动</p>
+      </div>
+      <div class="timeline-scroll" id="timelineScroll">
+        <p class="empty sm">加载宏观事件…</p>
+      </div>
+    </aside>
+
+    <section class="boards-panel" aria-label="交易所榜单">
+      <div class="boards-toolbar">
+        <h2>交易所广场榜单</h2>
+        <p class="boards-hint" id="boardsHint">按热度分排序</p>
+      </div>
+      <div class="boards-grid" id="boardsGrid">
+        <p class="empty">加载榜单…</p>
+      </div>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <span>左侧：宏观时间轴 · 右侧：各交易所热帖</span>
+    <span id="meta"></span>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

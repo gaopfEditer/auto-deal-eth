@@ -1,0 +1,7 @@
+data/
+*.tmp
+__pycache__/
+.venv/
+venv/
+frontend/dist/
+.env
