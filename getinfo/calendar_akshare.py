@@ -127,7 +127,8 @@ def get_high_impact_calendar(
         return calendar_df
 
     imp_col = None
-    for name in ("重要度", "importance"):
+    # 华尔街见闻 / AkShare 当前列名是「重要性」；旧文档偶见「重要度」
+    for name in ("重要性", "重要度", "importance"):
         if name in cols:
             imp_col = name
             break

@@ -12,66 +12,12 @@ from news_mornitor.config import (
 )
 from news_mornitor.fetchers.base import BaseFetcher
 from news_mornitor.fetchers.common import build_mock_items, http_get_json, parse_generic_feed
+from news_mornitor.fetchers.mock_posts import mock_home_url, samples_for
 from news_mornitor.models import Platform, RawFetchItem
 
 logger = logging.getLogger("CryptoPulse.OkxSquare")
 
-_MOCK_SAMPLES = [
-    (
-        "okx-eth-1",
-        "OKX Insights",
-        "ETH 质押占比再创新高，L2 费用探底",
-        "质押 APR 小幅回落但锁仓仍增。Blob 利用率回升，$ETH 中期贝塔优于多数山寨。",
-        880,
-        134,
-        46,
-    ),
-    (
-        "okx-ordi-2",
-        "铭文观察室",
-        "BTC 生态：Runes 成交萎缩，$ORDI 缩量横盘",
-        "铭文热度退潮后资金分化。若 BTC 突破，生态币或滞后跟涨；失效则继续阴跌。",
-        390,
-        67,
-        18,
-    ),
-    (
-        "okx-spam-3",
-        "活动助手",
-        "限时邀请码领空投",
-        "点击链接用邀请码注册 OKX，免费领盲盒！躺赚！",
-        11,
-        1,
-        28,
-    ),
-    (
-        "okx-ai-4",
-        "叙事追踪",
-        "AI Agent 二次轮动：$FET 领涨后资金下沉",
-        "龙头换手加快，小市值需严控仓位。关注是否带量突破前高，$TAO 联动。",
-        620,
-        95,
-        29,
-    ),
-    (
-        "okx-defi-5",
-        "DeFi 早报",
-        "链上稳定币供应周增，风险偏好回暖",
-        "USDT/USDC 净铸造回升，CEX 净流出放缓。偏多但不追高，$BTC 主导。",
-        510,
-        74,
-        21,
-    ),
-    (
-        "okx-sui-6",
-        "公链雷达",
-        "SUI 生态 TVL 回升，注意解锁压力",
-        "活跃地址与成交额同步改善。短线看能否站稳关键均线，$SUI 波动仍大。",
-        450,
-        82,
-        24,
-    ),
-]
+_MOCK_SAMPLES = samples_for(Platform.OKX, n=16, offset=6)
 
 
 def _headers() -> dict[str, str]:
@@ -95,7 +41,11 @@ def _headers() -> dict[str, str]:
     return headers
 
 
-def _url(eid: str) -> str:
+def _mock_url(_eid: str) -> str:
+    return mock_home_url(Platform.OKX)
+
+
+def _real_url(eid: str) -> str:
     return f"https://www.okx.com/zh-hans/community/post/{eid}"
 
 
@@ -117,7 +67,9 @@ class OkxSquareFetcher(BaseFetcher):
     async def fetch_trending(self, *, limit: int = 40) -> list[RawFetchItem]:
         if self.use_mock:
             logger.info("[%s] USE_MOCK=1，返回演示数据", self.name)
-            return build_mock_items(Platform.OKX, _MOCK_SAMPLES, limit=limit, url_builder=_url)
+            return build_mock_items(
+                Platform.OKX, _MOCK_SAMPLES, limit=limit, url_builder=_mock_url
+            )
 
         await self._sleep()
         data = await http_get_json(
@@ -126,12 +78,21 @@ class OkxSquareFetcher(BaseFetcher):
             params={"page": 1, "size": min(limit, 50), "sort": "hot"},
             name=self.name,
         )
-        if data is None:
-            logger.warning("[%s] 请求失败，回退 mock", self.name)
-            return build_mock_items(Platform.OKX, _MOCK_SAMPLES, limit=limit, url_builder=_url)
+        if data is not None:
+            parsed = parse_generic_feed(data, platform=Platform.OKX, url_builder=_real_url)
+            if parsed:
+                return parsed[:limit]
+            logger.warning("[%s] HTTP 解析为空，尝试 CDP", self.name)
+        else:
+            logger.warning("[%s] HTTP 失败，尝试 CDP 9222", self.name)
 
-        parsed = parse_generic_feed(data, platform=Platform.OKX, url_builder=_url)
-        if not parsed:
-            logger.warning("[%s] 解析为空，回退 mock", self.name)
-            return build_mock_items(Platform.OKX, _MOCK_SAMPLES, limit=limit, url_builder=_url)
-        return parsed[:limit]
+        try:
+            from news_mornitor.fetchers.cdp_square import fetch_via_cdp
+
+            cdp_items = await fetch_via_cdp(Platform.OKX, limit=limit)
+            if cdp_items:
+                logger.info("[%s] CDP 回退命中 %d 条", self.name, len(cdp_items))
+                return cdp_items[:limit]
+        except Exception as e:
+            logger.warning("[%s] CDP 回退失败: %s", self.name, e)
+        return []

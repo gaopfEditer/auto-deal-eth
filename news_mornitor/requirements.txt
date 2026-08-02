@@ -4,3 +4,10 @@ uvicorn[standard]>=0.27.0
 aiohttp>=3.9.0
 pydantic>=2.5.0
 python-dotenv>=1.0.0
+akshare>=1.14.0
+pandas>=2.0.0
+# CDP 回退（纯 WebSocket，不经 Selenium，避免抢焦点）
+websocket-client>=1.7.0
+# 可选：其它脚本若仍用 Selenium
+selenium>=4.15.0
+webdriver-manager>=4.0.0

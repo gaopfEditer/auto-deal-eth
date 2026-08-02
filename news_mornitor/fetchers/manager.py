@@ -1,24 +1,50 @@
-"""FetcherManager — 聚合多平台抓取（币安 / Bitget / OKX）。"""
+"""FetcherManager — 聚合多平台抓取。"""
 from __future__ import annotations
 
 import logging
 from typing import Iterable
 
+from news_mornitor.config import ENABLED_SOURCES
 from news_mornitor.fetchers.base import BaseFetcher
 from news_mornitor.fetchers.binance_square import BinanceSquareFetcher
 from news_mornitor.fetchers.bitget_square import BitgetSquareFetcher
+from news_mornitor.fetchers.bybit_feed import BybitFeedFetcher
+from news_mornitor.fetchers.cryptopanic import CryptoPanicFetcher
+from news_mornitor.fetchers.farcaster import FarcasterFetcher
 from news_mornitor.fetchers.okx_square import OkxSquareFetcher
+from news_mornitor.fetchers.reddit_crypto import RedditCryptoFetcher
+from news_mornitor.fetchers.tradingview_ideas import TradingViewIdeasFetcher
 from news_mornitor.models import RawFetchItem
 
 logger = logging.getLogger("CryptoPulse.FetcherManager")
 
+_REGISTRY: dict[str, type[BaseFetcher]] = {
+    "binance": BinanceSquareFetcher,
+    "bitget": BitgetSquareFetcher,
+    "okx": OkxSquareFetcher,
+    "bybit": BybitFeedFetcher,
+    "reddit": RedditCryptoFetcher,
+    "tradingview": TradingViewIdeasFetcher,
+    "cryptopanic": CryptoPanicFetcher,
+    "farcaster": FarcasterFetcher,
+}
+
 
 def default_fetchers() -> list[BaseFetcher]:
-    return [
-        BinanceSquareFetcher(),
-        BitgetSquareFetcher(),
-        OkxSquareFetcher(),
-    ]
+    out: list[BaseFetcher] = []
+    for key, cls in _REGISTRY.items():
+        if key in ENABLED_SOURCES:
+            out.append(cls())
+    if not out:
+        logger.warning("ENABLED_SOURCES 为空，回退 binance+reddit+tradingview+farcaster")
+        out = [
+            BinanceSquareFetcher(),
+            RedditCryptoFetcher(),
+            TradingViewIdeasFetcher(),
+            FarcasterFetcher(),
+        ]
+    logger.info("启用抓取源: %s", ", ".join(f.name for f in out))
+    return out
 
 
 class FetcherManager:

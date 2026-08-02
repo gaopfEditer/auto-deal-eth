@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from news_mornitor.config import SQUARE_MIN_COMMENTS, SQUARE_MIN_LIKES
 from news_mornitor.models import Post
 
 
@@ -42,3 +43,33 @@ def apply_score(post: Post) -> Post:
         4,
     )
     return post
+
+
+def is_influential(
+    post: Post,
+    *,
+    min_likes: int | None = None,
+    min_comments: int | None = None,
+) -> bool:
+    """是否达到广场影响力门槛（默认 赞≥200 或 评≥30；TV / Farcaster 有特例）。"""
+    from news_mornitor.config import TV_MIN_AGREES, TV_MIN_COMMENTS
+    from news_mornitor.models import Platform
+
+    plat = post.platform.value if hasattr(post.platform, "value") else str(post.platform)
+    likes = int(post.like_count or 0)
+    comments = int(post.comment_count or 0)
+
+    if plat == Platform.TRADINGVIEW.value:
+        likes_need = TV_MIN_AGREES if min_likes is None else int(min_likes)
+        comments_need = TV_MIN_COMMENTS if min_comments is None else int(min_comments)
+        return likes >= likes_need or comments >= comments_need
+
+    # Hub 常无反应计数：有正文+真链即允许上榜（时间窗另控）
+    if plat == Platform.FARCASTER.value and likes == 0 and comments == 0:
+        content = (post.content or post.title or "").strip()
+        url = (post.source_url or "").strip()
+        return len(content) >= 40 and url.startswith("http")
+
+    likes_need = SQUARE_MIN_LIKES if min_likes is None else int(min_likes)
+    comments_need = SQUARE_MIN_COMMENTS if min_comments is None else int(min_comments)
+    return likes >= likes_need or comments >= comments_need

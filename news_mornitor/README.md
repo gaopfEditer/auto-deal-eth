@@ -1,80 +1,81 @@
 # CryptoPulse (`news_mornitor`)
 
-交易所广场（Binance Square 等）热门动态聚合与智能筛选。  
-**当前存储：JSON 文件缓存**（无 PostgreSQL / Redis）。Schema 见 [`SCHEMA.md`](./SCHEMA.md)。
+交易所广场 + 社区影响力帖聚合。  
+**存储：JSON 文件缓存**（无 PostgreSQL / Redis）。Schema 见 [`SCHEMA.md`](./SCHEMA.md)。
+
+**默认只展示真实抓取结果**：`CRYPTO_PULSE_USE_MOCK` 默认为 `0`；抓取失败不回退演示数据，前端为空直到有过门槛真帖。
 
 ## 模块
 
 | 模块 | 说明 |
 |------|------|
-| `fetchers/` | `FetcherManager` + 币安 / Bitget / OKX 广场抓取（默认 mock） |
+| `fetchers/` | 多源抓取；`FetcherManager` 按 `CRYPTO_PULSE_SOURCES` 启用 |
 | `pipeline/` | 热度打分 + AI/规则摘要与垃圾过滤 |
-| `fetchers/macro_calendar.py` | 金十风格宏观日历：≥3★、未来 24h、利好/利空 |
-| `store.py` | `posts.json` / `tickers.json` / `macro_events.json` + API 缓存 |
-| `api/server.py` | FastAPI 只读接口 |
-| `frontend/public/` | **左时间轴 + 右交易所榜单** UI |
-| `scheduler.py` | 每 5 分钟轮询（文件锁去重） |
+| `fetchers/macro_calendar.py` | **优先** `getinfo/calendar_akshare`（华尔街见闻）；金十 HTTP 兜底 |
+| `store.py` | `posts.json` / `tickers.json` / `macro_events.json` |
+| `api/server.py` | FastAPI |
+| `frontend/public/` | 左宏观时间轴 + 右多源影响力榜 |
+| `scheduler.py` | 默认每 **30 分钟** 一轮（web 后台 / `daemon`） |
+
+## 内容源
+
+| 源 | 模块 | 拉取方式 | 说明 |
+|----|------|----------|------|
+| 币安广场 | `binance_square` | bapi → **CDP 9222** → 本地 JSON | 真帖真链 |
+| Bitget Insights | `bitget_square` | HTTP 404 → **CDP `/zh-CN/insights`** | 默认启用 |
+| Reddit | `reddit_crypto` | PullPush 近 14 天 → **CDP hot** | 陈年高赞会丢弃 |
+| TradingView | `tradingview_ideas` | Ideas 页 `likes_count` → **CDP** | 解析字段已对齐 |
+| Farcaster | `farcaster` | Hub casts | 无赞评时仍可上榜（按抓取时间） |
+| OKX / Bybit | 对应模块 | HTTP → **CDP 9222** | 默认关；加进 `CRYPTO_PULSE_SOURCES` |
+
+**CDP 回退（默认开）**：公开 API 404 时，用 **纯 WebSocket CDP**（不经 Selenium）连本机 Chrome `--remote-debugging-port=9222`：`Target.createTarget(background=true)` 后台 worker 标签（带 `#cryptopulse-cdp-worker`，会复用），`Page.navigate` + 页内 `fetch`/DOM，**不** `activate`/`bringToFront`。若仍闪一下 Dock，结束时会把 macOS 前台还回去。
+
+```bash
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
+# 建议已登录币安/Bitget/OKX；CRYPTO_PULSE_CDP_FALLBACK=0 可关掉
+```
+
+默认门槛：**赞 ≥ 200 或 评 ≥ 30**（TradingView：agree≥30 或 评≥10）。
 
 ## 快速启动
 
 ```bash
 cd news_mornitor
-pip install -r requirements.txt
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-# Web：http://127.0.0.1:8770 （首次自动 mock 抓取）
+# Web：http://127.0.0.1:8770 （立刻可读历史；后台抓取完成后自动更新）
 python run.py
-# 或
-python -m news_mornitor
 
-# 单次抓取
 python run.py once
-
-# 仅守护定时抓取
 python run.py daemon
 ```
 
-复制 `.env.example` → 仓库根或本目录 `.env`。
+可选：
+
+```bash
+# 仅本地调试才开 mock（正式浏览不要开）
+# CRYPTO_PULSE_USE_MOCK=1
+
+CRYPTO_PULSE_FETCH_INTERVAL_SEC=1800
+# CRYPTO_PULSE_CRYPTOPANIC_TOKEN=你的免费token
+# HTTPS_PROXY=http://127.0.0.1:7890
+```
 
 ## API
 
-- `GET /api/v1/health`
-- `GET /api/v1/posts?platform=BINANCE&ticker=BTC&time_range=24h`
-- `GET /api/v1/tickers/trending`
-- `GET /api/v1/macro/timeline?min_star=3&ahead_hours=24` — 宏观时间轴
-- `GET /api/v1/boards` — 按交易所拆分的热帖榜单
-- `POST /api/v1/ingest` — 手动触发抓取（含宏观刷新）
+- `GET /api/v1/boards?time_range=3d` — 过门槛真帖榜
+- `GET /api/v1/posts?...` — 同上
+- `GET /api/v1/macro/timeline` — 宏观 ±3 天（北京时间）
+- `GET /api/v1/fetch/status` — 定时开关 / 是否在抓 / 距下次间隔
+- `POST /api/v1/fetch/stop` — 停止定时抓取
+- `POST /api/v1/fetch/start` — 开始定时抓取
+- `POST /api/v1/fetch/now` — 立即抓一轮（忽略开关与间隔）
+- `POST /api/v1/ingest` — 兼容旧接口
 
-## 页面布局
-
-- **左侧**：金十风格宏观时间轴（手动滚动），仅 **≥3★** 且 **未来 24h**；卡片带 **利好 / 利空 / 中性** 标签与简要理由
-- **右侧**：币安 / Bitget / OKX 等广场热帖榜单（按 score 排序）
+前端约 60s 只刷新展示，**不自动抓取**；定时默认每 **30 分钟**一轮。顶栏：**停止获取 / 开始获取 / 立即获取**、历史。
 
 ## 热度公式
 
 ```
 Score = (Likes*1 + Comments*3 + Shares*5) / (HoursPassed + 2)^1.5
 ```
-
-## AI
-
-默认 `CRYPTO_PULSE_AI_ENABLED=0`，用规则过滤邀请码/喊单并提取 `$TICKER` + 截句摘要。  
-开启后走 OpenAI 兼容接口（DeepSeek 等改 `CRYPTO_PULSE_LLM_BASE_URL`）。
-
-## 真实币安广场
-
-```bash
-CRYPTO_PULSE_USE_MOCK=0
-HTTPS_PROXY=http://127.0.0.1:7890
-# 如需 Cookie / clienttype 等：
-# CRYPTO_PULSE_BINANCE_HEADERS_JSON={"cookie":"..."}
-```
-
-解析失败时自动回退 mock，保证本地可演示。
-
-## 与 `news_aggregator` 关系
-
-| | `news_aggregator` | `news_mornitor` |
-|--|-------------------|-----------------|
-| 源 | RSS 宏观/科技 | 交易所广场 |
-| 存储 | 文本输出 | JSON 文件库 |
-| UI | 无 | CryptoPulse Web |

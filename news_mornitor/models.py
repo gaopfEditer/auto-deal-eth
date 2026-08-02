@@ -13,6 +13,12 @@ class Platform(str, Enum):
     BINANCE = "BINANCE"
     BITGET = "BITGET"
     OKX = "OKX"
+    BYBIT = "BYBIT"
+    REDDIT = "REDDIT"
+    TRADINGVIEW = "TRADINGVIEW"
+    CRYPTOPANIC = "CRYPTOPANIC"
+    FARCASTER = "FARCASTER"
+    DEBANK = "DEBANK"
     TWITTER = "TWITTER"
 
 
@@ -145,6 +151,27 @@ class MacroEvent(BaseModel):
     source_url: str = "https://rili.jin10.com/"
 
     def to_public_dict(self) -> dict[str, Any]:
+        from datetime import datetime, timedelta, timezone
+        from zoneinfo import ZoneInfo
+
+        try:
+            tz = ZoneInfo("Asia/Shanghai")
+        except Exception:
+            tz = timezone(timedelta(hours=8))
+
         d = self.model_dump(mode="json")
         d["bias_label"] = BIAS_LABELS.get(self.bias.value, self.bias_label or "中性")
+        d["timezone"] = "Asia/Shanghai"
+        phase = "upcoming"
+        beijing = ""
+        if self.publish_at:
+            try:
+                ts = datetime.fromisoformat(self.publish_at.replace("Z", "+00:00"))
+                bj = ts.astimezone(tz)
+                beijing = bj.isoformat(timespec="minutes")
+                phase = "past" if bj < datetime.now(tz) else "upcoming"
+            except ValueError:
+                beijing = self.publish_at
+        d["publish_at_beijing"] = beijing
+        d["phase"] = phase
         return d

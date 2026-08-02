@@ -25,14 +25,20 @@
         <span class="ticker-item muted">加载中…</span>
       </div>
     </div>
-    <button type="button" class="btn-ingest" id="btnIngest" title="触发抓取">刷新源</button>
+    <div class="fetch-controls" aria-label="抓取控制">
+      <span class="fetch-status" id="fetchStatus" title="抓取状态">定时 · …</span>
+      <button type="button" class="btn-ingest btn-stop" id="btnFetchStop" title="停止定时抓取">停止获取</button>
+      <button type="button" class="btn-ingest btn-start" id="btnFetchStart" title="恢复定时抓取">开始获取</button>
+      <button type="button" class="btn-ingest" id="btnFetchNow" title="立即抓取一轮（忽略间隔）">立即获取</button>
+    </div>
+    <button type="button" class="btn-ingest" id="btnHistory" title="点击与收藏历史">历史</button>
   </header>
 
   <div class="workspace">
     <aside class="timeline-panel" aria-label="宏观时间轴">
       <div class="timeline-head">
         <h2>宏观时间轴</h2>
-        <p class="timeline-sub">金十 ≥3★ · 未来 24h · 可滚动</p>
+        <p class="timeline-sub">华尔街见闻(AkShare) · 中高重要度 · 北京时间 ±3d～+3d</p>
       </div>
       <div class="timeline-scroll" id="timelineScroll">
         <p class="empty sm">加载宏观事件…</p>
@@ -41,8 +47,8 @@
 
     <section class="boards-panel" aria-label="交易所榜单">
       <div class="boards-toolbar">
-        <h2>交易所广场榜单</h2>
-        <p class="boards-hint" id="boardsHint">按热度分排序</p>
+        <h2>交易所 / 社区影响力帖</h2>
+        <p class="boards-hint" id="boardsHint">仅展示真实抓取 · 赞≥200 或 评≥30</p>
       </div>
       <div class="boards-grid" id="boardsGrid">
         <p class="empty">加载榜单…</p>
@@ -50,11 +56,44 @@
     </section>
   </div>
 
-  <footer class="foot">
-    <span>左侧：宏观时间轴 · 右侧：各交易所热帖</span>
-    <span id="meta"></span>
-  </footer>
+  <aside class="history-drawer" id="historyDrawer" hidden aria-label="浏览与收藏历史">
+    <header class="history-head">
+      <h2>历史记录</h2>
+      <div class="history-actions">
+        <button type="button" class="hist-tab active" data-tab="all">全部</button>
+        <button type="button" class="hist-tab" data-tab="fav">收藏</button>
+        <button type="button" class="hist-tab" data-tab="click">点击</button>
+        <button type="button" class="hist-clear" id="btnClearHistory" title="清空当前筛选">清空</button>
+        <button type="button" class="hist-close" id="btnCloseHistory" aria-label="关闭">×</button>
+      </div>
+    </header>
+    <div class="history-list" id="historyList">
+      <p class="empty sm">暂无记录</p>
+    </div>
+  </aside>
 
-  <script src="/static/app.js"></script>
+  <div class="post-modal" id="postModal" hidden>
+    <div class="post-modal-backdrop" id="postModalBackdrop"></div>
+    <article class="post-modal-card" role="dialog" aria-modal="true" aria-labelledby="postModalTitle">
+      <header class="post-modal-head">
+        <div>
+          <p class="post-modal-meta" id="postModalMeta"></p>
+          <h2 id="postModalTitle"></h2>
+        </div>
+        <button type="button" class="hist-close" id="btnClosePost" aria-label="关闭">×</button>
+      </header>
+      <div class="post-modal-body" id="postModalBody"></div>
+      <footer class="post-modal-foot">
+        <button type="button" class="btn-ingest" id="btnPostFav">收藏</button>
+        <a class="btn-ingest" id="btnPostOpen" href="#" target="_blank" rel="noopener" hidden>打开原文</a>
+        <span class="post-modal-note" id="postModalNote"></span>
+      </footer>
+    </article>
+  </div>
+
+  <footer class="foot">
+    <span>点击条目看正文（与列表一致）· 有真链接才「打开原文」</span>
+    <span id="meta"></span>
+  </footer>  <script src="/static/app.js"></script>
 </body>
 </html>

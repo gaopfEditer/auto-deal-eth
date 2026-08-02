@@ -1,68 +1,26 @@
-"""Bitget Square / Insights 热帖抓取。"""
+"""Bitget Insights 热帖抓取（旧 square API 已 404，主路径 CDP 打开 Insights）。"""
 from __future__ import annotations
 
 import json
 import logging
 
 from news_mornitor.config import (
+    BITGET_INSIGHTS_URL,
     BITGET_SQUARE_HEADERS_JSON,
     BITGET_SQUARE_URL,
     REQUEST_DELAY_SEC,
+    SQUARE_MIN_COMMENTS,
+    SQUARE_MIN_LIKES,
     USE_MOCK_FETCHER,
 )
 from news_mornitor.fetchers.base import BaseFetcher
 from news_mornitor.fetchers.common import build_mock_items, http_get_json, parse_generic_feed
+from news_mornitor.fetchers.mock_posts import mock_home_url, samples_for
 from news_mornitor.models import Platform, RawFetchItem
 
 logger = logging.getLogger("CryptoPulse.BitgetSquare")
 
-_MOCK_SAMPLES = [
-    (
-        "bg-btc-1",
-        "Bitget 研究院",
-        "BTC 波动率压缩，突破前夜？",
-        "合约持仓高位盘整，现货 ETF 净流入转正。关注 96k 得失，$BTC 若放量上行或带动山寨贝塔。",
-        920,
-        156,
-        41,
-    ),
-    (
-        "bg-copy-2",
-        "跟单达人 Leo",
-        "跟单策略周报：降低杠杆、等待非农",
-        "本周胜率 58%，回撤控制在 4%。宏观窗口期建议仓位 ≤30%，$ETH 网格优于单边。",
-        540,
-        88,
-        27,
-    ),
-    (
-        "bg-spam-3",
-        "福利官",
-        "注册送盲盒 + 邀请码",
-        "用我的邀请码注册 Bitget，躺赚手续费返佣！无风险！",
-        8,
-        2,
-        35,
-    ),
-    (
-        "bg-sol-4",
-        "链上侦探",
-        "SOL meme 退潮后资金去哪了",
-        "部分回流蓝筹，部分进 AI agent。$SOL 链上活跃仍强，短线看 200 支撑是否守住。",
-        710,
-        102,
-        33,
-    ),
-    (
-        "bg-macro-5",
-        "宏观快讯",
-        "美元走弱窗口，风险资产共振",
-        "DXY 跌破关键均线，黄金与加密同向。注意 FOMC 前缩仓，$BTC $ETH 联动。",
-        480,
-        71,
-        19,
-    ),
-]
+_MOCK_SAMPLES = samples_for(Platform.BITGET, n=16, offset=3)
 
 
 def _headers() -> dict[str, str]:
@@ -73,8 +31,9 @@ def _headers() -> dict[str, str]:
         ),
         "Accept": "application/json, text/plain, */*",
         "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-        "Referer": "https://www.bitget.com/zh-CN/square",
+        "Referer": BITGET_INSIGHTS_URL or "https://www.bitget.com/zh-CN/insights",
         "Origin": "https://www.bitget.com",
+        "locale": "zh_CN",
     }
     if BITGET_SQUARE_HEADERS_JSON.strip():
         try:
@@ -86,8 +45,12 @@ def _headers() -> dict[str, str]:
     return headers
 
 
-def _url(eid: str) -> str:
-    return f"https://www.bitget.com/zh-CN/square/post/{eid}"
+def _mock_url(_eid: str) -> str:
+    return mock_home_url(Platform.BITGET)
+
+
+def _real_url(eid: str) -> str:
+    return f"https://www.bitget.com/zh-CN/insights/posts/{eid}"
 
 
 class BitgetSquareFetcher(BaseFetcher):
@@ -108,8 +71,11 @@ class BitgetSquareFetcher(BaseFetcher):
     async def fetch_trending(self, *, limit: int = 40) -> list[RawFetchItem]:
         if self.use_mock:
             logger.info("[%s] USE_MOCK=1，返回演示数据", self.name)
-            return build_mock_items(Platform.BITGET, _MOCK_SAMPLES, limit=limit, url_builder=_url)
+            return build_mock_items(
+                Platform.BITGET, _MOCK_SAMPLES, limit=limit, url_builder=_mock_url
+            )
 
+        # 1) 旧公开 API（多数已 404，保留作快路径）
         await self._sleep()
         data = await http_get_json(
             self.url,
@@ -117,12 +83,32 @@ class BitgetSquareFetcher(BaseFetcher):
             params={"pageNo": 1, "pageSize": min(limit, 50), "type": "hot"},
             name=self.name,
         )
-        if data is None:
-            logger.warning("[%s] 请求失败，回退 mock", self.name)
-            return build_mock_items(Platform.BITGET, _MOCK_SAMPLES, limit=limit, url_builder=_url)
+        if data is not None:
+            parsed = parse_generic_feed(data, platform=Platform.BITGET, url_builder=_real_url)
+            if parsed:
+                return parsed[:limit]
 
-        parsed = parse_generic_feed(data, platform=Platform.BITGET, url_builder=_url)
-        if not parsed:
-            logger.warning("[%s] 解析为空，回退 mock", self.name)
-            return build_mock_items(Platform.BITGET, _MOCK_SAMPLES, limit=limit, url_builder=_url)
-        return parsed[:limit]
+        # 2) CDP：打开 Insights 页扫 /insights/posts/ 真链
+        logger.warning("[%s] HTTP 不可用，CDP 打开 Insights", self.name)
+        try:
+            from news_mornitor.fetchers.cdp_square import fetch_bitget_insights_cdp
+
+            cdp_items = await fetch_bitget_insights_cdp(limit=max(limit, 30))
+            kept = [
+                x
+                for x in cdp_items
+                if x.like_count >= SQUARE_MIN_LIKES or x.comment_count >= SQUARE_MIN_COMMENTS
+            ]
+            if not kept:
+                # 热流里中等热度也先收，避免整栏空白
+                kept = [
+                    x
+                    for x in cdp_items
+                    if x.like_count >= 30 or x.comment_count >= 10 or len(x.content or "") >= 80
+                ]
+            if kept:
+                logger.info("[%s] Insights CDP 命中 %d 条", self.name, len(kept))
+                return kept[:limit]
+        except Exception as e:
+            logger.warning("[%s] CDP 回退失败: %s", self.name, e)
+        return []

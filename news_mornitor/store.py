@@ -91,10 +91,9 @@ class FileStore:
             for p in new_posts:
                 if p.id in posts:
                     old = posts[p.id]
-                    # 保留已有 summary / tickers / is_spam，更新互动与分数
+                    # 保留已有 summary / tickers；spam 以本轮规则为准（清简报腔）
                     p.summary = p.summary or old.summary
                     p.mentioned_tickers = p.mentioned_tickers or old.mentioned_tickers
-                    p.is_spam = old.is_spam if p.summary else p.is_spam
                     updated += 1
                 else:
                     inserted += 1

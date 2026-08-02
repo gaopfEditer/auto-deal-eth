@@ -47,6 +47,33 @@ def _ws_skip_telegram() -> bool:
     return os.getenv("WS_SKIP_TELEGRAM", "").strip().lower() in ("1", "true", "yes")
 
 
+def _notify_telegram_started(*, mode: str, periods_label: str, ws_uri: str) -> None:
+    """进程正式运行时发一条「已启动」到 Telegram（dry-run / 跳过 TG 时不发）。"""
+    if _ws_skip_telegram():
+        return
+    try:
+        from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+        from notifier import send_telegram_message
+    except Exception as e:
+        print(f"[WS] 启动通知跳过（导入失败）: {e}", file=sys.stderr)
+        return
+    if not (TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID):
+        return
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    text = (
+        f"✅ tv_ws 已启动\n"
+        f"时间: {now}\n"
+        f"模式: {mode}\n"
+        f"周期: {periods_label}\n"
+        f"WS: {ws_uri}"
+    )
+    ok = send_telegram_message(text)
+    if ok:
+        print("[WS] 已向 Telegram 发送「已启动」标识", file=sys.stderr)
+    else:
+        print("[WS] Telegram「已启动」发送失败", file=sys.stderr)
+
+
 def _log_telegram_status() -> None:
     if _ws_skip_telegram():
         print("[WS] Telegram: 已关闭（WS_SKIP_TELEGRAM）", file=sys.stderr)
@@ -157,7 +184,8 @@ def _handle_payload(
     if execute:
         ok, note = process_tradingview_ws_message(
             data,
-            skip_screenshot=skip_screenshot,
+            # --only-telegram：只发信号原文到 TG，不截图、不润色、不发广场
+            skip_screenshot=skip_screenshot or only_telegram,
             skip_publish=only_telegram,
             skip_polish=only_telegram,
             publish_to_square=publish_public and not only_telegram,
@@ -170,7 +198,7 @@ def _handle_payload(
         if judge:
             _judge_signal_dry(data, allowed_periods=allowed_periods)
         hint = (
-            "去掉 --dry-run 后：仅 Telegram 原文+截图（15m/1h/4h，不润色）"
+            "去掉 --dry-run 后：仅 Telegram 原文（15m/1h/4h，不润色、不截图、不发广场）"
             if only_telegram
             else "去掉 --dry-run 后：Ollama 润色（趋势+信心）+ Telegram；"
             "高信心担子带【高信心担子】标；加 --public 再发广场"
@@ -303,31 +331,34 @@ async def run_listener(
 
     disable_proxy_env()
     periods_label = ", ".join(sorted(allowed_periods or ONLY_TELEGRAM_PERIODS if only_telegram else ("1h", "4h")))
+    # --only-telegram 强制不截图：只把信号原文推 Telegram
+    if only_telegram:
+        skip_screenshot = True
     if execute:
         if only_telegram:
-            mode = f"仅 Telegram 原文（{periods_label}，不润色、不发广场"
-            mode += "，无截图）" if skip_screenshot else "，含截图）"
+            mode = f"仅 Telegram 原文（{periods_label}，不润色、不截图、不发广场）"
         else:
             mode = "润色 + Telegram 图文"
             if publish_public:
                 mode += " + 广场(square_publish/CDP)"
             else:
                 mode += "（默认不发布广场，加 --public 才发）"
-        if not skip_screenshot:
-            mode += " + 截图"
-            try:
-                shot_dir = get_screenshot_dir()
-                os.makedirs(shot_dir, exist_ok=True)
-                print(f"[WS] 截图目录: {shot_dir}", file=sys.stderr)
-            except OSError as e:
-                print(f"[WS][WARN] 截图目录不可用: {e}", file=sys.stderr)
-        else:
-            mode += "（跳过截图）"
+            if not skip_screenshot:
+                mode += " + 截图"
+                try:
+                    shot_dir = get_screenshot_dir()
+                    os.makedirs(shot_dir, exist_ok=True)
+                    print(f"[WS] 截图目录: {shot_dir}", file=sys.stderr)
+                except OSError as e:
+                    print(f"[WS][WARN] 截图目录不可用: {e}", file=sys.stderr)
+            else:
+                mode += "（跳过截图）"
         if not only_telegram:
             print(f"[WS] 润色: Ollama ({os.getenv('PROMAT_ANALYSIS_OLLAMA_BASE_URL', 'http://localhost:11434')})", file=sys.stderr)
         if publish_public and not only_telegram:
             print("[WS] 广场发布: binance.square_publish (CDP Chrome 9222)", file=sys.stderr)
         _log_telegram_status()
+        _notify_telegram_started(mode=mode, periods_label=periods_label, ws_uri=ws_uri)
     else:
         mode = "仅打印（--dry-run）"
         if judge:
@@ -407,7 +438,7 @@ def main() -> None:
     parser.add_argument(
         "--only-telegram",
         action="store_true",
-        help="不润色、不发广场；15m/1h/4h 信号原文推 Telegram（默认含截图，加 --no-screenshot 仅文本）",
+        help="不润色、不截图、不发广场；15m/1h/4h 信号原文直推 Telegram",
     )
     parser.add_argument(
         "--judge",

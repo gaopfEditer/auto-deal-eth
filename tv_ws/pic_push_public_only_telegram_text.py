@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-TradingView WSS → 仅 Telegram 文本（不润色、不截图、不发广场）。
+TradingView WSS → 仅 Telegram 原文（不润色、不截图、不发广场）。
 
-默认处理 15m / 1h / 4h，原文 signal 直推 Telegram（无配图）。
+与 `pic_push_public_only_telegram` / `--only-telegram` 行为相同（兼容入口）。
 
 用法:
   python -m tv_ws.pic_push_public_only_telegram_text
-  python tv_ws_pic_push_public_only_telegram_text.py
-  python tv_ws_pic_push_public.py --only-telegram --no-screenshot
+  python -m tv_ws.pic_push_public --only-telegram
 """
 from __future__ import annotations
 

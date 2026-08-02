@@ -198,3 +198,38 @@ async def http_get_json(
     except (asyncio.TimeoutError, aiohttp.ClientError, ValueError) as e:
         logger.warning("[%s] 请求失败: %s", name, e)
         return None
+
+
+async def http_get_text(
+    url: str,
+    *,
+    headers: dict[str, str] | None = None,
+    params: dict[str, Any] | None = None,
+    name: str = "fetcher",
+) -> str | None:
+    timeout = aiohttp.ClientTimeout(total=HTTP_TIMEOUT_SEC)
+    default_headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+        ),
+        "Accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9,zh-CN;q=0.8",
+    }
+    merged = {**default_headers, **(headers or {})}
+    try:
+        async with aiohttp.ClientSession(headers=merged, trust_env=True) as session:
+            async with session.get(
+                url,
+                params=params,
+                timeout=timeout,
+                proxy=proxy_url(),
+            ) as resp:
+                if resp.status != 200:
+                    text = await resp.text()
+                    logger.warning("[%s] HTTP %s: %s", name, resp.status, text[:200])
+                    return None
+                return await resp.text()
+    except (asyncio.TimeoutError, aiohttp.ClientError) as e:
+        logger.warning("[%s] 请求失败: %s", name, e)
+        return None

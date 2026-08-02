@@ -77,8 +77,12 @@ def rule_summary(title: str, content: str) -> str:
 
 
 def enrich_post_rules(post: Post) -> Post:
+    from news_mornitor.pipeline.content_quality import is_generic_wire
+
     text = f"{post.title}\n{post.content}"
-    post.is_spam = rule_is_spam(text)
+    post.is_spam = rule_is_spam(text) or is_generic_wire(
+        post.title, post.content, post.author
+    )
     if not post.mentioned_tickers:
         post.mentioned_tickers = rule_extract_tickers(text)
     if not post.summary:
@@ -86,10 +90,10 @@ def enrich_post_rules(post: Post) -> Post:
     return post
 
 
-_AI_PROMPT = """你是加密市场编辑。根据帖子原文：
-1) spam: 若含邀请码、纯喊单、无意义推广则为 true，否则 false
-2) tickers: 提取提到的代币符号数组，如 ["BTC","ETH"]，无则 []
-3) summary: 用恰好 2 句中文写精炼摘要，口语、无套话、不要「作为AI」
+_AI_PROMPT = """你是加密社区审稿。根据帖子原文：
+1) spam: 以下任一则为 true——邀请码/纯喊单推广；媒体简报腔（「再创新高」「溢价回升」「风险资产共振」这类研报标题，无个人经历）；否则 false
+2) tickers: 提取代币符号数组，如 ["BTC","ETH"]，无则 []
+3) summary: 用恰好 2 句中文摘要，保留口语与个人立场，不要写成新闻稿
 
 只输出 JSON：{{"spam":bool,"tickers":[...],"summary":"..."}}
 

@@ -1,8 +1,8 @@
 """
-WebSocket TradingView 信号：周期过滤 -> 截图 -> Ollama 润色 -> square_publish -> Telegram。
+WebSocket TradingView 信号：周期过滤 ->（可选）截图 ->（可选）Ollama 润色 ->（可选）广场 -> Telegram。
 
-- 润色：本地 Ollama（config.PROMAT_ANALYSIS）+ prompts/promat，不再 POST 8000。
-- --public：同一 Chrome 会话内 截图 → 润色 → 打开一次 Square 发布。
+- --only-telegram：15m/1h/4h 信号原文直推 Telegram（不润色、不截图、不发广场）。
+- 默认模式：截图 + 润色 + Telegram；--public 才发广场。
 - Telegram 与是否 --public 无关；润色/截图/广场失败不阻断 Telegram（除非 WS_SKIP_TELEGRAM）。
 """
 from __future__ import annotations
