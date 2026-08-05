@@ -4,18 +4,19 @@ Square 关注流帖子：按发帖时间保留窗口（默认 24 小时，见 co
 状态文件默认与 --out 同目录下的 binance_posts_state.json。
 posts 结构为 { 关注者 author_slug: { 帖子 href: 记录 } }；旧版扁平 { href: 记录 } 会在加载时自动迁移。
 根级 square_lives：本轮抓取中「正在直播」的用户（author_slug、profile、live_url 等），来自 watchlist.lives（含主页 LIVE 角标探测 profile_home_probe）；无命中时写 []。
-根级 detail_fetch_cache：记录已抓取过正文的 post_id，供 Selenium 跳过重复打开详情页；与帖子一并按保留窗口清理。
+根级 detail_fetch_cache：记录已抓取过正文的 post_id，供 Selenium 跳过重复打开详情页；与帖子一并按保留窗口清理（同时删除 square_post_images/{post_id}/）。
 """
 from __future__ import annotations
 
 import json
 import os
 import re
+import shutil
 import socket
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
@@ -654,8 +655,10 @@ def _cleanup_removed_post_images(candidate_paths: List[str], remaining_paths: Li
             continue
         ap = os.path.abspath(pp)
         low = ap.replace("\\", "/").lower()
-        if "/square_post_images/" not in low:
-            continue
+        if "/square_post_images/" not in low and not low.endswith("/square_post_images"):
+            # 兼容相对路径尚未 abspath 的极端情况
+            if "square_post_images" not in low:
+                continue
         if ap in remaining:
             continue
         try:
@@ -675,6 +678,104 @@ def _cleanup_removed_post_images(candidate_paths: List[str], remaining_paths: Li
                         parent = os.path.dirname(parent)
                     else:
                         break
+        except Exception:
+            continue
+    return deleted
+
+
+def _infer_square_post_images_root(
+    *path_groups: List[str],
+    state_path: Optional[str] = None,
+    images_dir: Optional[str] = None,
+) -> str:
+    """解析 square_post_images 根目录（优先显式参数 / 路径推断 / 状态文件旁 / cwd）。"""
+    if images_dir and str(images_dir).strip():
+        return os.path.abspath(str(images_dir).strip())
+    for group in path_groups:
+        for p in group or []:
+            ap = os.path.abspath(str(p or "").strip())
+            if not ap:
+                continue
+            parts = ap.replace("\\", "/").split("/")
+            try:
+                i = next(
+                    idx
+                    for idx, seg in enumerate(parts)
+                    if seg.lower() == "square_post_images"
+                )
+            except StopIteration:
+                continue
+            return "/".join(parts[: i + 1])
+    if state_path:
+        sibling = Path(state_path).resolve().parent / "square_post_images"
+        if sibling.is_dir():
+            return str(sibling)
+    cwd_dir = Path.cwd() / "square_post_images"
+    return str(cwd_dir.resolve())
+
+
+def _post_ids_still_referenced(
+    posts_map: Dict[str, Dict[str, Any]], image_paths: List[str]
+) -> Set[str]:
+    """仍在状态中的帖子 id（来自 href 与图片路径父目录名）。"""
+    ids: Set[str] = set()
+    for slug, inner in (posts_map or {}).items():
+        if not isinstance(inner, dict):
+            continue
+        for href, rec in inner.items():
+            pid = _post_id_from_square_href(str(href or ""))
+            if pid:
+                ids.add(pid)
+            if isinstance(rec, dict):
+                cid = str(rec.get("content_id") or "").strip()
+                if cid.isdigit():
+                    ids.add(cid)
+    for p in image_paths or []:
+        ap = os.path.abspath(str(p or "").strip())
+        if not ap:
+            continue
+        parts = ap.replace("\\", "/").split("/")
+        try:
+            i = next(
+                idx
+                for idx, seg in enumerate(parts)
+                if seg.lower() == "square_post_images"
+            )
+        except StopIteration:
+            continue
+        if i + 1 < len(parts) and parts[i + 1].isdigit():
+            ids.add(parts[i + 1])
+    return ids
+
+
+def _cleanup_removed_post_image_dirs(
+    removed_post_ids: List[str],
+    *,
+    remaining_post_ids: Set[str],
+    images_root: str,
+) -> int:
+    """
+    删除超期帖对应的 square_post_images/{post_id}/ 整目录
+    （即使 saved_image_paths 为空或漏记，也会清掉磁盘目录）。
+    """
+    if not removed_post_ids:
+        return 0
+    root = os.path.abspath(images_root)
+    if not os.path.isdir(root):
+        return 0
+    deleted = 0
+    seen: Set[str] = set()
+    for pid in removed_post_ids:
+        pid = str(pid or "").strip()
+        if not pid or not pid.isdigit() or pid in remaining_post_ids or pid in seen:
+            continue
+        seen.add(pid)
+        d = os.path.join(root, pid)
+        if not os.path.isdir(d):
+            continue
+        try:
+            shutil.rmtree(d)
+            deleted += 1
         except Exception:
             continue
     return deleted
@@ -1013,10 +1114,12 @@ def process_watchlist_posts(
     state_path: Optional[str] = None,
     *,
     skip_gemini: bool = False,
+    square_images_dir: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     合并本次抓取的 latest_posts 与持久化状态：
     - 以**帖子发帖时间**为准保留 POST_RETENTION_HOURS 小时内；剔除无法解析时间及超期帖（含久远置顶）；
+    - 同步删除 square_post_images/{post_id}/ 目录及其中图片；
     - 新出现的 href 写入 post_alerts 并提示；对**新帖**调用 Gemini；
     - 将 watchlist.lives 写入根级 square_lives（无则 []），便于与 posts 对照；
     - 不再维护「首次/最后一次发现时间」。
@@ -1039,6 +1142,7 @@ def process_watchlist_posts(
     href_index = _href_slug_index(posts_map)
     to_del: List[Tuple[str, str]] = []
     removed_image_candidates: List[str] = []
+    removed_post_ids: List[str] = []
     for slug, inner in list(posts_map.items()):
         if not isinstance(inner, dict):
             to_del.append((slug, "__drop_bucket__"))
@@ -1059,16 +1163,33 @@ def process_watchlist_posts(
             rec_to_drop = inner.get(href)
             if isinstance(rec_to_drop, dict):
                 removed_image_candidates.extend(_collect_record_image_paths(rec_to_drop))
+                cid = str(rec_to_drop.get("content_id") or "").strip()
+                if cid.isdigit():
+                    removed_post_ids.append(cid)
+            pid = _post_id_from_square_href(href)
+            if pid:
+                removed_post_ids.append(pid)
+                detail_cache.pop(pid, None)
             del inner[href]
             href_index.pop(href, None)
             removed += 1
-            pid = _post_id_from_square_href(href)
-            if pid:
-                detail_cache.pop(pid, None)
         if isinstance(inner, dict) and not inner:
             posts_map.pop(slug, None)
+    remaining_paths = _iter_all_record_image_paths(posts_map)
     removed_images = _cleanup_removed_post_images(
-        removed_image_candidates, _iter_all_record_image_paths(posts_map)
+        removed_image_candidates, remaining_paths
+    )
+    images_root = _infer_square_post_images_root(
+        removed_image_candidates,
+        remaining_paths,
+        state_path=spath,
+        images_dir=square_images_dir,
+    )
+    remaining_pids = _post_ids_still_referenced(posts_map, remaining_paths)
+    removed_image_dirs = _cleanup_removed_post_image_dirs(
+        removed_post_ids,
+        remaining_post_ids=remaining_pids,
+        images_root=images_root,
     )
 
     incoming: List[Dict[str, Any]] = list(
@@ -1125,6 +1246,9 @@ def process_watchlist_posts(
             rec["square_audio_replay_url"] = str(
                 p.get("square_audio_replay_url") or rec.get("square_audio_replay_url") or ""
             )
+            cid = str(p.get("content_id") or "").strip()
+            if cid:
+                rec["content_id"] = cid
             if p.get("saved_image_paths"):
                 rec["saved_image_paths"] = p.get("saved_image_paths")
             # 保留既有的接口分析字段（后续会统一异步刷新）
@@ -1150,6 +1274,7 @@ def process_watchlist_posts(
                 "video_url": str(p.get("video_url") or ""),
                 "audio_m3u8_url": str(p.get("audio_m3u8_url") or ""),
                 "square_audio_replay_url": str(p.get("square_audio_replay_url") or ""),
+                "content_id": str(p.get("content_id") or "").strip(),
                 "saved_image_paths": p.get("saved_image_paths") or [],
                 "gemini_direction": None,
                 "gemini_confidence": None,
@@ -1395,6 +1520,7 @@ def process_watchlist_posts(
     wl["posts_retention_hours"] = POST_RETENTION_HOURS
     wl["posts_pruned_count"] = removed
     wl["posts_pruned_image_files"] = removed_images
+    wl["posts_pruned_image_dirs"] = removed_image_dirs
     wl["posts_signal_analyzed_ok"] = analyzed_ok
     wl["posts_signal_analyzed_fail"] = analyzed_fail
     wl["posts_signal_analyzed_skip"] = analyzed_skip
@@ -1415,6 +1541,11 @@ def process_watchlist_posts(
         )
     if removed_images:
         print(f"[posts_state] 已删除超期帖子关联截图: {removed_images} 个文件")
+    if removed_image_dirs:
+        print(
+            f"[posts_state] 已删除超期帖子图片目录: {removed_image_dirs} 个 "
+            f"（{images_root}/{{post_id}}）"
+        )
     n_sq_live = len(state.get("square_lives") or [])
     print(
         f"[posts_state] 窗口内帖子 {len(merged)} 条，新帖信号 {len(alerts)} 条，"

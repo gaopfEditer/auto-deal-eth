@@ -413,6 +413,63 @@ function _bnPostTimeFromCard(a) {
   return { published_iso: publishedIso, time_label: timeLabel, is_pinned: isPinned };
 }
 
+/** 从卡片 .trading-pairs 链接取 contentId（多交易对共用同一 id，取第一个即可） */
+function _bnContentIdFromCard(el) {
+  let root = el;
+  for (let i = 0; i < 22 && root; i++) {
+    const pairs = root.querySelector && root.querySelector('.trading-pairs, [class*="trading-pairs"]');
+    if (pairs) {
+      const as = pairs.querySelectorAll('a[href*="contentId="], a[href*="contentid="]');
+      for (const a of as) {
+        const href = a.getAttribute('href') || a.href || '';
+        const m = href.match(/[?&]contentId=(\d+)/i);
+        if (m && m[1]) return m[1];
+      }
+    }
+    // 卡片内任意带 contentId 的 futures/spot 链也行
+    if (root.querySelectorAll) {
+      const any = root.querySelectorAll('a[href*="contentId="], a[href*="contentid="]');
+      for (const a of any) {
+        const href = a.getAttribute('href') || a.href || '';
+        if (!/\/(futures|trade|spot)\//i.test(href) && !/contentId=/i.test(href)) continue;
+        const m = href.match(/[?&]contentId=(\d+)/i);
+        if (m && m[1]) return m[1];
+      }
+    }
+    const cls = String(root.className || '');
+    if (/border-Line|border-b|aspect-video/i.test(cls) && root.querySelector
+        && root.querySelector('.trading-pairs, [class*="trading-pairs"]')) {
+      break;
+    }
+    root = root.parentElement;
+  }
+  return '';
+}
+
+function _bnSquarePostHrefFromContentId(contentId) {
+  const id = String(contentId || '').trim();
+  if (!id) return '';
+  let locale = 'zh-CN';
+  const pm = (location.pathname || '').match(/^\/([a-z]{2}(?:-[A-Za-z]+)?)(\/|$)/i);
+  if (pm) locale = pm[1];
+  return (location.origin || 'https://www.binance.com') + '/' + locale + '/square/post/' + id;
+}
+
+function _bnFindCardRoot(el) {
+  let n = el;
+  for (let i = 0; i < 20 && n; i++) {
+    const cls = String(n.className || '');
+    if (n.matches && n.matches('article')) return n;
+    if (/border-Line|PostCard|post-card|feed-item/i.test(cls)) return n;
+    if (n.querySelector && n.querySelector('.trading-pairs, [class*="trading-pairs"], [class*="aspect-video"]')
+        && n.querySelector('a[href*="/square/profile/"]')) {
+      return n;
+    }
+    n = n.parentElement;
+  }
+  return el && el.parentElement ? el.parentElement : el;
+}
+
 function _bnDetailArticleImages() {
   const roots = [];
   const m = document.querySelector('main');
@@ -854,6 +911,9 @@ def _merge_posts_by_href(*lists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             )
             o["square_audio_replay_url"] = (
                 p.get("square_audio_replay_url") or o.get("square_audio_replay_url") or ""
+            )
+            o["content_id"] = (
+                str(p.get("content_id") or o.get("content_id") or "").strip()
             )
     return list(by_href.values())
 
@@ -1443,8 +1503,16 @@ for (const a of anchors) {
   }
 
   const meta = _bnPostTimeFromCard(a);
+  const contentId = _bnContentIdFromCard(a) || '';
+  let finalHref = href;
+  if (contentId) {
+    const byId = _bnSquarePostHrefFromContentId(contentId);
+    // 统一成 /square/post/{contentId}，便于 state 去重
+    if (byId) finalHref = byId;
+  }
+  if (seen.has(finalHref)) continue;
   const item = {
-    href,
+    href: finalHref,
     title: title || (videoUrl ? '视频帖' : title),
     author,
     author_slug: authorSlug,
@@ -1455,9 +1523,60 @@ for (const a of anchors) {
     published_iso: meta.published_iso,
     time_label: meta.time_label,
     is_pinned: meta.is_pinned,
+    content_id: contentId,
   };
   out.latest_posts.push(item);
-  seen.add(href);
+  seen.add(finalHref);
+  if (contentId) seen.add(contentId);
+}
+
+// 补漏：仅有 trading-pairs(contentId)、没有 /square/post/ 锚点的直播/回放卡
+const pairRoots = Array.from(document.querySelectorAll('.trading-pairs, [class*="trading-pairs"]'));
+for (const pairs of pairRoots) {
+  if (out.latest_posts.length >= maxItems) break;
+  const contentId = _bnContentIdFromCard(pairs) || '';
+  if (!contentId || seen.has(contentId)) continue;
+  const card = _bnFindCardRoot(pairs);
+  const finalHref = _bnSquarePostHrefFromContentId(contentId);
+  if (!finalHref || seen.has(finalHref)) continue;
+  let authorSlug = '';
+  let author = '';
+  const prof = card && card.querySelector('a[href*="/square/profile/"]');
+  if (prof) {
+    const ph = (prof.href || '').split('#')[0];
+    const m = ph.match(/\\/square\\/profile\\/([^\\/?#]+)/i);
+    if (m && m[1]) authorSlug = String(m[1]).toLowerCase();
+    const nick = card.querySelector('.nick, [class*="nick"]');
+    author = norm((nick && nick.innerText) || prof.innerText || authorSlug);
+  }
+  if (prioritySlugs.size > 0) {
+    if (!authorSlug || !prioritySlugs.has(authorSlug)) continue;
+  }
+  const titleEl = card && (
+    card.querySelector('.text-PrimaryText.mb-2, [class*="text-PrimaryText"][class*="mb-2"], [class*="font-medium"]')
+  );
+  let title = norm((titleEl && titleEl.innerText) || '');
+  if (title.length > 120) title = title.slice(0, 120);
+  const clean = norm((card && card.innerText) || title);
+  const meta = _bnPostTimeFromCard(pairs);
+  const imageUrls = _bnCollectArticleImagesRelaxed(pairs);
+  const videoUrl = _bnCollectVideoUrlFromCard(pairs);
+  out.latest_posts.push({
+    href: finalHref,
+    title: title || (videoUrl ? '视频帖' : contentId),
+    author: author || authorSlug,
+    author_slug: authorSlug,
+    time: meta.time_label || findTime(clean),
+    raw: clean.slice(0, 2000),
+    image_urls: imageUrls,
+    video_url: videoUrl,
+    published_iso: meta.published_iso,
+    time_label: meta.time_label,
+    is_pinned: meta.is_pinned,
+    content_id: contentId,
+  });
+  seen.add(finalHref);
+  seen.add(contentId);
 }
 
 out.latest_posts = out.latest_posts.slice(0, maxItems);
@@ -1551,8 +1670,15 @@ for (const a of anchors) {
   if (dotIdx > 0 && dotIdx < 80) author = clean.slice(0, dotIdx).trim() || authorSlug;
 
   const meta = _bnPostTimeFromCard(a);
+  const contentId = _bnContentIdFromCard(a) || '';
+  let finalHref = href;
+  if (contentId) {
+    const byId = _bnSquarePostHrefFromContentId(contentId);
+    if (byId) finalHref = byId;
+  }
+  if (seen.has(finalHref)) continue;
   out.push({
-    href,
+    href: finalHref,
     title: title || (videoUrl ? '视频帖' : title),
     author,
     author_slug: authorSlug,
@@ -1563,8 +1689,49 @@ for (const a of anchors) {
     published_iso: meta.published_iso,
     time_label: meta.time_label,
     is_pinned: meta.is_pinned,
+    content_id: contentId,
   });
-  seen.add(href);
+  seen.add(finalHref);
+  if (contentId) seen.add(contentId);
+}
+
+// 补漏：trading-pairs 上的 contentId（直播/回放卡常无 /square/post/ 锚点）
+const pairRoots = Array.from(document.querySelectorAll('.trading-pairs, [class*="trading-pairs"]'));
+for (const pairs of pairRoots) {
+  if (out.length >= maxItems) break;
+  const contentId = _bnContentIdFromCard(pairs) || '';
+  if (!contentId || seen.has(contentId)) continue;
+  const card = _bnFindCardRoot(pairs);
+  const finalHref = _bnSquarePostHrefFromContentId(contentId);
+  if (!finalHref || seen.has(finalHref)) continue;
+  let author = authorSlug;
+  const nick = card && card.querySelector('.nick, [class*="nick"]');
+  if (nick) author = norm(nick.innerText) || author;
+  const titleEl = card && (
+    card.querySelector('.text-PrimaryText.mb-2, [class*="text-PrimaryText"][class*="mb-2"], [class*="font-medium"]')
+  );
+  let title = norm((titleEl && titleEl.innerText) || '');
+  if (title.length > 120) title = title.slice(0, 120);
+  const clean = norm((card && card.innerText) || title);
+  const meta = _bnPostTimeFromCard(pairs);
+  const imageUrls = _bnCollectArticleImagesRelaxed(pairs);
+  const videoUrl = _bnCollectVideoUrlFromCard(pairs);
+  out.push({
+    href: finalHref,
+    title: title || (videoUrl ? '视频帖' : contentId),
+    author,
+    author_slug: authorSlug,
+    time: meta.time_label || findTime(clean),
+    raw: clean.slice(0, 2000),
+    image_urls: imageUrls,
+    video_url: videoUrl,
+    published_iso: meta.published_iso,
+    time_label: meta.time_label,
+    is_pinned: meta.is_pinned,
+    content_id: contentId,
+  });
+  seen.add(finalHref);
+  seen.add(contentId);
 }
 return out;
             """,
@@ -1811,11 +1978,15 @@ def _aspect_video_probe_random_click_and_log_opened_url(
             )
             _human_pause(0.85, 1.65)
         except Exception:
-            driver.get(base)
-            WebDriverWait(driver, 24).until(
-                EC.presence_of_element_located((By.TAG_NAME, "body"))
-            )
-            _human_pause_after_nav(1.1, 2.1)
+            nav = None
+            try:
+                nav = cdp_get(driver, base, page_load_timeout=24, log_prefix="square")
+                WebDriverWait(driver, 24).until(
+                    EC.presence_of_element_located((By.TAG_NAME, "body"))
+                )
+                _human_pause_after_nav(1.1, 2.1)
+            finally:
+                cdp_restore(driver, nav)
         if not _wait_driver_execution_context(driver, 18.0):
             _recover_profile_tab(driver, base, log=f"aspect-video[{label_idx}]_back")
     else:
@@ -2262,11 +2433,15 @@ return {
                     )
                     _human_pause(0.7, 1.5)
                 except Exception:
-                    driver.get(base)
-                    WebDriverWait(driver, 20).until(
-                        EC.presence_of_element_located((By.TAG_NAME, "body"))
-                    )
-                    _human_pause_after_nav(1.1, 2.1)
+                    nav = None
+                    try:
+                        nav = cdp_get(driver, base, page_load_timeout=20, log_prefix="square")
+                        WebDriverWait(driver, 20).until(
+                            EC.presence_of_element_located((By.TAG_NAME, "body"))
+                        )
+                        _human_pause_after_nav(1.1, 2.1)
+                    finally:
+                        cdp_restore(driver, nav)
             else:
                 try:
                     body = driver.find_element(By.TAG_NAME, "body")
@@ -2515,36 +2690,41 @@ def _probe_single_profile_live(
         _scrape_log(f"巡检是否在直播 → {name or slug} ({href})")
     try:
         sep = "&" if ("?" in href) else "?"
-        driver.get(f"{href}{sep}tab=live")
-        WebDriverWait(driver, 12).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
-        _human_pause_after_nav(1.15, 2.55)
-        status = _detect_live_on_current_square_page(driver)
-        if not status.get("is_live"):
-            driver.get(href)
+        live_tab = f"{href}{sep}tab=live"
+        with cdp_worker_tab(
+            driver, live_tab, page_load_timeout=12, log_prefix="square-live"
+        ):
             WebDriverWait(driver, 12).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
-            _human_pause_after_nav(0.9, 2.15)
+            _human_pause_after_nav(1.15, 2.55)
             status = _detect_live_on_current_square_page(driver)
-        if status.get("is_live"):
-            links = status.get("live_links") or []
-            live_url = _pick_live_url(href, links)
-            author_disp = name or slug or href.rsplit("/", 1)[-1].split("?")[0]
-            _show_square_live_toast(
-                driver,
-                author=author_disp,
-                live_url=live_url,
-                view_all_url=vu,
-            )
-            return {
-                "author": author_disp,
-                "profile": href.split("#")[0],
-                "live_url": live_url,
-                "raw": "profile_live_probe",
-            }
-        _remove_square_live_toast(driver)
+            if not status.get("is_live"):
+                # 已在同一静默 worker 内，直接跳转主页
+                driver.set_page_load_timeout(12)
+                driver.get(href)
+                WebDriverWait(driver, 12).until(
+                    EC.presence_of_element_located((By.TAG_NAME, "body"))
+                )
+                _human_pause_after_nav(0.9, 2.15)
+                status = _detect_live_on_current_square_page(driver)
+            if status.get("is_live"):
+                links = status.get("live_links") or []
+                live_url = _pick_live_url(href, links)
+                author_disp = name or slug or href.rsplit("/", 1)[-1].split("?")[0]
+                _show_square_live_toast(
+                    driver,
+                    author=author_disp,
+                    live_url=live_url,
+                    view_all_url=vu,
+                )
+                return {
+                    "author": author_disp,
+                    "profile": href.split("#")[0],
+                    "live_url": live_url,
+                    "raw": "profile_live_probe",
+                }
+            _remove_square_live_toast(driver)
     except Exception:
         _remove_square_live_toast(driver)
     return None
@@ -3518,6 +3698,9 @@ def main():
             out_path,
             state_path=args.posts_state,
             skip_gemini=args.skip_posts_gemini,
+            square_images_dir=None
+            if args.skip_square_images
+            else args.square_images_dir,
         )
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)

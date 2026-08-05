@@ -1,16 +1,18 @@
 """
-CDP 远程调试下的标签页导航：后台开页、不抢用户焦点。
+CDP 远程调试下的标签页导航：静默、不抢焦点。
 
-优先：
-  - Target.getTargets 查已有标签（不 switch 轮询）
-  - Target.createTarget(background=True) 后台新开
-  - macOS 操作前后恢复前台 App
-绝不默认替换用户当前标签；供 binance / news_mornitor 等共用。
+默认策略（供 market_lists_selenium / news_mornitor 等）：
+  1. 第一次：Target.createTarget(background=True) 开一个专用 worker 标签
+  2. 之后：始终在同一 worker 里 driver.get 跳转，不再新开
+  3. restore 时回到用户原标签，默认不关 worker
+  4. macOS 操作前后恢复前台 App
 
 环境变量：
-  CDP_NAV_SAME_TAB=1     仅在当前标签导航（旧行为，会抢焦点）
-  CDP_PRESERVE_FOCUS=0   关闭 macOS 前台恢复（默认开）
-  CDP_SILENT=0           关闭静默策略，回退 new_window（默认开）
+  CDP_NAV_SAME_TAB=1          仅在当前标签导航（旧行为，会抢焦点）
+  CDP_SILENT=0                关闭静默建 tab，回退 new_window
+  CDP_PERSISTENT_WORKER=0     关闭「单 worker 复用」（每次按 URL 匹配/新开）
+  CDP_PRESERVE_FOCUS=0        关闭 macOS 前台恢复
+  CDP_CLOSE_WORKER=1          restore 时关闭本次新开的 worker（破坏复用）
 """
 from __future__ import annotations
 
@@ -25,6 +27,9 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 from selenium.common.exceptions import WebDriverException
 
+# driver 对象 id → 持久 worker（同一次 Chrome 附着会话内复用）
+_PERSISTENT_WORKERS: dict[int, dict[str, Any]] = {}
+
 
 @dataclass(frozen=True)
 class CdpNavSession:
@@ -35,6 +40,7 @@ class CdpNavSession:
     opened_new_tab: bool
     reused_tab: bool
     target_id: Optional[str] = None
+    keep_worker: bool = True
 
 
 def _log(msg: str, *, prefix: str = "CDP") -> None:
@@ -105,6 +111,16 @@ def _silent_mode() -> bool:
     return v.strip().lower() not in ("0", "false", "no")
 
 
+def _persistent_worker_mode() -> bool:
+    v = os.getenv("CDP_PERSISTENT_WORKER", "1")
+    return v.strip().lower() not in ("0", "false", "no")
+
+
+def _close_worker_on_restore() -> bool:
+    v = os.getenv("CDP_CLOSE_WORKER", "0")
+    return v.strip().lower() in ("1", "true", "yes")
+
+
 def _preserve_focus_enabled() -> bool:
     v = os.getenv("CDP_PRESERVE_FOCUS", "1")
     return v.strip().lower() not in ("0", "false", "no")
@@ -158,7 +174,6 @@ def preserve_os_focus() -> Generator[None, None, None]:
         yield
     finally:
         if prev is not None:
-            # 导航/切 tab 常异步抢焦，稍等再还
             time.sleep(0.08)
             _activate_unix_pid(prev)
             time.sleep(0.05)
@@ -170,7 +185,6 @@ def _cdp_cmd(driver, cmd: str, params: Optional[dict[str, Any]] = None) -> dict[
 
 
 def _list_page_targets(driver) -> list[dict[str, Any]]:
-    """用 CDP 列页面目标，避免 switch_to 轮询抢焦点。"""
     try:
         data = _cdp_cmd(driver, "Target.getTargets", {})
         infos = data.get("targetInfos") or []
@@ -184,8 +198,9 @@ def _list_page_targets(driver) -> list[dict[str, Any]]:
         return []
 
 
-def _handle_for_target(driver, target_id: str, *, before_handles: Optional[set[str]] = None) -> Optional[str]:
-    """把 CDP targetId 映射到 Selenium window handle。"""
+def _handle_for_target(
+    driver, target_id: str, *, before_handles: Optional[set[str]] = None
+) -> Optional[str]:
     if not target_id:
         return None
     try:
@@ -198,10 +213,8 @@ def _handle_for_target(driver, target_id: str, *, before_handles: Optional[set[s
         new = [h for h in handles if h not in before_handles]
         if len(new) == 1:
             return new[0]
-        # 多新标签时：再扫一遍 targets 对齐 url 较难，取最后一个新的
         if new:
             return new[-1]
-    # 有的 chromedriver 用 targetId 作 handle，有的用其他 id——再试一次 getTargets 后短等
     for _ in range(20):
         try:
             handles = list(driver.window_handles)
@@ -231,7 +244,6 @@ def find_tab_handle_for_url(driver, url: str) -> Optional[str]:
             if h:
                 return h
 
-    # CDP 不可用时的旧回退（会短暂切 tab，外层有 focus guard）
     try:
         handles = list(driver.window_handles)
     except WebDriverException:
@@ -266,11 +278,9 @@ def find_target_id_for_url(driver, url: str) -> Optional[str]:
     return None
 
 
-def _create_background_tab(driver, url: str, *, log_prefix: str) -> tuple[Optional[str], Optional[str]]:
-    """
-    Target.createTarget(background=True) → (window_handle, target_id)。
-    不激活前台标签。
-    """
+def _create_background_tab(
+    driver, url: str, *, log_prefix: str
+) -> tuple[Optional[str], Optional[str]]:
     try:
         before = set(driver.window_handles)
     except WebDriverException:
@@ -279,7 +289,7 @@ def _create_background_tab(driver, url: str, *, log_prefix: str) -> tuple[Option
         res = _cdp_cmd(
             driver,
             "Target.createTarget",
-            {"url": url, "background": True, "newWindow": False},
+            {"url": url or "about:blank", "background": True, "newWindow": False},
         )
     except Exception as e:
         _warn(f"Target.createTarget 失败: {e}", prefix=log_prefix)
@@ -287,7 +297,7 @@ def _create_background_tab(driver, url: str, *, log_prefix: str) -> tuple[Option
     tid = str(res.get("targetId") or "") or None
     handle = _handle_for_target(driver, tid or "", before_handles=before)
     if handle:
-        _log("已后台新开 worker 标签（不抢焦点）", prefix=log_prefix)
+        _log("已后台新开专用 worker 标签（不抢焦点）", prefix=log_prefix)
         return handle, tid
     _warn("后台标签已创建但未能映射 window handle", prefix=log_prefix)
     return None, tid
@@ -311,38 +321,170 @@ def _close_target(driver, target_id: Optional[str], worker_handle: Optional[str]
         pass
 
 
+def _driver_key(driver) -> int:
+    return id(driver)
+
+
+def clear_persistent_worker(driver) -> None:
+    """手动清掉该 driver 的持久 worker 记录（不关标签）。"""
+    _PERSISTENT_WORKERS.pop(_driver_key(driver), None)
+
+
+def _worker_handle_alive(driver, handle: Optional[str]) -> bool:
+    if not handle:
+        return False
+    try:
+        return handle in list(driver.window_handles)
+    except WebDriverException:
+        return False
+
+
+def _ensure_persistent_worker(
+    driver, *, log_prefix: str
+) -> tuple[str, Optional[str], bool]:
+    """
+    返回 (worker_handle, target_id, newly_created)。
+    首次 background 建 tab；之后复用同一 handle。
+    """
+    key = _driver_key(driver)
+    entry = _PERSISTENT_WORKERS.get(key)
+    if entry:
+        h = entry.get("handle")
+        tid = entry.get("target_id")
+        if _worker_handle_alive(driver, h):
+            return str(h), tid, False
+        _warn("持久 worker 标签已失效，将重新创建", prefix=log_prefix)
+        _PERSISTENT_WORKERS.pop(key, None)
+
+    worker: Optional[str] = None
+    tid: Optional[str] = None
+    if _silent_mode():
+        worker, tid = _create_background_tab(driver, "about:blank", log_prefix=log_prefix)
+
+    if not worker:
+        # 回退 new_window（仍尽量包在 focus guard 外层）
+        main = _safe_current_handle(driver)
+        n_before = 0
+        try:
+            n_before = len(driver.window_handles)
+        except WebDriverException:
+            pass
+        try:
+            before = set(driver.window_handles)
+        except WebDriverException:
+            before = set()
+        driver.switch_to.new_window("tab")
+        worker = _safe_current_handle(driver)
+        if not worker:
+            after = set(driver.window_handles) - before
+            worker = after.pop() if after else None
+        if not worker:
+            if main:
+                try:
+                    driver.switch_to.window(main)
+                except WebDriverException:
+                    pass
+            raise WebDriverException("无法创建 worker 标签")
+        _log("回退 new_window 创建 worker 标签", prefix=log_prefix)
+        if n_before and len(driver.window_handles) <= n_before:
+            _warn("new_window 后标签数未增加", prefix=log_prefix)
+
+    _PERSISTENT_WORKERS[key] = {"handle": worker, "target_id": tid}
+    return worker, tid, True
+
+
+def _navigate_worker(
+    driver,
+    worker: str,
+    url: str,
+    *,
+    page_load_timeout: int,
+    log_prefix: str,
+) -> None:
+    driver.switch_to.window(worker)
+    driver.set_page_load_timeout(page_load_timeout)
+    # 优先 CDP Page.navigate（不 bringToFront）；失败再 driver.get
+    try:
+        _cdp_cmd(driver, "Page.enable", {})
+        _cdp_cmd(driver, "Page.navigate", {"url": url})
+        # 等 ready
+        deadline = time.time() + max(8, min(page_load_timeout, 40))
+        while time.time() < deadline:
+            try:
+                state = driver.execute_script("return document.readyState")
+            except Exception:
+                time.sleep(0.15)
+                continue
+            if state in ("interactive", "complete"):
+                break
+            time.sleep(0.15)
+        _log(f"worker 内 CDP 跳转 → {url}", prefix=log_prefix)
+        return
+    except Exception as e:
+        _warn(f"Page.navigate 失败，改用 driver.get: {e}", prefix=log_prefix)
+    driver.get(url)
+    _log(f"worker 内 get → {url}", prefix=log_prefix)
+
+
 def cdp_goto(
     driver,
     url: str,
     *,
     page_load_timeout: int = 90,
     log_prefix: str = "CDP",
+    persistent: Optional[bool] = None,
 ) -> CdpNavSession:
     """
-    在 worker 标签页打开 url，绝不默认替换用户当前标签。
+    在 worker 标签打开 url，不替换用户当前前台标签。
 
-    - 已有同 URL 标签 → 切到 worker（外层 preserve_os_focus）并刷新
-    - 否则 CDP background 新开；失败再 switch_to.new_window
-    - CDP_NAV_SAME_TAB=1 时仅在当前标签导航（兼容旧行为）
+    默认 persistent：全脚本共用一个后台 worker，后续只在该页跳转。
     """
     chart_url = (url or "").strip()
     if not chart_url:
         raise ValueError("URL 为空")
 
     main_handle = _safe_current_handle(driver)
+    use_persistent = _persistent_worker_mode() if persistent is None else bool(persistent)
+    keep = not _close_worker_on_restore()
 
     if _same_tab_mode():
         _log("CDP_NAV_SAME_TAB=1：在当前标签导航", prefix=log_prefix)
         driver.set_page_load_timeout(page_load_timeout)
         driver.get(chart_url)
-        return CdpNavSession(main_handle, _safe_current_handle(driver), False, False, None)
+        return CdpNavSession(
+            main_handle, _safe_current_handle(driver), False, False, None, keep_worker=False
+        )
 
+    # —— 持久 worker：第一次开，之后同 tab 跳转 ——
+    if use_persistent:
+        worker, tid, created = _ensure_persistent_worker(driver, log_prefix=log_prefix)
+        if created:
+            _log("首次创建静默 worker，后续跳转复用此标签", prefix=log_prefix)
+        else:
+            _log("复用静默 worker 标签跳转", prefix=log_prefix)
+        _navigate_worker(
+            driver,
+            worker,
+            chart_url,
+            page_load_timeout=page_load_timeout,
+            log_prefix=log_prefix,
+        )
+        return CdpNavSession(
+            main_handle,
+            worker,
+            opened_new_tab=created,
+            reused_tab=not created,
+            target_id=tid,
+            keep_worker=keep,
+        )
+
+    # —— 非持久：按 URL 复用或新开（旧逻辑） ——
     existing_tid = find_target_id_for_url(driver, chart_url)
     existing = find_tab_handle_for_url(driver, chart_url)
     if existing:
         try:
             driver.switch_to.window(existing)
-            _log(f"复用已有标签并刷新 → {chart_url}", prefix=log_prefix)
+            _log(f"复用已有同 URL 标签并刷新 → {chart_url}", prefix=log_prefix)
             driver.set_page_load_timeout(page_load_timeout)
             driver.refresh()
             return CdpNavSession(
@@ -351,56 +493,43 @@ def cdp_goto(
                 opened_new_tab=False,
                 reused_tab=True,
                 target_id=existing_tid,
+                keep_worker=True,
             )
         except WebDriverException as e:
             _warn(f"复用标签刷新失败: {e}；改为新开标签", prefix=log_prefix)
 
-    worker: Optional[str] = None
-    tid: Optional[str] = None
+    worker = None
+    tid = None
     opened_new_tab = False
-
     if _silent_mode():
         worker, tid = _create_background_tab(driver, chart_url, log_prefix=log_prefix)
         if worker:
             opened_new_tab = True
-            try:
-                driver.switch_to.window(worker)
-            except WebDriverException as e:
-                _warn(f"切到后台 worker 失败: {e}", prefix=log_prefix)
-            driver.set_page_load_timeout(page_load_timeout)
-            # createTarget 已带 url；若仍 about:blank 再 get
-            try:
-                cur = (driver.current_url or "").strip()
-            except WebDriverException:
-                cur = ""
-            if not cur or cur == "about:blank" or not _urls_match(cur, chart_url):
-                # 若已在加载目标域则不强制 get，减少二次激活
-                if not cur or cur == "about:blank":
-                    _log(f"后台导航 → {chart_url}", prefix=log_prefix)
-                    driver.get(chart_url)
+            _navigate_worker(
+                driver,
+                worker,
+                chart_url,
+                page_load_timeout=page_load_timeout,
+                log_prefix=log_prefix,
+            )
             return CdpNavSession(
                 main_handle,
                 worker,
-                opened_new_tab=opened_new_tab,
+                opened_new_tab=True,
                 reused_tab=False,
                 target_id=tid,
+                keep_worker=keep,
             )
 
-    # 静默创建失败 / 关闭静默：旧路径
     n_before = 0
     try:
         n_before = len(driver.window_handles)
     except WebDriverException:
         pass
-
     try:
         driver.switch_to.new_window("tab")
-        if n_before and len(driver.window_handles) > n_before:
-            opened_new_tab = True
-            _log("已新开 worker 标签", prefix=log_prefix)
-        else:
-            _warn("new_window 后标签数未增加，仍在新上下文导航", prefix=log_prefix)
-            opened_new_tab = True
+        opened_new_tab = True
+        _log("已新开 worker 标签", prefix=log_prefix)
     except WebDriverException as e:
         _warn(f"新开标签失败: {e}", prefix=log_prefix)
         if main_handle:
@@ -410,7 +539,9 @@ def cdp_goto(
                 pass
         raise
 
-    _log(f"导航 → {chart_url}", prefix=log_prefix)
+    if n_before and len(driver.window_handles) <= n_before:
+        _warn("new_window 后标签数未增加，仍在新上下文导航", prefix=log_prefix)
+
     driver.set_page_load_timeout(page_load_timeout)
     driver.get(chart_url)
     worker = _safe_current_handle(driver)
@@ -420,23 +551,34 @@ def cdp_goto(
         opened_new_tab=opened_new_tab,
         reused_tab=False,
         target_id=None,
+        keep_worker=keep,
     )
 
 
-def cdp_restore(driver, session: CdpNavSession | None, *, close_worker: bool = True) -> None:
-    """回到 main 标签；仅当本次是新开的 worker 标签时才 close。"""
+def cdp_restore(
+    driver,
+    session: CdpNavSession | None,
+    *,
+    close_worker: Optional[bool] = None,
+) -> None:
+    """
+    回到 main 标签。
+    默认不关 worker（保持下次复用）；仅 CDP_CLOSE_WORKER=1 或 close_worker=True 时关闭。
+    """
     if not session:
         return
-    if close_worker and session.opened_new_tab and (session.target_id or session.worker_handle):
-        _close_target(driver, session.target_id, session.worker_handle)
-    if session.main_handle:
-        try:
-            # 仅当 main 仍在时切回，避免无意义激活
-            handles = list(driver.window_handles)
-            if session.main_handle in handles:
-                driver.switch_to.window(session.main_handle)
-        except WebDriverException:
-            pass
+    do_close = _close_worker_on_restore() if close_worker is None else bool(close_worker)
+    with preserve_os_focus():
+        if do_close:
+            _close_target(driver, session.target_id, session.worker_handle)
+            clear_persistent_worker(driver)
+        if session.main_handle:
+            try:
+                handles = list(driver.window_handles)
+                if session.main_handle in handles:
+                    driver.switch_to.window(session.main_handle)
+            except WebDriverException:
+                pass
 
 
 @contextmanager
@@ -446,11 +588,16 @@ def cdp_worker_tab(
     *,
     page_load_timeout: int = 90,
     log_prefix: str = "CDP",
+    persistent: Optional[bool] = None,
 ) -> Generator[CdpNavSession, None, None]:
-    """with 块内在 worker 标签操作，退出后自动 cdp_restore；默认不抢 OS 焦点。"""
+    """with 块内在静默 worker 操作；退出回到原标签，默认保留 worker 供下次复用。"""
     with preserve_os_focus():
         session = cdp_goto(
-            driver, url, page_load_timeout=page_load_timeout, log_prefix=log_prefix
+            driver,
+            url,
+            page_load_timeout=page_load_timeout,
+            log_prefix=log_prefix,
+            persistent=persistent,
         )
         try:
             yield session
@@ -464,8 +611,14 @@ def cdp_get(
     *,
     page_load_timeout: int = 90,
     log_prefix: str = "CDP",
+    persistent: Optional[bool] = None,
 ) -> CdpNavSession:
-    """等价于 cdp_goto；命名对齐 driver.get 语义。"""
-    return cdp_goto(
-        driver, url, page_load_timeout=page_load_timeout, log_prefix=log_prefix
-    )
+    """等价于 cdp_goto；调用方需自行 cdp_restore。全程包一层 OS 焦点保护。"""
+    with preserve_os_focus():
+        return cdp_goto(
+            driver,
+            url,
+            page_load_timeout=page_load_timeout,
+            log_prefix=log_prefix,
+            persistent=persistent,
+        )

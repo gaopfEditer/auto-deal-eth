@@ -1,0 +1,9 @@
+# batch_whisperx_nodownload.py 依赖（流式转写，不落盘下载完整视频）
+# 安装：pip install -r requirements-whisperx-nodownload.txt
+# 另需系统已安装 ffmpeg（macOS: brew install ffmpeg）
+
+yt-dlp>=2024.8.0
+faster-whisper>=1.0.0
+numpy>=1.24.0
+requests>=2.31.0
+websockets>=12.0

@@ -2,225 +2,101 @@
   "version": 1,
   "posts": {
     "yanchibit": {
-      "https://www.binance.com/zh-CN/square/post/349923354439713": {
-        "href": "https://www.binance.com/zh-CN/square/post/349923354439713",
-        "published_at": "2026-07-29 21:33:27 北京时间",
+      "https://www.binance.com/zh-CN/square/post/352071206546657": {
+        "href": "https://www.binance.com/zh-CN/square/post/352071206546657",
+        "published_at": "2026-08-04 20:56:00 北京时间",
         "published_iso": "",
         "time_label": "1小时",
         "is_pinned": false,
-        "title": "很多人说进不了教学频道，要不交流频道给进一下啊 你跟你一样水平的人或者比你水平还低的人有什么好交流的？都是杂讯！ 有啥要解答的直播间一问，还能当下给你从盘面讲清楚。 🎈多少人犯过一个错误，就是你不知道他水准的情况下，在一个群聊里面，他给你讲的头头是道，你就认为他的水平比你高，从而听从他的建议，然后亏麻了~~~ 最后碍于都是群友，你也不好说什么。交流频道进多了，等同于无限敞开风险敞口… #BTC 进教学频道门槛也几乎无门槛，使用我邀请链接注册，交易大于1BTC 即可进入，什么时候满足200万U合约交易量则永久呆着无任何考核~ 合约返佣最高20% 老用户换绑的话，可以试下这个链接，输入:YCYCYC，可以的话就可以，不行就无招！ [老用户换绑跳转](https://www.bsmkweb.cc/activity/referral/bind-ref)",
-        "raw": "很多人说进不了教学频道，要不交流频道给进一下啊 你跟你一样水平的人或者比你水平还低的人有什么好交流的？都是杂讯！ 有啥要解答的直播间一问，还能当下给你从盘面讲清楚。 🎈多少人犯过一个错误，就是你不知道他水准的情况下，在一个群聊里面，他给你讲的头头是道，你就认为他的水平比你高，从而听从他的建议，然后亏麻了~~~ 最后碍于都是群友，你也不好说什么。交流频道进多了，等同于无限敞开风险敞口… #BTC 进教学频道门槛也几乎无门槛，使用我邀请链接注册，交易大于1BTC 即可进入，什么时候满足200万U合约交易量则永久呆着无任何考核~ 合约返佣最高20% 老用户换绑的话，可以试下这个链接，输入:YCYCYC，可以的话就可以，不行就无招！ [老用户换绑跳转](https://www.bsmkweb.cc/activity/referral/bind-ref)",
+        "title": "大饼是币圈体量最大的资产，但还没有哪个 DeFi 协议能充分利用它的流动性。 原因很简单，99% DeFi 协议都要求用户交出控制权。 要么 wrap 成 WBTC，真 BTC 进了托管方的地址，你手里剩一张欠条。要么走跨链桥，桥被黑的名场面，老玩家闭着眼都能数出好几起。说白了，比特币持有者想要流动性，就得先放弃「私钥在我手里」这条底线。 💡 @babylonlabs_io 的解法是 Babylon Trustless Bitcoin Vaults (TBV)：",
+        "raw": "大饼是币圈体量最大的资产，但还没有哪个 DeFi 协议能充分利用它的流动性。 原因很简单，99% DeFi 协议都要求用户交出控制权。 要么 wrap 成 WBTC，真 BTC 进了托管方的地址，你手里剩一张欠条。要么走跨链桥，桥被黑的名场面，老玩家闭着眼都能数出好几起。说白了，比特币持有者想要流动性，就得先放弃「私钥在我手里」这条底线。 💡 @babylonlabs_io 的解法是 Babylon Trustless Bitcoin Vaults (TBV)： 原生 BTC 直接当抵押品，不 wrap、不跨桥、不经手任何中介，币自始至终锁在你自己签名控制的 vault 里。 第一个落地场景是和 Aave v4 合作的，用户质押原生 BTC，可以直接在以太坊上借 USDC、USDT。这是市面上第一个原生且 trustless 的 BTC 借贷方案，不是第 N 个 wrapped 换皮。 Babylon 也不是新面孔，2025 年上线的 BTC Staking Protocol，峰值 TVL 干到 72 亿美金，BTC 赛道第一大项目。TBV 是它的第二步棋，把原生 BTC 的流动性接进整个链上经济，借贷之外，稳定币、衍生品、信用卡这些场景都在排队接入。 公开测试网已经上线，测试币水龙头也备好了，想抢先体验原生 BTC 抵押借贷的，现在就能上手撸一遍流程⬇️ 🔗 https://btc-vaults.testnet.babylonlabs.io/ $BABY #baby",
         "author": "yanchibit",
         "author_slug": "yanchibit",
         "time": "1小时",
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2ViNjM5MjE2ZDZiOTQwZTY4Mjc3YmRhMDM5MjliNTJiLnBuZw==&level=lg"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2ExMTE2MTA0MGY4ZTRhNDI5ZDMwYzE1Y2YwYmVkNzEzLnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2IxMWQzODE3NGZjNjQ2NTk4MGZlNjIwNzk2MTViZThjLnBuZw==&level=md"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
         "square_audio_replay_url": "",
         "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349923354439713/img_0.png"
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/352071206546657/img_0.png",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/352071206546657/img_1.png"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
         "gemini_reason": null,
         "gemini_bias_zh": "不明",
         "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "该帖子虽然没有给出明确的入场点、止盈或止损位，但作为专业的盘面分析员推荐，其隐含信号是：BTC将有高质量的技术趋势判断。这预示着未来会有明确的看涨或看空方向指导出现，属于具备高度可靠性的技术预判型信号。",
+        "signal_star": 4,
+        "signal_content": "极强看涨信号。该帖子提供了非常坚实的底层逻辑支撑（Fundamental Buy）。Babylon TBV解决了BTC DeFi最大的痛点：用户主权丢失问题。通过原生抵押和自签名Vault，实现了第一个真正的Trustless BTC借贷方案（已与Aave v4合作）。项目规模巨大，TVL高达72亿美金，叙事极强，预示着原生BTC流动性将引发一轮上涨周期。推荐关注$BABY代币的爆发式增长，或顺应该叙事的BTC回调做多。",
         "signal_raw_data": {
           "isSign": true,
-          "content": "该帖子虽然没有给出明确的入场点、止盈或止损位，但作为专业的盘面分析员推荐，其隐含信号是：BTC将有高质量的技术趋势判断。这预示着未来会有明确的看涨或看空方向指导出现，属于具备高度可靠性的技术预判型信号。",
-          "star": 3
+          "content": "极强看涨信号。该帖子提供了非常坚实的底层逻辑支撑（Fundamental Buy）。Babylon TBV解决了BTC DeFi最大的痛点：用户主权丢失问题。通过原生抵押和自签名Vault，实现了第一个真正的Trustless BTC借贷方案（已与Aave v4合作）。项目规模巨大，TVL高达72亿美金，叙事极强，预示着原生BTC流动性将引发一轮上涨周期。推荐关注$BABY代币的爆发式增长，或顺应该叙事的BTC回调做多。",
+          "star": 4
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:33:52 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349923354439713/img_0.png",
+        "signal_analyzed_at": "2026-08-04 21:56:26 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/352071206546657/img_0.png",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/349907345513281": {
-        "href": "https://www.binance.com/zh-CN/square/post/349907345513281",
-        "published_at": "2026-07-29 19:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "3小时",
-        "is_pinned": false,
-        "title": "我的内容全是发给粉丝用户们看的，如果有时候我内容同行之间觉得说我冒犯到你，我并不是在说你，我只是在鞭策我的粉丝。 我们都应该多听粉丝说什么，而不是听同行说你什么… 如果你有时候看到的内容觉得是在说你，就全当别人是在嫉妒你就好了，这你就不会揪心， 也能更好的做自己的事情了。 我除了用手机要发文的时候会看到随机第一页的广场内容除外，我也没心思去看别人的内容，交易跟分析是自己的事，哪怕最后自己是错的，别人是对的，我也不会采纳别人的“杂讯”，而是优化自己的分析跟交易。",
-        "raw": "我的内容全是发给粉丝用户们看的，如果有时候我内容同行之间觉得说我冒犯到你，我并不是在说你，我只是在鞭策我的粉丝。 我们都应该多听粉丝说什么，而不是听同行说你什么… 如果你有时候看到的内容觉得是在说你，就全当别人是在嫉妒你就好了，这你就不会揪心， 也能更好的做自己的事情了。 我除了用手机要发文的时候会看到随机第一页的广场内容除外，我也没心思去看别人的内容，交易跟分析是自己的事，哪怕最后自己是错的，别人是对的，我也不会采纳别人的“杂讯”，而是优化自己的分析跟交易。",
-        "author": "yanchibit",
-        "author_slug": "yanchibit",
-        "time": "3小时",
-        "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Q5N2FjNDk1MzAzODRiNjg4MGRkNTA0ZTEwOGRjYTJiLnBuZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349907345513281/img_0.png"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "这是一篇偏向于“战略确认”的帖子，而非具体的入场信号。分析师强调了忽略同行杂讯、坚持优化自身分析的重要性，这表明他对当前持仓或正在进行的交易方向抱有极强的信心和看涨/看空倾向（尽管未明确指出是哪个币）。由于缺乏具体的K线图佐证，且没有给出任何价格点位支撑/压力，因此信号强度为2分。这是一个“相信自己分析”的强情绪信号。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "这是一篇偏向于“战略确认”的帖子，而非具体的入场信号。分析师强调了忽略同行杂讯、坚持优化自身分析的重要性，这表明他对当前持仓或正在进行的交易方向抱有极强的信心和看涨/看空倾向（尽管未明确指出是哪个币）。由于缺乏具体的K线图佐证，且没有给出任何价格点位支撑/压力，因此信号强度为2分。这是一个“相信自己分析”的强情绪信号。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:34:10 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349907345513281/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349918081287522": {
-        "href": "https://www.binance.com/zh-CN/square/post/349918081287522",
-        "published_at": "2026-07-29 18:33:27 北京时间",
+      "https://www.binance.com/zh-CN/square/post/351971434275969": {
+        "href": "https://www.binance.com/zh-CN/square/post/351971434275969",
+        "published_at": "2026-08-04 17:56:00 北京时间",
         "published_iso": "",
         "time_label": "4小时",
         "is_pinned": false,
-        "title": "7.29 #BTC 日内行情分析，闪迪多单获利中，下去这里，还多！币圈依旧有点枯燥，等待中…",
-        "raw": "7.29 #BTC 日内行情分析，闪迪多单获利中，下去这里，还多！币圈依旧有点枯燥，等待中…",
+        "title": "8.3 直播订单 SNDK 我们再来看闪迪的价格行为。 图1看到图4，你又能看出技术分析的魅力，跟技术分析之间的差距。也可以点我头像看昨天晚上的直播回放。 交易不是去预测行情，而是找出位置等待价格来到此处后的反应。 📌我跟其他博主的区别即是不贩卖焦虑，你没跟上也没关系，逻辑我会解读给你听，还是一样，耳濡目染多了之后，慢慢就懂了。 只要你的逻辑在，市场多的是交易机会。 #SNDK",
+        "raw": "8.3 直播订单 SNDK 我们再来看闪迪的价格行为。 图1看到图4，你又能看出技术分析的魅力，跟技术分析之间的差距。也可以点我头像看昨天晚上的直播回放。 交易不是去预测行情，而是找出位置等待价格来到此处后的反应。 📌我跟其他博主的区别即是不贩卖焦虑，你没跟上也没关系，逻辑我会解读给你听，还是一样，耳濡目染多了之后，慢慢就懂了。 只要你的逻辑在，市场多的是交易机会。 #SNDK",
         "author": "yanchibit",
         "author_slug": "yanchibit",
         "time": "4小时",
-        "image_urls": [],
-        "video_url": "https://public.bnbstatic.com/video/pgc/ArticleContent/3136cf10-e085-4083-b071-29ba9d5be39d.mp4",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzQ0ZTllZGQ5NmVlOTQ0OTA5MjMwZDE3NWFiODQ5NDA5LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzc5OTMxMzExODQ5YzQyMDA5YjAyMWZjYWYwZjBlZTQwLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2RmZDRlMDJlODQzNTQwOTZiNzgzMjliMmRiMDliMmY4LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzdkNGI5OGFlZmQ3NTQ2NzRhNDdlNmVhMzk3Yzc1NDEyLmpwZw==&level=md"
+        ],
+        "video_url": "",
         "audio_m3u8_url": "",
         "square_audio_replay_url": "",
-        "saved_image_paths": [],
+        "saved_image_paths": [
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351971434275969/img_0.jpg",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351971434275969/img_1.jpg",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351971434275969/img_2.jpg",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351971434275969/img_3.jpg"
+        ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
         "gemini_reason": null,
         "gemini_bias_zh": "不明",
         "signal_is_sign": true,
         "signal_star": 4,
-        "signal_content": "看涨信号。当前处于多头趋势中，交易者确认已获利（闪迪多单），但判断回调至特定区域时仍应继续做多。核心策略是等待价格“下去这里”（即在支撑位附近）进行买入或加仓操作。",
+        "signal_content": "这是一个高逻辑强度的技术分析分享帖。虽然文本中没有明确给出“买入/卖出”指令，但其核心思想是“找出位置等待价格来到此处后的反应”，这强烈暗示图表中已经定义了关键的支撑位和压力位（即交易点位）。因此，该信号强度为4星，属于给出了明确的参考价位的信号。",
         "signal_raw_data": {
           "isSign": true,
-          "content": "看涨信号。当前处于多头趋势中，交易者确认已获利（闪迪多单），但判断回调至特定区域时仍应继续做多。核心策略是等待价格“下去这里”（即在支撑位附近）进行买入或加仓操作。",
+          "content": "这是一个高逻辑强度的技术分析分享帖。虽然文本中没有明确给出“买入/卖出”指令，但其核心思想是“找出位置等待价格来到此处后的反应”，这强烈暗示图表中已经定义了关键的支撑位和压力位（即交易点位）。因此，该信号强度为4星，属于给出了明确的参考价位的信号。",
           "star": 4
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:34:29 北京时间",
-        "signal_image_used": "",
+        "signal_analyzed_at": "2026-08-04 21:56:51 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351971434275969/img_0.jpg",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/349902925106417": {
-        "href": "https://www.binance.com/zh-CN/square/post/349902925106417",
-        "published_at": "2026-07-29 17:33:27 北京时间",
+      "https://www.binance.com/zh-CN/square/post/351991821221633": {
+        "href": "https://www.binance.com/zh-CN/square/post/351991821221633",
+        "published_at": "2026-08-04 15:56:00 北京时间",
         "published_iso": "",
-        "time_label": "5小时",
+        "time_label": "6小时",
         "is_pinned": false,
-        "title": "闪迪靠近1135即做第一止盈☝🏻 或者现在1113做点止盈也行。逻辑昨晚直播也讲过，文字再复述一遍 📌逻辑解析：击穿流动性后，回到原本的1030支撑之上，并且出现了高低点的抬高，所以进场！ 并不是什么呆瓜言论，什么跌多了想买…博个反弹什么的。#SNDK 交易等待很重要，等待机会出现，基本出手就会有… 这种单子的处理方式也很简单到目标位止盈部分，剩下防守着，能继续涨继续赚，打防守了，就下次再等机会了",
-        "raw": "闪迪靠近1135即做第一止盈☝🏻 或者现在1113做点止盈也行。逻辑昨晚直播也讲过，文字再复述一遍 📌逻辑解析：击穿流动性后，回到原本的1030支撑之上，并且出现了高低点的抬高，所以进场！ 并不是什么呆瓜言论，什么跌多了想买…博个反弹什么的。#SNDK 交易等待很重要，等待机会出现，基本出手就会有… 这种单子的处理方式也很简单到目标位止盈部分，剩下防守着，能继续涨继续赚，打防守了，就下次再等机会了",
+        "title": "8.4 #BTC 日内行情分析，短多获利中… 然后继续枯燥中！",
+        "raw": "8.4 #BTC 日内行情分析，短多获利中… 然后继续枯燥中！",
         "author": "yanchibit",
         "author_slug": "yanchibit",
-        "time": "5小时",
+        "time": "6小时",
         "image_urls": [],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 5,
-        "signal_content": "看涨信号。逻辑：价格已击穿流动性并回到原有的1030支撑位之上，同时出现了高低点抬高的形态，确认了上涨趋势。建议当前在1113做部分止盈（或作为入场参考），目标位锁定在靠近1135。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "看涨信号。逻辑：价格已击穿流动性并回到原有的1030支撑位之上，同时出现了高低点抬高的形态，确认了上涨趋势。建议当前在1113做部分止盈（或作为入场参考），目标位锁定在靠近1135。",
-          "star": 5
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:34:49 北京时间",
-        "signal_image_used": "",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349840170902194": {
-        "href": "https://www.binance.com/zh-CN/square/post/349840170902194",
-        "published_at": "2026-07-29 13:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "9小时",
-        "is_pinned": false,
-        "title": "做兄弟在心中，你不信我我说一万句也没用。 #SNDK",
-        "raw": "做兄弟在心中，你不信我我说一万句也没用。 #SNDK",
-        "author": "yanchibit",
-        "author_slug": "yanchibit",
-        "time": "9小时",
-        "image_urls": [],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 1,
-        "signal_content": "纯粹的情绪看涨信号。发帖人表达了极强的信念（'做兄弟在心中'），暗示SNDK即将迎来强势上涨，具备强烈的买入心理驱动力。但帖子本身未提供任何技术指标或具体的支撑/阻力位作为依据。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "纯粹的情绪看涨信号。发帖人表达了极强的信念（'做兄弟在心中'），暗示SNDK即将迎来强势上涨，具备强烈的买入心理驱动力。但帖子本身未提供任何技术指标或具体的支撑/阻力位作为依据。",
-          "star": 1
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:35:09 北京时间",
-        "signal_image_used": "",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349834002020305": {
-        "href": "https://www.binance.com/zh-CN/square/post/349834002020305",
-        "published_at": "2026-07-29 13:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "9小时",
-        "is_pinned": false,
-        "title": "1000破了，这不是技术，这是交易常识。#sndk 希望有帮到你。",
-        "raw": "1000破了，这不是技术，这是交易常识。#sndk 希望有帮到你。",
-        "author": "yanchibit",
-        "author_slug": "yanchibit",
-        "time": "9小时",
-        "image_urls": [],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 4,
-        "signal_content": "看涨。帖子明确指出价格突破了关键的1000阻力位，这是一个强烈的趋势确认信号（Breakout）。该1000点位现在将转变为重要的支撑位，是潜在的回踩入场参考点。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "看涨。帖子明确指出价格突破了关键的1000阻力位，这是一个强烈的趋势确认信号（Breakout）。该1000点位现在将转变为重要的支撑位，是潜在的回踩入场参考点。",
-          "star": 4
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:35:29 北京时间",
-        "signal_image_used": "",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349630452719153": {
-        "href": "https://www.binance.com/zh-CN/square/post/349630452719153",
-        "published_at": "2026-07-28 23:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "23小时",
-        "is_pinned": false,
-        "title": "闪迪，主跌浪5浪预期… #SNDK 流动性在哪里，价格就去哪里！",
-        "raw": "闪迪，主跌浪5浪预期… #SNDK 流动性在哪里，价格就去哪里！",
-        "author": "yanchibit",
-        "author_slug": "yanchibit",
-        "time": "23小时",
-        "image_urls": [],
-        "video_url": "",
+        "video_url": "https://public.bnbstatic.com/video/pgc/ArticleContent/5ae387f6-d762-4779-b653-053c192bdbd2.mp4",
         "audio_m3u8_url": "",
         "square_audio_replay_url": "",
         "saved_image_paths": [],
@@ -230,30 +106,178 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": true,
         "signal_star": 3,
-        "signal_content": "明确看空信号。基于“主跌浪5浪预期”，判断SNDK当前处于主要下跌阶段的最后冲刺，趋势偏向熊市延续。交易策略应关注市场流动性聚集的关键支撑/阻力位（未给出具体价格），等待价格触及这些区域进行做空布局或逢高减仓。",
+        "signal_content": "该帖子是一个日内行情分析，明确指出当前BTC处于“短多获利中”的强势状态，即短期看涨情绪占据主导。尽管描述为“枯燥”，暗示市场可能在进行区间震荡或整理，但整体趋势偏向多头（Bullish）。由于缺乏具体的入场、止盈和止损价格点位信息，信号强度定位于趋势判断。",
         "signal_raw_data": {
           "isSign": true,
-          "content": "明确看空信号。基于“主跌浪5浪预期”，判断SNDK当前处于主要下跌阶段的最后冲刺，趋势偏向熊市延续。交易策略应关注市场流动性聚集的关键支撑/阻力位（未给出具体价格），等待价格触及这些区域进行做空布局或逢高减仓。",
+          "content": "该帖子是一个日内行情分析，明确指出当前BTC处于“短多获利中”的强势状态，即短期看涨情绪占据主导。尽管描述为“枯燥”，暗示市场可能在进行区间震荡或整理，但整体趋势偏向多头（Bullish）。由于缺乏具体的入场、止盈和止损价格点位信息，信号强度定位于趋势判断。",
           "star": 3
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:35:50 北京时间",
+        "signal_analyzed_at": "2026-08-04 21:57:14 北京时间",
+        "signal_image_used": "",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/351970060441233": {
+        "href": "https://www.binance.com/zh-CN/square/post/351970060441233",
+        "published_at": "2026-08-04 13:56:00 北京时间",
+        "published_iso": "",
+        "time_label": "8小时",
+        "is_pinned": false,
+        "title": "多看直播，学的更多！8.3直播订单！ 何为价格行为，看多了，耳濡目染后，慢慢自己就有感觉了。 所谓的盯盘，是价格来到支撑/阻力面前，去盯着价格行为，是否有出现开仓条件，而不是随便开个仓位，然后盯着你的仓位。 #BTC 麻啦「轻声细语」…… 这就是技术分析的魅力。",
+        "raw": "多看直播，学的更多！8.3直播订单！ 何为价格行为，看多了，耳濡目染后，慢慢自己就有感觉了。 所谓的盯盘，是价格来到支撑/阻力面前，去盯着价格行为，是否有出现开仓条件，而不是随便开个仓位，然后盯着你的仓位。 #BTC 麻啦「轻声细语」…… 这就是技术分析的魅力。",
+        "author": "yanchibit",
+        "author_slug": "yanchibit",
+        "time": "8小时",
+        "image_urls": [
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzg3NDIxNTc5NjUwYTRkNjE5OGRkNjU1MzcyNjY1Nzc2LmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzZhODA2OTkwOWQyYjRmZDVhYzA3Y2Q2ZjFmMDMyOWIyLmpwZw==&level=md"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351970060441233/img_0.jpg",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351970060441233/img_1.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "该帖子虽然没有直接给出买入/卖出指令，但提供了明确的交易方法论（价格行为 Price Action），核心信号是：等待BTC价格到达关键支撑/阻力位后，寻找开仓条件。这属于高可靠度的趋势跟踪策略预警。看涨理由在于当前市场处于上涨趋势中，回调至支撑区具备强烈的买入潜力。",
+        "signal_raw_data": {
+          "isSign": true,
+          "content": "该帖子虽然没有直接给出买入/卖出指令，但提供了明确的交易方法论（价格行为 Price Action），核心信号是：等待BTC价格到达关键支撑/阻力位后，寻找开仓条件。这属于高可靠度的趋势跟踪策略预警。看涨理由在于当前市场处于上涨趋势中，回调至支撑区具备强烈的买入潜力。",
+          "star": 4
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-08-04 21:57:43 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351970060441233/img_0.jpg",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/24584895456538": {
+        "href": "https://www.binance.com/zh-CN/square/post/24584895456538",
+        "published_at": "2026-08-04 21:56:00 北京时间",
+        "published_iso": "2026-08-04T13:56:00Z",
+        "time_label": "音频回扫",
+        "is_pinned": false,
+        "title": "🎙️ 听驰鉴coin----8.1「继续枯燥的震荡~继续静候假跌破！」",
+        "raw": "🎙️ 听驰鉴coin----8.1「继续枯燥的震荡~继续静候假跌破！」",
+        "author": "yanchibit",
+        "author_slug": "yanchibit",
+        "time": "",
+        "image_urls": [],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "https://www.binance.com/zh-CN/square/audio/replay?id=43965784467818",
+        "saved_image_paths": [],
+        "gemini_direction": null,
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": null,
+        "signal_is_sign": true,
+        "signal_star": 3,
+        "signal_content": "当前处于震荡整理阶段，信号为看涨（Bullish）。关键逻辑是“静候假跌破”，这意味着交易员预期价格在回调至支撑位时会尝试向下突破，但随后会迅速反转向上。建议等待价格确认一个虚假的下跌突破信号后入场。",
+        "signal_raw_data": {
+          "isSign": true,
+          "content": "当前处于震荡整理阶段，信号为看涨（Bullish）。关键逻辑是“静候假跌破”，这意味着交易员预期价格在回调至支撑位时会尝试向下突破，但随后会迅速反转向上。建议等待价格确认一个虚假的下跌突破信号后入场。",
+          "star": 3
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-08-04 21:58:05 北京时间",
         "signal_image_used": "",
         "signal_analyzed_ok": true
       }
     },
     "sanmageshuai": {
-      "https://www.binance.com/zh-CN/square/post/349923860567650": {
-        "href": "https://www.binance.com/zh-CN/square/post/349923860567650",
-        "published_at": "2026-07-29 20:33:27 北京时间",
+      "https://www.binance.com/zh-CN/square/post/352050239217090": {
+        "href": "https://www.binance.com/zh-CN/square/post/352050239217090",
+        "published_at": "2026-08-04 19:56:00 北京时间",
         "published_iso": "",
         "time_label": "2小时",
         "is_pinned": false,
-        "title": "美联储利率决议还没公布BTC就开始炒作利好预期上涨了，但是每次要注意止盈点到了就跑，利润记得落袋才能浮盈加仓。 本周我们在65500多单止盈后，又出策略无脑在63388挂单加仓多、今天又再次提醒63900还可以做多都连续吃了大肉！ 64588第一个多头止盈点已经被突破，下一个多头止盈点是65100左右，最后66666点位。 支撑翻来覆去就那么几个，以太坊这一波提前预判了1858的多头支撑非常精准，你还记得2100和1588哪个先到来吗？感谢新老币安粉丝会员再次选择续肥，币安订阅合约现货群你值得拥有标配。#BTC 👉🏻[马前炮](https://app.binance.com/uni-qr/cpos/349434998517041?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink)",
-        "raw": "美联储利率决议还没公布BTC就开始炒作利好预期上涨了，但是每次要注意止盈点到了就跑，利润记得落袋才能浮盈加仓。 本周我们在65500多单止盈后，又出策略无脑在63388挂单加仓多、今天又再次提醒63900还可以做多都连续吃了大肉！ 64588第一个多头止盈点已经被突破，下一个多头止盈点是65100左右，最后66666点位。 支撑翻来覆去就那么几个，以太坊这一波提前预判了1858的多头支撑非常精准，你还记得2100和1588哪个先到来吗？感谢新老币安粉丝会员再次选择续肥，币安订阅合约现货群你值得拥有标配。#BTC 👉🏻[马前炮](https://app.binance.com/uni-qr/cpos/349434998517041?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink)",
+        "title": "加密货币清晰法案一旦通过，BTC未来地位将超过黄金、ETH地位将超过白银，而且被法律保护升级为大宗商品，这也是本轮熊市结束的标志信号。最后的窗口期是8月7号（大非农+清晰法案将会引爆BTC行情），届时传统银行、证券机构甚至全世界的养老基金、社保基金购买BTC的门槛将会大大降低，给我们已经在币圈的交易员抬轿子送钱。 本轮熊市两家交易所倒闭、老牌加密钱包被盗、微策略公开扬言要割肉出售50亿美元的比特币（吓唬散户低价割肉交出筹码），这也都是熊市见底的信号，也是三马哥六面交易战法之情绪面见底的见证。 现在与过去不一样了，死等一个低点去全部梭哈买入是不成熟的交易风格，你只能去每天定投买入或者分批次买入（比如现在是63000多价格就不错），最后抄到一个不错的持仓均价，你在63000和58000之间分批买入，总比你在7万美元、8万美元买入强太多了吧？ 买在无人问津当所有人都在说BTC不行了的时候，你应当跟它们的想法相反，这个市场上韭菜散户的合力思路可以当反面参考。#BTC",
+        "raw": "加密货币清晰法案一旦通过，BTC未来地位将超过黄金、ETH地位将超过白银，而且被法律保护升级为大宗商品，这也是本轮熊市结束的标志信号。最后的窗口期是8月7号（大非农+清晰法案将会引爆BTC行情），届时传统银行、证券机构甚至全世界的养老基金、社保基金购买BTC的门槛将会大大降低，给我们已经在币圈的交易员抬轿子送钱。 本轮熊市两家交易所倒闭、老牌加密钱包被盗、微策略公开扬言要割肉出售50亿美元的比特币（吓唬散户低价割肉交出筹码），这也都是熊市见底的信号，也是三马哥六面交易战法之情绪面见底的见证。 现在与过去不一样了，死等一个低点去全部梭哈买入是不成熟的交易风格，你只能去每天定投买入或者分批次买入（比如现在是63000多价格就不错），最后抄到一个不错的持仓均价，你在63000和58000之间分批买入，总比你在7万美元、8万美元买入强太多了吧？ 买在无人问津当所有人都在说BTC不行了的时候，你应当跟它们的想法相反，这个市场上韭菜散户的合力思路可以当反面参考。#BTC",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
         "time": "2小时",
+        "image_urls": [
+          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/87496d50-2408-43e1-ad4c-78b47b448a6a.png"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/352050239217090/img_0.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "强看涨信号。核心驱动力为加密货币清晰法案通过，将BTC地位提升至大宗商品级别，预示熊市结束和机构资金流入爆发（尤其在8月7日窗口期）。建议策略是分批次定投/买入，最佳入场区间设定在$63,000到$58,000之间。",
+        "signal_raw_data": {
+          "isSign": true,
+          "content": "强看涨信号。核心驱动力为加密货币清晰法案通过，将BTC地位提升至大宗商品级别，预示熊市结束和机构资金流入爆发（尤其在8月7日窗口期）。建议策略是分批次定投/买入，最佳入场区间设定在$63,000到$58,000之间。",
+          "star": 4
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-08-04 21:58:29 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/352050239217090/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/352013878802977": {
+        "href": "https://www.binance.com/zh-CN/square/post/352013878802977",
+        "published_at": "2026-08-04 16:56:00 北京时间",
+        "published_iso": "",
+        "time_label": "5小时",
+        "is_pinned": false,
+        "title": "闪迪SNDK到了最关键的时候了，之前都是4次假突破然后暴跌，这是第五次尝试突破压力，如果是真突破那就是加特林突突突到1800了。 $SNDK 被假突破骗怕了，你们觉得呢？ {future}(SNDKUSDT)",
+        "raw": "闪迪SNDK到了最关键的时候了，之前都是4次假突破然后暴跌，这是第五次尝试突破压力，如果是真突破那就是加特林突突突到1800了。 $SNDK 被假突破骗怕了，你们觉得呢？ {future}(SNDKUSDT)",
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "time": "5小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/symbol/logo/20260407/ab669219-fa31-4444-937c-28598d0e24c9.png",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzcwNmNiMWMyOTFiOTQ4NmM4YWJjZjRkMGU4YTYyMzg0LnBuZw==&level=lg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "saved_image_paths": [
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/352013878802977/img_0.png",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/352013878802977/img_1.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 5,
+        "signal_content": "看涨信号极强。分析基于趋势和形态逻辑（第五次突破关键阻力位，此前有4次假突破失败）。如果能成功突破当前压力区，目标价位被预估在1800美元附近，属于高爆发潜力型突破交易。",
+        "signal_raw_data": {
+          "isSign": true,
+          "content": "看涨信号极强。分析基于趋势和形态逻辑（第五次突破关键阻力位，此前有4次假突破失败）。如果能成功突破当前压力区，目标价位被预估在1800美元附近，属于高爆发潜力型突破交易。",
+          "star": 5
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-08-04 21:58:54 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/352013878802977/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/351959724705810": {
+        "href": "https://www.binance.com/zh-CN/square/post/351959724705810",
+        "published_at": "2026-08-04 12:56:00 北京时间",
+        "published_iso": "",
+        "time_label": "9小时",
+        "is_pinned": false,
+        "title": "BTC正在冲击64000看看能不能企稳，试试火力，该小爆发一波了。#BTC",
+        "raw": "BTC正在冲击64000看看能不能企稳，试试火力，该小爆发一波了。#BTC",
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "time": "9小时",
         "image_urls": [],
         "video_url": "",
         "audio_m3u8_url": "",
@@ -264,31 +288,31 @@
         "gemini_reason": null,
         "gemini_bias_zh": "不明",
         "signal_is_sign": true,
-        "signal_star": 5,
-        "signal_content": "强烈的看涨信号。市场预期美联储利好决议，BTC趋势向上。策略建议：在63900附近或利用低吸机会在63388加仓做多。当前已突破64588压力位，第一个目标止盈点设定在65100左右，最终目标看涨至66666。该帖子提供了完整的入场和离场策略。",
+        "signal_star": 4,
+        "signal_content": "看涨信号。BTC正冲击关键价格64000美元，预判该点位企稳后将迎来一波上涨爆发（小幅突破）。64000是当前需要重点关注的关键阻力/支撑位。",
         "signal_raw_data": {
           "isSign": true,
-          "content": "强烈的看涨信号。市场预期美联储利好决议，BTC趋势向上。策略建议：在63900附近或利用低吸机会在63388加仓做多。当前已突破64588压力位，第一个目标止盈点设定在65100左右，最终目标看涨至66666。该帖子提供了完整的入场和离场策略。",
-          "star": 5
+          "content": "看涨信号。BTC正冲击关键价格64000美元，预判该点位企稳后将迎来一波上涨爆发（小幅突破）。64000是当前需要重点关注的关键阻力/支撑位。",
+          "star": 4
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:36:10 北京时间",
+        "signal_analyzed_at": "2026-08-04 21:59:16 北京时间",
         "signal_image_used": "",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/349896155674081": {
-        "href": "https://www.binance.com/zh-CN/square/post/349896155674081",
-        "published_at": "2026-07-29 17:33:27 北京时间",
+      "https://www.binance.com/zh-CN/square/post/351955807408114": {
+        "href": "https://www.binance.com/zh-CN/square/post/351955807408114",
+        "published_at": "2026-08-04 12:56:00 北京时间",
         "published_iso": "",
-        "time_label": "5小时",
+        "time_label": "9小时",
         "is_pinned": false,
-        "title": "今天美联储利率决议，回调后还可以做多，等待本周第四个多单发布。#BTC",
-        "raw": "今天美联储利率决议，回调后还可以做多，等待本周第四个多单发布。#BTC",
+        "title": "12万买的比特币 现在6万多 1200买的黄金 现在800多 32买的白银 现在14了 130多万买的房子 现在50多 50多万买的BBA 现在20多 只有20多岁娶的媳妇 现在50多。",
+        "raw": "12万买的比特币 现在6万多 1200买的黄金 现在800多 32买的白银 现在14了 130多万买的房子 现在50多 50多万买的BBA 现在20多 只有20多岁娶的媳妇 现在50多。",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "time": "5小时",
+        "time": "9小时",
         "image_urls": [],
-        "video_url": "https://public.bnbstatic.com/video/pgc/ArticleContent/15bad294-5e71-4bc1-9825-93c0be02b0f6.mp4",
+        "video_url": "https://public.bnbstatic.com/video/pgc/ArticleContent/8e9b6230-ca71-4d12-9f17-509c11bdf86f.mp4",
         "audio_m3u8_url": "",
         "square_audio_replay_url": "",
         "saved_image_paths": [],
@@ -298,30 +322,30 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": true,
         "signal_star": 3,
-        "signal_content": "看多信号。基于美联储利率决议这一重磅基本面事件，分析师判断市场将迎来回调（Pullback）后的做多机会。建议在价格回踩关键支撑位时介入，等待本周第四个宏观数据发布确认方向。",
+        "signal_content": "这是一个典型的“抄底/价值回归”的看涨情绪帖。核心逻辑是资产跌得太深，存在被市场低估的风险。特别是比特币（BTC）从12万跌至6万多，跌幅接近50%，暗示极强的逢低买入信号。尽管没有给出具体的止盈止损点位，但巨大的回调形成了明确的看涨基础。",
         "signal_raw_data": {
           "isSign": true,
-          "content": "看多信号。基于美联储利率决议这一重磅基本面事件，分析师判断市场将迎来回调（Pullback）后的做多机会。建议在价格回踩关键支撑位时介入，等待本周第四个宏观数据发布确认方向。",
+          "content": "这是一个典型的“抄底/价值回归”的看涨情绪帖。核心逻辑是资产跌得太深，存在被市场低估的风险。特别是比特币（BTC）从12万跌至6万多，跌幅接近50%，暗示极强的逢低买入信号。尽管没有给出具体的止盈止损点位，但巨大的回调形成了明确的看涨基础。",
           "star": 3
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:36:27 北京时间",
+        "signal_analyzed_at": "2026-08-04 21:59:42 北京时间",
         "signal_image_used": "",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/349875179411842": {
-        "href": "https://www.binance.com/zh-CN/square/post/349875179411842",
-        "published_at": "2026-07-29 16:33:27 北京时间",
+      "https://www.binance.com/zh-CN/square/post/351929983665346": {
+        "href": "https://www.binance.com/zh-CN/square/post/351929983665346",
+        "published_at": "2026-08-04 10:56:00 北京时间",
         "published_iso": "",
-        "time_label": "6小时",
+        "time_label": "11小时",
         "is_pinned": false,
-        "title": "比特币大暴涨！请你记住三马哥提前14个小时在你睡觉前告诉你做多比特币64588止盈。👉🏻[提前预判](https://app.binance.com/uni-qr/cpos/349660728449201?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink) 虽然64588点位差了一丢丢也足以预判到了方向思路点位，最重要的是三马哥周一策略63388加仓做多比特币，今天周三睡醒告诉你63900继续做多BTC。 我们浮盈加仓胜利了！再次恭喜跟上的朋友！#BTC",
-        "raw": "比特币大暴涨！请你记住三马哥提前14个小时在你睡觉前告诉你做多比特币64588止盈。👉🏻[提前预判](https://app.binance.com/uni-qr/cpos/349660728449201?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink) 虽然64588点位差了一丢丢也足以预判到了方向思路点位，最重要的是三马哥周一策略63388加仓做多比特币，今天周三睡醒告诉你63900继续做多BTC。 我们浮盈加仓胜利了！再次恭喜跟上的朋友！#BTC",
+        "title": "耐心等待突破企稳64000再去加仓追涨，不然要稳如老狗稳着点。#BTC",
+        "raw": "耐心等待突破企稳64000再去加仓追涨，不然要稳如老狗稳着点。#BTC",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "time": "6小时",
+        "time": "11小时",
         "image_urls": [],
-        "video_url": "",
+        "video_url": "https://public.bnbstatic.com/video/pgc/ArticleContent/abe98888-e6f5-422a-acc9-04b3f069a1eb.mp4",
         "audio_m3u8_url": "",
         "square_audio_replay_url": "",
         "saved_image_paths": [],
@@ -330,43 +354,41 @@
         "gemini_reason": null,
         "gemini_bias_zh": "不明",
         "signal_is_sign": true,
-        "signal_star": 5,
-        "signal_content": "强烈的看涨信号。策略是延续多头趋势：初始建仓点位为 63388 做多，当前（或次级）加仓/入场点位为 63900 继续做多BTC。目标止盈位明确设定在 64588，这是一个清晰的上升趋势策略。",
+        "signal_star": 4,
+        "signal_content": "看涨信号。建议耐心等待BTC突破并企稳在关键阻力位 64000 美元后，再进行加仓追涨操作。这是一个典型的“突破确认”入场策略。",
         "signal_raw_data": {
           "isSign": true,
-          "content": "强烈的看涨信号。策略是延续多头趋势：初始建仓点位为 63388 做多，当前（或次级）加仓/入场点位为 63900 继续做多BTC。目标止盈位明确设定在 64588，这是一个清晰的上升趋势策略。",
-          "star": 5
+          "content": "看涨信号。建议耐心等待BTC突破并企稳在关键阻力位 64000 美元后，再进行加仓追涨操作。这是一个典型的“突破确认”入场策略。",
+          "star": 4
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:36:44 北京时间",
+        "signal_analyzed_at": "2026-08-04 22:00:03 北京时间",
         "signal_image_used": "",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/349811801645874": {
-        "href": "https://www.binance.com/zh-CN/square/post/349811801645874",
-        "published_at": "2026-07-29 11:33:27 北京时间",
+      "https://www.binance.com/zh-CN/square/post/351896121535314": {
+        "href": "https://www.binance.com/zh-CN/square/post/351896121535314",
+        "published_at": "2026-08-04 08:56:00 北京时间",
         "published_iso": "",
-        "time_label": "11小时",
+        "time_label": "13小时",
         "is_pinned": false,
-        "title": "左右侧交易，赚钱有手就行！公开赚麻才是真的麻！昨天有人在持仓中扰乱军心，不过策略还是吃肉了！ 三马哥再次封神了，昨天做空以太坊+做多比特币两头吃也没有亏，而是以太坊空单优先吃肉了！ 昨天提前告诉你比特币支撑第一个63388、以太坊更精准支撑1858到达后瞬间拉升至1928阻力位。👉🏻[马前炮了](https://app.binance.com/uni-qr/cpos/349419739472722?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink) 比特币目前来看走势不错，可别再让存储闪迪给带崩了啊，我怎么感觉闪迪SNDk再杀高杠杆，是不是有很多大户高位重仓在偷偷抗单不止损？你们可真不知道清理杠杆的威力！#BTC #SNDk",
-        "raw": "左右侧交易，赚钱有手就行！公开赚麻才是真的麻！昨天有人在持仓中扰乱军心，不过策略还是吃肉了！ 三马哥再次封神了，昨天做空以太坊+做多比特币两头吃也没有亏，而是以太坊空单优先吃肉了！ 昨天提前告诉你比特币支撑第一个63388、以太坊更精准支撑1858到达后瞬间拉升至1928阻力位。👉🏻[马前炮了](https://app.binance.com/uni-qr/cpos/349419739472722?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink) 比特币目前来看走势不错，可别再让存储闪迪给带崩了啊，我怎么感觉闪迪SNDk再杀高杠杆，是不是有很多大户高位重仓在偷偷抗单不止损？你们可真不知道清理杠杆的威力！#BTC #SNDk",
+        "title": "睡醒发现BTC并没有突破压力还是被压制了，下次我把压力位写高一点，可能就会涨的更高，昨天这个63918就是随笔一写，结果就被这里给压制没上去，观望一下等待新的策略布局。#BTC 👉[压力位预判](https://app.binance.com/uni-qr/cpos/351539157881394?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "raw": "睡醒发现BTC并没有突破压力还是被压制了，下次我把压力位写高一点，可能就会涨的更高，昨天这个63918就是随笔一写，结果就被这里给压制没上去，观望一下等待新的策略布局。#BTC 👉[压力位预判](https://app.binance.com/uni-qr/cpos/351539157881394?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "time": "11小时",
+        "time": "13小时",
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzgxNDQ1MGI0YzVjMTQ5Y2ViOGQ3MmM3ZjRhYTY4OTUxLnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzNhNWFmNDQ5OWJhNzRiZjg4ZDkxNzIxMTIzMjgwZjUxLnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzdkMDdhYTk5Njk5ZDRkOWU5OWRhODkyOGZiMWFjM2ZkLnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzM3YzRkODA3MzAwMDRmNDNhM2VkODI3OGIzNDAzMzA3LnBuZw==&level=md"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzczZWZlYjBhYmViYTRiMDc5MzlhNzNkNjhkZGE0ZGZmLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzI3YWJkMTIwODcxNzRhOWFiZDJiYjAxODhlM2M5NGFmLmpwZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzgyMzVkZDI5ODM5YTQ5MGNiNzc3NjZlMmIwZjEzZDg3LnBuZw==&level=md"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
         "square_audio_replay_url": "",
         "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349811801645874/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349811801645874/img_1.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349811801645874/img_2.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349811801645874/img_3.png"
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351896121535314/img_0.jpg",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351896121535314/img_1.jpg",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351896121535314/img_2.png"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
@@ -374,75 +396,42 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": true,
         "signal_star": 4,
-        "signal_content": "整体看涨趋势（BTC和ETH），信号强度高。关键支撑位已明确给出：比特币在63388附近获得支撑，可视为潜在做多入场点；以太坊精准支撑位为1858，突破后目标看向1928阻力位。目前策略是围绕这些关键价位进行左右侧的波段交易。",
+        "signal_content": "BTC未能有效突破关键的阻力位（63918），表明当前上行动能受压制，市场处于盘整或回调前的承压状态。这是一个明显的看空参考信号，提示交易者可以在此压力位附近寻找做空的入场机会，或者等待价格跌破该点位的确认。",
         "signal_raw_data": {
           "isSign": true,
-          "content": "整体看涨趋势（BTC和ETH），信号强度高。关键支撑位已明确给出：比特币在63388附近获得支撑，可视为潜在做多入场点；以太坊精准支撑位为1858，突破后目标看向1928阻力位。目前策略是围绕这些关键价位进行左右侧的波段交易。",
+          "content": "BTC未能有效突破关键的阻力位（63918），表明当前上行动能受压制，市场处于盘整或回调前的承压状态。这是一个明显的看空参考信号，提示交易者可以在此压力位附近寻找做空的入场机会，或者等待价格跌破该点位的确认。",
           "star": 4
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:37:01 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349811801645874/img_0.png",
+        "signal_analyzed_at": "2026-08-04 22:00:28 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351896121535314/img_0.jpg",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/349787802372929": {
-        "href": "https://www.binance.com/zh-CN/square/post/349787802372929",
-        "published_at": "2026-07-29 10:33:27 北京时间",
+      "https://www.binance.com/zh-CN/square/post/351758422277730": {
+        "href": "https://www.binance.com/zh-CN/square/post/351758422277730",
+        "published_at": "2026-08-03 23:56:00 北京时间",
         "published_iso": "",
-        "time_label": "12小时",
+        "time_label": "22小时",
         "is_pinned": false,
-        "title": "BTC的走势不错看看今天企稳了能否继续上攻，但你需要知道你一些重大支撑与阻力。 BTC上涨的压力64588、最大压力66666，67788可能要下个月到达了。所以你的BTC多单可以在64588全部止盈。#BTC BTC的下跌最近支撑是63458，只有跌破63000后才会测试61388的极端点位。 ETH昨天我们的空单在第一目标附近止盈了50%后剩余保本，最高拉升到我们策略波段做空的1928加仓点，无论怎样ETH这单都是赚钱的，但是由于是波段策略只做了一次。 ETH上方最大压力是2000、2000是多头的一个幻想里程碑，下跌支撑与BTC同步即可，昨天分析1858的支撑测试后一路上涨。#ETH SNDK闪迪提前预判了1088点位到达的太快了，1000U保卫战！这个币有点勾八了，1000必须要守住，如果强势破位你就只能在738点位购买了，长期看起来基本面依旧良好，短期正在清算高杠杆仓位。#SNDK 一直跟着三马哥发财的好兄弟可以注册个返佣，邀请码全新升级新用户以后注册使用 SANMAG （大小写均可）邀请码即可自动开通永久+实时返佣，或者下方链接任意都可以。 华语区🔗：https://www.bsmkweb.cc/zh-CN/join?ref=SANMAG",
-        "raw": "BTC的走势不错看看今天企稳了能否继续上攻，但你需要知道你一些重大支撑与阻力。 BTC上涨的压力64588、最大压力66666，67788可能要下个月到达了。所以你的BTC多单可以在64588全部止盈。#BTC BTC的下跌最近支撑是63458，只有跌破63000后才会测试61388的极端点位。 ETH昨天我们的空单在第一目标附近止盈了50%后剩余保本，最高拉升到我们策略波段做空的1928加仓点，无论怎样ETH这单都是赚钱的，但是由于是波段策略只做了一次。 ETH上方最大压力是2000、2000是多头的一个幻想里程碑，下跌支撑与BTC同步即可，昨天分析1858的支撑测试后一路上涨。#ETH SNDK闪迪提前预判了1088点位到达的太快了，1000U保卫战！这个币有点勾八了，1000必须要守住，如果强势破位你就只能在738点位购买了，长期看起来基本面依旧良好，短期正在清算高杠杆仓位。#SNDK 一直跟着三马哥发财的好兄弟可以注册个返佣，邀请码全新升级新用户以后注册使用 SANMAG （大小写均可）邀请码即可自动开通永久+实时返佣，或者下方链接任意都可以。 华语区🔗：https://www.bsmkweb.cc/zh-CN/join?ref=SANMAG",
+        "title": "BTC站稳64000都这么难吗？都冲击了好几次了都是站不稳，睡觉挂64588会给机会吗？ ETH今天操作很优秀而且马前炮给的1838支撑和两个空单止盈点是1838买入平空，可以说是多空双吃了。#ETH 👉[马前炮了](https://app.binance.com/uni-qr/cpos/351544138811217?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "raw": "BTC站稳64000都这么难吗？都冲击了好几次了都是站不稳，睡觉挂64588会给机会吗？ ETH今天操作很优秀而且马前炮给的1838支撑和两个空单止盈点是1838买入平空，可以说是多空双吃了。#ETH 👉[马前炮了](https://app.binance.com/uni-qr/cpos/351544138811217?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "time": "12小时",
+        "time": "22小时",
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Q0NTQ5OWVkMThmODQxNTRhZDExMWIzZjI1YTU5MDVhLnBuZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzBkYjYzNWQxYWU5ZjQzNDc5NGE0NWFhMzhkNzlkYTAzLnBuZw==&level=md"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzQ1N2ZmMDBjOTU3ZjQzZGE5NTI2MTVkYzZiNGQxZGE4LnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2VmMWQ1Yjg0ZDUxMjQzMTc5NzBlMTcxNzYzMjU0ZTI1LnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzA3MTZlNzFlNzI5MzQ4NTY5ZGRiZDI3OWUwNWRjMDBhLnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2I4M2UwMDY4ZWZjZjRjNDhiZTIyZDZjYmY0NDZmODVjLnBuZw==&level=md"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
         "square_audio_replay_url": "",
         "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349787802372929/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349787802372929/img_1.png"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 5,
-        "signal_content": "多重明确信号。BTC：看涨，建议在64588全部止盈；下跌支撑位为63458（若跌破63000则测试61388）。SNDK：最强信号，关键在于守住1000U。如果强势跌破1000U，建议在738点位买入做多。ETH：上攻趋势确认，上方最大压力2000，下跌支撑与BTC同步。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "多重明确信号。BTC：看涨，建议在64588全部止盈；下跌支撑位为63458（若跌破63000则测试61388）。SNDK：最强信号，关键在于守住1000U。如果强势跌破1000U，建议在738点位买入做多。ETH：上攻趋势确认，上方最大压力2000，下跌支撑与BTC同步。",
-          "star": 5
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:37:24 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349787802372929/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349672532113969": {
-        "href": "https://www.binance.com/zh-CN/square/post/349672532113969",
-        "published_at": "2026-07-29 02:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "20小时",
-        "is_pinned": false,
-        "title": "这行情真的垃圾，明天8点比特币收盘价必须高于63888，不然就完蛋了。#BTC",
-        "raw": "这行情真的垃圾，明天8点比特币收盘价必须高于63888，不然就完蛋了。#BTC",
-        "author": "sanmageshuai",
-        "author_slug": "sanmageshuai",
-        "time": "20小时",
-        "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzUwOGZmM2UyZTFmODQyOGZhOGM0NDBmYThlYWQ3YzdiLnBuZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349672532113969/img_0.png"
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351758422277730/img_0.png",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351758422277730/img_1.png",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351758422277730/img_2.png",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351758422277730/img_3.png"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
@@ -450,1953 +439,138 @@
         "gemini_bias_zh": "不明",
         "signal_is_sign": true,
         "signal_star": 4,
-        "signal_content": "强烈的看涨信号。帖子明确指出比特币（BTC）必须在明天收盘价高于63888，否则趋势将面临严重风险（“完蛋了”）。该价格点是一个关键的压力位和目标支撑线。交易策略建议：在突破63888时追多入场；或等待回调至此位置附近做支撑买入。",
+        "signal_content": "BTC当前的关键瓶颈在于64000美元的支撑位，未能有效站稳。分析师建议等待价格回踩或回调到**$64,588**这一潜在关键点位寻找做多机会。同时，ETH的案例验证了特定支撑位（如1838）的强大作用，该价位可作为明确的多头入场点和空单平仓止盈点。",
         "signal_raw_data": {
           "isSign": true,
-          "content": "强烈的看涨信号。帖子明确指出比特币（BTC）必须在明天收盘价高于63888，否则趋势将面临严重风险（“完蛋了”）。该价格点是一个关键的压力位和目标支撑线。交易策略建议：在突破63888时追多入场；或等待回调至此位置附近做支撑买入。",
+          "content": "BTC当前的关键瓶颈在于64000美元的支撑位，未能有效站稳。分析师建议等待价格回踩或回调到**$64,588**这一潜在关键点位寻找做多机会。同时，ETH的案例验证了特定支撑位（如1838）的强大作用，该价位可作为明确的多头入场点和空单平仓止盈点。",
           "star": 4
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:37:44 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349672532113969/img_0.png",
+        "signal_analyzed_at": "2026-08-04 22:00:50 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351758422277730/img_0.png",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/349660728449201": {
-        "href": "https://www.binance.com/zh-CN/square/post/349660728449201",
-        "published_at": "2026-07-29 01:33:27 北京时间",
+      "https://www.binance.com/zh-CN/square/post/351748633791314": {
+        "href": "https://www.binance.com/zh-CN/square/post/351748633791314",
+        "published_at": "2026-08-03 22:56:00 北京时间",
         "published_iso": "",
-        "time_label": "21小时",
+        "time_label": "23小时",
         "is_pinned": false,
-        "title": "比特币的多单睡觉可以挂64588全部止盈，如果站稳65000就更好了。#BTC 以太坊空单在目标1止盈一半后，不做第二次了。#ETH",
-        "raw": "比特币的多单睡觉可以挂64588全部止盈，如果站稳65000就更好了。#BTC 以太坊空单在目标1止盈一半后，不做第二次了。#ETH",
+        "title": "手里有多单的全体，本来刚才想再63500让你们走一半，但是刚才差了100多U，不管你们什么63500附近要走一半，然后走完一半剩下的我会发新的策略，无脑执行不要扰乱军心。 一旦突破63900价格，BTC的春天就来了。#BTC",
+        "raw": "手里有多单的全体，本来刚才想再63500让你们走一半，但是刚才差了100多U，不管你们什么63500附近要走一半，然后走完一半剩下的我会发新的策略，无脑执行不要扰乱军心。 一旦突破63900价格，BTC的春天就来了。#BTC",
         "author": "sanmageshuai",
         "author_slug": "sanmageshuai",
-        "time": "21小时",
+        "time": "23小时",
         "image_urls": [
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA3MjgvZGUxZWM2MzE1ZGQ0NDA4MmEzODlhODg3NjMyNGEyNzkuanBn&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA3MjgvMjdkMmJjMDkxNDA0NGRhNThjNDJhNTM4MmMwZDkzZjEuanBn&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA3MjgvYzQ2ZjIyOTRkYzQ2NDM4YWIwOWY0YWRhNjc5YjIwYTQuanBn&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9pbWFnZS9wZ2MvMjAyNjA3MjgvYjkyMzFmNWE5YjFiNDIzODliMDQwMzg4ZmVlNDZkM2EuanBn&level=md"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzcyZWU4YWFjNTBhMDQ0Mzc5NGIzNTM4ZmMxOTUxYWJmLnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzgwNmU5YjhkOWFkYTRmMTZhNjBkM2EwNGU0ZjZiMDBjLnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2ZjYzEzOTQzZTg3MzQ1Mzk5Mzg5NDE4M2U0YTg5N2U1LnBuZw==&level=md",
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzA5YWJmZDBjMTljZTQ3N2Y4ZjIxYWUwMjkwMjBhYTVjLnBuZw==&level=md"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
         "square_audio_replay_url": "",
         "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349660728449201/img_0.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349660728449201/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349660728449201/img_2.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349660728449201/img_3.jpg"
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351748633791314/img_0.png",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351748633791314/img_1.png",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351748633791314/img_2.png",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351748633791314/img_3.png"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
         "gemini_reason": null,
         "gemini_bias_zh": "不明",
         "signal_is_sign": true,
-        "signal_star": 5,
-        "signal_content": "这是一个明确的看多/看空双向信号。BTC给出看涨策略，建议做多并设置全部止盈位在64588，如果突破站稳65000则趋势更佳。ETH给出看空策略，已在目标1处获利了结一半仓位，表明短期空头动能强劲且有明确的盈利计划。",
+        "signal_star": 4,
+        "signal_content": "强烈的看涨信号。发帖人建议多单在63500附近先走一半利润（TP1），这是一个重要的支撑/兑现位。核心的趋势判断是：一旦价格突破并站稳63900，则确认BTC进入上涨周期，可以继续持有或追高，预示着更强的看涨势头。",
         "signal_raw_data": {
           "isSign": true,
-          "content": "这是一个明确的看多/看空双向信号。BTC给出看涨策略，建议做多并设置全部止盈位在64588，如果突破站稳65000则趋势更佳。ETH给出看空策略，已在目标1处获利了结一半仓位，表明短期空头动能强劲且有明确的盈利计划。",
-          "star": 5
+          "content": "强烈的看涨信号。发帖人建议多单在63500附近先走一半利润（TP1），这是一个重要的支撑/兑现位。核心的趋势判断是：一旦价格突破并站稳63900，则确认BTC进入上涨周期，可以继续持有或追高，预示着更强的看涨势头。",
+          "star": 4
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:38:03 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349660728449201/img_0.jpg",
+        "signal_analyzed_at": "2026-08-04 22:01:15 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351748633791314/img_0.png",
         "signal_analyzed_ok": true
       }
     },
     "square-creator-1d148bbce7461": {
-      "https://www.binance.com/zh-CN/square/post/349974840072418": {
-        "href": "https://www.binance.com/zh-CN/square/post/349974840072418",
-        "published_at": "2026-07-29 22:22:27 北京时间",
-        "published_iso": "",
-        "time_label": "11分钟",
-        "is_pinned": false,
-        "title": "$BEAT 瑟瑟发抖吧狗庄，第一KOL户子已经梭哈了，你识相点早点拉上去，好让户子成功预判一次🤣 {future}(BEATUSDT)",
-        "raw": "$BEAT 瑟瑟发抖吧狗庄，第一KOL户子已经梭哈了，你识相点早点拉上去，好让户子成功预判一次🤣 {future}(BEATUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "11分钟",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20251112/d9257a96-a187-43a1-8dac-072bfbd645f6.png",
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2U1MDM0OGJkZTJlYzQwMDg5MWVkZjkyMmE1N2UxMTViLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349974840072418/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349974840072418/img_1.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349974840072418/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "看涨信号。帖子主要基于社群情绪和KOL行为分析（第一KOL已梭哈），判断短期内$BEAT将迎来一波强劲拉升，趋势明确向上，但未给出具体入场、止盈或止损价格。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "看涨信号。帖子主要基于社群情绪和KOL行为分析（第一KOL已梭哈），判断短期内$BEAT将迎来一波强劲拉升，趋势明确向上，但未给出具体入场、止盈或止损价格。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:38:21 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349974840072418/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349973450927425": {
-        "href": "https://www.binance.com/zh-CN/square/post/349973450927425",
-        "published_at": "2026-07-29 22:16:27 北京时间",
-        "published_iso": "",
-        "time_label": "17分钟",
-        "is_pinned": false,
-        "title": "$UAI 现在多！！🛫 户圣已经开空了😅，这把我要跟他反着买！！这个币上涨动能强劲，摩托大佬已开多！！大家跟上吧👌🏻 {future}(UAIUSDT)",
-        "raw": "$UAI 现在多！！🛫 户圣已经开空了😅，这把我要跟他反着买！！这个币上涨动能强劲，摩托大佬已开多！！大家跟上吧👌🏻 {future}(UAIUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "17分钟",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20251106/b359d66a-b649-4787-81d0-f958f7fccc8b.png",
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzNhY2I2ZGE5ODNhYzRkYjhhYjUyZDBhZTQ3ODUwNzEzLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2RjM2U2YWI3YTdjNTQzMWVhMjRlY2JhZWU1NTk4ZjllLmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349973450927425/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349973450927425/img_1.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349973450927425/img_2.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349973450927425/img_3.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "看涨信号强烈。虽然未提供K线图进行技术面验证，但文本明确指出该币种拥有“强劲上涨动能”，且有关键的资金（摩托大佬）开多支撑。这是一个典型的反向操作/追势交易信号，建议在当前价位或回调至近期支撑位时买入，预期价格将继续突破原有阻力。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "看涨信号强烈。虽然未提供K线图进行技术面验证，但文本明确指出该币种拥有“强劲上涨动能”，且有关键的资金（摩托大佬）开多支撑。这是一个典型的反向操作/追势交易信号，建议在当前价位或回调至近期支撑位时买入，预期价格将继续突破原有阻力。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:38:39 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349973450927425/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349972119115201": {
-        "href": "https://www.binance.com/zh-CN/square/post/349972119115201",
-        "published_at": "2026-07-29 22:11:27 北京时间",
-        "published_iso": "",
-        "time_label": "22分钟",
-        "is_pinned": false,
-        "title": "$SNDK 太有实力了！😅圈内a9大佬户圣开多了200万SNDK，没有强平价😱！！我草，震惊我一个月！他螚走到对岸吗，大家怎么看？ {future}(SNDKUSDT)",
-        "raw": "$SNDK 太有实力了！😅圈内a9大佬户圣开多了200万SNDK，没有强平价😱！！我草，震惊我一个月！他螚走到对岸吗，大家怎么看？ {future}(SNDKUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "22分钟",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260407/ab669219-fa31-4444-937c-28598d0e24c9.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzZjZTIyMTE0OGIxYzQyOGI5ZDgwZDI2ZGQ3YWU0YzgwLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349972119115201/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349972119115201/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 4,
-        "signal_content": "核心信号来自圈内A9大佬巨鲸的看涨行为：他开仓了200万SNDK的多单，且该头寸没有强平价支撑，这表明其信心极度高昂，预示着SNDK即将迎来一轮显著的上行突破。这是一个非常强的看多信号。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "核心信号来自圈内A9大佬巨鲸的看涨行为：他开仓了200万SNDK的多单，且该头寸没有强平价支撑，这表明其信心极度高昂，预示着SNDK即将迎来一轮显著的上行突破。这是一个非常强的看多信号。",
-          "star": 4
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:38:58 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349972119115201/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349970861523505": {
-        "href": "https://www.binance.com/zh-CN/square/post/349970861523505",
-        "published_at": "2026-07-29 22:06:27 北京时间",
-        "published_iso": "",
-        "time_label": "27分钟",
-        "is_pinned": false,
-        "title": "$SPCX 回调就是加仓多机会，兄弟们速速进多！相信全球首富老马的实力😁 {future}(SPCXUSDT)",
-        "raw": "$SPCX 回调就是加仓多机会，兄弟们速速进多！相信全球首富老马的实力😁 {future}(SPCXUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "27分钟",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260519/823b055a-391b-4bb4-8471-7959b28649c7.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2E4NjczZDY4ODEzMzRkOGM4ZDZkMzRiZDUwOWZlNzA4LmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349970861523505/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349970861523505/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "看涨信号。帖子认为当前SPCX正在经历回调，这是加仓多头（Long）的绝佳机会。虽然没有给出明确的点位，但趋势判断明确，暗示在回调过程中寻找支撑位入场。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "看涨信号。帖子认为当前SPCX正在经历回调，这是加仓多头（Long）的绝佳机会。虽然没有给出明确的点位，但趋势判断明确，暗示在回调过程中寻找支撑位入场。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:39:14 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349970861523505/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349969740572001": {
-        "href": "https://www.binance.com/zh-CN/square/post/349969740572001",
-        "published_at": "2026-07-29 22:01:27 北京时间",
-        "published_iso": "",
-        "time_label": "32分钟",
-        "is_pinned": false,
-        "title": "$AKE 利空？hu圣又空了，那我跟上了，空着吃肉 {future}(AKEUSDT)",
-        "raw": "$AKE 利空？hu圣又空了，那我跟上了，空着吃肉 {future}(AKEUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "32分钟",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20250926/fbf1eabf-3c2a-4a0a-a247-5317de9e5e79.png",
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzYwZWZjNGQ4NjVkYzQxYWRiY2RmZWQxN2UwOGM4YTdiLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzdlODQ0M2Q2YWE4ZDQyOTdiZDRlY2ZjY2Q5ZDY0OGQzLmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349969740572001/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349969740572001/img_1.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349969740572001/img_2.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349969740572001/img_3.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "$AKE 明确看空信号。理由是跟随专业交易员“hu圣”的空头判断，显示出市场可能面临利空压力和下跌趋势。虽然文本未给出具体入场点、止盈或止损位，但方向性（做空）非常清晰，属于有趋势预判但点位模糊的信号。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "$AKE 明确看空信号。理由是跟随专业交易员“hu圣”的空头判断，显示出市场可能面临利空压力和下跌趋势。虽然文本未给出具体入场点、止盈或止损位，但方向性（做空）非常清晰，属于有趋势预判但点位模糊的信号。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:39:34 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349969740572001/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349966909424194": {
-        "href": "https://www.binance.com/zh-CN/square/post/349966909424194",
-        "published_at": "2026-07-29 21:50:27 北京时间",
-        "published_iso": "",
-        "time_label": "43分钟",
-        "is_pinned": false,
-        "title": "$ACH 广场著名kol出手了，空军要要吃大肉了👍🏻 {future}(ACHUSDT)",
-        "raw": "$ACH 广场著名kol出手了，空军要要吃大肉了👍🏻 {future}(ACHUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "43分钟",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250205/5d8df6a5-f664-43d8-a921-df75bef0210b.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Y2M2IwYWRhYmUyZjRjNGM5YzA2MTBiYjI2N2Q4Yjg0LmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349966909424194/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349966909424194/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "强烈的看涨情绪信号。帖子指出‘空军要吃大肉了’，预示着短期内市场将发生快速上涨或轧空行情（Short Squeeze）。虽然没有给出明确的入场和止损目标位，但趋势判断非常清晰，属于中期/短期的强势看多预期。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "强烈的看涨情绪信号。帖子指出‘空军要吃大肉了’，预示着短期内市场将发生快速上涨或轧空行情（Short Squeeze）。虽然没有给出明确的入场和止损目标位，但趋势判断非常清晰，属于中期/短期的强势看多预期。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:39:54 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349966909424194/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349966534002530": {
-        "href": "https://www.binance.com/zh-CN/square/post/349966534002530",
-        "published_at": "2026-07-29 21:48:27 北京时间",
-        "published_iso": "",
-        "time_label": "45分钟",
-        "is_pinned": false,
-        "title": "$UNI 借升级利好出货，历史暴跌剧本重演，喊圣户子已空，梭哈！ {future}(UNIUSDT)",
-        "raw": "$UNI 借升级利好出货，历史暴跌剧本重演，喊圣户子已空，梭哈！ {future}(UNIUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "45分钟",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201110/1992e2e5-4f39-4a1a-a891-fe8afefc1e59.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzM3OGQ3NWE4NjljNTQwODliNWVkNGUwMTI0YTNlMzgwLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349966534002530/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349966534002530/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "看空信号。帖子指出UNI在借升级利好出货，暗示当前上涨动能存在衰竭风险，历史暴跌剧本可能重演。分析师已明确采取做空（已空）立场，但未给出具体的入场、止盈或止损点位。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "看空信号。帖子指出UNI在借升级利好出货，暗示当前上涨动能存在衰竭风险，历史暴跌剧本可能重演。分析师已明确采取做空（已空）立场，但未给出具体的入场、止盈或止损点位。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:40:11 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349966534002530/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349965515961490": {
-        "href": "https://www.binance.com/zh-CN/square/post/349965515961490",
-        "published_at": "2026-07-29 21:44:27 北京时间",
-        "published_iso": "",
-        "time_label": "49分钟",
-        "is_pinned": false,
-        "title": "$VANRY 看跌300%！户子豁出去了，动不动看跌看多，要不我跟一手😅 {future}(VANRYUSDT)",
-        "raw": "$VANRY 看跌300%！户子豁出去了，动不动看跌看多，要不我跟一手😅 {future}(VANRYUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "49分钟",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20240812/62dd2e26-521c-4bd6-bc84-107c9b54e89d.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzllMWEyZWFlMjFkZjQyMDdiMGQ3OWIwNTdjMjUzMzNmLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2ZhMmZkY2Q2Mjc4YzQxNmViMzM5ZGFiMmVhZDI4Nzg5LmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349965515961490/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349965515961490/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349965515961490/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "VANRY情绪高度看跌，预判存在300%的剧烈下跌空间。尽管帖子提到币种波动性大（动不动看多看跌），但其表达了极强的做空倾向和交易意愿，强烈建议关注趋势向下突破或顺势做空。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "VANRY情绪高度看跌，预判存在300%的剧烈下跌空间。尽管帖子提到币种波动性大（动不动看多看跌），但其表达了极强的做空倾向和交易意愿，强烈建议关注趋势向下突破或顺势做空。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:40:31 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349965515961490/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349964532646306": {
-        "href": "https://www.binance.com/zh-CN/square/post/349964532646306",
-        "published_at": "2026-07-29 21:40:27 北京时间",
-        "published_iso": "",
-        "time_label": "53分钟",
-        "is_pinned": false,
-        "title": "$SLX 螚涨5倍？喊圣户子喊多了，跟上吃肉 {future}(SLXUSDT)",
-        "raw": "$SLX 螚涨5倍？喊圣户子喊多了，跟上吃肉 {future}(SLXUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "53分钟",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260601/85938b64-f795-4deb-b479-83edf29b7286.png",
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzYxM2E4ZWI4MDc5ZjRhZmZhYjYyNWQ2MjdjYzg5ODUwLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349964532646306/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349964532646306/img_1.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349964532646306/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "$SLX呈现极强的看涨情绪，主线预测为“螚涨5倍”。虽然帖子没有给出具体的入场、止盈或止损点位，但其高增长潜力的叙事本身构成了一个强烈的买入信号。建议结合当前K线图的突破形态和均线支撑来确认最佳入场点。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "$SLX呈现极强的看涨情绪，主线预测为“螚涨5倍”。虽然帖子没有给出具体的入场、止盈或止损点位，但其高增长潜力的叙事本身构成了一个强烈的买入信号。建议结合当前K线图的突破形态和均线支撑来确认最佳入场点。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:40:48 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349964532646306/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349931908845313": {
-        "href": "https://www.binance.com/zh-CN/square/post/349931908845313",
-        "published_at": "2026-07-29 19:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "3小时",
-        "is_pinned": false,
-        "title": "$UAI 喊圣就靠一张嘴，天天带粉丝们入坑，币安kol就是如此优秀🤣 {future}(UAIUSDT)",
-        "raw": "$UAI 喊圣就靠一张嘴，天天带粉丝们入坑，币安kol就是如此优秀🤣 {future}(UAIUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "3小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20251106/b359d66a-b649-4787-81d0-f958f7fccc8b.png",
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2VlMGJkODQ1NDAwMTRmNWE4ODcxYTdkYmI2NTc0NGUwLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzJmNjA4MWNkYzQ3MDRjZjM4M2UyOTJlZjI2ODYyOThlLmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349931908845313/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349931908845313/img_1.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349931908845313/img_2.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349931908845313/img_3.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "该帖子属于纯情绪/叙事驱动型信号。虽然没有明确的入场/出场点位，但其核心观点是$UAI的价格上涨主要靠“喊圣”和KOL炒作（即市场心理推动），而非基本面支撑。这暗示了当前价格可能处于过度乐观或高波动状态，适合采用趋势跟踪或短线反手策略。投资者应警惕FOMO情绪下的快速回调风险。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "该帖子属于纯情绪/叙事驱动型信号。虽然没有明确的入场/出场点位，但其核心观点是$UAI的价格上涨主要靠“喊圣”和KOL炒作（即市场心理推动），而非基本面支撑。这暗示了当前价格可能处于过度乐观或高波动状态，适合采用趋势跟踪或短线反手策略。投资者应警惕FOMO情绪下的快速回调风险。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:41:12 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349931908845313/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349930545849601": {
-        "href": "https://www.binance.com/zh-CN/square/post/349930545849601",
-        "published_at": "2026-07-29 19:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "3小时",
-        "is_pinned": false,
-        "title": "$SOON 还能再跌20%？户子言之凿凿要跌20%，他又要拷打狗庄了吗😅 {future}(SOONUSDT)",
-        "raw": "$SOON 还能再跌20%？户子言之凿凿要跌20%，他又要拷打狗庄了吗😅 {future}(SOONUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "3小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250702/67f28db2-8069-4b05-bf63-7e71e65b57a6.png",
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzkxMTNhOTFmMjdhODQwNzVhMzA2MjZhZmZjMTkzNTA5LmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349930545849601/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349930545849601/img_1.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349930545849601/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 4,
-        "signal_content": "SOON面临看空压力，核心观点是价格将“凿凿”下跌20%。虽然未给出明确的入场点和止损位，但该20%跌幅提供了极强的潜在目标位（TP），可作为主要的阻力/卖出参考。建议在当前高位或回调至关键支撑时考虑做空。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "SOON面临看空压力，核心观点是价格将“凿凿”下跌20%。虽然未给出明确的入场点和止损位，但该20%跌幅提供了极强的潜在目标位（TP），可作为主要的阻力/卖出参考。建议在当前高位或回调至关键支撑时考虑做空。",
-          "star": 4
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:41:31 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349930545849601/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349929504311426": {
-        "href": "https://www.binance.com/zh-CN/square/post/349929504311426",
-        "published_at": "2026-07-29 19:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "3小时",
-        "is_pinned": false,
-        "title": "$COTI 15分钟30亿！！喊圣hu子又在喊人上车了🤣，跟上吃肉了 {future}(COTIUSDT)",
-        "raw": "$COTI 15分钟30亿！！喊圣hu子又在喊人上车了🤣，跟上吃肉了 {future}(COTIUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "3小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20220329/06563581-ac97-4d7e-a500-cf85fa8cc2cc.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzQ4ZGU2N2M1ZWU4MjQ1MmVhMDViNzkzM2U3MjRkOWUwLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Q5OTQzZGRlNjMyNzRhNGFhMjA2ZTc1Yjg1YWEyYWRjLmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349929504311426/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349929504311426/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349929504311426/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 4,
-        "signal_content": "强烈的看涨信号。帖子明确提及15分钟时间周期和30亿的巨大交易量（或关注度），这表明当前市场存在极强的买入动能和追涨需求。虽然没有给出具体的点位，但其爆发性的数据已提供了强大的技术支撑，建议立刻跟进做多。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "强烈的看涨信号。帖子明确提及15分钟时间周期和30亿的巨大交易量（或关注度），这表明当前市场存在极强的买入动能和追涨需求。虽然没有给出具体的点位，但其爆发性的数据已提供了强大的技术支撑，建议立刻跟进做多。",
-          "star": 4
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:41:51 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349929504311426/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349928172410226": {
-        "href": "https://www.binance.com/zh-CN/square/post/349928172410226",
-        "published_at": "2026-07-29 19:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "3小时",
-        "is_pinned": false,
-        "title": "$SNDK 2000万！不是2千，不是2万，而是整整2000万😅大家认为这巨鲸会被狗庄吃掉吗？ {future}(SNDKUSDT)",
-        "raw": "$SNDK 2000万！不是2千，不是2万，而是整整2000万😅大家认为这巨鲸会被狗庄吃掉吗？ {future}(SNDKUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "3小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260407/ab669219-fa31-4444-937c-28598d0e24c9.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzhlODAwYWM3ZTVjNzRlMjdiM2MzYjNmOTZiYTE1YjhlLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349928172410226/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349928172410226/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "看涨信号。核心逻辑是巨鲸持有高达2000万USDT的SNDK代币，这代表了极强的市场信心和大规模资金的持续流入迹象。虽然帖子没有给出明确的入场/止盈点位，但如此庞大的持仓往往预示着庄家（狗庄）会推动价格向上突破或拉升，值得关注后续技术形态确认。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "看涨信号。核心逻辑是巨鲸持有高达2000万USDT的SNDK代币，这代表了极强的市场信心和大规模资金的持续流入迹象。虽然帖子没有给出明确的入场/止盈点位，但如此庞大的持仓往往预示着庄家（狗庄）会推动价格向上突破或拉升，值得关注后续技术形态确认。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:42:10 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349928172410226/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349927585555137": {
-        "href": "https://www.binance.com/zh-CN/square/post/349927585555137",
-        "published_at": "2026-07-29 19:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "3小时",
-        "is_pinned": false,
-        "title": "$ZIL 又是又吃既拿，第一喊圣户子又来了，还是神机妙算，兄弟们怎么看？ {future}(ZILUSDT)",
-        "raw": "$ZIL 又是又吃既拿，第一喊圣户子又来了，还是神机妙算，兄弟们怎么看？ {future}(ZILUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "3小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/images/20191212/80289eb9-ed6f-47ef-867e-8de7c485bcbc.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2VjMDc5ZTM1OTkwYjQyMjlhMDFjZDI4ZjRkMjI0OWVmLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349927585555137/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349927585555137/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "该帖子是典型的强势看涨情绪信号。核心逻辑在于ZIL目前正在呈现“吃既拿”的强劲上行趋势，显示出强大的买入力和趋势延续性。虽然未给出具体的入场点、止盈点或止损点，但已明确确认了看多方向，建议关注近期支撑位的回踩做多机会。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "该帖子是典型的强势看涨情绪信号。核心逻辑在于ZIL目前正在呈现“吃既拿”的强劲上行趋势，显示出强大的买入力和趋势延续性。虽然未给出具体的入场点、止盈点或止损点，但已明确确认了看多方向，建议关注近期支撑位的回踩做多机会。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:42:28 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349927585555137/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349920905326994": {
-        "href": "https://www.binance.com/zh-CN/square/post/349920905326994",
-        "published_at": "2026-07-29 19:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "3小时",
-        "is_pinned": false,
-        "title": "$UB 山寨币还有90亿市值，它配吗😅，跟着喊圣梭哈了 {future}(UBUSDT)",
-        "raw": "$UB 山寨币还有90亿市值，它配吗😅，跟着喊圣梭哈了 {future}(UBUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "3小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20250912/b99a8d3d-694e-4a19-b3e2-d5953b77efaa.png",
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2ZhMGQyYzM3NzBjNzQyMTM5ZTUwM2UyMWVmM2ZjMDUxLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzY5NjY1OGFjNzRkMDRhYWI5YTFmZDNmOGE3ZTg5ODE4LmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349920905326994/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349920905326994/img_1.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349920905326994/img_2.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349920905326994/img_3.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "UB币基于其90亿市值的体量具备看涨逻辑，表明市场对该代币的认可度和增长预期较高。发帖人已明确表达了极端的看多情绪（“圣梭哈”），预示着强劲的上涨趋势，但帖子中缺乏具体的入场位、止盈位或止损位的技术支撑/压力参考。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "UB币基于其90亿市值的体量具备看涨逻辑，表明市场对该代币的认可度和增长预期较高。发帖人已明确表达了极端的看多情绪（“圣梭哈”），预示着强劲的上涨趋势，但帖子中缺乏具体的入场位、止盈位或止损位的技术支撑/压力参考。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:42:47 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349920905326994/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349919839833682": {
-        "href": "https://www.binance.com/zh-CN/square/post/349919839833682",
-        "published_at": "2026-07-29 19:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "3小时",
-        "is_pinned": false,
-        "title": "$SKHYNIX 韩国政府救市来了！！今晚大爆拉！ {future}(SKHYNIXUSDT)",
-        "raw": "$SKHYNIX 韩国政府救市来了！！今晚大爆拉！ {future}(SKHYNIXUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "3小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260602/69707ef3-2474-47fb-a757-a85f1d3f9d52.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzI4Zjg1MDg2YThmZDQyYmJhZTNmMjY4NzEwNGNiNDRmLnBuZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349919839833682/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349919839833682/img_1.png"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "这是一个强烈的看涨信号。核心逻辑在于韩国政府介入救市的重大利好基本面驱动，预期将在今晚引发大爆拉行情。虽然帖子中未给出具体的入场/止盈点位，但宏观催化剂非常明确，趋势判断强烈。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "这是一个强烈的看涨信号。核心逻辑在于韩国政府介入救市的重大利好基本面驱动，预期将在今晚引发大爆拉行情。虽然帖子中未给出具体的入场/止盈点位，但宏观催化剂非常明确，趋势判断强烈。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:43:05 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349919839833682/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349877580262114": {
-        "href": "https://www.binance.com/zh-CN/square/post/349877580262114",
-        "published_at": "2026-07-29 16:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "6小时",
-        "is_pinned": false,
-        "title": "$SKHYNIX 挖槽，币安第一kol喊圣又得内幕消息了，他说海力士要大涨，跟上就是捡钱啊😅 {future}(SKHYNIXUSDT)",
-        "raw": "$SKHYNIX 挖槽，币安第一kol喊圣又得内幕消息了，他说海力士要大涨，跟上就是捡钱啊😅 {future}(SKHYNIXUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "6小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260602/69707ef3-2474-47fb-a757-a85f1d3f9d52.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Q4MzRlYzgxNGNkMTQ1MGViNjZkMWM2YjBkYTY3ZmZmLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349877580262114/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349877580262114/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "强看涨信号。核心理由是币安 KOL 获得了关于海力士（Hynix）大涨的内幕消息，这意味着 $SKHYNIX 有强大的基本面催化剂支撑。\n\n虽然文本没有给出明确的入场、止盈或止损位，但趋势判断非常明确——强烈看涨（“要大涨”、“捡钱”）。因此，信号强度属于有趋势预判但点位模糊的级别。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "强看涨信号。核心理由是币安 KOL 获得了关于海力士（Hynix）大涨的内幕消息，这意味着 $SKHYNIX 有强大的基本面催化剂支撑。\n\n虽然文本没有给出明确的入场、止盈或止损位，但趋势判断非常明确——强烈看涨（“要大涨”、“捡钱”）。因此，信号强度属于有趋势预判但点位模糊的级别。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:43:24 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349877580262114/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349876713720433": {
-        "href": "https://www.binance.com/zh-CN/square/post/349876713720433",
-        "published_at": "2026-07-29 16:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "6小时",
-        "is_pinned": false,
-        "title": "$SAMSUNG 韩三星电子资费收这么高哦，那不得吃几口😅 {future}(SAMSUNGUSDT)",
-        "raw": "$SAMSUNG 韩三星电子资费收这么高哦，那不得吃几口😅 {future}(SAMSUNGUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "6小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260602/e0d70e1c-21b6-47eb-8272-65edb18e5705.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzUzZDc5NWY4MDUzYjQ4MTdhNTdmMzRmNmVkZmI1MzBhLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349876713720433/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349876713720433/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "该帖属于明显的看涨情绪信号，理由是韩三星电子资产价格处于高位，暗示市场需求强劲且上涨动能旺盛。虽然没有给出明确的入场、止盈和止损点位，但其趋势判断（预期会继续“吃口”）偏向强势做多。建议关注回调至关键支撑位的买入机会。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "该帖属于明显的看涨情绪信号，理由是韩三星电子资产价格处于高位，暗示市场需求强劲且上涨动能旺盛。虽然没有给出明确的入场、止盈和止损点位，但其趋势判断（预期会继续“吃口”）偏向强势做多。建议关注回调至关键支撑位的买入机会。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:43:43 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349876713720433/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349862389899873": {
-        "href": "https://www.binance.com/zh-CN/square/post/349862389899873",
-        "published_at": "2026-07-29 15:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "7小时",
-        "is_pinned": false,
-        "title": "$EUL 空，户子又喊大家空了😅，无脑跟呗 {future}(EULUSDT)",
-        "raw": "$EUL 空，户子又喊大家空了😅，无脑跟呗 {future}(EULUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "7小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20251013/17ef1a91-3084-4bc7-8f53-00333bf25d88.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzcyZmZhMmM0NTVkOTRlMmZiMDk0MTM2NjczNzEyZGMyLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Y0MWU3ZGM5OTZhMDRiY2I4MmIxNTAzY2NmNTIyNjBjLmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349862389899873/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349862389899873/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349862389899873/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "文本明确给出EUL的看空信号（做空）。理由是引用了大型账户的观点，暗示有机构级别的抛压和强烈的趋势判断。虽然没有提供具体的入场点、止盈或止损价格位，但方向性非常清晰。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "文本明确给出EUL的看空信号（做空）。理由是引用了大型账户的观点，暗示有机构级别的抛压和强烈的趋势判断。虽然没有提供具体的入场点、止盈或止损价格位，但方向性非常清晰。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:44:00 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349862389899873/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349860935985745": {
-        "href": "https://www.binance.com/zh-CN/square/post/349860935985745",
-        "published_at": "2026-07-29 15:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "7小时",
-        "is_pinned": false,
-        "title": "$KAITO 要跌到0.5？喊圣户子说要暴跌了😄，真的假的哦，那我跟上？ {future}(KAITOUSDT)",
-        "raw": "$KAITO 要跌到0.5？喊圣户子说要暴跌了😄，真的假的哦，那我跟上？ {future}(KAITOUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "7小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250219/5f08dfc2-16a1-49c4-a59b-233f3f27c06d.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzAyZTE4Y2FmYjhjODQwYjdhNzdhMjc1YmM0MzVhMGVjLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzdkNjExYmRjNzVjZDQxN2E5NDE1ZDA3ODZjOTlhNDY0LmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349860935985745/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349860935985745/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349860935985745/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 4,
-        "signal_content": "该帖子情绪偏空，明确预测 $KAITO 将暴跌。虽然没有给出完整的交易策略（入场/止盈/止损），但给出了一个非常清晰的潜在支撑位和目标位：0.5。这为做空提供了一个强烈的参考点。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "该帖子情绪偏空，明确预测 $KAITO 将暴跌。虽然没有给出完整的交易策略（入场/止盈/止损），但给出了一个非常清晰的潜在支撑位和目标位：0.5。这为做空提供了一个强烈的参考点。",
-          "star": 4
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:44:18 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349860935985745/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349859490640482": {
-        "href": "https://www.binance.com/zh-CN/square/post/349859490640482",
-        "published_at": "2026-07-29 14:33:27 北京时间",
+      "https://www.binance.com/zh-CN/square/post/351964665850402": {
+        "href": "https://www.binance.com/zh-CN/square/post/351964665850402",
+        "published_at": "2026-08-04 13:56:00 北京时间",
         "published_iso": "",
         "time_label": "8小时",
         "is_pinned": false,
-        "title": "$SNDK 好家伙，户子又喊多了，不会又反指吧😅，别搞别搞 {future}(SNDKUSDT)",
-        "raw": "$SNDK 好家伙，户子又喊多了，不会又反指吧😅，别搞别搞 {future}(SNDKUSDT)",
+        "title": "$SPCX 惊天大利好！SpaceX猎鹰9号发射成功，盘面要大涨一波了！ {future}(SPCXUSDT)",
+        "raw": "$SPCX 惊天大利好！SpaceX猎鹰9号发射成功，盘面要大涨一波了！ {future}(SPCXUSDT)",
         "author": "square-creator-1d148bbce7461",
         "author_slug": "square-creator-1d148bbce7461",
         "time": "8小时",
         "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260407/ab669219-fa31-4444-937c-28598d0e24c9.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzMzNTgxYzc3MTEzNzRjNDNhOWRmMTViOGFlNDcwNzM0LmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349859490640482/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349859490640482/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "该帖虽然没有给出具体的入场点位，但提供了明显的看空预警。核心逻辑是市场情绪过于亢奋（“户子又喊多了”），暗示短期内回调风险高，交易者应警惕可能出现的快速反指或获利回吐。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "该帖虽然没有给出具体的入场点位，但提供了明显的看空预警。核心逻辑是市场情绪过于亢奋（“户子又喊多了”），暗示短期内回调风险高，交易者应警惕可能出现的快速反指或获利回吐。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:44:34 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349859490640482/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349858520803922": {
-        "href": "https://www.binance.com/zh-CN/square/post/349858520803922",
-        "published_at": "2026-07-29 14:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "8小时",
-        "is_pinned": false,
-        "title": "$DEXE 速速多，广场喊圣户子已经梭哈了，大家跟上起飞😄 {future}(DEXEUSDT)",
-        "raw": "$DEXE 速速多，广场喊圣户子已经梭哈了，大家跟上起飞😄 {future}(DEXEUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "8小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20231023/55f9d432-a1a8-48e3-b5c4-2ae16eb89679.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2M1YWNhYjlkYjdmNDRkYWJhZjE2OTA1Y2ZkNThjZmFmLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzE1YjI4NDhkZTYyNDQ4NGI4OGFlZDBmYzczMGFkYjQyLmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349858520803922/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349858520803922/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349858520803922/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "DEXE出现强烈的看涨情绪，基于“圣户子”已梭哈的社媒共识。该信号属于趋势预判型（速速多/起飞），表明短期内有上攻动能和抛压支撑。由于未提供具体的入场、止盈或止损价格位，因此信号强度为3级。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "DEXE出现强烈的看涨情绪，基于“圣户子”已梭哈的社媒共识。该信号属于趋势预判型（速速多/起飞），表明短期内有上攻动能和抛压支撑。由于未提供具体的入场、止盈或止损价格位，因此信号强度为3级。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:44:54 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349858520803922/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349857901605713": {
-        "href": "https://www.binance.com/zh-CN/square/post/349857901605713",
-        "published_at": "2026-07-29 14:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "8小时",
-        "is_pinned": false,
-        "title": "$WLD 人人都知道要跌的，喊圣就又跑出来喊了😅，大家都吃麻了 {future}(WLDUSDT)",
-        "raw": "$WLD 人人都知道要跌的，喊圣就又跑出来喊了😅，大家都吃麻了 {future}(WLDUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "8小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20240812/5e63bd55-8a04-4666-baf8-84a5a7048c4c.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2M0ZjU2ZDZlNTEzNjRlMDA4ZTg0ZTA0M2RlNGZkNmMxLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzU3MDNhYmE5ZTU0NjRiOWU4ZjY1ZmI1ZTc3M2UyZjYyLmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349857901605713/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349857901605713/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349857901605713/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "这是一个情绪驱动型的看空信号。帖子明确指出市场共识认为$WLD将下跌（人人都知道要跌），尽管有部分喊涨的声音出现，但整体偏弱且趋势向下。由于没有提供具体的K线支撑/阻力位作为参考，因此无法给出精确点位，建议关注价格回调至关键均线或前期低点的做空机会。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "这是一个情绪驱动型的看空信号。帖子明确指出市场共识认为$WLD将下跌（人人都知道要跌），尽管有部分喊涨的声音出现，但整体偏弱且趋势向下。由于没有提供具体的K线支撑/阻力位作为参考，因此无法给出精确点位，建议关注价格回调至关键均线或前期低点的做空机会。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:45:14 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349857901605713/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349837830644578": {
-        "href": "https://www.binance.com/zh-CN/square/post/349837830644578",
-        "published_at": "2026-07-29 13:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "9小时",
-        "is_pinned": false,
-        "title": "$BEAT 还能涨？😄喊圣户子说还能再涨30%，大家怎么看？ {future}(BEATUSDT)",
-        "raw": "$BEAT 还能涨？😄喊圣户子说还能再涨30%，大家怎么看？ {future}(BEATUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "9小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20251112/d9257a96-a187-43a1-8dac-072bfbd645f6.png",
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzRkYjQ5M2RlMjYyMTQ3ZjliY2NkMGJkZGRmNzY1NDRmLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzNiZjE5MDdiZjkwNzRmMmU5OWYxOTE5MDk3MDQ5MjJjLmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349837830644578/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349837830644578/img_1.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349837830644578/img_2.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349837830644578/img_3.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 4,
-        "signal_content": "这是一个强烈的看涨信号。尽管没有K线截图进行技术面验证，但帖子明确指出有外部预测（喊圣户子）认为$BEAT还能再涨30%。这提供了非常清晰的盈利目标位作为参考，属于具有明确方向和目标的策略。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "这是一个强烈的看涨信号。尽管没有K线截图进行技术面验证，但帖子明确指出有外部预测（喊圣户子）认为$BEAT还能再涨30%。这提供了非常清晰的盈利目标位作为参考，属于具有明确方向和目标的策略。",
-          "star": 4
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:45:30 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349837830644578/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349837049028146": {
-        "href": "https://www.binance.com/zh-CN/square/post/349837049028146",
-        "published_at": "2026-07-29 13:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "9小时",
-        "is_pinned": false,
-        "title": "$SKHYNIX 海力士救市来了，多军们要得救了，梭哈 {future}(SKHYNIXUSDT)",
-        "raw": "$SKHYNIX 海力士救市来了，多军们要得救了，梭哈 {future}(SKHYNIXUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "9小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260602/69707ef3-2474-47fb-a757-a85f1d3f9d52.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzYyZWVjYTVjYzdhODQyOTBhZDM5NTQ1YWMxNTRiY2ZiLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349837049028146/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349837049028146/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "这是一个极度看涨的信号（Bullish）。核心逻辑在于基本面驱动，即“海力士救市”的催化剂预期将支撑SKHYNIX向上爆发。虽然帖子没有给出具体的入场、止盈和止损点位，但“梭哈”的强调表明了多方极高的信心和强劲的上行趋势判断。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "这是一个极度看涨的信号（Bullish）。核心逻辑在于基本面驱动，即“海力士救市”的催化剂预期将支撑SKHYNIX向上爆发。虽然帖子没有给出具体的入场、止盈和止损点位，但“梭哈”的强调表明了多方极高的信心和强劲的上行趋势判断。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:45:47 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349837049028146/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349836148312017": {
-        "href": "https://www.binance.com/zh-CN/square/post/349836148312017",
-        "published_at": "2026-07-29 13:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "9小时",
-        "is_pinned": false,
-        "title": "$CL 原油不得起飞啊，币安著名kol户子又发话了，原油不得应声大涨一波😏 {future}(CLUSDT)",
-        "raw": "$CL 原油不得起飞啊，币安著名kol户子又发话了，原油不得应声大涨一波😏 {future}(CLUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "9小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260331/b68bd3dd-adec-4eff-86d5-27ee57277605.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2EzZTczMTM3MDEwZjQ5YWM5OTczM2NmMWIwY2MyNGRiLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzRlNzI5MzY1MmViMjQ4N2VhOWU2OTQxMmRiOTFlYjY2LmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349836148312017/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349836148312017/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349836148312017/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "看涨信号。该帖子基于'著名KOL户子'的强力喊单和情绪驱动，判断原油（$CL）即将迎来一波大涨行情。虽然缺乏具体的入场/止损点位支撑，但趋势预判非常明确。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "看涨信号。该帖子基于'著名KOL户子'的强力喊单和情绪驱动，判断原油（$CL）即将迎来一波大涨行情。虽然缺乏具体的入场/止损点位支撑，但趋势预判非常明确。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:46:04 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349836148312017/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349835431615170": {
-        "href": "https://www.binance.com/zh-CN/square/post/349835431615170",
-        "published_at": "2026-07-29 13:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "9小时",
-        "is_pinned": false,
-        "title": "$OPEN 速速多，广场喊圣又喊单了，跟上就是财富自由😅 {future}(OPENUSDT)",
-        "raw": "$OPEN 速速多，广场喊圣又喊单了，跟上就是财富自由😅 {future}(OPENUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "9小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250905/e4bcb6e9-7714-4c5a-9523-d24928a6c768.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzUzNTM5N2QzOTg0MzRmMDdhMGFjNDFlNThmNTgzZGUxLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349835431615170/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349835431615170/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "$OPEN 给出明确的看涨信号（速速多）。文本虽然没有提供具体的支撑、阻力位或入场/离场点，但“广场喊圣又喊单了”的表述表明当前市场情绪极度乐观，趋势判断为强烈的上升势头。这是一个典型的基于情绪和趋势预判的买入信号。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "$OPEN 给出明确的看涨信号（速速多）。文本虽然没有提供具体的支撑、阻力位或入场/离场点，但“广场喊圣又喊单了”的表述表明当前市场情绪极度乐观，趋势判断为强烈的上升势头。这是一个典型的基于情绪和趋势预判的买入信号。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:46:25 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349835431615170/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349834357847601": {
-        "href": "https://www.binance.com/zh-CN/square/post/349834357847601",
-        "published_at": "2026-07-29 13:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "9小时",
-        "is_pinned": false,
-        "title": "$HYPE 什么，户子又要拷打狗庄了吗😄，他不是喊空吗，怎么又变方向了😅 {future}(HYPEUSDT)",
-        "raw": "$HYPE 什么，户子又要拷打狗庄了吗😄，他不是喊空吗，怎么又变方向了😅 {future}(HYPEUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "9小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20250717/15bceffe-9306-414d-9716-21072247fd3f.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzRiYzhmOGM1NTA1NzQ3ZDViMzA5YTZjY2M5OGVjOThhLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349834357847601/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349834357847601/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "帖子观察到HYPE币种的走势发生了方向变化（此前喊空，现变盘）。这暗示着潜在的趋势反转或强势回调/突破信号。虽然没有给出具体价格位，但这种“改变方向”本身就是重要的技术面观测点。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "帖子观察到HYPE币种的走势发生了方向变化（此前喊空，现变盘）。这暗示着潜在的趋势反转或强势回调/突破信号。虽然没有给出具体价格位，但这种“改变方向”本身就是重要的技术面观测点。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:46:41 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349834357847601/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349833233581569": {
-        "href": "https://www.binance.com/zh-CN/square/post/349833233581569",
-        "published_at": "2026-07-29 13:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "9小时",
-        "is_pinned": false,
-        "title": "$AKE 冲！喊圣户子又来教唆粉丝入坑了，那不得跟上吃肉 {future}(AKEUSDT)",
-        "raw": "$AKE 冲！喊圣户子又来教唆粉丝入坑了，那不得跟上吃肉 {future}(AKEUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "9小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20250926/fbf1eabf-3c2a-4a0a-a247-5317de9e5e79.png",
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2IyOWJlZjMwYjg5MjRhZjM4NDBmYTYxY2VjOTQyMDE1LmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2NlNmVkYmFjMzgzMTQ4N2VhOWQxNDQ2ODk1ZDQ1NDMzLmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349833233581569/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349833233581569/img_1.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349833233581569/img_2.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349833233581569/img_3.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "AKE极度看涨，属于情绪驱动型信号。核心逻辑是跟随市场领头羊（圣户子）的趋势和资金流入，预期价格将迎来一波强势拉升（'冲'），目标是快速获利 ('吃肉')。由于缺乏K线图表验证以及具体的支撑/压力位点位设定，目前为方向判断为主。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "AKE极度看涨，属于情绪驱动型信号。核心逻辑是跟随市场领头羊（圣户子）的趋势和资金流入，预期价格将迎来一波强势拉升（'冲'），目标是快速获利 ('吃肉')。由于缺乏K线图表验证以及具体的支撑/压力位点位设定，目前为方向判断为主。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:47:02 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349833233581569/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349831929450850": {
-        "href": "https://www.binance.com/zh-CN/square/post/349831929450850",
-        "published_at": "2026-07-29 13:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "9小时",
-        "is_pinned": false,
-        "title": "$KORU 韩股要归零了，梭哈! {future}(KORUUSDT)",
-        "raw": "$KORU 韩股要归零了，梭哈! {future}(KORUUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "9小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260629/1a331d8c-ca14-4254-b933-43e42cabf187.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzdmYzMyOTE5NzM3YjRjZTdiODMzNzVkZGNkMjFlMzI0LmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349831929450850/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349831929450850/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "极度看多信号。帖子情绪非常强烈，预测KORU将迎来暴涨（“归零”）。虽然没有提供具体的入场、止盈或止损点位，且缺乏 K 线图的技术指标支撑，但其‘梭哈’的呼吁表明了对强劲上行趋势的高度确定性。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "极度看多信号。帖子情绪非常强烈，预测KORU将迎来暴涨（“归零”）。虽然没有提供具体的入场、止盈或止损点位，且缺乏 K 线图的技术指标支撑，但其‘梭哈’的呼吁表明了对强劲上行趋势的高度确定性。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:47:21 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349831929450850/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349814752084849": {
-        "href": "https://www.binance.com/zh-CN/square/post/349814752084849",
-        "published_at": "2026-07-29 11:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "11小时",
-        "is_pinned": false,
-        "title": "$BANK 一小时暴跌25%，喊圣户子又一次完美带粉丝入坑🤣，跟他的粉丝们有福了😁 {future}(BANKUSDT)",
-        "raw": "$BANK 一小时暴跌25%，喊圣户子又一次完美带粉丝入坑🤣，跟他的粉丝们有福了😁 {future}(BANKUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "11小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20251113/35ce0395-0c9e-449d-9d98-7d7a0188e4ac.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzU5M2RiZWE1ZWE3YzRmNDViYzU1ODlkYTNhNTVmMjk4LmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349814752084849/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349814752084849/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "看空信号明显。$BANK在极短的时间内（一小时）暴跌了25%，这本身就是一个非常强烈的负面动量信号，表明市场抛售压力极大。尽管帖子未给出具体的入场/止盈点位，但其趋势判断明确：短期内大概率会延续下跌趋势。这是一个基于事件的强势看空信号。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "看空信号明显。$BANK在极短的时间内（一小时）暴跌了25%，这本身就是一个非常强烈的负面动量信号，表明市场抛售压力极大。尽管帖子未给出具体的入场/止盈点位，但其趋势判断明确：短期内大概率会延续下跌趋势。这是一个基于事件的强势看空信号。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:47:42 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349814752084849/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349813181650225": {
-        "href": "https://www.binance.com/zh-CN/square/post/349813181650225",
-        "published_at": "2026-07-29 11:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "11小时",
-        "is_pinned": false,
-        "title": "$ON 又是追涨杀跌，喊圣户子一喊多，马上就触发反指了🤣，跟他反着买不得月入千万 {future}(ONUSDT)",
-        "raw": "$ON 又是追涨杀跌，喊圣户子一喊多，马上就触发反指了🤣，跟他反着买不得月入千万 {future}(ONUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "11小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20251022/36f1623c-ad7c-48eb-9905-3ec22e628223.png",
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzdjZDk5OGRlNWYxNDRlNDlhOTg5ODI1MGU5ZjdhNTdlLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349813181650225/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349813181650225/img_1.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349813181650225/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "观察到 $ON 币种处于典型的追涨杀跌阶段，市场情绪过于偏向看多（喊圣户子一喊多）。交易员预判当前上涨动能已达顶峰，即将触发反指信号。核心逻辑是逆势操作（做空或超买时逢高减仓），等待回调/反转机会。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "观察到 $ON 币种处于典型的追涨杀跌阶段，市场情绪过于偏向看多（喊圣户子一喊多）。交易员预判当前上涨动能已达顶峰，即将触发反指信号。核心逻辑是逆势操作（做空或超买时逢高减仓），等待回调/反转机会。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:48:00 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349813181650225/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349812545496577": {
-        "href": "https://www.binance.com/zh-CN/square/post/349812545496577",
-        "published_at": "2026-07-29 11:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "11小时",
-        "is_pinned": false,
-        "title": "$SNDK 第一kol喊圣出手了，这次他螚蒙对吗🤣？ {future}(SNDKUSDT)",
-        "raw": "$SNDK 第一kol喊圣出手了，这次他螚蒙对吗🤣？ {future}(SNDKUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "11小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260407/ab669219-fa31-4444-937c-28598d0e24c9.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzY3YjBkOWMxNzNlYTQxOTk5YTM1MzBhMzYxMzAyYTRlLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2EyMGEzODE2OTZmZDRjZmViYmVlYmUxMWQwMDFjZDU5LmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349812545496577/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349812545496577/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349812545496577/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "这是一个基于“KOL喊单”的验证性信号，虽然文本中未给出明确的入场/止盈点位，但它强烈暗示了市场对SNDK看涨的趋势。由于帖子本身是提问（“这次他螚蒙对吗？”），需要结合K线图确认当前价格是否已经成功突破关键阻力位或正在回踩支撑。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "这是一个基于“KOL喊单”的验证性信号，虽然文本中未给出明确的入场/止盈点位，但它强烈暗示了市场对SNDK看涨的趋势。由于帖子本身是提问（“这次他螚蒙对吗？”），需要结合K线图确认当前价格是否已经成功突破关键阻力位或正在回踩支撑。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:48:17 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349812545496577/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349811600430530": {
-        "href": "https://www.binance.com/zh-CN/square/post/349811600430530",
-        "published_at": "2026-07-29 11:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "11小时",
-        "is_pinned": false,
-        "title": "$MU 昨晚他还梭哈空，现在又抄底多了，喊圣户子怎么随便乱喊😅，蒙对了就大吹特吹🤣 {future}(MUUSDT)",
-        "raw": "$MU 昨晚他还梭哈空，现在又抄底多了，喊圣户子怎么随便乱喊😅，蒙对了就大吹特吹🤣 {future}(MUUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "11小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260407/cd4f6a01-c109-497c-ad35-1202cacfa795.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2MxMzZlYzU0ZjA0NzQyNjg4NjNlZDdkZWMxODBjNWI5LmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349811600430530/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349811600430530/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "$MU 交易员的持仓切换是核心信号：从昨天的“梭哈空”转变为现在的“抄底多”，这强烈暗示了看涨趋势的确认或潜在的底部反转。虽然没有给出明确的点位，但预设的交易方向是做多（买入回调）。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "$MU 交易员的持仓切换是核心信号：从昨天的“梭哈空”转变为现在的“抄底多”，这强烈暗示了看涨趋势的确认或潜在的底部反转。虽然没有给出明确的点位，但预设的交易方向是做多（买入回调）。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:48:35 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349811600430530/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349810749637265": {
-        "href": "https://www.binance.com/zh-CN/square/post/349810749637265",
-        "published_at": "2026-07-29 11:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "11小时",
-        "is_pinned": false,
-        "title": "$SKHYNIX 笑死了，广场第一kol户子又反指了，只要他喊多，立马就暴跌🤣。这就是币安的kol现状 {future}(SKHYNIXUSDT)",
-        "raw": "$SKHYNIX 笑死了，广场第一kol户子又反指了，只要他喊多，立马就暴跌🤣。这就是币安的kol现状 {future}(SKHYNIXUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "11小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260602/69707ef3-2474-47fb-a757-a85f1d3f9d52.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2RmZjkwYWQ0MGUxZjQ1MGVhOTVkNDZlNmM2YWMzZmQxLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzI0Yjc3NTE5NTJkOTRmYjA5YzQzZTU0NGNiNDZiY2M3LmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349810749637265/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349810749637265/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349810749637265/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "市场存在KOL过度炒作的疑虑，暗示当前趋势（或短期上涨）可能即将回调甚至暴跌。该帖子倾向于看空/做空操作，等待价格因情绪驱动的回撤。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "市场存在KOL过度炒作的疑虑，暗示当前趋势（或短期上涨）可能即将回调甚至暴跌。该帖子倾向于看空/做空操作，等待价格因情绪驱动的回撤。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:48:54 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349810749637265/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349809711192018": {
-        "href": "https://www.binance.com/zh-CN/square/post/349809711192018",
-        "published_at": "2026-07-29 11:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "11小时",
-        "is_pinned": false,
-        "title": "$SOXL 又是吃麻，喊圣户子又又喊多了😅，那跟上发财 {future}(SOXLUSDT)",
-        "raw": "$SOXL 又是吃麻，喊圣户子又又喊多了😅，那跟上发财 {future}(SOXLUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "11小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260520/79ec049e-cb6c-4f6c-9617-5ce130a5b8d2.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzg4OTU2Y2EzYThmYjRjMWQ5ZDUxZTE1MTc3MmI4Nzc4LmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349809711192018/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349809711192018/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 1,
-        "signal_content": "看涨信号。帖子表达了极度乐观的市场情绪（“吃麻”、“喊多了”），暗示SOXL处于强劲的上涨趋势中，建议跟随做多。但文本未提供具体的入场点、支撑位或阻力位作为技术验证，因此信号强度依赖于市场热度。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "看涨信号。帖子表达了极度乐观的市场情绪（“吃麻”、“喊多了”），暗示SOXL处于强劲的上涨趋势中，建议跟随做多。但文本未提供具体的入场点、支撑位或阻力位作为技术验证，因此信号强度依赖于市场热度。",
-          "star": 1
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:49:12 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349809711192018/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349655808784866": {
-        "href": "https://www.binance.com/zh-CN/square/post/349655808784866",
-        "published_at": "2026-07-29 01:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "21小时",
-        "is_pinned": false,
-        "title": "$KORU 暴力起飞？广场第一kol又又来喊多了😅，跟上那不是财富自由？ {future}(KORUUSDT)",
-        "raw": "$KORU 暴力起飞？广场第一kol又又来喊多了😅，跟上那不是财富自由？ {future}(KORUUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "21小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260629/1a331d8c-ca14-4254-b933-43e42cabf187.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzlmZmMzMWQ5YzBmNjQ5ZTg5YTg4NTI1MzEwMWEwNjZjLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349655808784866/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349655808784866/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 3,
-        "signal_content": "KORU情绪极度看涨，由“暴力起飞”的表达和广场第一KOL的高调喊话驱动。这属于强烈的趋势判断信号（偏多），预示着价格可能迎来一波快速上涨行情。虽然文本未提供具体的支撑/压力位作为入场参考，但其趋势强度已经达到了3星标准。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "KORU情绪极度看涨，由“暴力起飞”的表达和广场第一KOL的高调喊话驱动。这属于强烈的趋势判断信号（偏多），预示着价格可能迎来一波快速上涨行情。虽然文本未提供具体的支撑/压力位作为入场参考，但其趋势强度已经达到了3星标准。",
-          "star": 3
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:49:30 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349655808784866/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349652593361986": {
-        "href": "https://www.binance.com/zh-CN/square/post/349652593361986",
-        "published_at": "2026-07-29 00:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "22小时",
-        "is_pinned": false,
-        "title": "$BANK 来啦啊，喊圣户子一天喊这么多方向，这会是空了，蒙对了吹半天🤣 {future}(BANKUSDT)",
-        "raw": "$BANK 来啦啊，喊圣户子一天喊这么多方向，这会是空了，蒙对了吹半天🤣 {future}(BANKUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "22小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20251113/35ce0395-0c9e-449d-9d98-7d7a0188e4ac.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzI3OThiYmY5YmU4MjQwNjM4NTcwMDA0YTMyYTYyMTViLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2UxY2Y3MDc5NDFiNzQ5Nzk5ODQzYmM2ZjZlMGE5ZjkwLmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349652593361986/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349652593361986/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349652593361986/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "该帖子是一个看空信号。分析基于对市场大户（圣户子）交易行为的观察，认为其一天多次喊多单和空单表明市场处于方向选择或动能衰竭阶段，预判价格将偏向下跌趋势。\n当前为情绪驱动型信号，缺乏明确的价格位支撑（如具体的阻力/支撑位），因此信号强度中等。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "该帖子是一个看空信号。分析基于对市场大户（圣户子）交易行为的观察，认为其一天多次喊多单和空单表明市场处于方向选择或动能衰竭阶段，预判价格将偏向下跌趋势。\n当前为情绪驱动型信号，缺乏明确的价格位支撑（如具体的阻力/支撑位），因此信号强度中等。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:49:50 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349652593361986/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349649855435506": {
-        "href": "https://www.binance.com/zh-CN/square/post/349649855435506",
-        "published_at": "2026-07-29 00:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "22小时",
-        "is_pinned": false,
-        "title": "$SNDK 速速来咯，喊圣户子又又喊多了😅，那跟上吃肉了 {future}(SNDKUSDT)",
-        "raw": "$SNDK 速速来咯，喊圣户子又又喊多了😅，那跟上吃肉了 {future}(SNDKUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "22小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260407/ab669219-fa31-4444-937c-28598d0e24c9.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2QyODdlNzNiYjFiNjQ0NDM5Njc2YWQ4MmRhNGQ2OTAwLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349649855435506/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349649855435506/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 1,
-        "signal_content": "SNDK极度看涨的纯情绪帖，语气强劲地鼓励用户跟进做多（'吃肉了'）。该帖子虽然没有提供具体的支撑/阻力位或技术分析依据，但其极强的看涨信号本身就构成了一个交易触发点。由于缺乏具体的价格策略，信号强度定为最低级别。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "SNDK极度看涨的纯情绪帖，语气强劲地鼓励用户跟进做多（'吃肉了'）。该帖子虽然没有提供具体的支撑/阻力位或技术分析依据，但其极强的看涨信号本身就构成了一个交易触发点。由于缺乏具体的价格策略，信号强度定为最低级别。",
-          "star": 1
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:50:09 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349649855435506/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349646164212817": {
-        "href": "https://www.binance.com/zh-CN/square/post/349646164212817",
-        "published_at": "2026-07-29 00:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "22小时",
-        "is_pinned": false,
-        "title": "$SPCX 马斯克跌落神坛？但身家仍超7000亿美元😄 {future}(SPCXUSDT)",
-        "raw": "$SPCX 马斯克跌落神坛？但身家仍超7000亿美元😄 {future}(SPCXUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "22小时",
-        "image_urls": [
           "https://public.bnbstatic.com/image/symbol/logo/20260519/823b055a-391b-4bb4-8471-7959b28649c7.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzZiOThiNTQ0OGIxMzQyM2M5OTgyOWIwNjViMzA1NTkzLmpwZw==&level=lg"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzc3NDk1OTlhMDY0YTQ2MzVhNGUwMWNhMzY4MmE2Yjg1LmpwZw==&level=lg"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
         "square_audio_replay_url": "",
         "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349646164212817/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349646164212817/img_1.jpg"
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351964665850402/img_0.png",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351964665850402/img_1.jpg"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
         "gemini_reason": null,
         "gemini_bias_zh": "不明",
         "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "尽管帖子中缺乏明确的K线图表佐证，但从文本分析来看，该贴提供了强大的基本面支撑。内容强调了$SPCX（马斯克相关代币）虽然可能“跌落神坛”（暗示近期回调或趋势弱势），但其背后的估值和身家仍超过7000亿美元，这预示着极强的韧性和潜在的底部反弹力，倾向于看涨（做多）信号。由于缺乏具体点位，信号强度为2。",
+        "signal_star": 3,
+        "signal_content": "看涨信号。核心驱动力是重大的基本面利好——SpaceX猎鹰9号发射成功，预示着该资产短期内有强劲的上涨动力（'大涨一波'）。尽管帖子没有给出具体的支撑/压力位或交易点位，但明确的趋势判断使得信号强度达到中等。",
         "signal_raw_data": {
           "isSign": true,
-          "content": "尽管帖子中缺乏明确的K线图表佐证，但从文本分析来看，该贴提供了强大的基本面支撑。内容强调了$SPCX（马斯克相关代币）虽然可能“跌落神坛”（暗示近期回调或趋势弱势），但其背后的估值和身家仍超过7000亿美元，这预示着极强的韧性和潜在的底部反弹力，倾向于看涨（做多）信号。由于缺乏具体点位，信号强度为2。",
-          "star": 2
+          "content": "看涨信号。核心驱动力是重大的基本面利好——SpaceX猎鹰9号发射成功，预示着该资产短期内有强劲的上涨动力（'大涨一波'）。尽管帖子没有给出具体的支撑/压力位或交易点位，但明确的趋势判断使得信号强度达到中等。",
+          "star": 3
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:50:30 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349646164212817/img_0.png",
+        "signal_analyzed_at": "2026-08-04 22:01:37 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351964665850402/img_0.png",
         "signal_analyzed_ok": true
       },
-      "https://www.binance.com/zh-CN/square/post/349643833249554": {
-        "href": "https://www.binance.com/zh-CN/square/post/349643833249554",
-        "published_at": "2026-07-29 00:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "22小时",
-        "is_pinned": false,
-        "title": "$MU 老黄这是梭哈了啊😄，7500亿美元啊，好家伙，我直接好家伙！！ {future}(MUUSDT)",
-        "raw": "$MU 老黄这是梭哈了啊😄，7500亿美元啊，好家伙，我直接好家伙！！ {future}(MUUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "22小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260407/cd4f6a01-c109-497c-ad35-1202cacfa795.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2I0MDgzNDZmYjkxZTQzMGRhZmM5NGVlNzg3NjUxMTI4LmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2FkMmMyYjg5ODExMzQ0YTc5ODg5NjYxNmRhYjQ3NTA0LnBuZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349643833249554/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349643833249554/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349643833249554/img_2.png"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 4,
-        "signal_content": "极度看涨（Bullish）。核心依据是“老黄”（巨鲸）正在对MUUSDT进行750亿美元的梭哈操作，这是最强烈的资金确认信号。虽然帖子未给出具体点位，但这种级别的庄家介入预示着趋势将强势向上突破或至少延续大牛市趋势。应关注当前价格附近的做多机会。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "极度看涨（Bullish）。核心依据是“老黄”（巨鲸）正在对MUUSDT进行750亿美元的梭哈操作，这是最强烈的资金确认信号。虽然帖子未给出具体点位，但这种级别的庄家介入预示着趋势将强势向上突破或至少延续大牛市趋势。应关注当前价格附近的做多机会。",
-          "star": 4
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:50:49 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349643833249554/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349631418527042": {
-        "href": "https://www.binance.com/zh-CN/square/post/349631418527042",
-        "published_at": "2026-07-28 23:33:27 北京时间",
+      "https://www.binance.com/zh-CN/square/post/351754338997777": {
+        "href": "https://www.binance.com/zh-CN/square/post/351754338997777",
+        "published_at": "2026-08-03 22:56:00 北京时间",
         "published_iso": "",
         "time_label": "23小时",
         "is_pinned": false,
-        "title": "$SPCX 圈内第一反指非你莫属🤣，只要他一喊空大火箭立马v上去了🤣，这水平没谁了，这就是币安知名kol真实水平吗？ {future}(SPCXUSDT)",
-        "raw": "$SPCX 圈内第一反指非你莫属🤣，只要他一喊空大火箭立马v上去了🤣，这水平没谁了，这就是币安知名kol真实水平吗？ {future}(SPCXUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "23小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260519/823b055a-391b-4bb4-8471-7959b28649c7.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2IwZWZlODRmZjVhOTQ2ZjM4YTgxNmFmYTJkY2NlNGZjLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzIxYmE4YTU0ZDJhYjQxZTNhZjY5MDM2YTY1MTE1NmE5LmpwZw==&level=md"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349631418527042/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349631418527042/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349631418527042/img_2.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "这是一个基于市场行为的看涨信号（Bias）。帖子指出该知名 KOL 的“喊空”信号往往会触发强劲的买盘反弹（大火箭），这表明当前市场存在强大的多头支撑或机构抄底意愿。虽然没有给出具体的入场点位，但强烈暗示了趋势偏向上涨，可关注回调时进行做多的操作。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "这是一个基于市场行为的看涨信号（Bias）。帖子指出该知名 KOL 的“喊空”信号往往会触发强劲的买盘反弹（大火箭），这表明当前市场存在强大的多头支撑或机构抄底意愿。虽然没有给出具体的入场点位，但强烈暗示了趋势偏向上涨，可关注回调时进行做多的操作。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:51:09 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349631418527042/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349630798170817": {
-        "href": "https://www.binance.com/zh-CN/square/post/349630798170817",
-        "published_at": "2026-07-28 23:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "23小时",
-        "is_pinned": false,
-        "title": "$XAU 都知道要涨了，喊圣就又出来喊了😅，太搞笑了吧，大家觉得呢 {future}(XAUUSDT)",
-        "raw": "$XAU 都知道要涨了，喊圣就又出来喊了😅，太搞笑了吧，大家觉得呢 {future}(XAUUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "23小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20251209/cf670a44-5124-4344-a321-0ae7f8b536e9.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzRkNzFhOWJiZTAyZjQ3ZjRiZTQwODc0NWU5YzBjYjNkLmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349630798170817/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349630798170817/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "该帖子表达了对XAUUSDT（黄金）强烈的看涨情绪，认为金价必然上涨。由于缺乏具体的支撑/阻力位、均线形态或入场策略的提及，信号强度偏弱，属于纯粹的方向性判断（Bullish）。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "该帖子表达了对XAUUSDT（黄金）强烈的看涨情绪，认为金价必然上涨。由于缺乏具体的支撑/阻力位、均线形态或入场策略的提及，信号强度偏弱，属于纯粹的方向性判断（Bullish）。",
-          "star": 2
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:51:28 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349630798170817/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349629063772594": {
-        "href": "https://www.binance.com/zh-CN/square/post/349629063772594",
-        "published_at": "2026-07-28 23:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "23小时",
-        "is_pinned": false,
-        "title": "$SNDK 震惊！广场第一喊圣户子又出手了😅，又是动动嘴皮子梭哈多，太有趣了🤣 {future}(SNDKUSDT)",
-        "raw": "$SNDK 震惊！广场第一喊圣户子又出手了😅，又是动动嘴皮子梭哈多，太有趣了🤣 {future}(SNDKUSDT)",
+        "title": "$SNDK 加仓空，死猫跳而已，美股熊市已到，迟早暴跌。 {future}(SNDKUSDT)",
+        "raw": "$SNDK 加仓空，死猫跳而已，美股熊市已到，迟早暴跌。 {future}(SNDKUSDT)",
         "author": "square-creator-1d148bbce7461",
         "author_slug": "square-creator-1d148bbce7461",
         "time": "23小时",
         "image_urls": [
           "https://public.bnbstatic.com/image/symbol/logo/20260407/ab669219-fa31-4444-937c-28598d0e24c9.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzcxOTQyNDk1ZGIxODQ0MjY4MmQwNzYxNWQxODk5ZjQzLmpwZw==&level=md",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzgxOTQxNjU3YjkxODQ4Nzk5MjQ0MDExNWRkMzlkZjZmLmpwZw==&level=md"
+          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2RiOTljNDJkZTFiMjQ5ZDJiMjIyMzYzOTUwNTg1MmQ2LmpwZw==&level=lg"
         ],
         "video_url": "",
         "audio_m3u8_url": "",
         "square_audio_replay_url": "",
         "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349629063772594/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349629063772594/img_1.jpg",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349629063772594/img_2.jpg"
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351754338997777/img_0.png",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351754338997777/img_1.jpg"
         ],
         "gemini_direction": "unclear",
         "gemini_confidence": null,
         "gemini_reason": null,
         "gemini_bias_zh": "不明",
         "signal_is_sign": true,
-        "signal_star": 2,
-        "signal_content": "这是一个基于资金流的看多信号。帖子指出“圣户子”（大户）正在积极“梭哈多”，表明市场有强大的机构或头部玩家介入买入，提供了强烈的看涨情绪和潜在支撑。由于缺乏K线图的支撑/阻力位及具体的策略点位，此信号定性为情绪驱动型看涨。",
+        "signal_star": 3,
+        "signal_content": "看空信号。分析认为当前SNDK的上涨仅为“死猫跳”（Dead Cat Bounce），表明上行趋势缺乏可持续性。结合宏观背景（美股熊市已到），预期价格迟早将暴跌。交易建议是加仓做空，但帖子未给出具体的入场、止盈或止损点位。",
         "signal_raw_data": {
           "isSign": true,
-          "content": "这是一个基于资金流的看多信号。帖子指出“圣户子”（大户）正在积极“梭哈多”，表明市场有强大的机构或头部玩家介入买入，提供了强烈的看涨情绪和潜在支撑。由于缺乏K线图的支撑/阻力位及具体的策略点位，此信号定性为情绪驱动型看涨。",
-          "star": 2
+          "content": "看空信号。分析认为当前SNDK的上涨仅为“死猫跳”（Dead Cat Bounce），表明上行趋势缺乏可持续性。结合宏观背景（美股熊市已到），预期价格迟早将暴跌。交易建议是加仓做空，但帖子未给出具体的入场、止盈或止损点位。",
+          "star": 3
         },
         "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:51:47 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349629063772594/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349627237948786": {
-        "href": "https://www.binance.com/zh-CN/square/post/349627237948786",
-        "published_at": "2026-07-28 23:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "23小时",
-        "is_pinned": false,
-        "title": "$RIF 又是崩盘预定😅，喊圣户子一天喊多少个币啊，劳模啊，就是一次没准🤣 {future}(RIFUSDT)",
-        "raw": "$RIF 又是崩盘预定😅，喊圣户子一天喊多少个币啊，劳模啊，就是一次没准🤣 {future}(RIFUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "23小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20240812/f3256fa0-72ca-49c8-8e7f-8d384e43f5c3.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzL2Q3ZWRkMDUxNGRmYzRmZGJhZDZiMmFkOGRhMjUwZjI4LmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349627237948786/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349627237948786/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 1,
-        "signal_content": "纯粹的看空情绪帖。帖子明确指出$RIF“又是崩盘预定”，暗示价格即将下跌，适合做空或逢高减仓。由于缺乏K线图和具体的支撑/阻力位信息，信号强度较低。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "纯粹的看空情绪帖。帖子明确指出$RIF“又是崩盘预定”，暗示价格即将下跌，适合做空或逢高减仓。由于缺乏K线图和具体的支撑/阻力位信息，信号强度较低。",
-          "star": 1
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:52:06 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349627237948786/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349625568107729": {
-        "href": "https://www.binance.com/zh-CN/square/post/349625568107729",
-        "published_at": "2026-07-28 23:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "23小时",
-        "is_pinned": false,
-        "title": "$SOON 又是一个百倍币，梭哈！ {future}(SOONUSDT)",
-        "raw": "$SOON 又是一个百倍币，梭哈！ {future}(SOONUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "23小时",
-        "image_urls": [
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250702/67f28db2-8069-4b05-bf63-7e71e65b57a6.png",
-          "https://bin.bnbstatic.com/image/admin_mgs_image_upload/20250228/d0216ce4-a3e9-4bda-8937-4a6aa943ccf2.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzE5N2IwNzRjYzI2YTRmYzRiMWUxYzliNWU4NjRmNzA2LnBuZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349625568107729/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349625568107729/img_1.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349625568107729/img_2.png"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 1,
-        "signal_content": "这是一个极度看涨的情绪信号（Hype Signal）。虽然帖子中没有明确给出支撑/阻力位或技术逻辑，但“百倍币”和“梭哈”的表达传达了交易者对 $SOON 具备巨大上涨潜力的极高信心。信号倾向于全仓做多 (Long)，建议紧跟当前价格趋势入场。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "这是一个极度看涨的情绪信号（Hype Signal）。虽然帖子中没有明确给出支撑/阻力位或技术逻辑，但“百倍币”和“梭哈”的表达传达了交易者对 $SOON 具备巨大上涨潜力的极高信心。信号倾向于全仓做多 (Long)，建议紧跟当前价格趋势入场。",
-          "star": 1
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:52:25 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349625568107729/img_0.png",
-        "signal_analyzed_ok": true
-      },
-      "https://www.binance.com/zh-CN/square/post/349624684703922": {
-        "href": "https://www.binance.com/zh-CN/square/post/349624684703922",
-        "published_at": "2026-07-28 23:33:27 北京时间",
-        "published_iso": "",
-        "time_label": "23小时",
-        "is_pinned": false,
-        "title": "$CL 黄毛总统一天一个方向，现在又达成协议了😅，只能说明他梭哈了🤣 {future}(CLUSDT)",
-        "raw": "$CL 黄毛总统一天一个方向，现在又达成协议了😅，只能说明他梭哈了🤣 {future}(CLUSDT)",
-        "author": "square-creator-1d148bbce7461",
-        "author_slug": "square-creator-1d148bbce7461",
-        "time": "23小时",
-        "image_urls": [
-          "https://public.bnbstatic.com/image/symbol/logo/20260331/b68bd3dd-adec-4eff-86d5-27ee57277605.png",
-          "https://www.binance.com/bapi/fe/resource/image?image=aHR0cHM6Ly9wdWJsaWMuYm5ic3RhdGljLmNvbS9zdGF0aWMvY29udGVudC9zcXVhcmUvaW1hZ2VzLzlhZDMwYzE3MGZlZjQxMjA4Njc2YWRmNzQzOWI5N2M5LmpwZw==&level=lg"
-        ],
-        "video_url": "",
-        "audio_m3u8_url": "",
-        "square_audio_replay_url": "",
-        "saved_image_paths": [
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349624684703922/img_0.png",
-          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349624684703922/img_1.jpg"
-        ],
-        "gemini_direction": "unclear",
-        "gemini_confidence": null,
-        "gemini_reason": null,
-        "gemini_bias_zh": "不明",
-        "signal_is_sign": true,
-        "signal_star": 4,
-        "signal_content": "信号强度极高，虽然未给出具体点位，但文本表明分析师（黄毛总）已达成一致并“梭哈”，确认当前$CL正在沿着一个明确的方向强势运行。这构成了一个强烈的趋势跟随看涨/看多信号。",
-        "signal_raw_data": {
-          "isSign": true,
-          "content": "信号强度极高，虽然未给出具体点位，但文本表明分析师（黄毛总）已达成一致并“梭哈”，确认当前$CL正在沿着一个明确的方向强势运行。这构成了一个强烈的趋势跟随看涨/看多信号。",
-          "star": 4
-        },
-        "signal_error": null,
-        "signal_analyzed_at": "2026-07-29 22:52:45 北京时间",
-        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/349624684703922/img_0.png",
+        "signal_analyzed_at": "2026-08-04 22:02:02 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/351754338997777/img_0.png",
         "signal_analyzed_ok": true
       }
     }
@@ -2506,228 +680,64 @@
       "at": "2026-07-01T12:53:54.983259+00:00",
       "v": 1
     },
-    "349923354439713": {
-      "at": "2026-07-29T14:22:55.515145+00:00",
+    "352071206546657": {
+      "at": "2026-08-04T13:53:59.792003+00:00",
       "v": 1
     },
-    "349907345513281": {
-      "at": "2026-07-29T14:23:02.503311+00:00",
+    "351971434275969": {
+      "at": "2026-08-04T13:54:06.481395+00:00",
       "v": 1
     },
-    "349918081287522": {
-      "at": "2026-07-29T14:23:10.415712+00:00",
+    "351991821221633": {
+      "at": "2026-08-04T13:54:12.697146+00:00",
       "v": 1
     },
-    "349896155674081": {
-      "at": "2026-07-29T14:24:58.119346+00:00",
+    "351970060441233": {
+      "at": "2026-08-04T13:54:18.895641+00:00",
       "v": 1
     },
-    "349811801645874": {
-      "at": "2026-07-29T14:25:25.576149+00:00",
+    "352050239217090": {
+      "at": "2026-08-04T13:54:24.546990+00:00",
       "v": 1
     },
-    "349787802372929": {
-      "at": "2026-07-29T14:25:32.124919+00:00",
+    "352013878802977": {
+      "at": "2026-08-04T13:54:31.145139+00:00",
       "v": 1
     },
-    "349672532113969": {
-      "at": "2026-07-29T14:25:39.653430+00:00",
+    "351959724705810": {
+      "at": "2026-08-04T13:54:36.323701+00:00",
       "v": 1
     },
-    "349660728449201": {
-      "at": "2026-07-29T14:25:47.303906+00:00",
+    "351955807408114": {
+      "at": "2026-08-04T13:54:43.296918+00:00",
       "v": 1
     },
-    "349974840072418": {
-      "at": "2026-07-29T14:25:55.456371+00:00",
+    "351929983665346": {
+      "at": "2026-08-04T13:54:49.514636+00:00",
       "v": 1
     },
-    "349973450927425": {
-      "at": "2026-07-29T14:26:02.226662+00:00",
+    "351896121535314": {
+      "at": "2026-08-04T13:55:14.836968+00:00",
       "v": 1
     },
-    "349972119115201": {
-      "at": "2026-07-29T14:26:09.296581+00:00",
+    "351758422277730": {
+      "at": "2026-08-04T13:55:21.410066+00:00",
       "v": 1
     },
-    "349970861523505": {
-      "at": "2026-07-29T14:26:16.914851+00:00",
+    "351748633791314": {
+      "at": "2026-08-04T13:55:27.639572+00:00",
       "v": 1
     },
-    "349969740572001": {
-      "at": "2026-07-29T14:26:23.310219+00:00",
+    "351964665850402": {
+      "at": "2026-08-04T13:55:34.349903+00:00",
       "v": 1
     },
-    "349966909424194": {
-      "at": "2026-07-29T14:26:30.777152+00:00",
-      "v": 1
-    },
-    "349966534002530": {
-      "at": "2026-07-29T14:26:36.917845+00:00",
-      "v": 1
-    },
-    "349965515961490": {
-      "at": "2026-07-29T14:26:43.152006+00:00",
-      "v": 1
-    },
-    "349964532646306": {
-      "at": "2026-07-29T14:26:49.999981+00:00",
-      "v": 1
-    },
-    "349931908845313": {
-      "at": "2026-07-29T14:26:56.524243+00:00",
-      "v": 1
-    },
-    "349930545849601": {
-      "at": "2026-07-29T14:27:02.685885+00:00",
-      "v": 1
-    },
-    "349929504311426": {
-      "at": "2026-07-29T14:27:08.767299+00:00",
-      "v": 1
-    },
-    "349928172410226": {
-      "at": "2026-07-29T14:27:15.513500+00:00",
-      "v": 1
-    },
-    "349927585555137": {
-      "at": "2026-07-29T14:27:21.783744+00:00",
-      "v": 1
-    },
-    "349920905326994": {
-      "at": "2026-07-29T14:27:28.429076+00:00",
-      "v": 1
-    },
-    "349919839833682": {
-      "at": "2026-07-29T14:27:33.597880+00:00",
-      "v": 1
-    },
-    "349877580262114": {
-      "at": "2026-07-29T14:27:40.446219+00:00",
-      "v": 1
-    },
-    "349876713720433": {
-      "at": "2026-07-29T14:27:46.653749+00:00",
-      "v": 1
-    },
-    "349862389899873": {
-      "at": "2026-07-29T14:27:52.777384+00:00",
-      "v": 1
-    },
-    "349860935985745": {
-      "at": "2026-07-29T14:27:59.796914+00:00",
-      "v": 1
-    },
-    "349859490640482": {
-      "at": "2026-07-29T14:28:06.694545+00:00",
-      "v": 1
-    },
-    "349858520803922": {
-      "at": "2026-07-29T14:28:12.489793+00:00",
-      "v": 1
-    },
-    "349857901605713": {
-      "at": "2026-07-29T14:28:19.734334+00:00",
-      "v": 1
-    },
-    "349837830644578": {
-      "at": "2026-07-29T14:28:27.573163+00:00",
-      "v": 1
-    },
-    "349837049028146": {
-      "at": "2026-07-29T14:28:34.347885+00:00",
-      "v": 1
-    },
-    "349836148312017": {
-      "at": "2026-07-29T14:28:39.589020+00:00",
-      "v": 1
-    },
-    "349835431615170": {
-      "at": "2026-07-29T14:28:45.724725+00:00",
-      "v": 1
-    },
-    "349834357847601": {
-      "at": "2026-07-29T14:28:51.613388+00:00",
-      "v": 1
-    },
-    "349833233581569": {
-      "at": "2026-07-29T14:28:58.735505+00:00",
-      "v": 1
-    },
-    "349831929450850": {
-      "at": "2026-07-29T14:29:04.307362+00:00",
-      "v": 1
-    },
-    "349814752084849": {
-      "at": "2026-07-29T14:29:10.740248+00:00",
-      "v": 1
-    },
-    "349813181650225": {
-      "at": "2026-07-29T14:29:17.043323+00:00",
-      "v": 1
-    },
-    "349812545496577": {
-      "at": "2026-07-29T14:29:24.472596+00:00",
-      "v": 1
-    },
-    "349811600430530": {
-      "at": "2026-07-29T14:29:31.106076+00:00",
-      "v": 1
-    },
-    "349810749637265": {
-      "at": "2026-07-29T14:29:38.062480+00:00",
-      "v": 1
-    },
-    "349809711192018": {
-      "at": "2026-07-29T14:29:44.416909+00:00",
-      "v": 1
-    },
-    "349655808784866": {
-      "at": "2026-07-29T14:29:51.505935+00:00",
-      "v": 1
-    },
-    "349652593361986": {
-      "at": "2026-07-29T14:29:57.981096+00:00",
-      "v": 1
-    },
-    "349649855435506": {
-      "at": "2026-07-29T14:30:03.985632+00:00",
-      "v": 1
-    },
-    "349646164212817": {
-      "at": "2026-07-29T14:30:10.208749+00:00",
-      "v": 1
-    },
-    "349643833249554": {
-      "at": "2026-07-29T14:30:17.011233+00:00",
-      "v": 1
-    },
-    "349631418527042": {
-      "at": "2026-07-29T14:30:24.314317+00:00",
-      "v": 1
-    },
-    "349630798170817": {
-      "at": "2026-07-29T14:30:31.212403+00:00",
-      "v": 1
-    },
-    "349629063772594": {
-      "at": "2026-07-29T14:30:36.612972+00:00",
-      "v": 1
-    },
-    "349627237948786": {
-      "at": "2026-07-29T14:30:43.752628+00:00",
-      "v": 1
-    },
-    "349625568107729": {
-      "at": "2026-07-29T14:30:51.349142+00:00",
-      "v": 1
-    },
-    "349624684703922": {
-      "at": "2026-07-29T14:30:59.097196+00:00",
+    "351754338997777": {
+      "at": "2026-08-04T13:55:39.634201+00:00",
       "v": 1
     }
   },
-  "updated_at": "2026-07-29 22:33:27 北京时间",
+  "updated_at": "2026-08-04 21:56:00 北京时间",
   "square_lives": [
     {
       "author_slug": "yanchibit",
@@ -2735,7 +745,7 @@
       "profile": "https://www.binance.com/zh-CN/square/profile/yanchibit",
       "live_url": "https://www.binance.com/zh-CN/square/profile/yanchibit?tab=live",
       "probe": "profile_live_probe",
-      "scraped_at": "2026-07-29 22:33:27 北京时间"
+      "scraped_at": "2026-08-04 21:56:00 北京时间"
     },
     {
       "author_slug": "sanmageshuai",
@@ -2743,7 +753,7 @@
       "profile": "https://www.binance.com/zh-CN/square/profile/sanmageshuai",
       "live_url": "https://www.binance.com/zh-CN/square/profile/sanmageshuai?tab=live",
       "probe": "profile_live_probe",
-      "scraped_at": "2026-07-29 22:33:27 北京时间"
+      "scraped_at": "2026-08-04 21:56:00 北京时间"
     },
     {
       "author_slug": "square-creator-92912a51e",
@@ -2751,7 +761,7 @@
       "profile": "https://www.binance.com/zh-CN/square/profile/square-creator-92912a51e",
       "live_url": "https://www.binance.com/zh-CN/square/profile/square-creator-92912a51e?tab=live",
       "probe": "profile_live_probe",
-      "scraped_at": "2026-07-29 22:33:27 北京时间"
+      "scraped_at": "2026-08-04 21:56:00 北京时间"
     },
     {
       "author_slug": "square-creator-1d148bbce7461",
@@ -2759,7 +769,7 @@
       "profile": "https://www.binance.com/zh-CN/square/profile/square-creator-1d148bbce7461",
       "live_url": "https://www.binance.com/zh-CN/square/profile/square-creator-1d148bbce7461?tab=live",
       "probe": "profile_live_probe",
-      "scraped_at": "2026-07-29 22:33:27 北京时间"
+      "scraped_at": "2026-08-04 21:56:00 北京时间"
     }
   ]
 }
