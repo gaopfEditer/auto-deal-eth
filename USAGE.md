@@ -184,20 +184,33 @@ python -m browser_media_runner.runner "D:\frontend\main\python\auto-deal-eth\scr
 
 - `--prompt-text`：表示 `-p` 传入的是提示词正文，而不是文件名
 
-### 5.3 URL 分析（推荐流程）
+### 5.3 文生图（提示词 -> Gemini 网页出图）
 
-`runner` 不直接接收 URL。推荐先把 URL 内容变成本地截图，再走 5.1 / 5.2。
+与 5.1 / 5.2 **对称**：不上传本地图，只发提示词，让 Gemini 网页版生成图片并保存。
 
-**示例流程：**
+```bash
+# 直接传提示词正文
+python -m browser_media_runner.tti -p "一只赛博朋克风格的橘猫坐在月球上看K线图，16:9" --prompt-text --tag cat
 
-1) 先截图 URL（可用你现有浏览器自动化逻辑）  
-2) 再执行：
+# 使用 prompts/ 下的文生图模板
+python -m browser_media_runner.tti -p tti_crypto_banner.txt --tag banner
+
+# 指定输出目录，并保持浏览器打开便于检查
+python -m browser_media_runner.tti -p "深色科技感加密货币海报，无水印" --prompt-text --out ./screenshots/tti --keep-browser
+```
+
+- `-p/--prompt`：默认读 `browser_media_runner/prompts/` 文件名；加 `--prompt-text` 则当正文
+- `--out`：图片输出目录（默认写到 `browser_media_runner/history/tti_*/images`）
+- 需已登录 Gemini 的 Chrome（推荐 `USE_REMOTE_DEBUGGING=True` + 9222）
+- 账号需具备网页端出图能力；超时未出图时可能只落整页排查截图
+
+### 5.4 URL 分析（推荐流程）
+
+`runner` 对 URL：下游 `gemini_web_automation` 会先打开页面截图再上传分析（也可自行先截图再走 5.1）。
 
 ```bash
 python -m browser_media_runner.runner "https://x.com/yangyi/status/2043661337839141187" -p twitter_style_timeline.txt --tag url
 ```
-
-如果你希望“直接传 URL 自动打开并截图再分析”，建议单独做一层 URL 预处理脚本，然后把截图路径传给 `runner`。
 
 ## 6. TradingView WebSocket 推送 → 润色 → Telegram → 截图（`tv_ws/`）
 

@@ -1576,3 +1576,316 @@ def analyze_resources_with_gemini_web(
 
     ok = any(isinstance(x, dict) and x.get("status") == "success" for x in results)
     return {"ok": ok, "count": len(results), "results": results}
+
+
+def generate_image_with_gemini_web(
+    prompt: str,
+    *,
+    out_dir: str,
+    tag: str = "tti",
+    keep_browser_open: bool = False,
+) -> dict:
+    """
+    文生图：打开 Gemini 网页，发送「请生成图片」类提示词，抓取回复中的图片并保存到 out_dir。
+
+    依赖与 analyze_with_gemini_web 相同：``init_browser()``（可用 CDP 远程调试已登录账号）。
+    """
+    from browser_automation import init_browser
+
+    p = (prompt or "").strip()
+    if not p:
+        return {"ok": False, "error": "prompt 为空", "images": []}
+
+    os.makedirs(out_dir, exist_ok=True)
+    # 明确要求出图，避免只返回文字描述
+    gen_prompt = (
+        "请直接生成一张图片（必须输出图像，不要只给文字描述或 ASCII）。"
+        "画面内容如下：\n\n"
+        f"{p}"
+    )
+
+    driver = None
+    saved: list[str] = []
+    try:
+        driver = init_browser()
+        gemini_url = os.getenv("GEMINI_WEB_URL", "https://gemini.google.com/app").strip()
+        print(f"  [tti] 打开 Gemini: {gemini_url}", file=sys.stderr)
+        driver.get(gemini_url)
+        time.sleep(float(os.getenv("GEMINI_WEB_TTI_OPEN_WAIT", "4")))
+
+        # 定位输入框（与分析流类似的多选择器）
+        text_input = None
+        for sel in (
+            "div.ql-editor.textarea",
+            "div[contenteditable='true']",
+            "rich-textarea div[contenteditable='true']",
+            "textarea",
+            "[aria-label*='提示']",
+            "[aria-label*='Prompt']",
+            "[aria-label*='输入']",
+        ):
+            try:
+                els = driver.find_elements(By.CSS_SELECTOR, sel)
+                for el in els:
+                    try:
+                        if el.is_displayed():
+                            text_input = el
+                            break
+                    except Exception:
+                        continue
+                if text_input:
+                    break
+            except Exception:
+                continue
+
+        if text_input is None:
+            return {
+                "ok": False,
+                "error": "未找到 Gemini 输入框（请确认已登录且页面加载完成）",
+                "images": [],
+            }
+
+        try:
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", text_input)
+            text_input.click()
+        except Exception:
+            pass
+
+        try:
+            driver.execute_script(
+                """
+                var el = arguments[0];
+                var v = arguments[1] || '';
+                if (el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT')) {
+                  el.value = v;
+                } else if (el && el.isContentEditable) {
+                  el.innerText = v;
+                } else {
+                  try { el.value = v; } catch (e) {}
+                  try { el.innerText = v; } catch (e) {}
+                }
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                """,
+                text_input,
+                gen_prompt,
+            )
+            text_input.send_keys(" ")
+        except Exception:
+            try:
+                text_input.clear()
+            except Exception:
+                pass
+            text_input.send_keys(gen_prompt)
+
+        # 发送
+        sent = False
+        try:
+            send_button = WebDriverWait(driver, 8).until(
+                EC.presence_of_element_located(
+                    (
+                        By.CSS_SELECTOR,
+                        "button.send-button, button[aria-label='发送'], "
+                        "button[aria-label*='Send'], button[type='submit']",
+                    )
+                )
+            )
+            aria = (send_button.get_attribute("aria-disabled") or "").strip().lower()
+            if aria not in ("true", "1"):
+                try:
+                    send_button.click()
+                    sent = True
+                except Exception:
+                    driver.execute_script("arguments[0].click();", send_button)
+                    sent = True
+        except Exception:
+            send_button = None
+
+        if not sent:
+            text_input.send_keys(Keys.RETURN)
+            sent = True
+        print("  [tti] 已发送文生图请求", file=sys.stderr)
+
+        # 轮询回复区大图
+        max_wait = int(os.getenv("GEMINI_WEB_TTI_WAIT", "90"))
+        min_w = int(os.getenv("GEMINI_WEB_TTI_MIN_WIDTH", "200"))
+        deadline = time.time() + max_wait
+        last_srcs: set[str] = set()
+
+        def _collect_candidate_imgs():
+            js = """
+            const minW = arguments[0];
+            const out = [];
+            const imgs = Array.from(document.querySelectorAll('img'));
+            for (const img of imgs) {
+              try {
+                const r = img.getBoundingClientRect();
+                const w = Math.max(img.naturalWidth || 0, r.width || 0);
+                const h = Math.max(img.naturalHeight || 0, r.height || 0);
+                const src = img.currentSrc || img.src || '';
+                if (!src || src.startsWith('data:image/svg')) continue;
+                // 过滤头像/图标
+                if (w < minW || h < minW * 0.5) continue;
+                if (src.includes('googleusercontent.com/a/') && w < 120) continue;
+                out.push({src, w, h});
+              } catch (e) {}
+            }
+            return out;
+            """
+            try:
+                return driver.execute_script(js, min_w) or []
+            except Exception:
+                return []
+
+        while time.time() < deadline:
+            cands = _collect_candidate_imgs()
+            # 取最大的几张
+            cands = sorted(cands, key=lambda x: (x.get("w") or 0) * (x.get("h") or 0), reverse=True)
+            new_srcs = [c["src"] for c in cands[:4] if c.get("src") and c["src"] not in last_srcs]
+            if new_srcs:
+                # 再等一会儿让生成稳定
+                time.sleep(2.5)
+                cands = _collect_candidate_imgs()
+                cands = sorted(
+                    cands, key=lambda x: (x.get("w") or 0) * (x.get("h") or 0), reverse=True
+                )
+                for i, c in enumerate(cands[:3]):
+                    src = c.get("src") or ""
+                    if not src or src in last_srcs:
+                        continue
+                    path = _download_gemini_image(driver, src, out_dir, tag=tag, index=i)
+                    if path:
+                        saved.append(path)
+                        last_srcs.add(src)
+                if saved:
+                    break
+            time.sleep(1.5)
+
+        if not saved:
+            # 兜底：整页截一张，便于排查
+            fallback = os.path.join(out_dir, f"{tag}_{uuid.uuid4().hex[:8]}_page.png")
+            try:
+                driver.save_screenshot(fallback)
+                if os.path.isfile(fallback) and os.path.getsize(fallback) > 64:
+                    saved.append(fallback)
+                    return {
+                        "ok": False,
+                        "error": "未抓到生成图，已保存整页截图供排查（账号是否支持出图？）",
+                        "images": saved,
+                        "method": "web_tti_fallback_screenshot",
+                    }
+            except Exception:
+                pass
+            return {
+                "ok": False,
+                "error": "超时未检测到生成图片",
+                "images": [],
+                "method": "web_tti",
+            }
+
+        return {
+            "ok": True,
+            "images": saved,
+            "count": len(saved),
+            "method": "web_tti",
+            "tag": tag,
+        }
+    except Exception as e:
+        print(f"[ERROR] 文生图失败: {e}", file=sys.stderr)
+        return {"ok": False, "error": str(e), "images": saved, "method": "web_tti"}
+    finally:
+        if driver is not None and not keep_browser_open:
+            try:
+                driver.quit()
+            except Exception:
+                pass
+
+
+def _download_gemini_image(
+    driver,
+    src: str,
+    out_dir: str,
+    *,
+    tag: str,
+    index: int,
+) -> Optional[str]:
+    """将 Gemini 回复中的 img src（http/blob/data）保存为本地文件。"""
+    ext = ".png"
+    low = (src or "").lower()
+    if ".jpg" in low or "jpeg" in low:
+        ext = ".jpg"
+    elif ".webp" in low:
+        ext = ".webp"
+    out_path = os.path.join(out_dir, f"{tag}_{index}_{uuid.uuid4().hex[:8]}{ext}")
+
+    try:
+        if src.startswith("data:image"):
+            # data:image/png;base64,...
+            header, _, b64 = src.partition(",")
+            raw = base64.b64decode(b64)
+            with open(out_path, "wb") as f:
+                f.write(raw)
+            return out_path if os.path.getsize(out_path) > 64 else None
+
+        if src.startswith("blob:"):
+            # canvas 读像素 -> dataURL
+            data_url = driver.execute_script(
+                """
+                const src = arguments[0];
+                const img = Array.from(document.querySelectorAll('img')).find(i => (i.currentSrc||i.src) === src);
+                if (!img) return null;
+                const c = document.createElement('canvas');
+                c.width = img.naturalWidth || img.width;
+                c.height = img.naturalHeight || img.height;
+                if (!c.width || !c.height) return null;
+                const ctx = c.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                try { return c.toDataURL('image/png'); } catch (e) { return null; }
+                """,
+                src,
+            )
+            if isinstance(data_url, str) and data_url.startswith("data:image"):
+                return _download_gemini_image(driver, data_url, out_dir, tag=tag, index=index)
+            # CDP 截该元素
+            try:
+                img_el = None
+                for el in driver.find_elements(By.CSS_SELECTOR, "img"):
+                    try:
+                        if (el.get_attribute("src") or "") == src or (
+                            el.get_attribute("currentSrc") or ""
+                        ) == src:
+                            img_el = el
+                            break
+                    except Exception:
+                        continue
+                if img_el is not None:
+                    img_el.screenshot(out_path)
+                    if os.path.isfile(out_path) and os.path.getsize(out_path) > 64:
+                        return out_path
+            except Exception:
+                return None
+            return None
+
+        if src.startswith("http://") or src.startswith("https://"):
+            import urllib.request
+
+            req = urllib.request.Request(
+                src,
+                headers={
+                    "User-Agent": (
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+                    )
+                },
+            )
+            with urllib.request.urlopen(req, timeout=45) as resp:
+                data = resp.read()
+            if len(data) < 64:
+                return None
+            with open(out_path, "wb") as f:
+                f.write(data)
+            return out_path
+    except Exception as e:
+        print(f"  [tti] 保存图片失败: {e}", file=sys.stderr)
+        return None
+    return None
