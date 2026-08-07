@@ -89,6 +89,16 @@ vegas_v_b1 = input.int(576, title="B组1周期", minval=1, group="维加斯(V前
 vegas_v_b2 = input.int(676, title="B组2周期", minval=1, group="维加斯(V前缀)")
 vegas_v_tol_bb_pct = input.float(20.0, title="附近容差(占布林带宽%)", minval=1.0, maxval=60.0, step=1.0, tooltip="以布林上下轨间距类比为100：默认20表示 K 线高/低/收与任一维加斯EMA的最小距离 ≤ 带宽×20% 时视为在维加斯通道附近，才加 V", group="维加斯(V前缀)")
 
+// OI 异动（巨量 + OI 剧降/暴增）— 信号标签后缀，如 射击之星(oi异动)
+enable_oi_anomaly = input.bool(true, title="启用OI异动标注", tooltip="成交量巨量且 OI 相对 ΔOI 的 Z-Score 越界时，在信号名后追加 (oi异动)/(oi清算)/(oi建仓)", group="OI异动")
+oi_symbol_override = input.string("", title="OI品种(空=自动 ticker+_OI)", tooltip="例 BINANCE:BTCUSDT.P_OI；留空则用当前品种拼 _OI（现货图会尝试 .P_OI）", group="OI异动")
+oi_lookback = input.int(20, title="统计窗口", minval=10, maxval=100, group="OI异动")
+oi_vol_mult = input.float(1.5, title="巨量: 相对SMA倍数", minval=1.0, maxval=5.0, step=0.1, tooltip="volume > SMA(volume,N) × 该倍数", group="OI异动")
+oi_vol_z = input.float(2.0, title="巨量: 额外Z阈值", minval=0.0, maxval=5.0, step=0.1, tooltip="同时要求 volume > SMA + Z×StDev；设 0 则仅用倍数条件", group="OI异动")
+oi_delta_z = input.float(2.0, title="ΔOI Z-Score阈值", minval=1.0, maxval=5.0, step=0.1, tooltip="ΔOI > SMA+Z×σ 为暴增；ΔOI < SMA-Z×σ 为剧降", group="OI异动")
+oi_tag_mode = input.string("统一(oi异动)", title="标签后缀样式", options=["统一(oi异动)", "细分(oi清算/oi建仓)"], group="OI异动")
+show_oi_bg = input.bool(false, title="异动K线背景着色", tooltip="巨量+OI剧降=橙底；巨量+OI暴增=蓝底（仅调试）", group="OI异动")
+
 // 定时日线推送设置
 enable_daily_line_push = input.bool(true, title="启用定时日线推送", tooltip="按设定时间推送指定交易对的日线数据", group="定时日线推送")
 daily_push_symbol = input.symbol("BINANCE:BTCUSDT", title="推送交易对", group="定时日线推送")
@@ -299,13 +309,49 @@ vegas_min_dist = min_dist_to_vegas_channel_emas(high, low, close, vegas_v_e2, ve
 vegas_tol_abs = bb_width_for_vegas * vegas_v_tol_bb_pct / 100.0
 near_vegas_channel = enable_vegas_v_prefix and bb_width_for_vegas > syminfo.mintick * 2 and vegas_min_dist <= vegas_tol_abs
 
-// 仅在维加斯通道附近时给标签/告警文案加 V；否则为原名
-sig_prefix(s) =>
-    near_vegas_channel ? "V" + s : s
+// ==================== OI 异动：巨量 + ΔOI Z-Score ====================
+// 逻辑1 巨量+OI剧降 → 清算踩踏；逻辑2 巨量+OI暴增 → 强力建仓/博弈
+resolve_oi_ticker() =>
+    if str.length(oi_symbol_override) > 0
+        oi_symbol_override
+    else
+        tid = syminfo.tickerid
+        if str.endswith(tid, "_OI")
+            tid
+        else if str.endswith(tid, ".P")
+            tid + "_OI"
+        else
+            // 现货图尝试永续 OI：BINANCE:BTCUSDT → BINANCE:BTCUSDT.P_OI
+            tid + ".P_OI"
 
-// 是否为射击之星类信号名（含 V 前缀与 (2)）
+oi_ticker = resolve_oi_ticker()
+oi_close = request.security(oi_ticker, timeframe.period, close, ignore_invalid_symbol=true, gaps=barmerge.gaps_off)
+oi_valid = not na(oi_close) and oi_close > 0
+delta_oi = oi_valid ? oi_close - oi_close[1] : na
+doi_sma = ta.sma(delta_oi, oi_lookback)
+doi_std = ta.stdev(delta_oi, oi_lookback)
+vol_sma_oi = ta.sma(volume, oi_lookback)
+vol_std_oi = ta.stdev(volume, oi_lookback)
+vol_huge_mult = volume > vol_sma_oi * oi_vol_mult
+vol_huge_z = oi_vol_z <= 0 or volume > vol_sma_oi + oi_vol_z * vol_std_oi
+vol_huge = enable_oi_anomaly and vol_huge_mult and vol_huge_z and vol_sma_oi > 0
+oi_surge = oi_valid and not na(doi_std) and doi_std > 0 and delta_oi > doi_sma + oi_delta_z * doi_std
+oi_drop = oi_valid and not na(doi_std) and doi_std > 0 and delta_oi < doi_sma - oi_delta_z * doi_std
+oi_liquidation = vol_huge and oi_drop      // 巨量 + OI剧降 → 强制清算
+oi_building = vol_huge and oi_surge        // 巨量 + OI暴增 → 强力建仓
+oi_anomaly_active = oi_liquidation or oi_building
+oi_tag_text = not oi_anomaly_active ? "" : oi_tag_mode == "细分(oi清算/oi建仓)" ? (oi_liquidation ? "(oi清算)" : "(oi建仓)") : "(oi异动)"
+
+bgcolor(show_oi_bg and oi_liquidation ? color.new(color.orange, 85) : show_oi_bg and oi_building ? color.new(color.blue, 88) : na, title="OI异动背景")
+
+// 标签/告警：维加斯附近加 V；OI 异动时追加 (oi异动) 等，例：V射击之星(oi异动)
+sig_prefix(s) =>
+    base = near_vegas_channel ? "V" + s : s
+    oi_tag_text != "" ? base + oi_tag_text : base
+
+// 是否为射击之星类信号名（含 V 前缀、oi 后缀与 (2)）
 is_shoot_star_signal(msg) =>
-    msg == sig_prefix("射击之星") or msg == sig_prefix("射击之星（2）")
+    str.contains(msg, "射击之星")
 
 // 射击之星：形态 + 下轨收阴（low 在带间下 15% 内则须 close<open）
 shoot_star_shape = detect_shooting_star(high, low, open, close, pattern_upper_wick_ratio, pattern_upper_wick_max_ratio, at_lower_band)
