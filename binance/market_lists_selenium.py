@@ -627,11 +627,13 @@ def _action_chains_click_in_element_box(
     background_tab: bool = False,
 ) -> bool:
     """
-    用 Selenium ActionChains 发真实指针序列（相对元素中心再随机偏移后 click），
-    避免 JS 里 dispatchEvent(MouseEvent) 被 React 等直接忽略。
-    失败时依次回退 element.click()、arguments[0].click()。
-    background_tab=True 时先尝试修饰键+左键（尽量静默新开标签），再回退普通点击。
+    优先静默 CDP Input 点击（不 switch_to / 不抢焦点）；
+    否则再用 Selenium ActionChains。
+    background_tab=True 时带 Meta/Ctrl 修饰，尽量后台新标签。
     """
+    from binance.cdp_silent import SilentWebElement, get_binding
+
+    binding = get_binding(driver)
     try:
         driver.execute_script(
             "arguments[0].scrollIntoView({block:'center',inline:'center'});", el
@@ -652,6 +654,26 @@ def _action_chains_click_in_element_box(
             dy = random.randint(-half_h + my, half_h - my)
         else:
             dx, dy = 0, 0
+
+        # 静默绑定下：CDP 坐标点击，绝不走 ActionChains（会要求真实 WebElement / 抢焦）
+        if binding is not None and isinstance(el, SilentWebElement):
+            use_bg = bool(background_tab and SQUARE_VIDEO_BACKGROUND_TAB_CLICK)
+            _scrape_log(
+                f"{log_prefix} 静默 CDP 点击（dx={dx}, dy={dy}, bg_tab={use_bg}）"
+            )
+            ok = binding.click_element(
+                el, dx=float(dx), dy=float(dy), background_tab=use_bg
+            )
+            if ok:
+                return True
+            _scrape_log(f"{log_prefix} 静默 CDP 点击失败，回退 JS click")
+            try:
+                driver.execute_script("arguments[0].click();", el)
+                return True
+            except Exception as e2:
+                _scrape_log(f"{log_prefix} 点击全部失败: {e2}")
+                return False
+
         _scrape_log(
             f"{log_prefix} 实点点击 ActionChains（相对元素中心偏移 dx={dx}, dy={dy}）"
         )
