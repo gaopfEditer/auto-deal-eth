@@ -60,6 +60,7 @@ type ChartLayers = {
   volume: boolean;
   macd: boolean;
   candlePattern: boolean;
+  structure: boolean;
 };
 
 const DEFAULT_LAYERS: ChartLayers = {
@@ -67,6 +68,7 @@ const DEFAULT_LAYERS: ChartLayers = {
   volume: true,
   macd: true,
   candlePattern: true,
+  structure: true,
 };
 
 const LAYER_TOGGLES: { key: keyof ChartLayers; label: string }[] = [
@@ -74,7 +76,22 @@ const LAYER_TOGGLES: { key: keyof ChartLayers; label: string }[] = [
   { key: "volume", label: "量能" },
   { key: "macd", label: "MACD" },
   { key: "candlePattern", label: "射击/倒锤" },
+  { key: "structure", label: "形态线" },
 ];
+
+/** H_max / LH / L₁ / HL / 扳机 等水平价线 */
+const STRUCTURE_LINE_KINDS = new Set(["h_max", "lh", "l1", "hl", "trigger"]);
+/** 形态结构箭头标记（与价线对应） */
+const STRUCTURE_MARKER_KINDS = new Set([
+  "h_max",
+  "lh",
+  "l1",
+  "hl",
+  "mid_peak",
+  "trigger",
+  "hh",
+  "bb_wick",
+]);
 
 const MARKER_LEGEND = [
   { kind: "h_max", label: "① H_max 绝对高点", color: "#ff5252" },
@@ -103,12 +120,38 @@ const COMPACT_MARKER_SIZE = 0.5;
 /** 图表全局字号 = LWC 默认 12 × 60% */
 const CHART_FONT_SIZE = Math.round(12 * 0.6);
 
+/** 可见区左缘距数据起点小于此值时，自动加载更早 K 线 */
+const LEFT_HISTORY_PAD = 120;
+/** 滚轮缩小到「看全图」时的覆盖比例 */
+const ZOOM_OUT_COVER_RATIO = 0.72;
+/** 向左续载上限，避免一次拖太远 */
+const CHART_HISTORY_MAX = 5000;
+
+function isZoomedOutFullView(range: LogicalRange, len: number): boolean {
+  if (len <= 0) return false;
+  const span = range.to - range.from;
+  return (range.from < 10 || range.from < 0) && span >= len * ZOOM_OUT_COVER_RATIO;
+}
+
+/** 右拖/左滑接近左缘，或缩小看全图时，继续拉更早 K 线 */
+function needsLeftHistory(range: LogicalRange, len: number): boolean {
+  if (len <= 0 || len >= CHART_HISTORY_MAX) return false;
+  if (range.from < LEFT_HISTORY_PAD || range.from < 0) return true;
+  return isZoomedOutFullView(range, len);
+}
+
 function toCandleMarkers(
   markers: PatternChartData["markers"],
   showCandlePattern: boolean,
+  showStructure: boolean,
 ): SeriesMarker<UTCTimestamp>[] {
   return [...(markers ?? [])]
-    .filter((m) => showCandlePattern || !COMPACT_MARKER_KINDS.has(m.kind ?? ""))
+    .filter((m) => {
+      const kind = m.kind ?? "";
+      if (!showCandlePattern && COMPACT_MARKER_KINDS.has(kind)) return false;
+      if (!showStructure && STRUCTURE_MARKER_KINDS.has(kind)) return false;
+      return true;
+    })
     .sort((a, b) => a.time - b.time)
     .map((m) => {
       const kind = m.kind ?? "";
@@ -344,7 +387,9 @@ export const PatternChartPanel = memo(function PatternChartPanel({
     const series = seriesRef.current;
     if (!series || payload.partial) return;
     clearPriceLines();
+    const showStructure = layersRef.current.structure;
     for (const line of payload.price_lines ?? []) {
+      if (!showStructure && STRUCTURE_LINE_KINDS.has(line.kind ?? "")) continue;
       priceLinesRef.current.push(
         series.createPriceLine({
           price: line.price,
@@ -375,8 +420,9 @@ export const PatternChartPanel = memo(function PatternChartPanel({
         series.setData(toCandleData(sortedCandles));
 
         const showPattern = layersRef.current.candlePattern;
+        const showStructure = layersRef.current.structure;
         const rawMarkers = payload.partial ? metaRef.current?.markers : payload.markers;
-        const markers = toCandleMarkers(rawMarkers, showPattern);
+        const markers = toCandleMarkers(rawMarkers, showPattern, showStructure);
         if (markers.length) {
           series.setMarkers(markers);
         } else if (!payload.partial || !showPattern) {
@@ -461,10 +507,15 @@ export const PatternChartPanel = memo(function PatternChartPanel({
         if (close != null) applyPriceAxisFormat(close);
 
         if (prevRange && prepended > 0) {
-          chart.timeScale().setVisibleLogicalRange({
-            from: prevRange.from + prepended,
-            to: prevRange.to + prepended,
-          });
+          const shiftedTo = prevRange.to + prepended;
+          if (isZoomedOutFullView(prevRange, prevLen)) {
+            chart.timeScale().setVisibleLogicalRange({ from: 0, to: shiftedTo });
+          } else {
+            chart.timeScale().setVisibleLogicalRange({
+              from: prevRange.from + prepended,
+              to: shiftedTo,
+            });
+          }
         } else if (!prevRange || prevLen === 0) {
           const to = sortedCandles.length;
           const from = Math.max(0, to - CHART_VISIBLE_BARS);
@@ -477,14 +528,23 @@ export const PatternChartPanel = memo(function PatternChartPanel({
     [applyPriceLines, applyPriceAxisFormat],
   );
 
+  const loadMoreHistoryRef = useRef<() => Promise<void>>(async () => {});
+
   const loadMoreHistory = useCallback(async () => {
     if (loadingMoreRef.current || !hasMoreRef.current) return;
+    if (candlesRef.current.length >= CHART_HISTORY_MAX) {
+      hasMoreRef.current = false;
+      setHasMore(false);
+      return;
+    }
     const oldestMs = oldestCandleOpenMs(candlesRef.current);
     if (oldestMs == null) return;
 
     loadingMoreRef.current = true;
     setLoadingMore(true);
+    let shouldChain = false;
     try {
+      const prevLen = candlesRef.current.length;
       const chunk = await fetchPatternChart(symbol, timeframeRef.current, {
         limit: CHART_LOAD_CHUNK,
         endTimeMs: oldestMs - 1,
@@ -494,10 +554,16 @@ export const PatternChartPanel = memo(function PatternChartPanel({
         setHasMore(false);
         return;
       }
-      hasMoreRef.current = chunk.has_more !== false;
-      setHasMore(hasMoreRef.current);
 
       const merged = mergeCandlesByTime(candlesRef.current, chunk.candles);
+      if (merged.length <= prevLen) {
+        hasMoreRef.current = false;
+        setHasMore(false);
+        return;
+      }
+      hasMoreRef.current = chunk.has_more !== false && merged.length < CHART_HISTORY_MAX;
+      setHasMore(hasMoreRef.current);
+
       const mergedUpper = mergeBbSeries(metaRef.current?.bb?.upper ?? [], chunk.bb?.upper ?? []);
       const mergedMid = mergeBbSeries(metaRef.current?.bb?.mid ?? [], chunk.bb?.mid ?? []);
       const mergedLower = mergeBbSeries(metaRef.current?.bb?.lower ?? [], chunk.bb?.lower ?? []);
@@ -522,13 +588,24 @@ export const PatternChartPanel = memo(function PatternChartPanel({
         merged,
         { isPrepend: true },
       );
+
+      const range = chartApi.current?.timeScale().getVisibleLogicalRange();
+      const len = candlesRef.current.length;
+      shouldChain = Boolean(hasMoreRef.current && range && needsLeftHistory(range, len));
     } catch {
       /* 静默 */
     } finally {
       loadingMoreRef.current = false;
       setLoadingMore(false);
+      if (shouldChain) {
+        window.setTimeout(() => {
+          void loadMoreHistoryRef.current();
+        }, 0);
+      }
     }
   }, [symbol, applyChartSeries]);
+
+  loadMoreHistoryRef.current = loadMoreHistory;
 
   const refreshLatestRef = useRef<() => void>(() => {});
 
@@ -633,11 +710,16 @@ export const PatternChartPanel = memo(function PatternChartPanel({
 
     const series = seriesRef.current;
     if (series) {
-      series.setMarkers(toCandleMarkers(metaRef.current?.markers, next.candlePattern));
+      series.setMarkers(
+        toCandleMarkers(metaRef.current?.markers, next.candlePattern, next.structure),
+      );
+    }
+    if (metaRef.current && !metaRef.current.partial) {
+      applyPriceLines(metaRef.current);
     }
 
     if (chart) applyPaneMargins(chart, next);
-  }, []);
+  }, [applyPriceLines]);
 
   const toggleLayer = useCallback(
     (key: keyof ChartLayers) => {
@@ -762,6 +844,12 @@ export const PatternChartPanel = memo(function PatternChartPanel({
           axisPressedMouseMove: { time: true, price: true },
           mouseWheel: true,
           pinch: true,
+        },
+        handleScroll: {
+          mouseWheel: true,
+          pressedMouseMove: true,
+          horzTouchDrag: true,
+          vertTouchDrag: false,
         },
       });
 
@@ -899,7 +987,8 @@ export const PatternChartPanel = memo(function PatternChartPanel({
 
       const onRange = (range: LogicalRange | null) => {
         if (!range || loadingMoreRef.current || !hasMoreRef.current) return;
-        if (range.from < 40) void loadMoreHistory();
+        const len = candlesRef.current.length;
+        if (needsLeftHistory(range, len)) void loadMoreHistoryRef.current();
       };
       chart.timeScale().subscribeVisibleLogicalRangeChange(onRange);
 
@@ -934,7 +1023,7 @@ export const PatternChartPanel = memo(function PatternChartPanel({
     } catch (e) {
       setErr(e instanceof Error ? e.message : "图表初始化失败");
     }
-  }, [symbol, timeframe, loadMoreHistory]);
+  }, [symbol, timeframe]);
 
   useEffect(() => {
     if (!data?.candles?.length || !seriesRef.current) return;
@@ -1093,7 +1182,11 @@ export const PatternChartPanel = memo(function PatternChartPanel({
             <>
               <p className="pattern-analysis-msg">{analysis?.message || "扫描形态结构中…"}</p>
               <ul className="pattern-marker-legend">
-                {MARKER_LEGEND.filter((m) => activeKinds.has(m.kind)).map((m) => (
+                {MARKER_LEGEND.filter(
+                  (m) =>
+                    activeKinds.has(m.kind) &&
+                    (layers.structure || !STRUCTURE_MARKER_KINDS.has(m.kind)),
+                ).map((m) => (
                   <li key={m.kind}>
                     <span className="legend-dot" style={{ background: m.color }} />
                     {m.label}
@@ -1138,7 +1231,7 @@ export const PatternChartPanel = memo(function PatternChartPanel({
                 {timeframe} · 已加载 {candleCount} 根
                 {lastCandleTime ? ` · 最新 ${formatCandleLocalTime(lastCandleTime)}` : ""}
                 {wsConnected ? " · 实时" : " · 连接中…"}
-                {loadingMore ? " · 加载更早…" : hasMore ? " · 左滑/缩小可加载更多" : " · 已到最早"}
+                {loadingMore ? " · 加载更早…" : hasMore ? " · 右拖/左滑看更早可续载" : " · 已到最早"}
               </p>
             </>
           )}
