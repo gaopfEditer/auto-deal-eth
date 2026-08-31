@@ -66,11 +66,41 @@ def list_pages(port: int) -> list[dict[str, Any]]:
     return [t for t in data if isinstance(t, dict) and t.get("type") == "page"]
 
 
+def pick_last_usable_page(port: int) -> Optional[dict[str, Any]]:
+    """选最后一个可用普通页签（跳过 chrome://、扩展页等）。"""
+    pages = list_pages(port)
+    if not pages:
+        return None
+    skip_prefix = (
+        "chrome://",
+        "chrome-extension://",
+        "devtools://",
+        "edge://",
+    )
+    usable: list[dict[str, Any]] = []
+    for p in pages:
+        u = str(p.get("url") or "").strip().lower()
+        if any(u.startswith(s) for s in skip_prefix):
+            continue
+        usable.append(p)
+    https = [
+        p
+        for p in usable
+        if str(p.get("url") or "").lower().startswith(("http://", "https://"))
+    ]
+    pool = https or usable or pages
+    return pool[-1] if pool else None
+
+
 def with_worker_hash(url: str) -> str:
     u = (url or "").strip()
     if not u:
         return u
     if WORKER_HASH in u:
+        return u
+    # Gemini / Google App 等 SPA：加 hash 可能导致路由异常、地址栏看似没跳转
+    host = (urlparse(u).netloc or "").lower()
+    if "gemini.google.com" in host or host.endswith("google.com"):
         return u
     p = urlparse(u)
     frag = p.fragment or ""
@@ -116,6 +146,67 @@ def activate_unix_pid(pid: int) -> None:
         )
     except Exception:
         pass
+
+
+def frontmost_hwnd() -> Optional[int]:
+    if sys.platform != "win32":
+        return None
+    try:
+        import ctypes
+
+        hwnd = int(ctypes.windll.user32.GetForegroundWindow() or 0)
+        return hwnd or None
+    except Exception:
+        return None
+
+
+def activate_hwnd(hwnd: int) -> None:
+    if sys.platform != "win32" or not hwnd:
+        return
+    try:
+        import ctypes
+
+        user32 = ctypes.windll.user32
+        # 允许跨进程抢回前台：AttachThreadInput 更稳
+        fg = int(user32.GetForegroundWindow() or 0)
+        if fg == int(hwnd):
+            return
+        cur_tid = int(user32.GetWindowThreadProcessId(fg, None) or 0) if fg else 0
+        tgt_tid = int(user32.GetWindowThreadProcessId(int(hwnd), None) or 0)
+        my_tid = int(ctypes.windll.kernel32.GetCurrentThreadId() or 0)
+        if cur_tid and my_tid and cur_tid != my_tid:
+            user32.AttachThreadInput(my_tid, cur_tid, True)
+        if tgt_tid and my_tid and tgt_tid != my_tid:
+            user32.AttachThreadInput(my_tid, tgt_tid, True)
+        user32.ShowWindow(int(hwnd), 9)  # SW_RESTORE
+        user32.SetForegroundWindow(int(hwnd))
+        if cur_tid and my_tid and cur_tid != my_tid:
+            user32.AttachThreadInput(my_tid, cur_tid, False)
+        if tgt_tid and my_tid and tgt_tid != my_tid:
+            user32.AttachThreadInput(my_tid, tgt_tid, False)
+    except Exception:
+        try:
+            import ctypes
+
+            ctypes.windll.user32.SetForegroundWindow(int(hwnd))
+        except Exception:
+            pass
+
+
+def capture_os_focus() -> dict[str, Any]:
+    return {"hwnd": frontmost_hwnd(), "pid": frontmost_unix_pid()}
+
+
+def restore_os_focus(prev: Optional[dict[str, Any]]) -> None:
+    if not prev:
+        return
+    time.sleep(0.05)
+    hwnd = prev.get("hwnd")
+    pid = prev.get("pid")
+    if hwnd:
+        activate_hwnd(int(hwnd))
+    if pid:
+        activate_unix_pid(int(pid))
 
 
 class SilentCdpBrowser:
@@ -233,12 +324,18 @@ class SilentCdpBrowser:
         except Exception:
             pass
 
+    def activate_target(self, target_id: str) -> None:
+        """把页签切到 Chrome 前台选中（可能短暂抢 OS 焦点，调用方需还焦）。"""
+        tid = str(target_id or "").strip()
+        if not tid:
+            return
+        self.call("Target.activateTarget", {"targetId": tid}, timeout=5)
+
     def navigate(self, session_id: str, url: str, *, timeout: float = 35.0) -> None:
         try:
             self.call("Page.enable", {}, session_id=session_id, timeout=8)
         except Exception:
             pass
-        # 绝不 bringToFront / activateTarget
         self.call(
             "Page.navigate",
             {"url": url},

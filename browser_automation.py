@@ -147,6 +147,117 @@ def verify_chrome_profile(user_data_dir: str, profile_name: str):
         print("[提示] Profile 目录存在，但无法读取详细信息")
         return True  # 仍然返回 True，因为目录存在
 
+def focus_last_tab(driver) -> bool:
+    """
+    仅记录/确认最后一个页签，不 Selenium switch_to（switch_to 会抢焦点）。
+    真正导航请用 navigate_in_last_tab。
+    """
+    try:
+        handles = list(driver.window_handles or [])
+    except Exception:
+        return False
+    return bool(handles)
+
+
+def navigate_in_last_tab(driver, url: str) -> None:
+    """在最后一个已有页签打开 URL。
+
+    CDP 导航 → activateTarget（页签可见）→ 卸静默绑定 → Selenium switch_to 末页签
+    → 立即还 OS 焦点，避免 Cursor 被抢走。
+    """
+    url = (url or "").strip()
+    if not url:
+        return
+
+    from binance.cdp_silent import capture_os_focus, restore_os_focus, set_binding
+
+    prev_focus = capture_os_focus()
+    try:
+        from binance.cdp_navigation import cdp_goto
+
+        session = cdp_goto(
+            driver,
+            url,
+            page_load_timeout=90,
+            log_prefix="CDP-last-tab",
+            last_tab=True,
+            persistent=False,
+        )
+        href = ""
+        try:
+            if session and session.binding:
+                href = str(session.binding.current_url() or "")
+        except Exception:
+            href = ""
+        print(f"[OK] 静默 CDP 已在最后一页签打开: {url[:80]}")
+        if href:
+            print(f"[OK] 校验 location.href: {href[:120]}")
+
+        # 卸静默绑定：后续 Gemini 用完整 Selenium（SilentWebElement 半残会卡住）
+        set_binding(driver, None)
+        tid = str((session.target_id if session else "") or "")
+        handles = list(driver.window_handles or [])
+        switched = False
+        if tid and handles:
+            for h in handles:
+                hs = str(h or "")
+                if hs == tid or tid in hs or hs.endswith(tid) or hs.replace("CDwindow-", "") == tid:
+                    driver.switch_to.window(h)
+                    switched = True
+                    break
+        if not switched and handles:
+            driver.switch_to.window(handles[-1])
+        try:
+            cur = str(driver.current_url or "")
+        except Exception:
+            cur = ""
+        # 若可见页签仍不是目标域，再 Selenium get 一次（保证你能看见打开）
+        want = (url.split("://", 1)[-1].split("/", 1)[0] or "").lower()
+        if want and want not in cur.lower():
+            print(f"[WARN] 末页签 URL 不匹配（{cur[:60] or '空'}），Selenium 再 get 一次")
+            driver.get(url)
+            try:
+                cur = str(driver.current_url or "")
+            except Exception:
+                cur = ""
+        print(f"[OK] 已切到可见末页签，Selenium current_url={cur[:120] or '(空)'}")
+        return
+    except Exception as e:
+        print(f"[WARN] 静默 CDP 导航失败，尝试还焦回退: {e}")
+        try:
+            set_binding(driver, None)
+        except Exception:
+            pass
+
+        try:
+            handles = list(driver.window_handles or [])
+        except Exception:
+            handles = []
+        if not handles:
+            try:
+                driver.execute_cdp_cmd(
+                    "Target.createTarget",
+                    {"url": "about:blank", "background": True},
+                )
+                time.sleep(0.15)
+                handles = list(driver.window_handles or [])
+            except Exception:
+                pass
+        if handles:
+            try:
+                driver.switch_to.window(handles[-1])
+            except Exception:
+                pass
+        try:
+            driver.get(url)
+            print(f"[OK] Selenium 回退已打开: {url[:80]}")
+        except Exception as e2:
+            print(f"[ERROR] 导航失败: {e2}")
+            raise
+    finally:
+        restore_os_focus(prev_focus)
+
+
 def init_browser(use_remote_debugging: Optional[bool] = None):
     """
     初始化浏览器。
@@ -172,7 +283,8 @@ def init_browser(use_remote_debugging: Optional[bool] = None):
                 # 如果 webdriver-manager 失败，尝试直接使用系统 ChromeDriver
                 driver = webdriver.Chrome(options=chrome_options)
             
-            print("[OK] 成功连接到已运行的Chrome浏览器")
+            # 连接后不 switch_to，避免抢焦点；具体打开 URL 时走静默 CDP
+            print("[OK] 成功连接到已运行的Chrome浏览器（不抢焦点）")
             return driver
         
         # 否则，直接打开浏览器（可以使用指定的 Profile）

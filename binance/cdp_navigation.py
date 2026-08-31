@@ -183,6 +183,33 @@ def _get_or_create_browser(driver, *, timeout: float) -> SilentCdpBrowser:
     return browser
 
 
+def _resolve_selenium_last_target_id(driver, port: int) -> Optional[str]:
+    """用 Selenium window_handles[-1] 对齐「最后一个页签」，再映射到 CDP targetId。"""
+    from binance.cdp_silent import list_pages
+
+    try:
+        handles = list(driver.window_handles or [])
+    except Exception:
+        handles = []
+    if not handles:
+        return None
+    cand = str(handles[-1] or "").strip()
+    if not cand:
+        return None
+    pages = list_pages(port)
+    ids = {str(p.get("id") or "") for p in pages}
+    if cand in ids:
+        return cand
+    raw = cand[9:] if cand.startswith("CDwindow-") else cand
+    if raw in ids:
+        return raw
+    for p in pages:
+        pid = str(p.get("id") or "")
+        if pid and (pid in cand or cand in pid):
+            return pid
+    return None
+
+
 def _ensure_silent_worker(
     driver,
     url: str,
@@ -190,8 +217,13 @@ def _ensure_silent_worker(
     page_load_timeout: int,
     log_prefix: str,
     persistent: bool,
+    last_tab: bool = False,
 ) -> CdpNavSession:
-    """纯 CDP 建/复用 worker 并导航；绑定 driver；不 switch_to。"""
+    """纯 CDP 建/复用 worker 并导航；绑定 driver；不 switch_to。
+
+    last_tab=True：强制附着「最后一个可用页签」（Gemini/TTI），
+    不用旧的持久 worker，也不给 URL 强加 worker hash。
+    """
     main_handle = _safe_current_handle(driver)
     keep = not _close_worker_on_restore()
     browser = _get_or_create_browser(
@@ -201,35 +233,109 @@ def _ensure_silent_worker(
     created = False
     tid: Optional[str] = None
 
-    if persistent:
-        entry = _PERSISTENT_WORKERS.get(key)
-        if entry and entry.get("target_id"):
-            tid = str(entry["target_id"])
-            from binance.cdp_silent import list_pages
+    if last_tab:
+        from binance.cdp_silent import pick_last_usable_page
 
-            pages = {str(p.get("id") or "") for p in list_pages(browser.port)}
-            if tid not in pages:
-                _warn("持久 worker 标签已失效，将重新创建", prefix=log_prefix)
-                _PERSISTENT_WORKERS.pop(key, None)
-                tid = None
+        tid = _resolve_selenium_last_target_id(driver, browser.port)
+        if tid:
+            prev_url = ""
+            try:
+                from binance.cdp_silent import list_pages
 
-    if not tid:
-        prev = frontmost_unix_pid() if _preserve_focus_enabled() else None
-        tid = browser.create_background_page("about:blank")
-        created = True
-        _log("后台新建静默 worker（background=true，不 activate）", prefix=log_prefix)
-        if prev is not None:
-            time.sleep(0.05)
-            activate_unix_pid(prev)
+                for p in list_pages(browser.port):
+                    if str(p.get("id") or "") == tid:
+                        prev_url = str(p.get("url") or "")
+                        break
+            except Exception:
+                pass
+            _log(
+                f"last_tab 附着 Selenium 末页签 {tid[:16]}…（当前: {prev_url[:80] or '空'}）",
+                prefix=log_prefix,
+            )
+        else:
+            last = pick_last_usable_page(browser.port)
+            if last:
+                tid = str(last.get("id") or "") or None
+                prev_url = str(last.get("url") or "")
+                _log(
+                    f"last_tab 附着 /json 末可用页 {tid and tid[:16]}…（当前: {prev_url[:80] or '空'}）",
+                    prefix=log_prefix,
+                )
+        if not tid:
+            prev = frontmost_unix_pid() if _preserve_focus_enabled() else None
+            tid = browser.create_background_page("about:blank")
+            created = True
+            _log("last_tab 无可用页签，后台新建一次", prefix=log_prefix)
+            if prev is not None:
+                time.sleep(0.05)
+                activate_unix_pid(prev)
     else:
-        _log("复用静默 worker 标签跳转", prefix=log_prefix)
+        if persistent:
+            entry = _PERSISTENT_WORKERS.get(key)
+            if entry and entry.get("target_id"):
+                tid = str(entry["target_id"])
+                from binance.cdp_silent import list_pages
+
+                pages = {str(p.get("id") or "") for p in list_pages(browser.port)}
+                if tid not in pages:
+                    _warn("持久 worker 标签已失效，将重新选择", prefix=log_prefix)
+                    _PERSISTENT_WORKERS.pop(key, None)
+                    tid = None
+
+        if not tid:
+            from binance.cdp_silent import pick_last_usable_page
+
+            last = pick_last_usable_page(browser.port)
+            if last:
+                tid = str(last.get("id") or "") or None
+                created = False
+                _log(
+                    f"复用页签导航（{str(last.get('url') or '')[:60]}）",
+                    prefix=log_prefix,
+                )
+            if not tid:
+                prev = frontmost_unix_pid() if _preserve_focus_enabled() else None
+                tid = browser.create_background_page("about:blank")
+                created = True
+                _log("无可用页签，后台新建静默 worker（仅此一次）", prefix=log_prefix)
+                if prev is not None:
+                    time.sleep(0.05)
+                    activate_unix_pid(prev)
+        else:
+            _log("复用静默 worker 标签跳转", prefix=log_prefix)
 
     sid = browser.attach(tid)
-    target_url = with_worker_hash(url)
+    # last_tab / Gemini：不加 worker hash，避免 SPA 路由异常
+    target_url = url if last_tab else with_worker_hash(url)
+    _log(f"CDP Page.navigate → {target_url[:100]}", prefix=log_prefix)
     browser.navigate(sid, target_url, timeout=float(page_load_timeout))
-    _log(f"worker 内静默 CDP 跳转 → {url}", prefix=log_prefix)
 
-    if persistent:
+    try:
+        href = str(browser.evaluate(sid, "location.href") or "")
+    except Exception:
+        href = ""
+    _log(f"导航后 location.href = {href[:120] or '(空)'}", prefix=log_prefix)
+    want_host = (urlparse(url).netloc or "").lower()
+    got_host = (urlparse(href).netloc or "").lower()
+    if want_host and got_host and want_host not in got_host and got_host not in want_host:
+        raise SilentCdpError(
+            f"静默导航未落地：期望 {want_host}，实际 {got_host or href or '空'}"
+        )
+
+    # last_tab：必须 activate，否则 Chrome 不切可见页签，Gemini SPA 也可能不完成渲染
+    if last_tab and tid:
+        from binance.cdp_silent import capture_os_focus, restore_os_focus
+
+        prev_focus = capture_os_focus()
+        try:
+            browser.activate_target(tid)
+            _log("已 Target.activateTarget（页签应可见）", prefix=log_prefix)
+        except Exception as e:
+            _warn(f"activateTarget 失败: {e}", prefix=log_prefix)
+        finally:
+            restore_os_focus(prev_focus)
+
+    if persistent or last_tab:
         _PERSISTENT_WORKERS[key] = {"handle": tid, "target_id": tid}
 
     binding = SilentDriverBinding(
@@ -276,9 +382,11 @@ def cdp_goto(
     page_load_timeout: int = 90,
     log_prefix: str = "CDP",
     persistent: Optional[bool] = None,
+    last_tab: bool = False,
 ) -> CdpNavSession:
     """
-    在后台 worker 打开 url，不替换用户当前前台标签，不 Selenium switch_to。
+    静默打开 url，不 Selenium switch_to。
+    last_tab=True：在最后一个可用页签打开（Gemini/TTI 用）。
     """
     chart_url = (url or "").strip()
     if not chart_url:
@@ -286,7 +394,7 @@ def cdp_goto(
 
     use_persistent = _persistent_worker_mode() if persistent is None else bool(persistent)
 
-    if _same_tab_mode():
+    if _same_tab_mode() and not last_tab:
         _log("CDP_NAV_SAME_TAB=1：在当前标签导航（会抢焦点）", prefix=log_prefix)
         driver.set_page_load_timeout(page_load_timeout)
         driver.get(chart_url)
@@ -300,9 +408,16 @@ def cdp_goto(
         )
 
     if not _silent_mode():
-        _warn("CDP_SILENT=0：回退 Selenium new_window（会抢焦点）", prefix=log_prefix)
+        _warn("CDP_SILENT=0：回退 Selenium（可能抢焦点）", prefix=log_prefix)
         main_handle = _safe_current_handle(driver)
-        driver.switch_to.new_window("tab")
+        handles = list(driver.window_handles or [])
+        if handles:
+            try:
+                driver.switch_to.window(handles[-1])
+            except Exception:
+                pass
+        else:
+            driver.switch_to.new_window("tab")
         driver.set_page_load_timeout(page_load_timeout)
         driver.get(chart_url)
         return CdpNavSession(
@@ -321,12 +436,17 @@ def cdp_goto(
             page_load_timeout=page_load_timeout,
             log_prefix=log_prefix,
             persistent=use_persistent,
+            last_tab=last_tab,
         )
     except SilentCdpError as e:
         _warn(f"静默 CDP 失败，回退 Selenium（会抢焦点）: {e}", prefix=log_prefix)
         main_handle = _safe_current_handle(driver)
         try:
-            driver.switch_to.new_window("tab")
+            handles = list(driver.window_handles or [])
+            if handles:
+                driver.switch_to.window(handles[-1])
+            else:
+                driver.switch_to.new_window("tab")
             driver.set_page_load_timeout(page_load_timeout)
             driver.get(chart_url)
             return CdpNavSession(

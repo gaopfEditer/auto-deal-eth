@@ -38,7 +38,7 @@ def analyze_with_gemini_web(
 
     clipboard_only: 仅通过剪贴板粘贴图片，不查找 ``input[type=file]`` /「上传文件」等 UI。
     """
-    from browser_automation import init_browser
+    from browser_automation import init_browser, navigate_in_last_tab
 
     driver = init_browser()
     analysis_result = None
@@ -80,8 +80,8 @@ def analyze_with_gemini_web(
         analysis_prompt = prompt if prompt else default_prompt
         
         print(f"  正在打开 Gemini 网页版...")
-        # 打开 Gemini 网页版
-        driver.get("https://gemini.google.com")
+        # 打开 Gemini 网页版（复用最后一个页签，不新建）
+        navigate_in_last_tab(driver, "https://gemini.google.com")
         time.sleep(5)  # 等待页面加载
         
         # 等待页面元素加载
@@ -1425,12 +1425,12 @@ def analyze_resources_with_gemini_web(
         return t.startswith("http://") or t.startswith("https://")
 
     def _screenshot_url_to_temp_image(url: str) -> Optional[str]:
-        from browser_automation import init_browser
+        from browser_automation import init_browser, navigate_in_last_tab
 
         driver = None
         try:
             driver = init_browser()
-            driver.get(url)
+            navigate_in_last_tab(driver, url)
             wait_sec = int(os.getenv("GEMINI_WEB_URL_SCREENSHOT_WAIT", "12"))
             if wait_sec > 0:
                 time.sleep(wait_sec)
@@ -1590,7 +1590,7 @@ def generate_image_with_gemini_web(
 
     依赖与 analyze_with_gemini_web 相同：``init_browser()``（可用 CDP 远程调试已登录账号）。
     """
-    from browser_automation import init_browser
+    from browser_automation import init_browser, navigate_in_last_tab
 
     p = (prompt or "").strip()
     if not p:
@@ -1610,10 +1610,11 @@ def generate_image_with_gemini_web(
         driver = init_browser()
         gemini_url = os.getenv("GEMINI_WEB_URL", "https://gemini.google.com/app").strip()
         print(f"  [tti] 打开 Gemini: {gemini_url}", file=sys.stderr)
-        driver.get(gemini_url)
-        time.sleep(float(os.getenv("GEMINI_WEB_TTI_OPEN_WAIT", "4")))
-
-        # 定位输入框（与分析流类似的多选择器）
+        navigate_in_last_tab(driver, gemini_url)
+        wait_open = float(os.getenv("GEMINI_WEB_TTI_OPEN_WAIT", "4"))
+        print(f"  [tti] 等待页面就绪 {wait_open:.0f}s…", file=sys.stderr)
+        time.sleep(wait_open)
+        print("  [tti] 查找输入框…", file=sys.stderr)
         text_input = None
         for sel in (
             "div.ql-editor.textarea",

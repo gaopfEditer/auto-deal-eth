@@ -1,0 +1,8 @@
+{
+  "ok": false,
+  "error": "未抓到生成图，已保存整页截图供排查（账号是否支持出图？）",
+  "images": [
+    "D:\\frontend\\main\\python\\TrendRadar\\output\\lab_media\\20260831_173602_f12430ca\\FNTzysR3qsxwAnh2WBTiaU_37d134f0_page.png"
+  ],
+  "method": "web_tti_fallback_screenshot"
+}

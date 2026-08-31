@@ -1,0 +1,15 @@
+{
+  "ok": false,
+  "domain_tag": "FNTzysR3qsxwAnh2WBTiaU",
+  "prompt_name": "<inline>",
+  "run_id": "20260831_174049_4d538f61",
+  "history_dir": "D:\\frontend\\main\\python\\auto-deal-eth\\browser_media_runner\\history\\tti_20260831_174049_4d538f61",
+  "out_dir": "D:\\frontend\\main\\python\\TrendRadar\\output\\lab_media\\20260831_174049_6e604f16",
+  "images": [],
+  "web_result": {
+    "ok": false,
+    "error": "未找到 Gemini 输入框（请确认已登录且页面加载完成）",
+    "images": []
+  },
+  "error": "未找到 Gemini 输入框（请确认已登录且页面加载完成）"
+}
