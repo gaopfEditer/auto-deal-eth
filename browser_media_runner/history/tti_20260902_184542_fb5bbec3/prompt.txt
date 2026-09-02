@@ -1,0 +1,13 @@
+请直接生成一张 16:9 社交媒体配图横幅。
+画面上必须用清晰、高对比的中文大字标出下列内容（不要英文堆砌、不要水印、不要真人脸）：
+主标题（最大字）：「Web3 主战场在 X、TG、Discord，IG 只是炫富台」
+次级要点（小字或标签，逐条出现在图上）：
+  1. X (Twitter) 是 Web3 总议事厅与定价中心
+  2. Telegram 用于 Alpha 信号与空投指令
+  3. Discord 用 Token-Gating 实现精准变现
+  4. Farcaster 的 Frames 支持链上交互
+  5. Lens 协议实现带粉搬家
+  6. IG/TikTok 仅做小白破圈引流
+画面意象：一扇大门上写着 X/TG/Discord，旁边小门写着 IG/TikTok
+文章语境：web3的不应该到Instagram / Facebook、tiktok？国外有没有哪些平台时候web3 kol分发，哪
+风格：深色背景、资讯/行情氛围、文字可读优先；禁止空泛口号（如「未来已来」「抓住红利」）；不要大段正文粘贴。

@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "domain_tag": "UoMYKazn5eZx4HLh9auh4v",
+  "prompt_name": "<inline>",
+  "run_id": "20260902_184507_40b8f03e",
+  "history_dir": "D:\\frontend\\main\\python\\auto-deal-eth\\browser_media_runner\\history\\tti_20260902_184507_40b8f03e",
+  "out_dir": "D:\\frontend\\main\\python\\TrendRadar\\output\\lab_media\\20260902_183802_26a70c7b",
+  "images": [
+    "D:\\frontend\\main\\python\\TrendRadar\\output\\lab_media\\20260902_183802_26a70c7b\\UoMYKazn5eZx4HLh9auh4v_0_def9027c.png"
+  ],
+  "web_result": {
+    "ok": true,
+    "images": [
+      "D:\\frontend\\main\\python\\TrendRadar\\output\\lab_media\\20260902_183802_26a70c7b\\UoMYKazn5eZx4HLh9auh4v_0_def9027c.png"
+    ],
+    "count": 1,
+    "method": "web_tti",
+    "tag": "UoMYKazn5eZx4HLh9auh4v"
+  }
+}
