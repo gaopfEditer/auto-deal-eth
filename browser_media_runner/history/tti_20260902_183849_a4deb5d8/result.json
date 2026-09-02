@@ -1,0 +1,20 @@
+{
+  "ok": false,
+  "domain_tag": "AdLK8BQK33GyyrXTiLueH6",
+  "prompt_name": "<inline>",
+  "run_id": "20260902_183849_a4deb5d8",
+  "history_dir": "D:\\frontend\\main\\python\\auto-deal-eth\\browser_media_runner\\history\\tti_20260902_183849_a4deb5d8",
+  "out_dir": "D:\\frontend\\main\\python\\TrendRadar\\output\\lab_media\\20260902_183802_26a70c7b",
+  "images": [
+    "D:\\frontend\\main\\python\\TrendRadar\\output\\lab_media\\20260902_183802_26a70c7b\\AdLK8BQK33GyyrXTiLueH6_df9eb0c8_page.png"
+  ],
+  "web_result": {
+    "ok": false,
+    "error": "未抓到生成图，已保存整页截图供排查（账号是否支持出图？）",
+    "images": [
+      "D:\\frontend\\main\\python\\TrendRadar\\output\\lab_media\\20260902_183802_26a70c7b\\AdLK8BQK33GyyrXTiLueH6_df9eb0c8_page.png"
+    ],
+    "method": "web_tti_fallback_screenshot"
+  },
+  "error": "未抓到生成图，已保存整页截图供排查（账号是否支持出图？）"
+}
