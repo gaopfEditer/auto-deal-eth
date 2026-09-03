@@ -399,6 +399,67 @@ class SilentCdpBrowser:
             expr = f"(function(){{ const arguments = {args_js}; {js_function_body} }})()"
         return self.evaluate(session_id, expr, await_promise=await_promise)
 
+    def evaluate_object_id(self, session_id: str, expression: str) -> str:
+        res = self.call(
+            "Runtime.evaluate",
+            {
+                "expression": expression,
+                "returnByValue": False,
+                "awaitPromise": False,
+            },
+            session_id=session_id,
+        )
+        exc = res.get("exceptionDetails")
+        if exc:
+            desc = (exc.get("exception") or {}).get("description") or exc.get("text") or exc
+            raise SilentCdpError(f"JS 异常: {desc}")
+        oid = str((res.get("result") or {}).get("objectId") or "")
+        if not oid:
+            raise SilentCdpError("Runtime.evaluate 未返回 objectId")
+        return oid
+
+    def set_file_input_files(
+        self, session_id: str, resolve_js: str, paths: list[str]
+    ) -> None:
+        files = [
+            os.path.abspath(os.path.expanduser(str(p).strip()))
+            for p in paths
+            if str(p).strip()
+        ]
+        if not files:
+            return
+        missing = [p for p in files if not os.path.isfile(p)]
+        if missing:
+            raise SilentCdpError(f"上传文件不存在: {missing[0]}")
+        try:
+            self.call("DOM.enable", {}, session_id=session_id, timeout=8)
+        except Exception:
+            pass
+        try:
+            self.call("DOM.getDocument", {"depth": 0}, session_id=session_id, timeout=8)
+        except Exception:
+            pass
+        oid = self.evaluate_object_id(session_id, resolve_js)
+        params: dict[str, Any] = {"files": files, "objectId": oid}
+        try:
+            desc = self.call(
+                "DOM.describeNode",
+                {"objectId": oid},
+                session_id=session_id,
+                timeout=8,
+            )
+            backend = (desc.get("node") or {}).get("backendNodeId")
+            if backend:
+                params["backendNodeId"] = int(backend)
+        except Exception:
+            pass
+        self.call(
+            "DOM.setFileInputFiles",
+            params,
+            session_id=session_id,
+            timeout=20,
+        )
+
     def click_at(
         self,
         session_id: str,
@@ -439,23 +500,25 @@ class SilentCdpBrowser:
 
 
 class SilentWebElement:
-    """仅用于静默 CDP 绑定下的 find_element 结果；可交给 execute_script / 坐标点击。"""
+    """静默 CDP 下的 find_element 结果，对齐 Selenium WebElement 常用接口。"""
 
     def __init__(self, resolve_js: str, *, binding: "SilentDriverBinding") -> None:
         self.resolve_js = resolve_js
         self._binding = binding
         self.id = f"silent-{abs(hash(resolve_js)) & 0xFFFFFFFF:08x}"
 
+    def _js(self, body: str, *args: Any) -> Any:
+        return self._binding.evaluate_fn(body, self, *args)
+
     @property
     def rect(self) -> dict[str, float]:
-        box = self._binding.evaluate_fn(
+        box = self._js(
             """
 const el = arguments[0];
 if (!el || !el.getBoundingClientRect) return {x:0,y:0,width:0,height:0};
 const r = el.getBoundingClientRect();
 return {x:r.x, y:r.y, width:r.width, height:r.height};
-""",
-            self,
+"""
         )
         if not isinstance(box, dict):
             return {"x": 0, "y": 0, "width": 0, "height": 0}
@@ -466,10 +529,103 @@ return {x:r.x, y:r.y, width:r.width, height:r.height};
             "height": float(box.get("height") or 0),
         }
 
+    @property
+    def location(self) -> dict[str, float]:
+        r = self.rect
+        return {"x": r["x"], "y": r["y"]}
+
+    @property
+    def size(self) -> dict[str, float]:
+        r = self.rect
+        return {"width": r["width"], "height": r["height"]}
+
+    @property
+    def tag_name(self) -> str:
+        try:
+            return str(
+                self._js(
+                    "const el = arguments[0]; return el ? String(el.tagName || '').toLowerCase() : '';"
+                )
+                or ""
+            )
+        except Exception:
+            return ""
+
+    @property
+    def text(self) -> str:
+        try:
+            return str(
+                self._js(
+                    "const el = arguments[0]; return el ? String(el.innerText || el.textContent || '') : '';"
+                )
+                or ""
+            )
+        except Exception:
+            return ""
+
+    def get_property(self, name: str) -> Any:
+        return self._js(
+            "const el = arguments[0]; return el == null ? null : el[arguments[1]];",
+            name,
+        )
+
+    def get_dom_attribute(self, name: str) -> Optional[str]:
+        val = self._js(
+            "const el = arguments[0]; return el ? el.getAttribute(arguments[1]) : null;",
+            name,
+        )
+        return None if val is None else str(val)
+
+    def get_attribute(self, name: str) -> Optional[str]:
+        val = self._js(
+            """
+const el = arguments[0];
+const name = String(arguments[1] || '');
+if (!el || !name) return null;
+const boolNames = {
+  checked:1, disabled:1, selected:1, required:1, readonly:1, multiple:1,
+  hidden:1, async:1, defer:1, autoplay:1, controls:1, loop:1, muted:1
+};
+if (boolNames[name]) {
+  if (el[name]) return 'true';
+  const a = el.getAttribute(name);
+  if (a === '' || a === name || String(a).toLowerCase() === 'true') return 'true';
+  return null;
+}
+if (name === 'value') return el.value == null ? null : String(el.value);
+if (name === 'innerHTML') return el.innerHTML == null ? null : String(el.innerHTML);
+if (name === 'innerText') return el.innerText == null ? null : String(el.innerText);
+if (name === 'textContent') return el.textContent == null ? null : String(el.textContent);
+const prop = el[name];
+if (typeof prop === 'boolean') return prop ? 'true' : null;
+if (typeof prop === 'string' || typeof prop === 'number') return String(prop);
+const a = el.getAttribute(name);
+return a == null ? null : String(a);
+""",
+            name,
+        )
+        return None if val is None else str(val)
+
+    def value_of_css_property(self, property_name: str) -> str:
+        try:
+            return str(
+                self._js(
+                    """
+const el = arguments[0];
+if (!el) return '';
+return window.getComputedStyle(el).getPropertyValue(arguments[1]) || '';
+""",
+                    property_name,
+                )
+                or ""
+            )
+        except Exception:
+            return ""
+
     def is_displayed(self) -> bool:
         try:
             return bool(
-                self._binding.evaluate_fn(
+                self._js(
                     """
 const el = arguments[0];
 if (!el) return false;
@@ -477,8 +633,7 @@ const st = window.getComputedStyle(el);
 if (st && (st.visibility === 'hidden' || st.display === 'none')) return false;
 const r = el.getBoundingClientRect();
 return r.width > 0 && r.height > 0;
-""",
-                    self,
+"""
                 )
             )
         except Exception:
@@ -487,36 +642,194 @@ return r.width > 0 && r.height > 0;
     def is_enabled(self) -> bool:
         try:
             return bool(
-                self._binding.evaluate_fn(
-                    "const el = arguments[0]; return !!(el && !el.disabled);",
-                    self,
-                )
+                self._js("const el = arguments[0]; return !!(el && !el.disabled);")
             )
         except Exception:
             return True
 
-    def click(self) -> None:
-        self._binding.evaluate_fn(
-            "const el = arguments[0]; if (el) el.click();",
-            self,
-        )
+    def is_selected(self) -> bool:
+        try:
+            return bool(
+                self._js(
+                    "const el = arguments[0]; return !!(el && (el.checked || el.selected));"
+                )
+            )
+        except Exception:
+            return False
 
-    def send_keys(self, *value: str) -> None:
-        text = "".join(str(v) for v in value)
-        self._binding.evaluate_fn(
+    def click(self) -> None:
+        self._js("const el = arguments[0]; if (el) el.click();")
+
+    def clear(self) -> None:
+        self._js(
             """
 const el = arguments[0];
-const t = String(arguments[1] || '');
 if (!el) return;
 el.focus && el.focus();
 if ('value' in el) {
-  el.value = (el.value || '') + t;
+  el.value = '';
   el.dispatchEvent(new Event('input', {bubbles:true}));
+  el.dispatchEvent(new Event('change', {bubbles:true}));
+} else if (el.isContentEditable) {
+  el.textContent = '';
+  el.dispatchEvent(new InputEvent('input', {bubbles:true}));
 }
+"""
+        )
+
+    def _is_file_input(self) -> bool:
+        try:
+            return bool(
+                self._js(
+                    """
+const el = arguments[0];
+return !!(el && el.tagName === 'INPUT' && String(el.type || '').toLowerCase() === 'file');
+"""
+                )
+            )
+        except Exception:
+            return False
+
+    def _select_all(self) -> None:
+        self._js(
+            """
+const el = arguments[0];
+if (!el) return;
+el.focus && el.focus();
+if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+  try { el.select(); } catch (_) {}
+  return;
+}
+const sel = window.getSelection();
+const range = document.createRange();
+range.selectNodeContents(el);
+sel.removeAllRanges();
+sel.addRange(range);
+"""
+        )
+
+    def _move_caret_end(self) -> None:
+        self._js(
+            """
+const el = arguments[0];
+if (!el) return;
+el.focus && el.focus();
+if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+  const len = (el.value || '').length;
+  try { el.setSelectionRange(len, len); } catch (_) {}
+  return;
+}
+const sel = window.getSelection();
+const range = document.createRange();
+range.selectNodeContents(el);
+range.collapse(false);
+sel.removeAllRanges();
+sel.addRange(range);
+"""
+        )
+
+    def _delete_key(self) -> None:
+        self._js(
+            """
+const el = arguments[0];
+if (!el) return;
+el.focus && el.focus();
+if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+  const v = el.value || '';
+  let start = el.selectionStart == null ? v.length : el.selectionStart;
+  let end = el.selectionEnd == null ? v.length : el.selectionEnd;
+  if (start !== end) {
+    el.value = v.slice(0, start) + v.slice(end);
+  } else if (start > 0) {
+    el.value = v.slice(0, start - 1) + v.slice(start);
+    start -= 1;
+  }
+  try { el.setSelectionRange(start, start); } catch (_) {}
+  el.dispatchEvent(new Event('input', {bubbles:true}));
+  return;
+}
+document.execCommand('delete', false, null);
+el.dispatchEvent(new InputEvent('input', {bubbles:true}));
+"""
+        )
+
+    def _insert_text(self, text: str) -> None:
+        if not text:
+            return
+        self._js(
+            """
+const el = arguments[0];
+const t = String(arguments[1] || '');
+if (!el || !t) return;
+el.focus && el.focus();
+if ('value' in el && el.tagName !== 'BODY') {
+  const tag = String(el.tagName || '').toUpperCase();
+  if (tag === 'TEXTAREA' || tag === 'INPUT') {
+    const v = el.value || '';
+    let start = el.selectionStart == null ? v.length : el.selectionStart;
+    let end = el.selectionEnd == null ? v.length : el.selectionEnd;
+    el.value = v.slice(0, start) + t + v.slice(end);
+    const pos = start + t.length;
+    try { el.setSelectionRange(pos, pos); } catch (_) {}
+    el.dispatchEvent(new Event('input', {bubbles:true}));
+    return;
+  }
+}
+try {
+  document.execCommand('insertText', false, t);
+} catch (_) {
+  el.appendChild(document.createTextNode(t));
+}
+el.dispatchEvent(new InputEvent('input', {bubbles:true, data: t}));
 """,
-            self,
             text,
         )
+
+    def send_keys(self, *value: Any) -> None:
+        from selenium.webdriver.common.keys import Keys
+
+        raw = "".join("" if v is None else str(v) for v in value)
+        if self._is_file_input():
+            cleaned = "".join(
+                ch for ch in raw if not (0xE000 <= ord(ch) <= 0xF8FF)
+            )
+            paths = [p.strip() for p in cleaned.split("\n") if p.strip()]
+            self._binding.browser.set_file_input_files(
+                self._binding.session_id, self.resolve_js, paths
+            )
+            return
+
+        meta = Keys.COMMAND in raw or Keys.CONTROL in raw or Keys.META in raw
+        letters = "".join(
+            ch for ch in raw if not (0xE000 <= ord(ch) <= 0xF8FF)
+        )
+        if meta and letters.lower() == "a":
+            if Keys.BACKSPACE in raw or Keys.DELETE in raw or Keys.CLEAR in raw:
+                self.clear()
+            else:
+                self._select_all()
+            return
+        if meta and Keys.END in raw:
+            self._move_caret_end()
+            return
+        if (not letters) and (
+            Keys.BACKSPACE in raw or Keys.DELETE in raw or Keys.CLEAR in raw
+        ):
+            self._delete_key()
+            return
+        if Keys.RETURN in raw or Keys.ENTER in raw:
+            raw = raw.replace(Keys.RETURN, "\n").replace(Keys.ENTER, "\n")
+        if Keys.TAB in raw:
+            raw = raw.replace(Keys.TAB, "\t")
+        if meta:
+            # 未知组合键：只保留可打印字符，绝不把 \ue03d 写进正文
+            if letters:
+                self._insert_text(letters)
+            return
+        text = "".join(ch for ch in raw if not (0xE000 <= ord(ch) <= 0xF8FF))
+        if not text:
+            return
+        self._insert_text(text)
 
 
 class SilentDriverBinding:
@@ -602,18 +915,21 @@ class SilentDriverBinding:
             # 兜底：当 CSS 用
             return f"document.querySelector({json.dumps(value)})"
 
+        def _cmd(*attrs: str) -> tuple:
+            # Selenium 4 已删 JSON Wire 常量（EXECUTE_SCRIPT 等），必须 getattr
+            return tuple(getattr(Command, a) for a in attrs if hasattr(Command, a))
+
         def execute(driver_command: Any, params: Any = None):  # noqa: ANN001
             params = params or {}
             # W3C / 旧命令名兼容
             name = str(driver_command)
 
-            if driver_command in (Command.NEW_WINDOW,) or name.endswith("newWindow"):
+            if driver_command in _cmd("NEW_WINDOW") or name.endswith("newWindow"):
                 # 禁止 Selenium 新开窗抢焦
                 raise SilentCdpError("静默模式禁止 driver 新开窗；请用 CDP background createTarget")
 
-            if driver_command in (
-                Command.SWITCH_TO_WINDOW,
-                getattr(Command, "W3C_SWITCH_TO_WINDOW", "switchToWindow"),
+            if driver_command in _cmd(
+                "SWITCH_TO_WINDOW", "W3C_SWITCH_TO_WINDOW"
             ) or "switchToWindow" in name or name == "switchToWindow":
                 handle = str((params or {}).get("handle") or "")
                 page_ids = {
@@ -636,35 +952,34 @@ class SilentDriverBinding:
                         pass
                 return {"value": None}
 
-            if driver_command in (Command.GET,):
+            if driver_command in _cmd("GET"):
                 url = str((params or {}).get("url") or "")
                 binding.navigate(url, timeout=40)
                 return {"value": None}
 
-            if driver_command in (Command.GET_CURRENT_URL,):
+            if driver_command in _cmd("GET_CURRENT_URL"):
                 return {"value": binding.current_url()}
 
-            if driver_command in (Command.GET_TITLE,):
+            if driver_command in _cmd("GET_TITLE"):
                 try:
                     return {"value": str(binding.evaluate("document.title") or "")}
                 except Exception:
                     return {"value": ""}
 
-            if driver_command in (Command.GO_BACK,):
+            if driver_command in _cmd("GO_BACK"):
                 binding.evaluate("window.history.back()")
                 time.sleep(0.35)
                 binding.browser.wait_ready(binding.session_id, timeout=20)
                 return {"value": None}
 
-            if driver_command in (Command.REFRESH,):
+            if driver_command in _cmd("REFRESH"):
                 binding.evaluate("location.reload()")
                 binding.browser.wait_ready(binding.session_id, timeout=40)
                 return {"value": None}
 
-            if driver_command in (
-                Command.W3C_EXECUTE_SCRIPT,
-                Command.EXECUTE_SCRIPT,
-            ):
+            if driver_command in _cmd(
+                "W3C_EXECUTE_SCRIPT", "EXECUTE_SCRIPT"
+            ) or "executeScript" in name:
                 script = str((params or {}).get("script") or "")
                 args = list((params or {}).get("args") or [])
                 # Selenium 可能把 SilentWebElement 序列化坏了；绑定层走 evaluate_fn
@@ -683,9 +998,8 @@ class SilentDriverBinding:
                 val = binding.evaluate_fn(script, *real_args)
                 return {"value": val}
 
-            if driver_command in (
-                Command.FIND_ELEMENT,
-                getattr(Command, "W3C_FIND_ELEMENT", "findElement"),
+            if driver_command in _cmd(
+                "FIND_ELEMENT", "W3C_FIND_ELEMENT"
             ) or name in ("findElement",):
                 using = str((params or {}).get("using") or "")
                 value = str((params or {}).get("value") or "")
@@ -703,9 +1017,8 @@ class SilentDriverBinding:
                 el = SilentWebElement(js, binding=binding)
                 return {"value": el}
 
-            if driver_command in (
-                Command.FIND_ELEMENTS,
-                getattr(Command, "W3C_FIND_ELEMENTS", "findElements"),
+            if driver_command in _cmd(
+                "FIND_ELEMENTS", "W3C_FIND_ELEMENTS"
             ) or name in ("findElements",):
                 using = str((params or {}).get("using") or "")
                 value = str((params or {}).get("value") or "")
@@ -748,7 +1061,7 @@ class SilentDriverBinding:
                 ]
                 return {"value": out}
 
-            if driver_command in (Command.CLOSE,):
+            if driver_command in _cmd("CLOSE"):
                 closing = binding.target_id
                 binding.browser.close_target(closing)
                 if (
@@ -761,10 +1074,9 @@ class SilentDriverBinding:
                         pass
                 return {"value": None}
 
-            if driver_command in (
-                Command.W3C_GET_CURRENT_WINDOW_HANDLE,
-                Command.CURRENT_WINDOW_HANDLE,
-            ):
+            if driver_command in _cmd(
+                "W3C_GET_CURRENT_WINDOW_HANDLE", "CURRENT_WINDOW_HANDLE"
+            ) or ("WindowHandle" in name and "Handles" not in name):
                 return {"value": binding.target_id}
 
             # 其余命令仍走原 Selenium（可能抢焦）——尽量少触发

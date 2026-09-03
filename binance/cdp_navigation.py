@@ -161,6 +161,48 @@ def _driver_key(driver) -> int:
     return id(driver)
 
 
+def _parse_debug_port(raw: Any) -> Optional[int]:
+    s = str(raw or "").strip()
+    if not s:
+        return None
+    if "://" in s:
+        s = s.split("://", 1)[1]
+    s = s.split("/", 1)[0]
+    if s.isdigit():
+        port = int(s)
+        return port if 1 <= port <= 65535 else None
+    if ":" in s:
+        tail = s.rsplit(":", 1)[-1]
+        if tail.isdigit():
+            port = int(tail)
+            return port if 1 <= port <= 65535 else None
+    return None
+
+
+def _driver_debug_port(driver) -> int:
+    """静默 CDP 必须跟 Selenium debuggerAddress 同一端口，不能用全局 CHROME_DEBUG_PORT。"""
+    candidates: list[Any] = [
+        getattr(driver, "_cdp_debugger_url", None),
+        getattr(driver, "_cdp_debug_port", None),
+    ]
+    opts = getattr(driver, "options", None)
+    if opts is not None:
+        exp = getattr(opts, "experimental_options", None) or {}
+        if isinstance(exp, dict):
+            candidates.append(exp.get("debuggerAddress"))
+    caps = getattr(driver, "capabilities", None) or {}
+    if isinstance(caps, dict):
+        for key in ("goog:chromeOptions", "chromeOptions"):
+            goog = caps.get(key) or {}
+            if isinstance(goog, dict):
+                candidates.append(goog.get("debuggerAddress"))
+    for raw in candidates:
+        port = _parse_debug_port(raw)
+        if port:
+            return port
+    return debug_port()
+
+
 def clear_persistent_worker(driver) -> None:
     """手动清掉该 driver 的持久 worker 记录（不关标签）。"""
     key = _driver_key(driver)
@@ -175,11 +217,22 @@ def clear_persistent_worker(driver) -> None:
 
 def _get_or_create_browser(driver, *, timeout: float) -> SilentCdpBrowser:
     key = _driver_key(driver)
+    port = _driver_debug_port(driver)
     browser = _PERSISTENT_BROWSERS.get(key)
     if browser is not None:
-        return browser
-    browser = SilentCdpBrowser(debug_port(), timeout=timeout)
+        if int(getattr(browser, "port", -1) or -1) == port:
+            return browser
+        _warn(
+            f"静默 CDP 端口变更 {getattr(browser, 'port', '?')} → {port}，重建连接"
+        )
+        try:
+            browser.close()
+        except Exception:
+            pass
+        _PERSISTENT_BROWSERS.pop(key, None)
+    browser = SilentCdpBrowser(port, timeout=timeout)
     _PERSISTENT_BROWSERS[key] = browser
+    _log(f"静默 CDP WebSocket 127.0.0.1:{port}")
     return browser
 
 
@@ -290,7 +343,7 @@ def _ensure_silent_worker(
                 tid = str(last.get("id") or "") or None
                 created = False
                 _log(
-                    f"复用页签导航（{str(last.get('url') or '')[:60]}）",
+                    f"复用页签导航 :{browser.port}（{str(last.get('url') or '')[:60]}）",
                     prefix=log_prefix,
                 )
             if not tid:
@@ -362,7 +415,7 @@ def find_tab_handle_for_url(driver, url: str) -> Optional[str]:
     try:
         from binance.cdp_silent import list_pages
 
-        for t in list_pages(debug_port()):
+        for t in list_pages(_driver_debug_port(driver)):
             cur = str(t.get("url") or "").strip()
             if cur and _urls_match(cur, target):
                 return str(t.get("id") or "") or None
