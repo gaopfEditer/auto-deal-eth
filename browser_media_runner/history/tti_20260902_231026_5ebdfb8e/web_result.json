@@ -1,0 +1,8 @@
+{
+  "ok": false,
+  "error": "未抓到生成图，已保存整页截图供排查（账号是否支持出图？）",
+  "images": [
+    "/Users/maotouying/frontend/code/1.operations/python-ai-operate/output/lab_media/20260902_231024_32c9fec5/DAfKqCfB7CThc352rPghr4_3e556fe4_page.png"
+  ],
+  "method": "web_tti_fallback_screenshot"
+}

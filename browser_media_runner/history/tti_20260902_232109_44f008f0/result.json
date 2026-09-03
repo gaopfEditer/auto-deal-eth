@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "domain_tag": "BCdhwhjuvk49FLPo7jLwzd",
+  "prompt_name": "<inline>",
+  "run_id": "20260902_232109_44f008f0",
+  "history_dir": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/browser_media_runner/history/tti_20260902_232109_44f008f0",
+  "out_dir": "/Users/maotouying/frontend/code/1.operations/python-ai-operate/output/lab_media/20260902_231621_5602c204",
+  "images": [
+    "/Users/maotouying/frontend/code/1.operations/python-ai-operate/output/lab_media/20260902_231621_5602c204/BCdhwhjuvk49FLPo7jLwzd_0_aba090da.jpg"
+  ],
+  "web_result": {
+    "ok": true,
+    "images": [
+      "/Users/maotouying/frontend/code/1.operations/python-ai-operate/output/lab_media/20260902_231621_5602c204/BCdhwhjuvk49FLPo7jLwzd_0_aba090da.jpg"
+    ],
+    "count": 1,
+    "method": "web_tti",
+    "tag": "BCdhwhjuvk49FLPo7jLwzd"
+  }
+}
