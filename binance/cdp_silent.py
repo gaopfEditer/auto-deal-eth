@@ -777,9 +777,7 @@ if ('value' in el && el.tagName !== 'BODY') {
 }
 try {
   document.execCommand('insertText', false, t);
-} catch (_) {
-  el.appendChild(document.createTextNode(t));
-}
+} catch (_) {}
 el.dispatchEvent(new InputEvent('input', {bubbles:true, data: t}));
 """,
             text,
