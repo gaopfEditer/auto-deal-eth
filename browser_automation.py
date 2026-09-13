@@ -619,13 +619,86 @@ def capture_target_page():
         screenshot_path = os.path.join(SCREENSHOT_DIR, 'tophub_page.png')
         driver.save_screenshot(screenshot_path)
         print(f"[OK] 截图已保存: {screenshot_path}")
-        
+
         return screenshot_path
     except Exception as e:
         print(f"[ERROR] 截图失败: {e}")
         return None
     finally:
         driver.quit()
+
+
+def find_browser_tab_by_url(base_url: str) -> str | None:
+    """
+    在当前 Chrome 实例（CDP 调试端口）中搜索已有页签，
+    匹配指定 base_url 的根路径，返回 targetId，没找到返回 None。
+
+    需要环境变量：
+        CDP_DEBUGGER_URL 或 BROWSER_DEBUGGER_URL（格式：host:port）
+    """
+    import json
+    from urllib.parse import urlparse
+
+    debugger = os.environ.get("CDP_DEBUGGER_URL") or os.environ.get("BROWSER_DEBUGGER_URL") or ""
+    if not debugger:
+        return None
+    if "://" not in debugger:
+        debugger = "http://" + debugger
+
+    try:
+        import requests
+
+        ws_url = f"{debugger}/json"
+        resp = requests.get(ws_url, timeout=5)
+        tabs = resp.json() if resp.status_code == 200 else []
+        parsed_target = urlparse(base_url)
+        target_netloc = parsed_target.netloc.lower()
+        target_path = parsed_target.path.rstrip("/") or "/"
+
+        for tab in tabs:
+            tab_url = str(tab.get("url") or "")
+            tab_title = str(tab.get("title") or "")
+            if not tab_url or tab_url in ("about:blank", "chrome://newtab/"):
+                continue
+            try:
+                parsed_tab = urlparse(tab_url)
+                tab_netloc = parsed_tab.netloc.lower()
+                tab_path = parsed_tab.path.rstrip("/") or "/"
+                if tab_netloc == target_netloc and tab_path == target_path:
+                    return str(tab.get("id") or tab.get("targetId") or "")
+            except Exception:
+                continue
+        return None
+    except Exception as e:
+        print(f"[WARN] 搜索已有页签失败: {e}")
+        return None
+
+
+def activate_browser_tab(target_id: str, debugger: str = "") -> bool:
+    """通过 CDP activateTarget 激活已有页签。"""
+    import json
+
+    dbg = debugger or os.environ.get("CDP_DEBUGGER_URL") or os.environ.get("BROWSER_DEBUGGER_URL") or ""
+    if not dbg:
+        return False
+    if "://" not in dbg:
+        dbg = "http://" + dbg
+
+    try:
+        import requests
+
+        ws_url = f"{dbg}/json"
+        resp = requests.get(ws_url, timeout=5)
+        tabs = resp.json() if resp.status_code == 200 else []
+        for tab in tabs:
+            tid = str(tab.get("id") or tab.get("targetId") or "")
+            if tid == target_id:
+                requests.post(f"{ws_url}/activate", json={"id": tid}, timeout=5)
+                return True
+        return False
+    except Exception as e:
+        print(f"[WARN] 激活页签失败: {e}")
+        return False
 
 def capture_all_timeframes():
     """批量截图所有周期（兼容旧接口，默认ETH）"""
