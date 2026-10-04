@@ -1,6 +1,241 @@
 {
   "version": 1,
-  "posts": {},
+  "posts": {
+    "yanchibit": {
+      "https://www.binance.com/zh-CN/square/post/372579665305155": {
+        "href": "https://www.binance.com/zh-CN/square/post/372579665305155",
+        "published_at": "2026-10-01 19:54:26 北京时间",
+        "published_iso": "",
+        "time_label": "17小时",
+        "is_pinned": true,
+        "title": "10.1 #BTC 日内行情分析，顶背离之下，满足突破，满足跌回，则做空！不是能空，是包空！-----在下无敌包空哥。",
+        "raw": "10.1 #BTC 日内行情分析，顶背离之下，满足突破，满足跌回，则做空！不是能空，是包空！-----在下无敌包空哥。",
+        "author": "yanchibit",
+        "author_slug": "yanchibit",
+        "time": "17小时",
+        "image_urls": [],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "content_id": "372579665305155",
+        "saved_image_paths": [],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 3,
+        "signal_content": "这是一个高强度的看空（做空/包空）信号。主要依据是价格走势与指标（通常是MACD或RSI）形成的顶背离，表明上涨动能衰竭。交易策略为：等待价格满足两个条件之一：1. 向上突破阻力位后回踩确认；2. 直接回调跌入关键支撑区域。由于未给出具体的点位，故信号强度定为3。",
+        "signal_raw_data": {
+          "isSign": true,
+          "content": "这是一个高强度的看空（做空/包空）信号。主要依据是价格走势与指标（通常是MACD或RSI）形成的顶背离，表明上涨动能衰竭。交易策略为：等待价格满足两个条件之一：1. 向上突破阻力位后回踩确认；2. 直接回调跌入关键支撑区域。由于未给出具体的点位，故信号强度定为3。",
+          "star": 3
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-10-02 12:54:49 北京时间",
+        "signal_image_used": "",
+        "signal_analyzed_ok": true
+      }
+    },
+    "sanmageshuai": {
+      "https://www.binance.com/zh-CN/square/post/372711398959287": {
+        "href": "https://www.binance.com/zh-CN/square/post/372711398959287",
+        "published_at": "2026-10-02 04:54:26 北京时间",
+        "published_iso": "",
+        "time_label": "8小时",
+        "is_pinned": true,
+        "title": "意难平💔",
+        "raw": "意难平💔",
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "time": "8小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/static/content/square/images/ba344e9d718742a1b9fc76316f6f64ef.png"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "content_id": "",
+        "saved_image_paths": [
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/372711398959287/img_0.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 1,
+        "signal_content": "帖子内容极其简短，仅表达了“意难平”的情绪，缺乏明确的看涨或看空指令。这种强烈的负面情绪通常暗示市场对当前的价格走势或趋势存在不满（例如：突破失败、涨幅停滞），因此预示着潜在的反转机会或趋势回调的开始。",
+        "signal_raw_data": {
+          "isSign": true,
+          "content": "帖子内容极其简短，仅表达了“意难平”的情绪，缺乏明确的看涨或看空指令。这种强烈的负面情绪通常暗示市场对当前的价格走势或趋势存在不满（例如：突破失败、涨幅停滞），因此预示着潜在的反转机会或趋势回调的开始。",
+          "star": 1
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-10-02 12:55:12 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/372711398959287/img_0.png",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/372676989580926": {
+        "href": "https://www.binance.com/zh-CN/square/post/372676989580926",
+        "published_at": "2026-10-02 01:54:26 北京时间",
+        "published_iso": "",
+        "time_label": "11小时",
+        "is_pinned": true,
+        "title": "拉盘BTC被针对了，85100就差了几十U，跟单的人这么多吗？#BTC 👉[提前1天告诉你拉盘](https://app.binance.com/uni-qr/cpos/372648408384889?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "raw": "拉盘BTC被针对了，85100就差了几十U，跟单的人这么多吗？#BTC 👉[提前1天告诉你拉盘](https://app.binance.com/uni-qr/cpos/372648408384889?l=zh-CN&r=SDR9QGU2&uc=web_square_share_link&uco=YlhI6nVWAwXtxF1K2b4Utg&us=copylink)",
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "time": "11小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/image/pgc/20261001/56b48183ab72497db7fa0c3f8c4a8e2e.jpg",
+          "https://public.bnbstatic.com/image/pgc/20261001/a1cf6444a87547c6a3798b1de5478fc6.jpg",
+          "https://public.bnbstatic.com/image/pgc/20261001/c4d08368a458418fb3a1336b1eae7bd6.jpg",
+          "https://public.bnbstatic.com/image/pgc/20261001/1051189d94f34167b7bfd23dd95aa632.jpg"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "content_id": "372676989580926",
+        "saved_image_paths": [
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/372676989580926/img_0.jpg",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/372676989580926/img_1.jpg",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/372676989580926/img_2.jpg",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/372676989580926/img_3.jpg"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "看涨倾向。BTC价格正逼近关键心理和技术压力位85100美元。由于帖子提及“拉盘被针对”，表明当前的上涨动能很强，85100极可能是短期阻力位。如果能强势突破并站稳85100，则看涨趋势确认；若在此位遭遇抛压回踩，则可考虑在85100附近或略低于该位（如84800-85000）逢低做多。这是一个明确的入场参考位。",
+        "signal_raw_data": {
+          "isSign": true,
+          "content": "看涨倾向。BTC价格正逼近关键心理和技术压力位85100美元。由于帖子提及“拉盘被针对”，表明当前的上涨动能很强，85100极可能是短期阻力位。如果能强势突破并站稳85100，则看涨趋势确认；若在此位遭遇抛压回踩，则可考虑在85100附近或略低于该位（如84800-85000）逢低做多。这是一个明确的入场参考位。",
+          "star": 4
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-10-02 12:55:35 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/372676989580926/img_0.jpg",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/372648408384889": {
+        "href": "https://www.binance.com/zh-CN/square/post/372648408384889",
+        "published_at": "2026-10-01 23:54:26 北京时间",
+        "published_iso": "",
+        "time_label": "13小时",
+        "is_pinned": true,
+        "title": "比特币睡觉的话挂85100止盈一波。#BTC",
+        "raw": "比特币睡觉的话挂85100止盈一波。#BTC",
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "time": "13小时",
+        "image_urls": [],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "content_id": "372648408384889",
+        "saved_image_paths": [],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "看涨信号。文本指出在比特币回调（睡觉）后，建议挂单止盈位在 85100。这是一个明确的趋势预判和止盈点位设定，属于高确定性的入场策略。虽然缺少明确的入场点和止损点，但85100的TP位已经提供了极高的操作指导。",
+        "signal_raw_data": {
+          "isSign": true,
+          "content": "看涨信号。文本指出在比特币回调（睡觉）后，建议挂单止盈位在 85100。这是一个明确的趋势预判和止盈点位设定，属于高确定性的入场策略。虽然缺少明确的入场点和止损点，但85100的TP位已经提供了极高的操作指导。",
+          "star": 4
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-10-02 12:55:54 北京时间",
+        "signal_image_used": "",
+        "signal_analyzed_ok": true
+      },
+      "https://www.binance.com/zh-CN/square/post/372633455107651": {
+        "href": "https://www.binance.com/zh-CN/square/post/372633455107651",
+        "published_at": "2026-10-01 22:54:26 北京时间",
+        "published_iso": "",
+        "time_label": "14小时",
+        "is_pinned": true,
+        "title": "ZEC1208和888的点位越来越近了，这个垃圾币你到了位置你敢不敢干。#ZEC",
+        "raw": "ZEC1208和888的点位越来越近了，这个垃圾币你到了位置你敢不敢干。#ZEC",
+        "author": "sanmageshuai",
+        "author_slug": "sanmageshuai",
+        "time": "14小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/static/content/square/images/2f7fbb43fdcd4f2b97f9f91563b719e9.png",
+          "https://public.bnbstatic.com/static/content/square/images/8b0bf2a5dddd42329751115376d567a4.png"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "content_id": "372633455107651",
+        "saved_image_paths": [
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/372633455107651/img_0.png",
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/372633455107651/img_1.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 4,
+        "signal_content": "虽然语气带有负面情绪（'垃圾币'），但文本提供了明确的结构性交易信号。ZEC正在围绕1208和888这两个关键点位进行收缩和测试（点位越来越近）。这是一个典型的突破（Breakout）或挤压（Squeeze）前的蓄势信号。交易员应重点关注价格是否能突破1208进行看涨操作，或跌破888进行看跌操作。888可作为较强支撑/入场位，1208可作为压力/目标位。",
+        "signal_raw_data": {
+          "isSign": true,
+          "content": "虽然语气带有负面情绪（'垃圾币'），但文本提供了明确的结构性交易信号。ZEC正在围绕1208和888这两个关键点位进行收缩和测试（点位越来越近）。这是一个典型的突破（Breakout）或挤压（Squeeze）前的蓄势信号。交易员应重点关注价格是否能突破1208进行看涨操作，或跌破888进行看跌操作。888可作为较强支撑/入场位，1208可作为压力/目标位。",
+          "star": 4
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-10-02 12:56:18 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/372633455107651/img_0.png",
+        "signal_analyzed_ok": true
+      }
+    },
+    "square-creator-92912a51e": {
+      "https://www.binance.com/zh-CN/square/post/372800956683511": {
+        "href": "https://www.binance.com/zh-CN/square/post/372800956683511",
+        "published_at": "2026-10-02 10:54:26 北京时间",
+        "published_iso": "",
+        "time_label": "2小时",
+        "is_pinned": true,
+        "title": "这两天的热点在哪里？打开现货涨幅榜这个页面里有7个都是观察板块的代币，懂了吗！",
+        "raw": "这两天的热点在哪里？打开现货涨幅榜这个页面里有7个都是观察板块的代币，懂了吗！",
+        "author": "square-creator-92912a51e",
+        "author_slug": "square-creator-92912a51e",
+        "time": "2小时",
+        "image_urls": [
+          "https://public.bnbstatic.com/static/content/square/images/18a7312a02f342158d9f847a26bd37de.png"
+        ],
+        "video_url": "",
+        "audio_m3u8_url": "",
+        "square_audio_replay_url": "",
+        "content_id": "372800956683511",
+        "saved_image_paths": [
+          "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/372800956683511/img_0.png"
+        ],
+        "gemini_direction": "unclear",
+        "gemini_confidence": null,
+        "gemini_reason": null,
+        "gemini_bias_zh": "不明",
+        "signal_is_sign": true,
+        "signal_star": 2,
+        "signal_content": "这是一则基于市场热点（基本面/情绪面）的观察信号。帖子指出涨幅榜上有7个代币处于观察板块，这强烈暗示这些代币目前处于爆发或高关注度的牛市动能中。信号类型为：关注热点，寻找潜在的追涨机会。由于没有提供具体的代币名称、技术支撑/阻力位，故无法给出确切交易点位。",
+        "signal_raw_data": {
+          "isSign": true,
+          "content": "这是一则基于市场热点（基本面/情绪面）的观察信号。帖子指出涨幅榜上有7个代币处于观察板块，这强烈暗示这些代币目前处于爆发或高关注度的牛市动能中。信号类型为：关注热点，寻找潜在的追涨机会。由于没有提供具体的代币名称、技术支撑/阻力位，故无法给出确切交易点位。",
+          "star": 2
+        },
+        "signal_error": null,
+        "signal_analyzed_at": "2026-10-02 12:56:41 北京时间",
+        "signal_image_used": "/Users/maotouying/frontend/code/1.operations/auto-deal-eth/square_post_images/372800956683511/img_0.png",
+        "signal_analyzed_ok": true
+      }
+    }
+  },
   "detail_fetch_cache": {
     "339901446738754": {
       "at": "2026-07-01T12:51:35.247600+00:00",
@@ -105,17 +340,41 @@
     "339948166641681": {
       "at": "2026-07-01T12:53:54.983259+00:00",
       "v": 1
+    },
+    "372579665305155": {
+      "at": "2026-10-02T04:53:57.103185+00:00",
+      "v": 1
+    },
+    "372711398959287": {
+      "at": "2026-10-02T04:54:02.436991+00:00",
+      "v": 1
+    },
+    "372676989580926": {
+      "at": "2026-10-02T04:54:06.958642+00:00",
+      "v": 1
+    },
+    "372648408384889": {
+      "at": "2026-10-02T04:54:11.971939+00:00",
+      "v": 1
+    },
+    "372633455107651": {
+      "at": "2026-10-02T04:54:16.311107+00:00",
+      "v": 1
+    },
+    "372800956683511": {
+      "at": "2026-10-02T04:54:20.943218+00:00",
+      "v": 1
     }
   },
-  "updated_at": "2026-09-19 23:37:42 北京时间",
+  "updated_at": "2026-10-02 12:54:26 北京时间",
   "square_lives": [
     {
       "author_slug": "yanchibit",
       "author": "yanchibit",
       "profile": "https://www.binance.com/zh-CN/square/profile/yanchibit",
       "live_url": "https://www.binance.com/zh-CN/square/profile/yanchibit?tab=live",
-      "probe": "profile_live_probe",
-      "scraped_at": "2026-09-19 23:37:42 北京时间"
+      "probe": "profile_home_probe",
+      "scraped_at": "2026-10-02 12:54:26 北京时间"
     },
     {
       "author_slug": "sanmageshuai",
@@ -123,7 +382,7 @@
       "profile": "https://www.binance.com/zh-CN/square/profile/sanmageshuai",
       "live_url": "https://www.binance.com/zh-CN/square/profile/sanmageshuai?tab=live",
       "probe": "profile_live_probe",
-      "scraped_at": "2026-09-19 23:37:42 北京时间"
+      "scraped_at": "2026-10-02 12:54:26 北京时间"
     },
     {
       "author_slug": "square-creator-92912a51e",
@@ -131,7 +390,7 @@
       "profile": "https://www.binance.com/zh-CN/square/profile/square-creator-92912a51e",
       "live_url": "https://www.binance.com/zh-CN/square/profile/square-creator-92912a51e?tab=live",
       "probe": "profile_live_probe",
-      "scraped_at": "2026-09-19 23:37:42 北京时间"
+      "scraped_at": "2026-10-02 12:54:26 北京时间"
     },
     {
       "author_slug": "square-creator-1d148bbce7461",
@@ -139,7 +398,7 @@
       "profile": "https://www.binance.com/zh-CN/square/profile/square-creator-1d148bbce7461",
       "live_url": "https://www.binance.com/zh-CN/square/profile/square-creator-1d148bbce7461?tab=live",
       "probe": "profile_live_probe",
-      "scraped_at": "2026-09-19 23:37:42 北京时间"
+      "scraped_at": "2026-10-02 12:54:26 北京时间"
     }
   ]
 }
